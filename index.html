@@ -106,15 +106,19 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
 #qstrip .qi.b{border-color:var(--amber);color:var(--amber2);background:#1d2119}
 #qstrip .qi i{font-style:normal;color:var(--dim);font-family:"Courier New",monospace}
-#ctrls{display:flex;gap:5px;padding:6px 6px 6px}
-.cbtn{flex:1;padding:9px 1px;font-size:10px;letter-spacing:.5px;background:linear-gradient(#1b262d,#0e161a);
+#ctrls{display:flex;gap:5px;padding:6px 6px 6px;overflow-x:auto;overscroll-behavior:contain;
+  touch-action:pan-x;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#ctrls::-webkit-scrollbar{display:none}
+.cbtn{flex:1 0 auto;min-width:70px;padding:9px 6px;font-size:10px;letter-spacing:.5px;white-space:nowrap;
+  background:linear-gradient(#1b262d,#0e161a);
   border:1px solid var(--edge);color:#b9c8d2;text-align:center;
   clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
 .cbtn.on{background:linear-gradient(#3a2e12,#241d0c);border-color:var(--amber);color:var(--amber2);
   box-shadow:0 0 10px #f0a72c44}
 
 /* ---------- Overlays ---------- */
-#hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(100% - 60vh);z-index:9;
+#hint{position:fixed;left:50%;transform:translateX(-50%);
+  top:calc(env(safe-area-inset-top,0px) + 54px);z-index:9;max-width:min(80vw,380px);text-align:center;
   background:#05080bd8;border:1px solid var(--amber);padding:6px 14px;font-size:12px;
   color:var(--amber2);pointer-events:none;opacity:0;transition:opacity .25s;letter-spacing:.4px;
   clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
@@ -174,6 +178,21 @@ body.fps #side,body.fps #top{display:none}
 body.fps #mmWrap{opacity:.55}
 #bSuper.ready{border-color:#ff8a4a;color:#ffca8a;background:rgba(120,45,20,.5)}
 #bSuper.aiming{border-color:#ffd75e;color:#ffe9a8;background:rgba(150,90,20,.6)}
+
+/* ---------- Compact chrome on short/landscape phone screens ---------- */
+@media (max-height:480px){
+  #mmWrap{transform:scale(.8);transform-origin:top right}
+  #cards{max-height:78px}
+  #cards.tall{max-height:200px}
+  .card{height:70px}
+  .card canvas{transform:scale(.74);transform-origin:top center;top:2px}
+  .card .nm{height:15px;font-size:8px}
+  #tabs{padding:3px 4px 0}
+  .tab,#more{padding:4px 1px;font-size:9px}
+  #ctrls{padding:4px 6px}
+  .cbtn{padding:6px 6px;font-size:9px}
+  #hint{top:calc(env(safe-area-inset-top,0px) + 40px);padding:4px 10px;font-size:11px}
+}
 </style>
 </head>
 <body>
