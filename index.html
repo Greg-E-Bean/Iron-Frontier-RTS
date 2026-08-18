@@ -499,26 +499,24 @@ crate(n,-.3*r,.25*r,l,4.5,"olive",.2);
 barrel(n,-.35*r,.15*r,l);
 break;}
 case"hive":{
-const tl=.76*r,tw=.4*r,dh=.2*s;
-n.push(P_(SLAB(roundRectProfile(.7*r,.7*r,3,3),1,.4,"hvpad"),.1*r,0,l,"asphalt"));
-n.push(P_(BOXM(tl,tw,dh,.16),0,0,l,"carapace2"));
-n.push(P_(BOXM(tl*.94,tw*.9,.12,.05),0,0,l+dh,"gunmetal"));
-for(const side of[-1,1])for(let i=0;i<3;i++)n.push(P_(CYL(.09*r,.16*r,10),(-.31+.31*i)*r,side*.23*r,l+.09*r,"darkmetal",{r:1.5708}));
-n.push(P_(BOXM(.14*r,.05*r,.05*r,.03),.45*r,0,l+.03*r,"gunmetal"));
-n.push(P_(CYL(.025*r,.14*r,8),.5*r,0,l+.05*r,"darkmetal",{r:1.5708}));
+const hl=1.02*r,hw=.46*r,hh=.3*s;
+n.push(P_(SLAB(roundRectProfile(.82*r,.82*r,3,3),1,.4,"hvpad"),0,0,l,"asphalt"));
+const hprof=[[-.48,.2],[-.32,.6],[-.1,.9],[.12,.9],[.32,.58],[.48,.18]];
+for(let i=0;i<hprof.length-1;i++){const x0=hprof[i][0]*hl,r0=hprof[i][1],x1=hprof[i+1][0]*hl,r1=hprof[i+1][1],cx=(x0+x1)/2,rm=(r0+r1)/2;
+n.push(P_(BOXM(x1-x0+.5,rm*2*hw,rm*hh,.16*rm*hh),cx,0,l+.5*rm*hh,"carapace2"))}
+n.push(P_(BOXM(.62*hl,.42*hw,.1*hh,.04*hh),.02*hl,0,l+.9*hh,"gunmetal"));
+for(const side of[-1,1])for(let i=0;i<2;i++)n.push(P_(CYL(.075*r,.1*r,10),(-.28+.5*i)*hl,side*.56*hw,l+.075*r,"darkmetal",{r:1.5708}));
 if(d){
-n.push(P_(WEDGE(.5*r,.22*r,0,dh),-.63*r,0,l,"darkmetal"));
-n.push(P_(BOXM(.5*r,.02*r,.02*r,.008),-.63*r,-.1*r,l+.01,"gunmetal"));
-n.push(P_(BOXM(.5*r,.02*r,.02*r,.008),-.63*r,.1*r,l+.01,"gunmetal"));
-hive(n,{x:.02*r,y:0,z:l+dh,r:.32*r,h:.58*s,crown:.13*r,seg:10});
-for(let e=0;e<4;e++){const t=1.57*e+.4;n.push(P_(DOME(2.2,1.8,8),.02*r+Math.cos(t)*r*.28,Math.sin(t)*r*.28,l+dh+1,"carapace2"))}
-n.push(P_(CONE(1.2,.16,3.2,7),.02*r,0,l+dh+.58*s+.13*r+1.3,"psi",{e:1}));
+n.push(P_(WEDGE(.4*r,.24*r,0,.9*hh),-.72*r,0,l,"darkmetal"));
+n.push(P_(BOXM(.4*r,.018*r,.018*r,.007),-.72*r,-.11*r,l+.01,"gunmetal"));
+n.push(P_(BOXM(.4*r,.018*r,.018*r,.007),-.72*r,.11*r,l+.01,"gunmetal"));
+for(const sx of[-1,1])n.push(P_(DOME(.15*r,.14*r,12),sx*.2*hl,0,l+.9*hh,"crystal",{e:1}));
+n.push(P_(CONE(.7,.12,2,7),.04*hl,0,l+.9*hh+.14*r+.7,"psi",{e:1}));
 }else{
-n.push(P_(DOME(.3*r,.24*r,10),0,0,l+dh,"carapace2"));
-n.push(P_(CONE(.5,.1,1.4,6),0,0,l+dh+.24*r,"psi",{e:1,ty:.12}));
-n.push(P_(BOXM(tl*.5,tw*1.02,.08,.03),-.05*r,0,l+dh+.02,"darkmetal"));
+for(const sx of[-1,1])n.push(P_(DOME(.12*r,.1*r,10),sx*.18*hl,0,l+.9*hh,"carapace2"));
+n.push(P_(CONE(.4,.08,1,6),.04*hl,0,l+.9*hh+.1*r,"psi",{e:1,ty:.1}));
 }
-crate(n,-.05*r,.28*r,l,3.6,"carapace2",.18);
+crate(n,-.1*r,.32*r,l,3.6,"carapace2",.18);
 break;}
 case"barracks":{
 const sw=.4*r,sd=.3*r,sh=.42*s;
