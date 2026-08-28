@@ -4,7 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Ore Wars — Skirmish</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Iron Frontier">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0c1216">
+<meta name="description" content="A real-time strategy game — build, expand, and battle across the frontier.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Iron Frontier RTS</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;color:#c4d0d8;
@@ -1447,6 +1455,7 @@ row._own=own,row._ready=ready,row._b=b,row.className="swRow"+(own?" own":"")+(ow
 }
 for(const[id,row]of rows)seenIds.has(id)||(row.remove(),rows.delete(id))
 }
+if("serviceWorker"in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
 </script>
 </body>
 </html>
