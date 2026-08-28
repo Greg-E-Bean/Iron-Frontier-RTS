@@ -1,6 +1,6 @@
 {
-  "name": "Iron Frontier RTS",
-  "short_name": "Iron Frontier",
+  "name": "Frontier Command",
+  "short_name": "Frontier Cmd",
   "description": "A real-time strategy game — build, expand, and battle across the frontier.",
   "id": "/",
   "start_url": "./index.html",

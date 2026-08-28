@@ -1,4 +1,4 @@
-# Iron Frontier RTS
+# Frontier Command
 
 A real-time strategy game that runs entirely in the browser — no build step, no server, no dependencies. The whole game (rendering, AI, audio, multiplayer-style skirmish setup, a first-person mode, and more) lives in a single `index.html` file.
 
@@ -18,7 +18,7 @@ then visit `http://localhost:8000/`.
 
 This is a [Progressive Web App](https://web.dev/progressive-web-apps/) — once it's hosted somewhere over HTTPS (for example via GitHub Pages), your browser will offer to install it like a native app:
 
-- **Desktop (Chrome/Edge):** click the install icon in the address bar, or the menu → *Install Iron Frontier*.
+- **Desktop (Chrome/Edge):** click the install icon in the address bar, or the menu → *Install Frontier Command*.
 - **Android (Chrome):** menu → *Add to Home screen* / *Install app*.
 - **iOS (Safari):** Share → *Add to Home Screen*.
 
