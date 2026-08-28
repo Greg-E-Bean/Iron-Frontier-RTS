@@ -115,6 +115,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
 .cbtn.on{background:linear-gradient(#3a2e12,#241d0c);border-color:var(--amber);color:var(--amber2);
   box-shadow:0 0 10px #f0a72c44}
+.cbtn.icon{font-size:17px;line-height:1;padding:7px 6px}
 
 /* ---------- Overlays ---------- */
 #hint{position:fixed;left:50%;transform:translateX(-50%);
@@ -312,11 +313,11 @@ body.fps #mmWrap{opacity:.55}
   <div id="qstrip"></div>
   <div id="cards"></div>
   <div id="ctrls">
-    <div class="cbtn" id="bSel">BOX SELECT</div>
+    <div class="cbtn icon" id="bSel" title="Box Select">⛶</div>
     <div class="cbtn" id="bAll">ALL UNITS</div>
     <div class="cbtn" id="bStop">STOP</div>
-    <div class="cbtn" id="bSell">SELL</div>
-    <div class="cbtn" id="bRepair">REPAIR</div>
+    <div class="cbtn icon" id="bSell" title="Sell">💰</div>
+    <div class="cbtn icon" id="bRepair" title="Repair">🔧</div>
   </div>
 </div>
 
