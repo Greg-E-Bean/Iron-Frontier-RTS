@@ -21,7 +21,9 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   --tib:#5ad044;--tib2:#a9ff72;--danger:#e0473a;--txt:#c4d0d8;--dim:#7d8f9a;
   --ease:cubic-bezier(.2,.8,.3,1.1);--sh1:0 1px 0 #ffffff14 inset,0 -1px 0 #00000055 inset;--sh2:0 3px 10px #0009,0 1px 0 #ffffff10 inset}
 .ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;pointer-events:none;filter:drop-shadow(0 1px 1px #0006)}
-.logo{display:block;margin:0 auto 6px;filter:drop-shadow(0 2px 8px #00000088)}
+.titleArt{display:block;width:calc(100% + 40px);height:auto;margin:-20px -20px 14px;
+  clip-path:polygon(14px 0,100% 0,100% 100%,0 100%,0 14px);
+  box-shadow:0 6px 22px #000a;border-bottom:1px solid var(--edge)}
 #gl{position:fixed;inset:0;display:block;touch-action:none;z-index:0}
 #game{position:fixed;inset:0;display:block;touch-action:none;z-index:1}
 .hidden{display:none!important}
@@ -336,8 +338,6 @@ body.fps #mmWrap{opacity:.55}
 <symbol id="i-select" viewBox="0 0 24 24"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/></symbol>
 <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="9" cy="14" r="6.5"/><circle cx="15" cy="9" r="6.5" fill="#0d1418" stroke="currentColor"/></symbol>
 <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M6.5 17.5L15 9M9 15L16.5 7.5"/><circle cx="6" cy="18" r="2.6"/><circle cx="18" cy="6" r="2.6"/></symbol>
-<linearGradient id="logoGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcb62"/><stop offset="1" stop-color="#f0a72c"/></linearGradient>
-<radialGradient id="logoGlow" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#5ad044" stop-opacity=".5"/><stop offset="1" stop-color="#5ad044" stop-opacity="0"/></radialGradient>
 </defs>
 </svg>
 
@@ -395,21 +395,7 @@ body.fps #mmWrap{opacity:.55}
 
 <div id="menu">
   <div class="panel" id="panelMain">
-    <svg class="logo" width="72" height="72" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="46" fill="url(#logoGlow)"/>
-      <polygon points="50,6 87,27 87,73 50,94 13,73 13,27" fill="#0d1418" stroke="url(#logoGrad)" stroke-width="3.5"/>
-      <polygon points="50,14 80,31 80,69 50,86 20,69 20,31" fill="none" stroke="#2c3d47" stroke-width="1"/>
-      <circle cx="50" cy="50" r="20" fill="none" stroke="#5ad044" stroke-width="2.5"/>
-      <circle cx="50" cy="50" r="20" fill="none" stroke="#5ad044" stroke-width="2.5" opacity=".35" stroke-dasharray="4 6"/>
-      <g stroke="url(#logoGrad)" stroke-width="3" stroke-linecap="round">
-        <line x1="50" y1="18" x2="50" y2="29"/>
-        <line x1="50" y1="71" x2="50" y2="82"/>
-        <line x1="18" y1="50" x2="29" y2="50"/>
-        <line x1="71" y1="50" x2="82" y2="50"/>
-      </g>
-      <circle cx="50" cy="50" r="5.5" fill="url(#logoGrad)"/>
-    </svg>
-    <h1><span>FRONTIER</span> COMMAND</h1>
+    <img class="titleArt" src="icons/logo-banner.jpg" alt="Frontier Command" width="640" height="640">
     <div class="sub">SKIRMISH COMMAND</div>
     <div class="pHead"><div class="pName"></div><div class="cFac">Faction</div><div class="cTeam">Team</div><div class="cColor">Colour</div><div class="cSpawn">Spawn</div><div class="cDiff">AI</div></div>
     <div id="playerRows"></div>
