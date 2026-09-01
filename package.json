@@ -1,0 +1,14 @@
+{
+  "name": "frontier-command",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Build tooling for Frontier Command. The game itself has zero runtime dependencies — this is a dev-time-only build step that regenerates the committed, directly-playable index.html from src/.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

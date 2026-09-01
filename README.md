@@ -1,6 +1,6 @@
 # Frontier Command
 
-A real-time strategy game that runs entirely in the browser — no build step, no server, no dependencies. The whole game (rendering, AI, audio, multiplayer-style skirmish setup, a first-person mode, and more) lives in a single `index.html` file.
+A real-time strategy game that runs entirely in the browser — no build step, no server, no dependencies to *play* it. The whole game (rendering, AI, audio, multiplayer-style skirmish setup, a first-person mode, and more) lives in a single `index.html` file, which stays a committed, directly-playable artifact regardless of how the source is organized.
 
 Three factions, a dozen maps, a full tech tree of infantry/vehicles/aircraft/naval units, and a faction-specific campaign.
 
@@ -33,7 +33,36 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 
 ## Project layout
 
-- `index.html` — the entire game.
+- `index.html` — the entire game, ready to open. This file is a **build
+  output**: most of it is still one big inline `<script>`, but pieces are
+  being incrementally moved into `src/` and get bundled back in here. It's
+  committed to the repo so cloning and opening it (or hosting it as-is via
+  GitHub Pages) always works, with nothing to install.
+- `src/` — the source of truth for any part of the game that's been
+  modularized so far (currently just the audio engine, `src/audio.js`).
+  `src/index.template.html` is the same document with those parts replaced
+  by a marker (`<script>/* BUNDLE:main */</script>`) that the build step
+  fills in.
+- `package.json`, `scripts/build.mjs` — a small [esbuild](https://esbuild.github.io/)-based
+  build script. It's a dev-time convenience only — the exported game has zero
+  runtime dependencies either way.
 - `manifest.webmanifest` — PWA metadata (name, icons, colors, display mode).
 - `sw.js` — the service worker that caches the app for offline play.
 - `icons/` — app icons used by the manifest.
+
+## Developing
+
+If you're only playing, ignore this section — `index.html` always works
+standalone. If you're editing a part of the game that's been moved into
+`src/` (audio, for now; more subsystems will move over time), edit the file
+under `src/` and rebuild:
+
+```
+npm install
+npm run build   # regenerates index.html once
+npm run watch   # regenerates index.html on every src/ change
+```
+
+Anything not yet under `src/` still lives directly in `index.html`'s
+remaining inline `<script>` blocks — edit those in place as before, no
+build step needed for that part.
