@@ -49,7 +49,11 @@ async function buildOnce() {
     if (!html.includes(mod.marker)) {
       throw new Error(`Marker for "${mod.name}" not found after previous replacements`);
     }
-    html = html.replace(mod.marker, `<script>\n${js}\n</script>`);
+    // Use a function replacer, not a string one: a plain string argument to
+    // replace() treats "$&", "$'", "$`", "$$", "$1" etc. as special patterns,
+    // and bundled game code can easily contain "$'" (e.g. `>$'+someValue`)
+    // by coincidence, silently truncating/corrupting the splice.
+    html = html.replace(mod.marker, () => `<script>\n${js}\n</script>`);
   }
   await writeFile(outPath, html);
   console.log(`Built ${path.relative(root, outPath)} (${html.length} bytes, ${modules.length} module(s): ${modules.map((m) => m.name).join(", ")})`);

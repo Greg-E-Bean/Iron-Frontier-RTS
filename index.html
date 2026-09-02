@@ -7350,36 +7350,393 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 
 </script>
 <script>
-"use strict";
-let sellMode=!1,repairMode=!1;$("#bSel").addEventListener("click",()=>{S.selMode=!S.selMode,$("#bSel").classList.toggle("on",S.selMode),S.selMode&&hint("Drag on the map to box-select")}),$("#bAll").addEventListener("click",()=>{S.sel=S.units.filter(e=>0===e.owner&&!e.dead&&"miner"!==e.d.role),sfx("sel"),S.sel.length||hint("No combat units")}),$("#bStop").addEventListener("click",()=>{S.sel.forEach(e=>{"u"===e.e&&(e.order="miner"===e.d.role?"harvest":"idle",e.path=null,e.target=null)}),sfx("go")}),$("#deployPrompt").addEventListener("click",doDeploy),$("#rotatePrompt").addEventListener("click",()=>{rotateTarget&&!rotateTarget.dead&&(rotateTarget.rot=((rotateTarget.rot||0)+Math.PI/2)%(2*Math.PI),"gate"===rotateTarget.key&&relinkGatePair(rotateTarget),sfx("sel"))}),$("#cancelPlace").addEventListener("click",()=>{S.placing=null,S.ghost=null,S.deployUnit=null,hint("Placement cancelled")}),$("#bSell").addEventListener("click",()=>{sellMode=!sellMode,repairMode=!1,$("#bSell").classList.toggle("on",sellMode),$("#bRepair").classList.remove("on"),sellMode&&hint("Tap one of your structures to sell it")}),$("#bRepair").addEventListener("click",()=>{repairMode=!repairMode,sellMode=!1,$("#bRepair").classList.toggle("on",repairMode),$("#bSell").classList.remove("on"),repairMode&&hint("Tap a structure to toggle repair")}),$("#btnMenu").addEventListener("click",()=>{S.running=!S.running,openMenu(S.running?null:"pause")});$("#btnMute").addEventListener("click",()=>setMuted(!muted));setMuted(muted);$("#btnSettings").addEventListener("click",()=>{S.running=!1,openMenu("settings")});const ptrs=new Map;let dragMode=null,dragStart=null,pinch=null,moved=0,lastTap=0;function endPtr(e){if(FPS.on)return void ptrs.delete(e.pointerId);const t=ptrs.get(e.pointerId);ptrs.delete(e.pointerId),"pinch"!==dragMode?t&&("box"===dragMode&&S.box?(moved>14?boxSelect(S.box):tap(e.clientX,e.clientY),S.box=null):"ghost"===dragMode?tryPlace(e.clientX,e.clientY):moved<14&&tap(e.clientX,e.clientY),dragMode=null,dragStart=null):ptrs.size<2&&(dragMode=null,dragStart=null)}function updateGhost(e,t,r){const n=s2w(e,t-(r?Math.min(46,26/Math.max(.35,cam.z)):0)),a=n.x,o=n.y,s=BLD[S.placing].size;S.ghost={tx:clamp(Math.round(a/32-s/2),0,92-s),ty:clamp(Math.round(o/32-s/2),0,72-s)}}function tryPlace(e,t){updateGhost(e,t,!1);const r=S.ghost;if(S.deployUnit){const u=S.deployUnit;return void(u.dead?(S.placing=null,S.ghost=null,S.deployUnit=null,hint("Unit lost")):canDeploy(S.placing,r.tx,r.ty,u)?(finishDeploy(u,S.placing,r.tx,r.ty),S.placing=null,S.ghost=null,S.deployUnit=null):hint("Cannot deploy here — drag to a clear, open spot"))}if(placeReady(P(),r.tx,r.ty))S.placing=null,S.ghost=null;else{const bd=BLD[S.placing];bd&&bd.naval&&!nearWater(r.tx,r.ty,bd.size,2)?hint("Cannot build there — must be near the coast"):hint("Cannot build there — must be near your base")}}function entAt(e,t,sx,sy){let r=null,n=1e9;const hidden=o=>o.d.sub&&teamOf(o.owner)!==teamOf(0)&&!subRevealed(o);if(void 0!==sx){for(const o of S.units){if(o.dead||o.inside||!(o.d.fly||o.alt>2)||hidden(o))continue;const px=w2sx(o.x,o.y),py=w2sy(o.x,o.y,o.alt||0),rad=Math.max(34,(o.d.radius+18)*cam.z),dx=sx-px,dy=sy-py,d2=dx*dx+dy*dy;d2<rad*rad&&d2<n&&(n=d2,r=o)}if(r)return r;n=1e9}const a=24/Math.max(.3,cam.z);for(const o of S.units){if(o.dead||o.inside||o.d.fly||o.alt>2||hidden(o))continue;const s=Math.max(a,o.d.radius+8),i=dist2(e,t,o.x,o.y);i<s*s&&i<n&&(n=i,r=o)}if(r)return r;const o=Math.floor(e/32),s=Math.floor(t/32);if(inMap(o,s)){const e=G.occ[idx(o,s)];if(e){const t=S.blds.find(t=>t.id===e&&!t.dead);if(t)return t}}return null}function tap(e,t){if(S.placing)return void tryPlace(e,t);const r=s2w(e,t),n=r.x,a=r.y;if(superAim)return superAim=!1,void(fireSuper(0,n,a)&&(cam.x=n,cam.y=a,clampCam(),S.marker={x:n,y:a,t:0},hint("Strike inbound")));if(spyAim)return spyAim=!1,void spyStrike(0,n,a);if(paradropAim)return paradropAim=!1,void paradropStrike(0,n,a);if(empAim)return empAim=!1,void fireEmp(0,n,a);const o=entAt(n,a,e,t);if(sellMode)return void(o&&"b"===o.e&&0===o.owner&&"conyard"!==o.key?(P().credits+=.5*o.d.cost,textFx(o.x,o.y,"+$"+Math.round(.5*o.d.cost)),killBld(o),sellMode=!1,$("#bSell").classList.remove("on")):hint("Select one of your structures"));if(repairMode)return void(o&&"b"===o.e&&0===o.owner&&(o.d.civ?hint("Civilian structures can't be repaired — use an engineer"):(o.repair=!o.repair,hint(o.repair?"Repairing":"Repair off"))));if(o){if(0===o.owner){if("u"===o.e&&o.d.transport){const loadable=S.sel.filter(u=>"u"===u.e&&u!==o&&0===u.owner&&!u.d.transport&&!u.d.fly);if(loadable.length)return loadable.forEach(u=>{u.order="load",u.target=o,u.path=null}),S.marker={x:o.x,y:o.y,t:0,c:"#7dff8a"},sfx("go"),void 0}const engs="b"===o.e?S.sel.filter(u=>"u"===u.e&&"engineer"===u.d.role):[];if(engs.length)engs.forEach(u=>{u.order="capture",u.target=o,u.path=null}),S.marker={x:o.x,y:o.y,t:0,c:"#7dff8a"},sfx("go");else{const e=performance.now();"u"===o.e?(e-lastTap<330&&S.sel.includes(o)?(S.sel=S.units.filter(e=>0===e.owner&&!e.dead&&e.key===o.key),hint("Selected all "+o.d.name)):S.sel.includes(o)&&S.sel.length>1?(S.sel=S.sel.filter(e=>e!==o),hint("Dropped "+o.d.name)):S.sel.includes(o)&&1===S.sel.length?(S.sel=[],hint("Deselected")):S.sel=[o],lastTap=e):S.sel=S.sel.includes(o)?[]:[o],sfx("sel")}}else if(teamOf(o.owner)===teamOf(0)){hint((o.d.name||"Ally")+" — allied, cannot attack")}else{const e=S.sel.filter(e=>"u"===e.e);e.length?(cmdAttack(e,o),S.marker={x:o.x,y:o.y,t:0,c:"#ff7d7d"},sfx("go")):S.sel=[]}return}const s=S.sel.filter(e=>"u"===e.e&&0===e.owner);if(s.length){const e=Math.floor(n/32),t=Math.floor(a/32);return inMap(e,t)&&G.ore[idx(e,t)]>0&&s.some(e=>"miner"===e.d.role)?(cmdHarvest(s,e,t),s.filter(e=>"miner"!==e.d.role).forEach(e=>cmdMove([e],n,a)),S.marker={x:n,y:a,t:0,c:"#ffd75e"}):(cmdMove(s,n,a),S.marker={x:n,y:a,t:0,c:"#7dff8a"}),void sfx("go")}const i=S.sel.find(e=>"b"===e.e);if(i&&0===i.owner)return i.rally={x:n,y:a},S.marker={x:n,y:a,t:0,c:"#7dc4ff"},void hint("Rally point set");S.sel=[]}function boxSelect(e){const t=Math.min(e.x0,e.x1),r=Math.max(e.x0,e.x1),n=Math.min(e.y0,e.y1),a=Math.max(e.y0,e.y1),o=[];for(const e of S.units){if(e.dead||0!==e.owner)continue;const s=w2sx(e.x,e.y),i=w2sy(e.x,e.y,e.alt||0);s>=t&&s<=r&&i>=n&&i<=a&&o.push(e)}const s=o.filter(e=>"miner"!==e.d.role),i=s.length?s:o;if(!i.length)return S.sel=[],void hint("Selection cleared");S.sel=i,sfx("sel");const l=[...new Set(i.map(e=>e.d.name))];hint(i.length+" selected — "+l.slice(0,2).join(", ")+(l.length>2?"…":""))}cv.addEventListener("pointerdown",e=>{if(FPS.on)return;if(cv.setPointerCapture(e.pointerId),ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY}),1===ptrs.size)moved=0,dragStart={x:e.clientX,y:e.clientY,cx:cam.x,cy:cam.y,t:performance.now()},S.placing?(dragMode="ghost",updateGhost(e.clientX,e.clientY,!1)):S.selMode?(dragMode="box",S.box={x0:e.clientX,y0:e.clientY,x1:e.clientX,y1:e.clientY}):dragMode="pan";else if(2===ptrs.size){const[e,t]=[...ptrs.values()];pinch={d:dist(e.x,e.y,t.x,t.y),z:cam.z,mx:(e.x+t.x)/2,my:(e.y+t.y)/2},dragMode="pinch",S.box=null}}),cv.addEventListener("pointermove",e=>{if(FPS.on)return;const t=ptrs.get(e.pointerId);if(t){if(t.x=e.clientX,t.y=e.clientY,"pinch"===dragMode&&ptrs.size>=2){const[e,t]=[...ptrs.values()],r=dist(e.x,e.y,t.x,t.y),n=(e.x+t.x)/2,a=(e.y+t.y)/2,o=s2w(n,a);cam.z=camZTarget=clamp(pinch.z*(r/pinch.d),.3,2.3);const s=s2w(n,a);cam.x+=o.x-s.x,cam.y+=o.y-s.y;const i=s2w(pinch.mx,pinch.my),l=s2w(n,a);return cam.x+=i.x-l.x,cam.y+=i.y-l.y,pinch.mx=n,pinch.my=a,pinch.d=r,pinch.z=cam.z,void clampCam()}if(dragStart)if(moved=Math.max(moved,dist(e.clientX,e.clientY,dragStart.x,dragStart.y)),"pan"===dragMode){const t=-(e.clientX-dragStart.x)/cam.z,r=-(e.clientY-dragStart.y)/cam.z;cam.x=dragStart.cx+(r/.5/2+t/2),cam.y=dragStart.cy+(r/.5/2-t/2),clampCam()}else"box"===dragMode&&S.box?(S.box.x1=e.clientX,S.box.y1=e.clientY):"ghost"===dragMode&&updateGhost(e.clientX,e.clientY,moved>12)}}),cv.addEventListener("pointerup",endPtr),cv.addEventListener("pointercancel",endPtr),cv.addEventListener("wheel",e=>{e.preventDefault();camZTarget=clamp(camZTarget*(e.deltaY>0?.9:1.1),.3,2.3),zoomPivot={sx:e.clientX,sy:e.clientY}},{passive:!1}),mm.addEventListener("pointerdown",e=>{const t=mm.getBoundingClientRect();cam.x=(e.clientX-t.left)/t.width*2944,cam.y=(e.clientY-t.top)/t.height*2304,clampCam(),e.stopPropagation()}),window.addEventListener("keydown",e=>{"Escape"===e.key&&(S.placing=null,S.ghost=null,S.deployUnit=null,S.sel=[])," "===e.key&&(S.running=!S.running);const t=50/cam.z;"ArrowLeft"===e.key&&(cam.x-=t,cam.y+=t),"ArrowRight"===e.key&&(cam.x+=t,cam.y-=t),"ArrowUp"===e.key&&(cam.x-=t,cam.y-=t),"ArrowDown"===e.key&&(cam.x+=t,cam.y+=t),clampCam()});const COLORSETS=[{k:"def",n:"DEFAULT",body:null,dark:null,tint:null},{k:"red",n:"RED",body:"#7a3530",dark:"#3f1a17",tint:"#c99a90"},{k:"blue",n:"BLUE",body:"#355070",dark:"#1c2838",tint:"#9db4cc"},{k:"green",n:"GREEN",body:"#4a6b3a",dark:"#25341d",tint:"#a8c290"},{k:"yellow",n:"YELLOW",body:"#8a7a30",dark:"#453d18",tint:"#d8c890"},{k:"purple",n:"PURPLE",body:"#5f4a6b",dark:"#312638",tint:"#a99bb2"},{k:"orange",n:"ORANGE",body:"#8a5530",dark:"#452b18",tint:"#d0a074"},{k:"teal",n:"TEAL",body:"#357070",dark:"#1c3838",tint:"#9dc4c4"},{k:"grey",n:"GREY",body:"#6a6a6a",dark:"#363636",tint:"#b8b8b8"}];
-function colorSet(k){return COLORSETS.find(e=>e.k===k)||COLORSETS[0]}
-let cfg={fac:"soviet",map:"basin",fog:"on",team:1,color:"def",spawn:0,slots:[{fac:"allied",team:2,color:"def",spawn:1,diff:"normal"}]};
-function nextDefaultFac(){const e=["allied","soviet","yuri"],t=[cfg.fac,...cfg.slots.map(e=>e.fac)];return e.find(e=>!t.includes(e))||e[cfg.slots.length%3]}
-function nextDefaultSpawn(mp){const e=[cfg.spawn,...cfg.slots.map(e=>e.spawn)];for(let t=0;t<(mp||4);t++)if(!e.includes(t))return t;return 0}
-function mapMax(key){const m=MAPS.find(e=>e.k===key);return m&&m.mp||4}
-function nextDefaultTeam(){const e=[cfg.team,...cfg.slots.map(e=>e.team)];for(let t=1;t<=4;t++)if(!e.includes(t))return t;return 1}const MAP_SPAWNS={divide:[[10,30],[78,30]],high:[[14,52],[74,14]],dust:[[40,10],[40,56]],lakes:[[13,13],[76,56]],line:[[16,58],[76,14]],ring:[[46,8],[46,66]],city:[[12,12],[80,60]]};
-function mapSpots(key){const e=MAP_SPAWNS[key]||[[13,13],[76,56]],cx=46,cy=36,rot=e=>[clamp(Math.round(cx-(e[1]-cy)),6,85),clamp(Math.round(cy+(e[0]-cx)),6,65)];return e.concat([rot(e[0]),rot(e[1])])}
-function mapPreviewSVG(key,mp){const spots=mapSpots(key).slice(0,mp||4),W=140,H=100,pts=spots.map((e,t)=>{const x=(e[0]/92*W).toFixed(1),y=(e[1]/72*H).toFixed(1);return'<circle cx="'+x+'" cy="'+y+'" r="7" fill="#f0a72c" stroke="#1a1206" stroke-width="1.2"/><text x="'+x+'" y="'+y+'" font-size="8" fill="#1a1206" text-anchor="middle" dy=".3em" font-weight="700">'+String.fromCharCode(65+t)+"</text>"}).join("");return'<svg viewBox="0 0 '+W+" "+H+'"><rect width="'+W+'" height="'+H+'" fill="#16211a" stroke="#2a3a30"/>'+pts+"</svg>"}
-function fillSelect(id,opts,val,cb){const e=$("#"+id);e.innerHTML=opts.map(e=>'<option value="'+e.k+'"'+(String(e.k)===String(val)?" selected":"")+">"+e.n+"</option>").join(""),e.onchange=()=>cb(e.value)}
-function refreshMenu(){
-const mp=mapMax(cfg.map);
-while(cfg.slots.length>mp-1)cfg.slots.pop();
-const usedSpawns=new Set;
-[cfg,...cfg.slots].forEach(rec=>{if(rec.spawn>=mp||usedSpawns.has(rec.spawn)){let s=0;while(usedSpawns.has(s)&&s<mp-1)s++;rec.spawn=s}usedSpawns.add(rec.spawn)});
-const facList=[{k:"allied",n:"Vanguard"},{k:"soviet",n:"Legion"},{k:"yuri",n:"Syndicate"}],teamList=[1,2,3,4].map((e,t)=>({k:e,n:String.fromCharCode(65+t)})),colorList=COLORSETS.map(e=>({k:e.k,n:e.n})),diffList=[{k:"easy",n:"Easy"},{k:"normal",n:"Normal"},{k:"hard",n:"Brutal"}],n=1+cfg.slots.length,spawnList=Array.from({length:mp},(e,t)=>({k:t,n:String.fromCharCode(65+t)}));
-$("#playerRows").innerHTML=Array.from({length:n},(e,t)=>{const you=0===t;return'<div class="pRow"><div class="pName">'+(you?"YOU":"AI "+t)+'</div><select class="cFac" id="rFac'+t+'"></select><select class="cTeam" id="rTeam'+t+'"></select><select class="cColor" id="rColor'+t+'"></select><select class="cSpawn" id="rSpawn'+t+'"></select>'+(you?'<div class="cDiff"></div>':'<select class="cDiff" id="rDiff'+t+'"></select><button class="rm" data-i="'+t+'">✕</button>')+"</div>"}).join("");
-for(let t=0;t<n;t++){const you=0===t,rec=you?cfg:cfg.slots[t-1];
-fillSelect("rFac"+t,facList,rec.fac,e=>{rec.fac=e,refreshMenu()});
-fillSelect("rTeam"+t,teamList,rec.team,e=>{rec.team=+e,refreshMenu()});
-fillSelect("rColor"+t,colorList,rec.color,e=>{rec.color=e,refreshMenu()});
-fillSelect("rSpawn"+t,spawnList,rec.spawn,e=>{rec.spawn=+e,refreshMenu()});
-you||fillSelect("rDiff"+t,diffList,rec.diff||"normal",e=>{rec.diff=e,refreshMenu()})}
-$("#playerRows").onclick=e=>{const t=e.target.closest(".rm");if(!t)return;cfg.slots.splice(+t.dataset.i-1,1),refreshMenu()};
-const addBtn=$("#addAI");addBtn.disabled=n>=mp,addBtn.onclick=()=>{n>=mp||(cfg.slots.push({fac:nextDefaultFac(),team:nextDefaultTeam(),color:"def",spawn:nextDefaultSpawn(mp),diff:"normal"}),refreshMenu())};
-fillSelect("mapSel",MAPS.map(e=>({k:e.k,n:e.n})),cfg.map,e=>{cfg.map=e,refreshMenu()});
-$("#mapPreview").innerHTML=mapPreviewSVG(cfg.map,mp)+(mp<4?'<div class="small" style="margin-top:2px">Only '+mp+" spawn points — limited ore near the rest</div>":"");
-fillSelect("fogSel",[{k:"on",n:"Shrouded"},{k:"off",n:"Revealed"}],cfg.fog,e=>{cfg.fog=e,refreshMenu()})}const rivalNames=e=>S.players.filter(t=>t&&!t.neutral&&t.id!==e.id).map(t=>t.f.name.toUpperCase()).join(" / ");function openMenu(e){const t=$("#menu");if(null!==e){if(t.classList.remove("hidden"),"pause"===e){const e=P();$("#panelMain").innerHTML='<h1>PAUSED</h1><div class="sub">'+e.f.name.toUpperCase()+" COMMAND vs "+rivalNames(e)+'</div><div class="small" style="margin:0 0 6px">$'+Math.floor(e.credits)+" &nbsp;·&nbsp; power "+e.power+"/"+e.drain+" &nbsp;·&nbsp; "+S.units.filter(e=>0===e.owner).length+" units &nbsp;·&nbsp; "+Math.floor(S.time/60)+"m "+Math.floor(S.time%60)+"s<br>Killed "+e.kills+" · lost "+e.lost+'</div><button id="play">RESUME</button><button id="openSettings" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SETTINGS</button><button id="openSaveG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SAVE GAME</button><button id="openLoadG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="restart" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">RESTART</button><div class="small">Tap a card repeatedly to queue it · long-press a card (or tap a chip in the queue bar) to remove one · ▾ expands the build panel · DEPLOY toggles Desolators, evacuates a garrison, sends aircraft home.</div>',$("#play").addEventListener("click",()=>{S.running=!0,openMenu(null)}),$("#openSettings").addEventListener("click",()=>openMenu("settings")),$("#openSaveG").addEventListener("click",()=>showSaveLoad("save")),$("#openLoadG").addEventListener("click",()=>showSaveLoad("load")),$("#restart").addEventListener("click",()=>S.mission?launchMission(S.mission.fac,S.mission.idx):location.reload())}else if("settings"===e){const trackOpts=['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e,t)=>'<option value="'+t+'">'+e.name+"</option>")).join(""),vol=(id,label,val)=>'<div class="fld"><label>'+label+'</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="'+id+'" min="0" max="100" value="'+Math.round(100*val)+'" style="flex:1"><span id="'+id+'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">'+Math.round(100*val)+'%</span></div></div>';$("#panelMain").innerHTML='<h1>SETTINGS</h1><div class="sub">AUDIO</div>'+vol("masterVolOpt","Master Volume",masterVol)+vol("sfxVolOpt","Sound Effects",sfxVol)+vol("musicVolOpt","Music",musicVol)+'<div class="fld"><label>Music Track</label><select id="trackSelOpt">'+trackOpts+'</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>',$("#trackSelOpt").value=""+trackSel;const wireVol=(id,setter)=>{const el=$("#"+id),lbl=$("#"+id+"Val");el.addEventListener("input",()=>{const v=+el.value;lbl.textContent=v+"%",setter(v/100)})};wireVol("masterVolOpt",setMasterVol),wireVol("sfxVolOpt",e=>{setSfxVol(e),sfx("sel")}),wireVol("musicVolOpt",setMusicVol),$("#trackSelOpt").addEventListener("change",e=>setTrackSel(+e.target.value)),$("#settingsClose").addEventListener("click",()=>openMenu("pause"))}}else t.classList.add("hidden")}function gameOver(win){S.over=!0,S.running=!1,setRainAmbience(!1),sfx(win?"win":"lose");$("#menu").classList.remove("hidden");const t=P(),mission=S.mission;mission&&win&&unlockNext(mission.fac,mission.idx);const hasNext=!!mission&&mission.idx+1<CAMPAIGNS[mission.fac].missions.length;const label=mission?win?hasNext?"NEXT MISSION":"BACK TO MENU":"RETRY MISSION":"NEW SKIRMISH";$("#panelMain").innerHTML='<div id="result" style="color:'+(win?"#6fe36f":"#e0473a")+'">'+(win?"MISSION ACCOMPLISHED":"MISSION FAILED")+'</div><div class="sub">'+t.f.name.toUpperCase()+" vs "+rivalNames(t)+'</div><div class="small">Units killed: '+t.kills+" &nbsp;·&nbsp; Units lost: "+t.lost+"<br>Time: "+Math.floor(S.time/60)+"m "+Math.floor(S.time%60)+'s</div><button id="play">'+label+'</button>'+(mission?'<button id="backCamp2" '+SECBTN+'>MISSION SELECT</button>':""),$("#play").addEventListener("click",()=>{if(!mission)return void location.reload();win?hasNext?showBriefing(mission.fac,mission.idx+1):(S.mission=null,showCampaign()):launchMission(mission.fac,mission.idx)}),mission&&$("#backCamp2").addEventListener("click",()=>{S.mission=null,showMissionList(mission.fac)})}function pickWeather(){const r=Math.random();return r<.55?"clear":r<.8?"overcast":"rain"}
-function startGame(){audio(),startMusic(),genMap(Math.floor(1e3*Math.random()),cfg.map),mmCache=null,NEUTRAL=1+cfg.slots.length,S.players=[newPlayer(0,cfg.fac,!1,"normal",cfg.team,colorSet(cfg.color))];cfg.slots.forEach((e,t)=>{S.players.push(newPlayer(t+1,e.fac,!0,e.diff||"normal",e.team,colorSet(e.color)))}),S.players[NEUTRAL]=newPlayer(NEUTRAL,"allied",!1,"normal"),S.players[NEUTRAL].team=-1,S.players[NEUTRAL].f={key:"neutral",name:"Civilian",color:"#9c968a",dark:"#6a6252",tint:"#ccc",units:[],miner:"miner_allied",base:"gi",main:"grizzly",anti:"gi",elite:"gi"},S.players[NEUTRAL].fac="neutral",S.players[NEUTRAL].neutral=!0,S.rads=[],S.weather=pickWeather(),setRainAmbience("rain"===S.weather),GL?rebuildTerrainGL():initGL(),FOG_ON="off"!==cfg.fog,G.vis.fill(FOG_ON?0:2),"function"==typeof onFogUpdated&&onFogUpdated(),"function"==typeof setFogUniform&&setFogUniform(FOG_ON),resizeGL(),S.units=[],S.blds=[],S.bldById=new Map,S.projs=[],S.fx=[],S.rockets=[],S.sel=[],S.time=0,S.over=!1,S.aiVis=new Map,S.knownEnemy=new Map;for(let i=1;i<NEUTRAL;i++)S.players[i].credits=DIFFS[S.players[i].diff].cash;const allSpots=(G.spots&&G.spots.length?G.spots:[[13,13],[76,56],[16,66],[76,10]]).map(e=>[e[0],e[1]]),wanted=[cfg.spawn,...cfg.slots.map(e=>e.spawn)].map(e=>clamp(e,0,allSpots.length-1)),usedSpots=new Set,order=wanted.map(e=>{let t=e;if(usedSpots.has(t)){t=-1;for(let e=0;e<allSpots.length;e++)if(!usedSpots.has(e)){t=e;break}}return usedSpots.add(t),t});order.forEach((spotI,t)=>{let[r,n]=allSpots[spotI];const csz=BLD.conyard.size;for(let tries=0;!canPlaceRaw("conyard",r,n)&&tries<300;tries++)r+=1,r>92-csz&&(r=0,n+=1);S.players[t].spawnX=32*(r+1.5),S.players[t].spawnY=32*(n+1.5);const o=FACTIONS[S.players[t].fac];if(0===t){const wx=32*(r+1.5),wy=32*(n+1.5);if(pendingMission&&pendingMission.noBuild){addUnit(t,"engineer",wx,wy+24),addUnit(t,o.main,wx-26,wy),addUnit(t,o.main,wx+26,wy),addUnit(t,o.anti,wx,wy-20),addUnit(t,o.anti,wx-13,wy+13),S.tab="veh",document.querySelectorAll(".tab").forEach(e=>e.classList.toggle("on","veh"===e.dataset.t))}else{addUnit(t,"mcv",wx,wy);for(let e=0;e<3;e++)addUnit(t,o.base,32*(r+3.5)+rnd(-40,40),32*(n+5)+rnd(-20,30))}cam.z=camZTarget=clamp(CW/620,.42,.85),cam.x=wx,cam.y=wy+83.2,clampCam()}else{const a=addBuilding(t,"conyard",r,n,!0);addBuilding(t,"power",r+4,n,!0),addBuilding(t,"power",r+4,n+3,!0);for(let e=0;e<2;e++){const e=addUnit(t,o.miner,32*(r+1.5)+rnd(-30,30),32*(n+4.5)+rnd(0,40));e&&(e.order="harvest")}for(let e=0;e<3;e++)addUnit(t,o.base,32*(r+3.5)+rnd(-40,40),32*(n+5)+rnd(-20,30))}}),spawnCivs(),spawnSpecials(),applyPendingMission(),S.players[0].credits=1e4,S.running=!0,$("#top").classList.remove("hidden"),$("#side").classList.remove("hidden"),$("#mmWrap").classList.remove("hidden"),buildCards(),openMenu(null),hint("COMMAND: select your Mobile HQ and tap DEPLOY"),setTimeout(()=>{S.running&&hint("COMMAND: tap a card again to queue more")},12e3),setTimeout(()=>{S.running&&hint("COMMAND: gem veins pay far more than plain ore")},26e3),setTimeout(()=>{S.running&&hint("COMMAND: garrison the outposts with infantry")},4e4)}
+(() => {
+  // src/ui.js
+  var sellMode = false;
+  var repairMode = false;
+  $("#bSel").addEventListener("click", () => {
+    S.selMode = !S.selMode, $("#bSel").classList.toggle("on", S.selMode), S.selMode && hint("Drag on the map to box-select");
+  }), $("#bAll").addEventListener("click", () => {
+    S.sel = S.units.filter((e) => 0 === e.owner && !e.dead && "miner" !== e.d.role), sfx("sel"), S.sel.length || hint("No combat units");
+  }), $("#bStop").addEventListener("click", () => {
+    S.sel.forEach((e) => {
+      "u" === e.e && (e.order = "miner" === e.d.role ? "harvest" : "idle", e.path = null, e.target = null);
+    }), sfx("go");
+  }), $("#deployPrompt").addEventListener("click", doDeploy), $("#rotatePrompt").addEventListener("click", () => {
+    rotateTarget && !rotateTarget.dead && (rotateTarget.rot = ((rotateTarget.rot || 0) + Math.PI / 2) % (2 * Math.PI), "gate" === rotateTarget.key && relinkGatePair(rotateTarget), sfx("sel"));
+  }), $("#cancelPlace").addEventListener("click", () => {
+    S.placing = null, S.ghost = null, S.deployUnit = null, hint("Placement cancelled");
+  }), $("#bSell").addEventListener("click", () => {
+    sellMode = !sellMode, repairMode = false, $("#bSell").classList.toggle("on", sellMode), $("#bRepair").classList.remove("on"), sellMode && hint("Tap one of your structures to sell it");
+  }), $("#bRepair").addEventListener("click", () => {
+    repairMode = !repairMode, sellMode = false, $("#bRepair").classList.toggle("on", repairMode), $("#bSell").classList.remove("on"), repairMode && hint("Tap a structure to toggle repair");
+  }), $("#btnMenu").addEventListener("click", () => {
+    S.running = !S.running, openMenu(S.running ? null : "pause");
+  });
+  $("#btnMute").addEventListener("click", () => setMuted(!muted));
+  setMuted(muted);
+  $("#btnSettings").addEventListener("click", () => {
+    S.running = false, openMenu("settings");
+  });
+  var ptrs = /* @__PURE__ */ new Map();
+  var dragMode = null;
+  var dragStart = null;
+  var pinch = null;
+  var moved = 0;
+  var lastTap = 0;
+  function endPtr(e) {
+    if (FPS.on) return void ptrs.delete(e.pointerId);
+    const t = ptrs.get(e.pointerId);
+    ptrs.delete(e.pointerId), "pinch" !== dragMode ? t && ("box" === dragMode && S.box ? (moved > 14 ? boxSelect(S.box) : tap(e.clientX, e.clientY), S.box = null) : "ghost" === dragMode ? tryPlace(e.clientX, e.clientY) : moved < 14 && tap(e.clientX, e.clientY), dragMode = null, dragStart = null) : ptrs.size < 2 && (dragMode = null, dragStart = null);
+  }
+  function updateGhost(e, t, r) {
+    const n = s2w(e, t - (r ? Math.min(46, 26 / Math.max(0.35, cam.z)) : 0)), a = n.x, o = n.y, s = BLD[S.placing].size;
+    S.ghost = { tx: clamp(Math.round(a / 32 - s / 2), 0, 92 - s), ty: clamp(Math.round(o / 32 - s / 2), 0, 72 - s) };
+  }
+  function tryPlace(e, t) {
+    updateGhost(e, t, false);
+    const r = S.ghost;
+    if (S.deployUnit) {
+      const u = S.deployUnit;
+      return void (u.dead ? (S.placing = null, S.ghost = null, S.deployUnit = null, hint("Unit lost")) : canDeploy(S.placing, r.tx, r.ty, u) ? (finishDeploy(u, S.placing, r.tx, r.ty), S.placing = null, S.ghost = null, S.deployUnit = null) : hint("Cannot deploy here \u2014 drag to a clear, open spot"));
+    }
+    if (placeReady(P(), r.tx, r.ty)) S.placing = null, S.ghost = null;
+    else {
+      const bd = BLD[S.placing];
+      bd && bd.naval && !nearWater(r.tx, r.ty, bd.size, 2) ? hint("Cannot build there \u2014 must be near the coast") : hint("Cannot build there \u2014 must be near your base");
+    }
+  }
+  function entAt(e, t, sx, sy) {
+    let r = null, n = 1e9;
+    const hidden = (o2) => o2.d.sub && teamOf(o2.owner) !== teamOf(0) && !subRevealed(o2);
+    if (void 0 !== sx) {
+      for (const o2 of S.units) {
+        if (o2.dead || o2.inside || !(o2.d.fly || o2.alt > 2) || hidden(o2)) continue;
+        const px = w2sx(o2.x, o2.y), py = w2sy(o2.x, o2.y, o2.alt || 0), rad = Math.max(34, (o2.d.radius + 18) * cam.z), dx = sx - px, dy = sy - py, d2 = dx * dx + dy * dy;
+        d2 < rad * rad && d2 < n && (n = d2, r = o2);
+      }
+      if (r) return r;
+      n = 1e9;
+    }
+    const a = 24 / Math.max(0.3, cam.z);
+    for (const o2 of S.units) {
+      if (o2.dead || o2.inside || o2.d.fly || o2.alt > 2 || hidden(o2)) continue;
+      const s2 = Math.max(a, o2.d.radius + 8), i = dist2(e, t, o2.x, o2.y);
+      i < s2 * s2 && i < n && (n = i, r = o2);
+    }
+    if (r) return r;
+    const o = Math.floor(e / 32), s = Math.floor(t / 32);
+    if (inMap(o, s)) {
+      const e2 = G.occ[idx(o, s)];
+      if (e2) {
+        const t2 = S.blds.find((t3) => t3.id === e2 && !t3.dead);
+        if (t2) return t2;
+      }
+    }
+    return null;
+  }
+  function tap(e, t) {
+    if (S.placing) return void tryPlace(e, t);
+    const r = s2w(e, t), n = r.x, a = r.y;
+    if (superAim) return superAim = false, void (fireSuper(0, n, a) && (cam.x = n, cam.y = a, clampCam(), S.marker = { x: n, y: a, t: 0 }, hint("Strike inbound")));
+    if (spyAim) return spyAim = false, void spyStrike(0, n, a);
+    if (paradropAim) return paradropAim = false, void paradropStrike(0, n, a);
+    if (empAim) return empAim = false, void fireEmp(0, n, a);
+    const o = entAt(n, a, e, t);
+    if (sellMode) return void (o && "b" === o.e && 0 === o.owner && "conyard" !== o.key ? (P().credits += 0.5 * o.d.cost, textFx(o.x, o.y, "+$" + Math.round(0.5 * o.d.cost)), killBld(o), sellMode = false, $("#bSell").classList.remove("on")) : hint("Select one of your structures"));
+    if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, hint(o.repair ? "Repairing" : "Repair off"))));
+    if (o) {
+      if (0 === o.owner) {
+        if ("u" === o.e && o.d.transport) {
+          const loadable = S.sel.filter((u) => "u" === u.e && u !== o && 0 === u.owner && !u.d.transport && !u.d.fly);
+          if (loadable.length) return loadable.forEach((u) => {
+            u.order = "load", u.target = o, u.path = null;
+          }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, sfx("go"), void 0;
+        }
+        const engs = "b" === o.e ? S.sel.filter((u) => "u" === u.e && "engineer" === u.d.role) : [];
+        if (engs.length) engs.forEach((u) => {
+          u.order = "capture", u.target = o, u.path = null;
+        }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, sfx("go");
+        else {
+          const e2 = performance.now();
+          "u" === o.e ? (e2 - lastTap < 330 && S.sel.includes(o) ? (S.sel = S.units.filter((e3) => 0 === e3.owner && !e3.dead && e3.key === o.key), hint("Selected all " + o.d.name)) : S.sel.includes(o) && S.sel.length > 1 ? (S.sel = S.sel.filter((e3) => e3 !== o), hint("Dropped " + o.d.name)) : S.sel.includes(o) && 1 === S.sel.length ? (S.sel = [], hint("Deselected")) : S.sel = [o], lastTap = e2) : S.sel = S.sel.includes(o) ? [] : [o], sfx("sel");
+        }
+      } else if (teamOf(o.owner) === teamOf(0)) {
+        hint((o.d.name || "Ally") + " \u2014 allied, cannot attack");
+      } else {
+        const e2 = S.sel.filter((e3) => "u" === e3.e);
+        e2.length ? (cmdAttack(e2, o), S.marker = { x: o.x, y: o.y, t: 0, c: "#ff7d7d" }, sfx("go")) : S.sel = [];
+      }
+      return;
+    }
+    const s = S.sel.filter((e2) => "u" === e2.e && 0 === e2.owner);
+    if (s.length) {
+      const e2 = Math.floor(n / 32), t2 = Math.floor(a / 32);
+      return inMap(e2, t2) && G.ore[idx(e2, t2)] > 0 && s.some((e3) => "miner" === e3.d.role) ? (cmdHarvest(s, e2, t2), s.filter((e3) => "miner" !== e3.d.role).forEach((e3) => cmdMove([e3], n, a)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }) : (cmdMove(s, n, a), S.marker = { x: n, y: a, t: 0, c: "#7dff8a" }), void sfx("go");
+    }
+    const i = S.sel.find((e2) => "b" === e2.e);
+    if (i && 0 === i.owner) return i.rally = { x: n, y: a }, S.marker = { x: n, y: a, t: 0, c: "#7dc4ff" }, void hint("Rally point set");
+    S.sel = [];
+  }
+  function boxSelect(e) {
+    const t = Math.min(e.x0, e.x1), r = Math.max(e.x0, e.x1), n = Math.min(e.y0, e.y1), a = Math.max(e.y0, e.y1), o = [];
+    for (const e2 of S.units) {
+      if (e2.dead || 0 !== e2.owner) continue;
+      const s2 = w2sx(e2.x, e2.y), i2 = w2sy(e2.x, e2.y, e2.alt || 0);
+      s2 >= t && s2 <= r && i2 >= n && i2 <= a && o.push(e2);
+    }
+    const s = o.filter((e2) => "miner" !== e2.d.role), i = s.length ? s : o;
+    if (!i.length) return S.sel = [], void hint("Selection cleared");
+    S.sel = i, sfx("sel");
+    const l = [...new Set(i.map((e2) => e2.d.name))];
+    hint(i.length + " selected \u2014 " + l.slice(0, 2).join(", ") + (l.length > 2 ? "\u2026" : ""));
+  }
+  cv.addEventListener("pointerdown", (e) => {
+    if (FPS.on) return;
+    if (cv.setPointerCapture(e.pointerId), ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY }), 1 === ptrs.size) moved = 0, dragStart = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, t: performance.now() }, S.placing ? (dragMode = "ghost", updateGhost(e.clientX, e.clientY, false)) : S.selMode ? (dragMode = "box", S.box = { x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY }) : dragMode = "pan";
+    else if (2 === ptrs.size) {
+      const [e2, t] = [...ptrs.values()];
+      pinch = { d: dist(e2.x, e2.y, t.x, t.y), z: cam.z, mx: (e2.x + t.x) / 2, my: (e2.y + t.y) / 2 }, dragMode = "pinch", S.box = null;
+    }
+  }), cv.addEventListener("pointermove", (e) => {
+    if (FPS.on) return;
+    const t = ptrs.get(e.pointerId);
+    if (t) {
+      if (t.x = e.clientX, t.y = e.clientY, "pinch" === dragMode && ptrs.size >= 2) {
+        const [e2, t2] = [...ptrs.values()], r = dist(e2.x, e2.y, t2.x, t2.y), n = (e2.x + t2.x) / 2, a = (e2.y + t2.y) / 2, o = s2w(n, a);
+        cam.z = camZTarget = clamp(pinch.z * (r / pinch.d), 0.3, 2.3);
+        const s = s2w(n, a);
+        cam.x += o.x - s.x, cam.y += o.y - s.y;
+        const i = s2w(pinch.mx, pinch.my), l = s2w(n, a);
+        return cam.x += i.x - l.x, cam.y += i.y - l.y, pinch.mx = n, pinch.my = a, pinch.d = r, pinch.z = cam.z, void clampCam();
+      }
+      if (dragStart) if (moved = Math.max(moved, dist(e.clientX, e.clientY, dragStart.x, dragStart.y)), "pan" === dragMode) {
+        const t2 = -(e.clientX - dragStart.x) / cam.z, r = -(e.clientY - dragStart.y) / cam.z;
+        cam.x = dragStart.cx + (r / 0.5 / 2 + t2 / 2), cam.y = dragStart.cy + (r / 0.5 / 2 - t2 / 2), clampCam();
+      } else "box" === dragMode && S.box ? (S.box.x1 = e.clientX, S.box.y1 = e.clientY) : "ghost" === dragMode && updateGhost(e.clientX, e.clientY, moved > 12);
+    }
+  }), cv.addEventListener("pointerup", endPtr), cv.addEventListener("pointercancel", endPtr), cv.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    camZTarget = clamp(camZTarget * (e.deltaY > 0 ? 0.9 : 1.1), 0.3, 2.3), zoomPivot = { sx: e.clientX, sy: e.clientY };
+  }, { passive: false }), mm.addEventListener("pointerdown", (e) => {
+    const t = mm.getBoundingClientRect();
+    cam.x = (e.clientX - t.left) / t.width * 2944, cam.y = (e.clientY - t.top) / t.height * 2304, clampCam(), e.stopPropagation();
+  }), window.addEventListener("keydown", (e) => {
+    "Escape" === e.key && (S.placing = null, S.ghost = null, S.deployUnit = null, S.sel = []), " " === e.key && (S.running = !S.running);
+    const t = 50 / cam.z;
+    "ArrowLeft" === e.key && (cam.x -= t, cam.y += t), "ArrowRight" === e.key && (cam.x += t, cam.y -= t), "ArrowUp" === e.key && (cam.x -= t, cam.y -= t), "ArrowDown" === e.key && (cam.x += t, cam.y += t), clampCam();
+  });
+  var COLORSETS = [{ k: "def", n: "DEFAULT", body: null, dark: null, tint: null }, { k: "red", n: "RED", body: "#7a3530", dark: "#3f1a17", tint: "#c99a90" }, { k: "blue", n: "BLUE", body: "#355070", dark: "#1c2838", tint: "#9db4cc" }, { k: "green", n: "GREEN", body: "#4a6b3a", dark: "#25341d", tint: "#a8c290" }, { k: "yellow", n: "YELLOW", body: "#8a7a30", dark: "#453d18", tint: "#d8c890" }, { k: "purple", n: "PURPLE", body: "#5f4a6b", dark: "#312638", tint: "#a99bb2" }, { k: "orange", n: "ORANGE", body: "#8a5530", dark: "#452b18", tint: "#d0a074" }, { k: "teal", n: "TEAL", body: "#357070", dark: "#1c3838", tint: "#9dc4c4" }, { k: "grey", n: "GREY", body: "#6a6a6a", dark: "#363636", tint: "#b8b8b8" }];
+  function colorSet(k) {
+    return COLORSETS.find((e) => e.k === k) || COLORSETS[0];
+  }
+  var cfg = { fac: "soviet", map: "basin", fog: "on", team: 1, color: "def", spawn: 0, slots: [{ fac: "allied", team: 2, color: "def", spawn: 1, diff: "normal" }] };
+  function nextDefaultFac() {
+    const e = ["allied", "soviet", "yuri"], t = [cfg.fac, ...cfg.slots.map((e2) => e2.fac)];
+    return e.find((e2) => !t.includes(e2)) || e[cfg.slots.length % 3];
+  }
+  function nextDefaultSpawn(mp) {
+    const e = [cfg.spawn, ...cfg.slots.map((e2) => e2.spawn)];
+    for (let t = 0; t < (mp || 4); t++) if (!e.includes(t)) return t;
+    return 0;
+  }
+  function mapMax(key) {
+    const m = MAPS.find((e) => e.k === key);
+    return m && m.mp || 4;
+  }
+  function nextDefaultTeam() {
+    const e = [cfg.team, ...cfg.slots.map((e2) => e2.team)];
+    for (let t = 1; t <= 4; t++) if (!e.includes(t)) return t;
+    return 1;
+  }
+  var MAP_SPAWNS = { divide: [[10, 30], [78, 30]], high: [[14, 52], [74, 14]], dust: [[40, 10], [40, 56]], lakes: [[13, 13], [76, 56]], line: [[16, 58], [76, 14]], ring: [[46, 8], [46, 66]], city: [[12, 12], [80, 60]] };
+  function mapSpots(key) {
+    const e = MAP_SPAWNS[key] || [[13, 13], [76, 56]], cx = 46, cy = 36, rot = (e2) => [clamp(Math.round(cx - (e2[1] - cy)), 6, 85), clamp(Math.round(cy + (e2[0] - cx)), 6, 65)];
+    return e.concat([rot(e[0]), rot(e[1])]);
+  }
+  function mapPreviewSVG(key, mp) {
+    const spots = mapSpots(key).slice(0, mp || 4), W = 140, H = 100, pts = spots.map((e, t) => {
+      const x = (e[0] / 92 * W).toFixed(1), y = (e[1] / 72 * H).toFixed(1);
+      return '<circle cx="' + x + '" cy="' + y + '" r="7" fill="#f0a72c" stroke="#1a1206" stroke-width="1.2"/><text x="' + x + '" y="' + y + '" font-size="8" fill="#1a1206" text-anchor="middle" dy=".3em" font-weight="700">' + String.fromCharCode(65 + t) + "</text>";
+    }).join("");
+    return '<svg viewBox="0 0 ' + W + " " + H + '"><rect width="' + W + '" height="' + H + '" fill="#16211a" stroke="#2a3a30"/>' + pts + "</svg>";
+  }
+  function fillSelect(id, opts, val, cb) {
+    const e = $("#" + id);
+    e.innerHTML = opts.map((e2) => '<option value="' + e2.k + '"' + (String(e2.k) === String(val) ? " selected" : "") + ">" + e2.n + "</option>").join(""), e.onchange = () => cb(e.value);
+  }
+  function refreshMenu() {
+    const mp = mapMax(cfg.map);
+    while (cfg.slots.length > mp - 1) cfg.slots.pop();
+    const usedSpawns = /* @__PURE__ */ new Set();
+    [cfg, ...cfg.slots].forEach((rec) => {
+      if (rec.spawn >= mp || usedSpawns.has(rec.spawn)) {
+        let s = 0;
+        while (usedSpawns.has(s) && s < mp - 1) s++;
+        rec.spawn = s;
+      }
+      usedSpawns.add(rec.spawn);
+    });
+    const facList = [{ k: "allied", n: "Vanguard" }, { k: "soviet", n: "Legion" }, { k: "yuri", n: "Syndicate" }], teamList = [1, 2, 3, 4].map((e, t) => ({ k: e, n: String.fromCharCode(65 + t) })), colorList = COLORSETS.map((e) => ({ k: e.k, n: e.n })), diffList = [{ k: "easy", n: "Easy" }, { k: "normal", n: "Normal" }, { k: "hard", n: "Brutal" }], n = 1 + cfg.slots.length, spawnList = Array.from({ length: mp }, (e, t) => ({ k: t, n: String.fromCharCode(65 + t) }));
+    $("#playerRows").innerHTML = Array.from({ length: n }, (e, t) => {
+      const you = 0 === t;
+      return '<div class="pRow"><div class="pName">' + (you ? "YOU" : "AI " + t) + '</div><select class="cFac" id="rFac' + t + '"></select><select class="cTeam" id="rTeam' + t + '"></select><select class="cColor" id="rColor' + t + '"></select><select class="cSpawn" id="rSpawn' + t + '"></select>' + (you ? '<div class="cDiff"></div>' : '<select class="cDiff" id="rDiff' + t + '"></select><button class="rm" data-i="' + t + '">\u2715</button>') + "</div>";
+    }).join("");
+    for (let t = 0; t < n; t++) {
+      const you = 0 === t, rec = you ? cfg : cfg.slots[t - 1];
+      fillSelect("rFac" + t, facList, rec.fac, (e) => {
+        rec.fac = e, refreshMenu();
+      });
+      fillSelect("rTeam" + t, teamList, rec.team, (e) => {
+        rec.team = +e, refreshMenu();
+      });
+      fillSelect("rColor" + t, colorList, rec.color, (e) => {
+        rec.color = e, refreshMenu();
+      });
+      fillSelect("rSpawn" + t, spawnList, rec.spawn, (e) => {
+        rec.spawn = +e, refreshMenu();
+      });
+      you || fillSelect("rDiff" + t, diffList, rec.diff || "normal", (e) => {
+        rec.diff = e, refreshMenu();
+      });
+    }
+    $("#playerRows").onclick = (e) => {
+      const t = e.target.closest(".rm");
+      if (!t) return;
+      cfg.slots.splice(+t.dataset.i - 1, 1), refreshMenu();
+    };
+    const addBtn = $("#addAI");
+    addBtn.disabled = n >= mp, addBtn.onclick = () => {
+      n >= mp || (cfg.slots.push({ fac: nextDefaultFac(), team: nextDefaultTeam(), color: "def", spawn: nextDefaultSpawn(mp), diff: "normal" }), refreshMenu());
+    };
+    fillSelect("mapSel", MAPS.map((e) => ({ k: e.k, n: e.n })), cfg.map, (e) => {
+      cfg.map = e, refreshMenu();
+    });
+    $("#mapPreview").innerHTML = mapPreviewSVG(cfg.map, mp) + (mp < 4 ? '<div class="small" style="margin-top:2px">Only ' + mp + " spawn points \u2014 limited ore near the rest</div>" : "");
+    fillSelect("fogSel", [{ k: "on", n: "Shrouded" }, { k: "off", n: "Revealed" }], cfg.fog, (e) => {
+      cfg.fog = e, refreshMenu();
+    });
+  }
+  var rivalNames = (e) => S.players.filter((t) => t && !t.neutral && t.id !== e.id).map((t) => t.f.name.toUpperCase()).join(" / ");
+  function openMenu(e) {
+    const t = $("#menu");
+    if (null !== e) {
+      if (t.classList.remove("hidden"), "pause" === e) {
+        const e2 = P();
+        $("#panelMain").innerHTML = '<h1>PAUSED</h1><div class="sub">' + e2.f.name.toUpperCase() + " COMMAND vs " + rivalNames(e2) + '</div><div class="small" style="margin:0 0 6px">$' + Math.floor(e2.credits) + " &nbsp;\xB7&nbsp; power " + e2.power + "/" + e2.drain + " &nbsp;\xB7&nbsp; " + S.units.filter((e3) => 0 === e3.owner).length + " units &nbsp;\xB7&nbsp; " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + "s<br>Killed " + e2.kills + " \xB7 lost " + e2.lost + '</div><button id="play">RESUME</button><button id="openSettings" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SETTINGS</button><button id="openSaveG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SAVE GAME</button><button id="openLoadG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="restart" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">RESTART</button><div class="small">Tap a card repeatedly to queue it \xB7 long-press a card (or tap a chip in the queue bar) to remove one \xB7 \u25BE expands the build panel \xB7 DEPLOY toggles Desolators, evacuates a garrison, sends aircraft home.</div>', $("#play").addEventListener("click", () => {
+          S.running = true, openMenu(null);
+        }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => S.mission ? launchMission(S.mission.fac, S.mission.idx) : location.reload());
+      } else if ("settings" === e) {
+        const trackOpts = ['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + e2.name + "</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel;
+        const wireVol = (id, setter) => {
+          const el = $("#" + id), lbl = $("#" + id + "Val");
+          el.addEventListener("input", () => {
+            const v = +el.value;
+            lbl.textContent = v + "%", setter(v / 100);
+          });
+        };
+        wireVol("masterVolOpt", setMasterVol), wireVol("sfxVolOpt", (e2) => {
+          setSfxVol(e2), sfx("sel");
+        }), wireVol("musicVolOpt", setMusicVol), $("#trackSelOpt").addEventListener("change", (e2) => setTrackSel(+e2.target.value)), $("#settingsClose").addEventListener("click", () => openMenu("pause"));
+      }
+    } else t.classList.add("hidden");
+  }
+  function gameOver(win) {
+    S.over = true, S.running = false, setRainAmbience(false), sfx(win ? "win" : "lose");
+    $("#menu").classList.remove("hidden");
+    const t = P(), mission = S.mission;
+    mission && win && unlockNext(mission.fac, mission.idx);
+    const hasNext = !!mission && mission.idx + 1 < CAMPAIGNS[mission.fac].missions.length;
+    const label = mission ? win ? hasNext ? "NEXT MISSION" : "BACK TO MENU" : "RETRY MISSION" : "NEW SKIRMISH";
+    $("#panelMain").innerHTML = '<div id="result" style="color:' + (win ? "#6fe36f" : "#e0473a") + '">' + (win ? "MISSION ACCOMPLISHED" : "MISSION FAILED") + '</div><div class="sub">' + t.f.name.toUpperCase() + " vs " + rivalNames(t) + '</div><div class="small">Units killed: ' + t.kills + " &nbsp;\xB7&nbsp; Units lost: " + t.lost + "<br>Time: " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + 's</div><button id="play">' + label + "</button>" + (mission ? '<button id="backCamp2" ' + SECBTN + ">MISSION SELECT</button>" : ""), $("#play").addEventListener("click", () => {
+      if (!mission) return void location.reload();
+      win ? hasNext ? showBriefing(mission.fac, mission.idx + 1) : (S.mission = null, showCampaign()) : launchMission(mission.fac, mission.idx);
+    }), mission && $("#backCamp2").addEventListener("click", () => {
+      S.mission = null, showMissionList(mission.fac);
+    });
+  }
+  function pickWeather() {
+    const r = Math.random();
+    return r < 0.55 ? "clear" : r < 0.8 ? "overcast" : "rain";
+  }
+  function startGame() {
+    audio(), startMusic(), genMap(Math.floor(1e3 * Math.random()), cfg.map), mmCache = null, NEUTRAL = 1 + cfg.slots.length, S.players = [newPlayer(0, cfg.fac, false, "normal", cfg.team, colorSet(cfg.color))];
+    cfg.slots.forEach((e, t) => {
+      S.players.push(newPlayer(t + 1, e.fac, true, e.diff || "normal", e.team, colorSet(e.color)));
+    }), S.players[NEUTRAL] = newPlayer(NEUTRAL, "allied", false, "normal"), S.players[NEUTRAL].team = -1, S.players[NEUTRAL].f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, S.players[NEUTRAL].fac = "neutral", S.players[NEUTRAL].neutral = true, S.rads = [], S.weather = pickWeather(), setRainAmbience("rain" === S.weather), GL ? rebuildTerrainGL() : initGL(), FOG_ON = "off" !== cfg.fog, G.vis.fill(FOG_ON ? 0 : 2), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), resizeGL(), S.units = [], S.blds = [], S.bldById = /* @__PURE__ */ new Map(), S.projs = [], S.fx = [], S.rockets = [], S.sel = [], S.time = 0, S.over = false, S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map();
+    for (let i = 1; i < NEUTRAL; i++) S.players[i].credits = DIFFS[S.players[i].diff].cash;
+    const allSpots = (G.spots && G.spots.length ? G.spots : [[13, 13], [76, 56], [16, 66], [76, 10]]).map((e) => [e[0], e[1]]), wanted = [cfg.spawn, ...cfg.slots.map((e) => e.spawn)].map((e) => clamp(e, 0, allSpots.length - 1)), usedSpots = /* @__PURE__ */ new Set(), order = wanted.map((e) => {
+      let t = e;
+      if (usedSpots.has(t)) {
+        t = -1;
+        for (let e2 = 0; e2 < allSpots.length; e2++) if (!usedSpots.has(e2)) {
+          t = e2;
+          break;
+        }
+      }
+      return usedSpots.add(t), t;
+    });
+    order.forEach((spotI, t) => {
+      let [r, n] = allSpots[spotI];
+      const csz = BLD.conyard.size;
+      for (let tries = 0; !canPlaceRaw("conyard", r, n) && tries < 300; tries++) r += 1, r > 92 - csz && (r = 0, n += 1);
+      S.players[t].spawnX = 32 * (r + 1.5), S.players[t].spawnY = 32 * (n + 1.5);
+      const o = FACTIONS[S.players[t].fac];
+      if (0 === t) {
+        const wx = 32 * (r + 1.5), wy = 32 * (n + 1.5);
+        if (pendingMission && pendingMission.noBuild) {
+          addUnit(t, "engineer", wx, wy + 24), addUnit(t, o.main, wx - 26, wy), addUnit(t, o.main, wx + 26, wy), addUnit(t, o.anti, wx, wy - 20), addUnit(t, o.anti, wx - 13, wy + 13), S.tab = "veh", document.querySelectorAll(".tab").forEach((e) => e.classList.toggle("on", "veh" === e.dataset.t));
+        } else {
+          addUnit(t, "mcv", wx, wy);
+          for (let e = 0; e < 3; e++) addUnit(t, o.base, 32 * (r + 3.5) + rnd(-40, 40), 32 * (n + 5) + rnd(-20, 30));
+        }
+        cam.z = camZTarget = clamp(CW / 620, 0.42, 0.85), cam.x = wx, cam.y = wy + 83.2, clampCam();
+      } else {
+        const a = addBuilding(t, "conyard", r, n, true);
+        addBuilding(t, "power", r + 4, n, true), addBuilding(t, "power", r + 4, n + 3, true);
+        for (let e = 0; e < 2; e++) {
+          const e2 = addUnit(t, o.miner, 32 * (r + 1.5) + rnd(-30, 30), 32 * (n + 4.5) + rnd(0, 40));
+          e2 && (e2.order = "harvest");
+        }
+        for (let e = 0; e < 3; e++) addUnit(t, o.base, 32 * (r + 3.5) + rnd(-40, 40), 32 * (n + 5) + rnd(-20, 30));
+      }
+    }), spawnCivs(), spawnSpecials(), applyPendingMission(), S.players[0].credits = 1e4, S.running = true, $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), openMenu(null), hint("COMMAND: select your Mobile HQ and tap DEPLOY"), setTimeout(() => {
+      S.running && hint("COMMAND: tap a card again to queue more");
+    }, 12e3), setTimeout(() => {
+      S.running && hint("COMMAND: gem veins pay far more than plain ore");
+    }, 26e3), setTimeout(() => {
+      S.running && hint("COMMAND: garrison the outposts with infantry");
+    }, 4e4);
+  }
+  Object.assign(window, {
+    endPtr,
+    updateGhost,
+    tryPlace,
+    entAt,
+    tap,
+    boxSelect,
+    colorSet,
+    nextDefaultFac,
+    nextDefaultSpawn,
+    mapMax,
+    nextDefaultTeam,
+    mapSpots,
+    mapPreviewSVG,
+    fillSelect,
+    refreshMenu,
+    openMenu,
+    gameOver,
+    pickWeather,
+    startGame
+  });
+  Object.defineProperties(window, {
+    cfg: { get: () => cfg, set: (v) => {
+      cfg = v;
+    }, configurable: true }
+  });
+})();
+
 </script>
 <script>
 (() => {
