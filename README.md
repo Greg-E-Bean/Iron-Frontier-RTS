@@ -46,9 +46,10 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
   deploy), `src/saveload.js` (serializing/restoring game state, the
   localStorage save-slot helpers), `src/campaigns.js` (the
   mission-briefing tree and the launch/outcome/unlock flow that drives a
-  campaign match), and `src/abilities.js` (the superweapon/spy
-  plane/paradrop/EMP system). `src/index.template.html` is the same
-  document with
+  campaign match), `src/abilities.js` (the superweapon/spy
+  plane/paradrop/EMP system), and `src/ai.js` (the skirmish AI's base
+  expansion, army composition, and micro decisions). `src/index.template.html`
+  is the same document with
   each of those replaced by a marker (`<script>/* BUNDLE:<name> */</script>`) that the
   build step fills in.
 - `package.json`, `scripts/build.mjs` — a small [esbuild](https://esbuild.github.io/)-based
@@ -65,7 +66,7 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 
 If you're only playing, ignore this section — `index.html` always works
 standalone. If you're editing a part of the game that's been moved into
-`src/` (game data, audio, the build-card UI, save/load, campaigns, and abilities, for now; more subsystems will move over time), edit the file
+`src/` (game data, audio, the build-card UI, save/load, campaigns, abilities, and the AI, for now; more subsystems will move over time), edit the file
 under `src/` and rebuild:
 
 ```
