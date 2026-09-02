@@ -40,10 +40,12 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
   GitHub Pages) always works, with nothing to install.
 - `src/` — the source of truth for any part of the game that's been
   modularized so far: `src/gamedata.js` (buildings/units/factions/difficulty
-  data tables and their lookup helpers) and `src/audio.js` (the audio
-  engine — sfx, music, rain ambience, thunder). `src/index.template.html`
-  is the same document with each of those replaced by a marker
-  (`<script>/* BUNDLE:<name> */</script>`) that the build step fills in.
+  data tables and their lookup helpers), `src/audio.js` (the audio
+  engine — sfx, music, rain ambience, thunder), and `src/saveload.js`
+  (serializing/restoring game state, the localStorage save-slot helpers).
+  `src/index.template.html` is the same document with each of those
+  replaced by a marker (`<script>/* BUNDLE:<name> */</script>`) that the
+  build step fills in.
 - `package.json`, `scripts/build.mjs` — a small [esbuild](https://esbuild.github.io/)-based
   build script. It auto-discovers every `BUNDLE:<name>` marker in the
   template and bundles the matching `src/<name>.js` into it, so extracting
@@ -58,7 +60,7 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 
 If you're only playing, ignore this section — `index.html` always works
 standalone. If you're editing a part of the game that's been moved into
-`src/` (game data and audio, for now; more subsystems will move over time), edit the file
+`src/` (game data, audio, and save/load, for now; more subsystems will move over time), edit the file
 under `src/` and rebuild:
 
 ```
