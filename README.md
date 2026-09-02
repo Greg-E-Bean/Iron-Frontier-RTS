@@ -41,12 +41,13 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 - `src/` — the source of truth for any part of the game that's been
   modularized so far: `src/gamedata.js` (buildings/units/factions/difficulty
   data tables and their lookup helpers), `src/audio.js` (the audio
-  engine — sfx, music, rain ambience, thunder), `src/saveload.js`
-  (serializing/restoring game state, the localStorage save-slot helpers),
-  and `src/campaigns.js` (the mission-briefing tree and the
-  launch/outcome/unlock flow that drives a campaign match).
-  `src/index.template.html` is the same document with each of those
-  replaced by a marker (`<script>/* BUNDLE:<name> */</script>`) that the
+  engine — sfx, music, rain ambience, thunder), `src/cards.js` (the build
+  menu — rendering, tab switching, clicking to queue/place, unit
+  deploy), `src/saveload.js` (serializing/restoring game state, the
+  localStorage save-slot helpers), and `src/campaigns.js` (the
+  mission-briefing tree and the launch/outcome/unlock flow that drives a
+  campaign match). `src/index.template.html` is the same document with
+  each of those replaced by a marker (`<script>/* BUNDLE:<name> */</script>`) that the
   build step fills in.
 - `package.json`, `scripts/build.mjs` — a small [esbuild](https://esbuild.github.io/)-based
   build script. It auto-discovers every `BUNDLE:<name>` marker in the
@@ -62,7 +63,7 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 
 If you're only playing, ignore this section — `index.html` always works
 standalone. If you're editing a part of the game that's been moved into
-`src/` (game data, audio, save/load, and campaigns, for now; more subsystems will move over time), edit the file
+`src/` (game data, audio, the build-card UI, save/load, and campaigns, for now; more subsystems will move over time), edit the file
 under `src/` and rebuild:
 
 ```
