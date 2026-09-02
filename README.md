@@ -34,40 +34,51 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 ## Project layout
 
 - `index.html` — the entire game, ready to open. This file is a **build
-  output**: most of it is still one big inline `<script>`, but pieces are
-  being incrementally moved into `src/` and get bundled back in here. It's
-  committed to the repo so cloning and opening it (or hosting it as-is via
-  GitHub Pages) always works, with nothing to install.
-- `src/` — the source of truth for any part of the game that's been
-  modularized so far: `src/gamedata.js` (buildings/units/factions/difficulty
-  data tables and their lookup helpers), `src/audio.js` (the audio
-  engine — sfx, music, rain ambience, thunder), `src/cards.js` (the build
-  menu — rendering, tab switching, clicking to queue/place, unit
-  deploy), `src/saveload.js` (serializing/restoring game state, the
-  localStorage save-slot helpers), `src/campaigns.js` (the
-  mission-briefing tree and the launch/outcome/unlock flow that drives a
-  campaign match), `src/abilities.js` (the superweapon/spy
-  plane/paradrop/EMP system), `src/sim.js` (the core simulation: the
-  map/game-state data, procedural map generation, A* pathfinding,
-  building/unit lifecycle, production, orders, combat, unit-role ticks,
-  and fog of war), `src/ai.js` (the skirmish AI's base
-  expansion, army composition, and micro decisions), `src/render.js`
-  (the Three.js engine bootstrap, terrain/sky/weather builders, and the
-  main render loop), `src/models.js` (every unit/building/prop model
-  builder, the shared camera/canvas/projection state they run on, and
-  optional external GLTF/GLB asset loading via `registerModelAsset()` as
-  a drop-in alternative to a procedural model, with graceful fallback),
-  `src/fps.js` (first-person mode: entering/exiting, movement and
-  aiming, the procedural weapon viewmodels, building interiors for
-  garrisoned infantry, and the `fpsRender()` draw loop), and
-  `src/render2d.js` (the isometric terrain/tile baking, per-entity 2D
-  drawing for units/buildings/props/projectiles/effects, the minimap,
-  the screen-space HUD overlay, and the main render loop, alongside the
-  garrison/deploy/air-cargo/capture/Tiberium-growth logic that lived in
-  the same span of the original file). `src/index.template.html` is the
-  same document with
-  each of those replaced by a marker (`<script>/* BUNDLE:<name> */</script>`) that the
-  build step fills in.
+  output**, regenerated from `src/` (see below). It's committed to the repo
+  so cloning and opening it (or hosting it as-is via GitHub Pages) always
+  works, with nothing to install.
+- `src/` — the source of truth for the game logic, split into one file per
+  subsystem:
+  - `src/gamedata.js` — buildings/units/factions/difficulty data tables and
+    their lookup helpers.
+  - `src/sim.js` — the core simulation: the map/game-state data, procedural
+    map generation, A* pathfinding, building/unit lifecycle, production,
+    orders, combat, unit-role ticks, and fog of war.
+  - `src/ai.js` — the skirmish AI's base expansion, army composition, and
+    micro decisions.
+  - `src/models.js` — every unit/building/prop model builder, the shared
+    camera/canvas/projection state they run on, and optional external
+    GLTF/GLB asset loading via `registerModelAsset()` as a drop-in
+    alternative to a procedural model, with graceful fallback.
+  - `src/render2d.js` — the isometric terrain/tile baking, per-entity 2D
+    drawing for units/buildings/props/projectiles/effects, the minimap, and
+    the screen-space HUD overlay.
+  - `src/render.js` — the Three.js engine bootstrap and the
+    terrain/sky/weather builders.
+  - `src/fps.js` — first-person mode: entering/exiting, movement and
+    aiming, the procedural weapon viewmodels, building interiors for
+    garrisoned infantry, and the `fpsRender()` draw loop.
+  - `src/audio.js` — the audio engine: sfx, music, rain ambience, thunder.
+  - `src/cards.js` — the build menu: rendering, tab switching, clicking to
+    queue/place, unit deploy.
+  - `src/ui.js` — canvas pointer/keyboard input (pan/zoom/box-select/
+    tap-to-command), the game-setup menu, the pause/settings/game-over
+    screens, and `startGame()`.
+  - `src/saveload.js` — serializing/restoring game state, the localStorage
+    save-slot helpers.
+  - `src/campaigns.js` — the mission-briefing tree and the
+    launch/outcome/unlock flow that drives a campaign match.
+  - `src/loop.js` — `frame()`/`step()`, the requestAnimationFrame loop and
+    per-tick simulation driver everything else runs through, plus wall/gate
+    mechanics, the campaign/save-game menu screens, and FPS-mode touch
+    controls.
+  - `src/abilities.js` — the superweapon/spy plane/paradrop/EMP system.
+
+  `src/index.template.html` is the same document with each of those
+  replaced by a marker (`<script>/* BUNDLE:<name> */</script>`) that the
+  build step fills in. A small prelude of shared constants (map/world
+  dimensions, `clamp`/`dist`) stays inline ahead of the first marker, along
+  with the bundled Three.js library itself.
 - `package.json`, `scripts/build.mjs` — a small [esbuild](https://esbuild.github.io/)-based
   build script. It auto-discovers every `BUNDLE:<name>` marker in the
   template and bundles the matching `src/<name>.js` into it, so extracting
@@ -81,16 +92,11 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 ## Developing
 
 If you're only playing, ignore this section — `index.html` always works
-standalone. If you're editing a part of the game that's been moved into
-`src/` (game data, the core simulation, audio, the build-card UI, save/load, campaigns, abilities, the AI, the core renderer, the 3D model library, FPS mode, and the 2D top-down renderer, for now; more subsystems will move over time), edit the file
-under `src/` and rebuild:
+standalone. To change any game logic, edit the relevant file under `src/`
+(see the list above) and rebuild:
 
 ```
 npm install
 npm run build   # regenerates index.html once
 npm run watch   # regenerates index.html on every src/ change
 ```
-
-Anything not yet under `src/` still lives directly in `index.html`'s
-remaining inline `<script>` blocks — edit those in place as before, no
-build step needed for that part.
