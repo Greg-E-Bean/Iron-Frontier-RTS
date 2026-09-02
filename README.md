@@ -47,7 +47,10 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
   localStorage save-slot helpers), `src/campaigns.js` (the
   mission-briefing tree and the launch/outcome/unlock flow that drives a
   campaign match), `src/abilities.js` (the superweapon/spy
-  plane/paradrop/EMP system), `src/ai.js` (the skirmish AI's base
+  plane/paradrop/EMP system), `src/sim.js` (the core simulation: the
+  map/game-state data, procedural map generation, A* pathfinding,
+  building/unit lifecycle, production, orders, combat, unit-role ticks,
+  and fog of war), `src/ai.js` (the skirmish AI's base
   expansion, army composition, and micro decisions), `src/render.js`
   (the Three.js engine bootstrap, terrain/sky/weather builders, and the
   main render loop), `src/models.js` (every unit/building/prop model
@@ -79,7 +82,7 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 
 If you're only playing, ignore this section — `index.html` always works
 standalone. If you're editing a part of the game that's been moved into
-`src/` (game data, audio, the build-card UI, save/load, campaigns, abilities, the AI, the core renderer, the 3D model library, FPS mode, and the 2D top-down renderer, for now; more subsystems will move over time), edit the file
+`src/` (game data, the core simulation, audio, the build-card UI, save/load, campaigns, abilities, the AI, the core renderer, the 3D model library, FPS mode, and the 2D top-down renderer, for now; more subsystems will move over time), edit the file
 under `src/` and rebuild:
 
 ```
