@@ -39,13 +39,17 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
   committed to the repo so cloning and opening it (or hosting it as-is via
   GitHub Pages) always works, with nothing to install.
 - `src/` — the source of truth for any part of the game that's been
-  modularized so far (currently just the audio engine, `src/audio.js`).
-  `src/index.template.html` is the same document with those parts replaced
-  by a marker (`<script>/* BUNDLE:main */</script>`) that the build step
-  fills in.
+  modularized so far: `src/gamedata.js` (buildings/units/factions/difficulty
+  data tables and their lookup helpers) and `src/audio.js` (the audio
+  engine — sfx, music, rain ambience, thunder). `src/index.template.html`
+  is the same document with each of those replaced by a marker
+  (`<script>/* BUNDLE:<name> */</script>`) that the build step fills in.
 - `package.json`, `scripts/build.mjs` — a small [esbuild](https://esbuild.github.io/)-based
-  build script. It's a dev-time convenience only — the exported game has zero
-  runtime dependencies either way.
+  build script. It auto-discovers every `BUNDLE:<name>` marker in the
+  template and bundles the matching `src/<name>.js` into it, so extracting
+  a new subsystem is just adding a `src/<name>.js` + a matching marker — no
+  build-script changes needed. It's a dev-time convenience only — the
+  exported game has zero runtime dependencies either way.
 - `manifest.webmanifest` — PWA metadata (name, icons, colors, display mode).
 - `sw.js` — the service worker that caches the app for offline play.
 - `icons/` — app icons used by the manifest.
@@ -54,7 +58,7 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
 
 If you're only playing, ignore this section — `index.html` always works
 standalone. If you're editing a part of the game that's been moved into
-`src/` (audio, for now; more subsystems will move over time), edit the file
+`src/` (game data and audio, for now; more subsystems will move over time), edit the file
 under `src/` and rebuild:
 
 ```
