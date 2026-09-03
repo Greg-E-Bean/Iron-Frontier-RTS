@@ -433,7 +433,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 (() => {
-  // src/gamedata.js
+  // src/gamedata.ts
   var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { allied: "Command Spire", soviet: "Fortress HQ", yuri: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { allied: "Solar Array", soviet: "Thermal Plant", yuri: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { allied: "Ore Processor", soviet: "Smelting Works", yuri: "Digester", neutral: "Ore Processor" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { allied: "Spawning Hive", soviet: "Spawning Hive", yuri: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { allied: "Training Hall", soviet: "Muster Bunker", yuri: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { allied: "Assembly Bay", soviet: "Foundry", yuri: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { allied: "Research Spire", soviet: "War Institute", yuri: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { allied: "Auto Turret", soviet: "Gun Bunker", yuri: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { allied: "Airstrip", soviet: "Landing Pad", yuri: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { allied: "Shipwright", soviet: "Drydock", yuri: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { allied: "Interceptor Battery", soviet: "Flak Cannon", yuri: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 750, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { allied: "Sentinel Line", soviet: "Iron Rampart", yuri: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 260, dmg: 55, rof: 1, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Outpost", soviet: "Outpost", yuri: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Storehouse", soviet: "Storehouse", yuri: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "High-Rise", soviet: "High-Rise", yuri: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Chapel", soviet: "Chapel", yuri: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Tenement", soviet: "Tenement", yuri: "Tenement", neutral: "Tenement" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Garrison Cannon", soviet: "Garrison Cannon", yuri: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { allied: "Ore Vault", soviet: "Stockpile", yuri: "Gullet", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { allied: "Service Bay", soviet: "Field Works", yuri: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { allied: "Photon Lance", soviet: "Missile Silo", yuri: "Psychic Amplifier", neutral: "Photon Lance" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { allied: "Photon Tower", soviet: "Arc Tower", yuri: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { allied: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "prism" }, soviet: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "tesla" }, yuri: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { allied: "Barrier Wall", soviet: "Iron Wall", yuri: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { allied: "Checkpoint Gate", soviet: "Blast Gate", yuri: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Oil Derrick", soviet: "Oil Derrick", yuri: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Paradrop Hangar", soviet: "Paradrop Hangar", yuri: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "EMP Spire", soviet: "EMP Spire", yuri: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Rogue Den", soviet: "Rogue Den", yuri: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 } };
   function U(e) {
     return Object.assign({ kind: "veh", armor: "veh", radius: 11, speed: 44, sight: 260, vsInf: 1, vsVeh: 1, vsBldg: 1, proj: "shell", rof: 1, dmg: 10, range: 130, from: "factory", tab: "veh" }, e);
@@ -502,7 +502,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 (() => {
-  // src/sim.js
+  // src/sim.ts
   var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), fall: [] };
   var FOG_ON = true;
   var idx = (e, t) => 92 * t + e;
@@ -1868,7 +1868,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 (() => {
-  // src/ai.js
+  // src/ai.ts
   function aiBaseCenter(e) {
     const t = S.blds.find((t2) => t2.owner === e.id && !t2.dead && "conyard" === t2.key);
     if (t) return t;
@@ -2043,7 +2043,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 (() => {
-  // src/models.js
+  // src/models.ts
   function roundRectProfile(e, t, r, n) {
     const a = e / 2, o = t / 2;
     r = Math.max(0.01, Math.min(r, 0.98 * Math.min(a, o))), n = Math.max(1, 0 | n);
@@ -2573,6 +2573,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.push(P_(CYL(0.2 * (t + r), 1.4, 16), 0, 0, 0.7, "dark"));
   }
   var PILLAR_H = { grizzly: 27, rhino: 30, lasher: 26 };
+  var TURRET_RISE = { grizzly: 15.5, rhino: 17.5, lasher: 14.5 };
   function deployedPillar(topZ, wid, fac) {
     const a = [], baseR = 0.44 * wid;
     a.push(P_(CYL(baseR * 1.3, 3, 14), 0, 0, 1.5, "dark"));
@@ -4425,7 +4426,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     registerModelAsset,
     unregisterModelAsset,
     getAssetModel,
-    MODEL_ASSETS
+    MODEL_ASSETS,
+    PILLAR_H,
+    TURRET_RISE
   });
   Object.defineProperties(window, {
     camZTarget: { get: () => camZTarget, set: (v) => {
@@ -4444,7 +4447,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 (() => {
-  // src/render2d.js
+  // src/render2d.ts
   var GRASS = ["#3e6b2f", "#457234", "#39672b", "#4c7a3a", "#417030", "#366629", "#4a7638", "#3c6c2e"];
   var DIRT = ["#8a6f45", "#8f764c", "#84693f", "#937c54", "#8c7148", "#816841", "#906f43", "#8a6d40"];
   var ROCK = ["#6f6a5c", "#767162", "#676355", "#6d6859"];
@@ -5573,7 +5576,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 (() => {
-  // src/render.js
+  // src/render.ts
   var GL = null;
   var GL_F = [0.6118, 0.50143, 0.6118];
   var GL_U = [-0.35463, 0.86524, -0.35463];
@@ -6301,7 +6304,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 (() => {
-  // src/fps.js
+  // src/fps.ts
   function projModel(kind, fac) {
     const e = [], glowC = "allied" === fac ? "#8fe0ff" : "soviet" === fac ? "#ff9c4a" : "yuri" === fac ? "#c98cff" : "glow", bodyC = "soviet" === fac ? "#8a7a6a" : "allied" === fac ? "#d8e8ee" : "yuri" === fac ? "#7a5f8a" : "white", noseC = "soviet" === fac ? "#c0392b" : "allied" === fac ? "#3ba0c9" : "yuri" === fac ? "#8c3fc9" : "red", shellC = "soviet" === fac ? "#e8c04a" : "allied" === fac ? "#c9d8e0" : "yuri" === fac ? "#b98cd8" : "gold";
     return "bullet" === kind || "flak" === kind ? e.push(P_(CYL(0.5, 4.5, 6), 0, 0, 0, glowC, { ty: PI2, e: 1 })) : "flame" === kind ? e.push(P_(CYL(0.9, 3, 6), 0, 0, 0, "yuri" === fac ? "#8fe06a" : "tibGlit", { ty: PI2, e: 1 })) : "rocket" === kind || "missile" === kind || "aamissile" === kind ? (e.push(P_(CYL(0.7, 4.5, 7), 0, 0, 0, bodyC, { ty: PI2 })), e.push(P_(CONE(0.7, 0.2, 1.6, 7), 4.5, 0, 0, noseC, { ty: PI2 })), e.push(P_(CYL(0.95, 1.6, 6), -0.6, 0, 0, glowC, { ty: PI2, e: 1 }))) : "bomb" === kind ? e.push(P_(CYL(1.1, 3.5, 8), 0, 0, 0, "darkmetal", { ty: PI2 })) : "grenade" === kind ? (e.push(P_(CYL(1.3, 1.9, 8), 0, 0, 0, "olive", { ty: PI2 })), e.push(P_(CYL(0.35, 0.5, 6), 0, 1.1, 0, "darkmetal", { ty: PI2 }))) : e.push(P_(CYL(0.55, 3.4, 6), 0, 0, 0, shellC, { ty: PI2 })), e;
@@ -6714,7 +6717,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 (() => {
-  // src/audio.js
+  // src/audio.ts
   var AC = null;
   var masterGain = null;
   var sfxBus = null;
@@ -7110,7 +7113,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const myGen = ++musicGen, tr = MUSIC_TRACKS[idx], rp = RIFF_PATTERNS[idx % RIFF_PATTERNS.length], baseVol = 0.075 * musicVol, ft0 = ac.currentTime;
       mg.gain.cancelScheduledValues(ft0), mg.gain.setValueAtTime(mg.gain.value, ft0), mg.gain.linearRampToValueAtTime(0.3 * baseVol, ft0 + 0.2), mg.gain.linearRampToValueAtTime(baseVol, ft0 + 0.6);
       let step = 0, bar = 0, blk = 0;
-      !(function seq() {
+      void (function seq() {
         if (!musicOn || myGen !== musicGen) return;
         const sec = tr.sections[tr.arr[blk]], bi = bar % 4, br = sec.bass[bi], gr = sec.gtr[bi], bassFn = tr.synth ? (f) => (pad(f, 0.24, 0.5, bg), subBass(f, 0.26, 0.4, bg)) : (f) => (pluck(f, 0.24, "sawtooth", 0.5, bg), subBass(f, 0.26, 0.45, bg)), chordFn = tr.synth ? synthChord : chord;
         if (sec.industrial) {
@@ -7175,7 +7178,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 </script>
 <script>
 (() => {
-  // src/cards.js
+  // src/cards.ts
   function tabList(e) {
     const t = P().f;
     if ("bld" === e) return ["power", "refinery", "barracks", "factory", "silo", "repair", "lab", "airfield", "navalyard"].filter((e2) => "refinery" !== e2 || "yuri" !== t.key).map((e2) => ({ kind: "bld", key: e2 }));
@@ -7351,7 +7354,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 </script>
 <script>
 (() => {
-  // src/ui.js
+  // src/ui.ts
   var sellMode = false;
   var repairMode = false;
   $("#bSel").addEventListener("click", () => {
@@ -7740,7 +7743,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 </script>
 <script>
 (() => {
-  // src/saveload.js
+  // src/saveload.ts
   function packArr(arr) {
     let s = "";
     const b = new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength);
@@ -7854,7 +7857,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 </script>
 <script>
 (() => {
-  // src/campaigns.js
+  // src/campaigns.ts
   var FAC_NAME = { allied: "Vanguard", soviet: "Legion", yuri: "Syndicate" };
   function otherFacs(fac) {
     return ["allied", "soviet", "yuri"].filter((f) => f !== fac);
@@ -7962,7 +7965,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 </script>
 <script>
 (() => {
-  // src/loop.js
+  // src/loop.ts
   var SECBTN = 'style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px"';
   function showCampaign() {
     $("#menu").classList.remove("hidden");
@@ -8250,7 +8253,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 </script>
 <script>
 (() => {
-  // src/abilities.js
+  // src/abilities.ts
   var superAim = false;
   var spyAim = false;
   var paradropAim = false;
