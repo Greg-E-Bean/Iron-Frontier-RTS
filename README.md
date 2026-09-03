@@ -39,52 +39,64 @@ Once installed it opens in its own window, gets its own icon, and keeps working 
   works, with nothing to install.
 - `src/` — the source of truth for the game logic, split into one file per
   subsystem:
-  - `src/gamedata.js` — buildings/units/factions/difficulty data tables and
+  - `src/gamedata.ts` — buildings/units/factions/difficulty data tables and
     their lookup helpers.
-  - `src/sim.js` — the core simulation: the map/game-state data, procedural
+  - `src/sim.ts` — the core simulation: the map/game-state data, procedural
     map generation, A* pathfinding, building/unit lifecycle, production,
     orders, combat, unit-role ticks, and fog of war.
-  - `src/ai.js` — the skirmish AI's base expansion, army composition, and
+  - `src/ai.ts` — the skirmish AI's base expansion, army composition, and
     micro decisions.
-  - `src/models.js` — every unit/building/prop model builder, the shared
+  - `src/models.ts` — every unit/building/prop model builder, the shared
     camera/canvas/projection state they run on, and optional external
     GLTF/GLB asset loading via `registerModelAsset()` as a drop-in
     alternative to a procedural model, with graceful fallback.
-  - `src/render2d.js` — the isometric terrain/tile baking, per-entity 2D
+  - `src/render2d.ts` — the isometric terrain/tile baking, per-entity 2D
     drawing for units/buildings/props/projectiles/effects, the minimap, and
     the screen-space HUD overlay.
-  - `src/render.js` — the Three.js engine bootstrap and the
+  - `src/render.ts` — the Three.js engine bootstrap and the
     terrain/sky/weather builders.
-  - `src/fps.js` — first-person mode: entering/exiting, movement and
+  - `src/fps.ts` — first-person mode: entering/exiting, movement and
     aiming, the procedural weapon viewmodels, building interiors for
     garrisoned infantry, and the `fpsRender()` draw loop.
-  - `src/audio.js` — the audio engine: sfx, music, rain ambience, thunder.
-  - `src/cards.js` — the build menu: rendering, tab switching, clicking to
+  - `src/audio.ts` — the audio engine: sfx, music, rain ambience, thunder.
+  - `src/cards.ts` — the build menu: rendering, tab switching, clicking to
     queue/place, unit deploy.
-  - `src/ui.js` — canvas pointer/keyboard input (pan/zoom/box-select/
+  - `src/ui.ts` — canvas pointer/keyboard input (pan/zoom/box-select/
     tap-to-command), the game-setup menu, the pause/settings/game-over
     screens, and `startGame()`.
-  - `src/saveload.js` — serializing/restoring game state, the localStorage
+  - `src/saveload.ts` — serializing/restoring game state, the localStorage
     save-slot helpers.
-  - `src/campaigns.js` — the mission-briefing tree and the
+  - `src/campaigns.ts` — the mission-briefing tree and the
     launch/outcome/unlock flow that drives a campaign match.
-  - `src/loop.js` — `frame()`/`step()`, the requestAnimationFrame loop and
+  - `src/loop.ts` — `frame()`/`step()`, the requestAnimationFrame loop and
     per-tick simulation driver everything else runs through, plus wall/gate
     mechanics, the campaign/save-game menu screens, and FPS-mode touch
     controls.
-  - `src/abilities.js` — the superweapon/spy plane/paradrop/EMP system.
+  - `src/abilities.ts` — the superweapon/spy plane/paradrop/EMP system.
 
-  `src/index.template.html` is the same document with each of those
-  replaced by a marker (`<script>/* BUNDLE:<name> */</script>`) that the
-  build step fills in. A small prelude of shared constants (map/world
-  dimensions, `clamp`/`dist`) stays inline ahead of the first marker, along
-  with the bundled Three.js library itself.
+  Each module is TypeScript, type-checked against `src/types.ts` (the core
+  data model — `Unit`, `Building`, `Player`, `GameState`, `MapData`,
+  `EntityDef`, `GameConfig`) and `src/globals.d.ts` (ambient declarations
+  for the cross-module symbol table every module shares at runtime — see
+  "Developing" below for why that split exists). `src/index.template.html`
+  is the same document with each module replaced by a marker
+  (`<script>/* BUNDLE:<name> */</script>`) that the build step fills in. A
+  small prelude of shared constants (map/world dimensions, `clamp`/`dist`)
+  stays inline ahead of the first marker, along with the bundled Three.js
+  library itself.
 - `package.json`, `scripts/build.mjs` — a small [esbuild](https://esbuild.github.io/)-based
   build script. It auto-discovers every `BUNDLE:<name>` marker in the
-  template and bundles the matching `src/<name>.js` into it, so extracting
-  a new subsystem is just adding a `src/<name>.js` + a matching marker — no
-  build-script changes needed. It's a dev-time convenience only — the
-  exported game has zero runtime dependencies either way.
+  template and bundles the matching `src/<name>.ts` into it (esbuild
+  strips the TypeScript types as part of bundling — it doesn't type-check),
+  so extracting a new subsystem is just adding a `src/<name>.ts` + a
+  matching marker — no build-script changes needed. It's a dev-time
+  convenience only — the exported game has zero runtime dependencies
+  either way.
+- `tsconfig.json` — `strict: false` / `noImplicitAny: false`. This
+  codebase was written across many sessions as dense, single-letter-
+  variable JS with no type discipline; the type layer targets the core
+  data model specifically (see `src/types.ts` above), not every function
+  signature in the file.
 - `manifest.webmanifest` — PWA metadata (name, icons, colors, display mode).
 - `sw.js` — the service worker that caches the app for offline play.
 - `icons/` — app icons used by the manifest.
@@ -97,6 +109,7 @@ standalone. To change any game logic, edit the relevant file under `src/`
 
 ```
 npm install
-npm run build   # regenerates index.html once
-npm run watch   # regenerates index.html on every src/ change
+npm run build       # regenerates index.html once
+npm run watch       # regenerates index.html on every src/ change
+npm run typecheck   # tsc --noEmit - the actual type check (build doesn't check types)
 ```
