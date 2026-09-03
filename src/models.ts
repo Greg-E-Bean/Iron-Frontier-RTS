@@ -320,14 +320,19 @@ e.push(P_(CYL(1.4,1.6,12),hx,cy,top+4.2-mast*.52,"glow",{e:1,a:sw}));
 e.push(P_(BOXM(3.6,1.3,1.3,.25),hx,cy,top+4.2-mast*.58,"gold",{a:sw}));
 }
 function containerBox(e,cx,cy,z,w,d,h,mat,rot){rot=rot||0;e.push(P_(BOXM(w,d,h,.3),cx,cy,z,mat||"olive",{r:rot}));const rn=Math.max(2,Math.round(w/2.6)),co=Math.cos(rot),so=Math.sin(rot);for(let i=0;i<rn;i++){const lx=-.5*w+w*(i+.5)/rn;e.push(P_(BOXM(.3,d*.94,h*.82,.08),cx+lx*co,cy+lx*so,z+.09*h,"darkmetal",{r:rot}))}e.push(P_(BOXM(.5,d*.9,h*.72,.1),cx+.46*w*co,cy+.46*w*so,z+.14*h,"dark",{r:rot}))}function blockM(e,t,r,n,a,o,s,i,l,c){e.push(P_(SLAB(roundRectProfile(t,r,void 0===l?2.5:l,2),n,1.6,"bk"+c),a,o,s,i))}function bandLights(e,t,r,n,a,o){o=o||4;for(let s=0;s<o;s++){const i=.36*-t+.72*t*(1===o?.5:s/(o-1));e.push(P_(BOXM(.1*t,1.2,1.4,.3),i,.5*-r,n,a,{e:1})),e.push(P_(BOXM(.1*t,1.2,1.4,.3),i,.5*r,n,a,{e:1}))}}function glassBand(e,t,r,n,a){e.push(P_(BOXM(t,1.1,a,.3),0,.5*-r,n,"glass",{e:1})),e.push(P_(BOXM(t,1.1,a,.3),0,.5*r,n,"glass",{e:1})),e.push(P_(BOXM(1.1,r,a,.3),.5*-t,0,n,"glassdark")),e.push(P_(BOXM(1.1,r,a,.3),.5*t,0,n,"glassdark"))}function railing(e,t,r,n){e.push(P_(BOXM(t,.8,2.4,.3),0,.5*-r,n,"darkmetal")),e.push(P_(BOXM(t,.8,2.4,.3),0,.5*r,n,"darkmetal"))}function stack(e,t,r,n,a,o,s){e.push(P_(CYL(a,o,10),t,r,n,s||"rust")),e.push(P_(CYL(1.22*a,2.4,10),t,r,n+o-1.2,"darkmetal"))}function dish(e,t,r,n,a){e.push(P_(CYL(1.2,7,10),t,r,n,"steel")),e.push(P_(CYL(1.9,1.4,12),t,r,n+7,"darkmetal")),e.push(P_(CONE(a,.35*a,.55*a,14),t,r,n+8.4,"white",{ty:.55})),e.push(P_(CYL(.5,3.4,6),t,r,n+8.4+.4*a,"darkmetal")),e.push(P_(BOXM(.5*a,1,1,.2),t+.35*a,r,n+8.4+.3*a,"steel"))}function fan(e,t,r,n,a,o,s,i){e.push(P_(CYL(1.1*a,1.8,16),t,r,n,"darkmetal")),e.push(P_(CYL(.22*a,1.6,10),t,r,n+1.8,"gunmetal",{a:{spin:i||2.4}}));const l=o||5;for(let o=0;o<l;o++){const c=o/l*Math.PI*2;e.push(P_(BOXM(.92*a,.34*a,.5,.14),Math.cos(c)*a*.52+t,Math.sin(c)*a*.52+r,n+2.2,s||"steel",{r:c,ty:.42}))}}function drum(e,t,r,n,a,o,s,i){e.push(P_(CYL(a,o,18),t,r,n,s||"rust"));for(let s=0;s<6;s++){const l=1.047*s;e.push(P_(BOXM(1.2,.5*a,.92*o,.3),t+Math.cos(l)*a*.94,r+Math.sin(l)*a*.94,n+.04*o,"darkmetal",{r:l}))}e.push(P_(CYL(1.12*a,1.6,18),t,r,n,"darkmetal")),e.push(P_(CYL(1.12*a,1.6,18),t,r,n+o-1.6,"darkmetal"))}function spine(e,t,r,n,a,o,s){e.push(P_(CONE(2.2,.3,a,7),t,r,n,s||"dark",{r:Math.atan2(r,t),ty:o}))}function sandbagRing(e,t,r,cx?,cy?){cx=cx||0,cy=cy||0;for(let n=0;n<11;n++){const a=n/11*Math.PI*2;e.push(P_(BOXM(6,4.6,3,1.2),cx+Math.cos(a)*t,cy+Math.sin(a)*t,r,"sand",{r:a}))}}function ribs(e,t,r,n,a,o,s,i){for(let l=0;l<s;l++)e.push(P_(CYL(1.1*a,.9,16),t,r,n+o*(l+.7)/(s+.4),i||"darkmetal"))}function ladder(e,t,r,n,a,o){const s=Math.cos(o),i=Math.sin(o);e.push(P_(BOXM(.7,.7,a,.2),t-1.4*i,r+1.4*s,n,"darkmetal")),e.push(P_(BOXM(.7,.7,a,.2),t+1.4*i,r-1.4*s,n,"darkmetal"));for(let s=0;s<Math.max(2,a/3.2|0);s++)e.push(P_(BOXM(.5,3.2,.5,.15),t,r,n+1.6+3.2*s,"darkmetal",{r:o}))}function pipeRun(e,t,r,n,a,o,s,i){const l=n-t,c=a-r,d=Math.hypot(l,c),f=Math.atan2(c,l);e.push(P_(CYL(s,d,12),t,r,o,i||"rust",{r:f,ty:PI2})),e.push(P_(CYL(1.28*s,1.4,12),t,r,o,"darkmetal",{r:f,ty:PI2})),e.push(P_(CYL(1.28*s,1.4,12),n-1.4*Math.cos(f),a-1.4*Math.sin(f),o,"darkmetal",{r:f,ty:PI2}))}function vent(e,t,r,n,a,o,s){e.push(P_(BOXM(a,o,2.2,.5),t,r,n,s||"darkmetal"));const i=Math.max(3,o/2|0);for(let s=0;s<i;s++)e.push(P_(BOXM(.86*a,.7,.9,.2),t,r-.36*o+.72*o*s/(i-1),n+2,"gunmetal"))}function acUnit(e,t,r,n,a,o,s){e.push(P_(BOXM(a,o,3.4,.9),t,r,n,"steel",{r:s||0})),e.push(P_(CYL(.32*Math.min(a,o),.8,16),t,r,n+3.4,"gunmetal",{r:s||0})),e.push(P_(CYL(.3*Math.min(a,o),.5,6),t,r,n+4,"black",{r:s||0}))}function floodlight(e,t,r,n,a,o){e.push(P_(CYL(.85,a,10),t,r,n,"darkmetal")),e.push(P_(BOXM(3.4,2.6,2.4,.6),t+1.2*Math.cos(o),r+1.2*Math.sin(o),n+a,"steel",{r:o})),e.push(P_(CYL(1.15,.9,12),t+2.9*Math.cos(o),r+2.9*Math.sin(o),n+a+.9,"lightY",{r:o,ty:PI2,e:1}))}function railPosts(e,t,r,n,a){a=a||3,e.push(P_(BOXM(t,.55,.6,.18),0,.5*-r,n+a,"darkmetal")),e.push(P_(BOXM(t,.55,.6,.18),0,.5*r,n+a,"darkmetal")),e.push(P_(BOXM(.55,r,.6,.18),.5*-t,0,n+a,"darkmetal")),e.push(P_(BOXM(.55,r,.6,.18),.5*t,0,n+a,"darkmetal"));const o=Math.max(3,t/7|0);for(let s=0;s<o;s++){const i=.5*-t+t*s/(o-1);e.push(P_(BOXM(.6,.6,a,.18),i,.5*-r,n,"darkmetal")),e.push(P_(BOXM(.6,.6,a,.18),i,.5*r,n,"darkmetal"));const l=.5*-r+r*s/(o-1);e.push(P_(BOXM(.6,.6,a,.18),.5*-t,l,n,"darkmetal")),e.push(P_(BOXM(.6,.6,a,.18),.5*t,l,n,"darkmetal"))}}function hazard(e,t,r,n,a,o){const s=Math.max(3,a/3.2|0);for(let i=0;i<s;i++){const l=.5*-a+a*(i+.5)/s;e.push(P_(BOXM(a/s*.92,2.2,.5,.12),t+Math.cos(o)*l,r+Math.sin(o)*l,n,i%2?"black":"gold",{r:o}))}}function bolts(e,t,r,n,a,o,s,i){for(let l=0;l<s;l++){const c=.5*-a+a*(1===s?.5:l/(s-1));e.push(P_(CYL(.42,.42,6),t+Math.cos(o)*c,r+Math.sin(o)*c,n,i||"darkmetal"))}}function boltRing(e,t,r,n,a,o,s){for(let l=0;l<o;l++){const c=l/o*Math.PI*2;e.push(P_(CYL(.4,.4,6),t+Math.cos(c)*a,r+Math.sin(c)*a,n,s||"darkmetal"))}}function seams(e,t,r,n,a){e.push(P_(BOXM(t,.9,.55,.15),0,.22*-r,n,a||"armor3")),e.push(P_(BOXM(t,.9,.55,.15),0,.22*r,n,a||"armor3")),e.push(P_(BOXM(.9,r,.55,.15),.22*-t,0,n,a||"armor3")),e.push(P_(BOXM(.9,r,.55,.15),.22*t,0,n,a||"armor3"))}function catwalk(e,t,r,n,a,o,s){e.push(P_(SLAB(roundRectProfile(a,o,1.2,2),1.1,.3,"cwk"+a.toFixed(0)+o.toFixed(0)),t,r,n,"darkmetal",{r:s||0}));const i=Math.max(2,a/6|0);for(let l=0;l<i;l++){const c=.5*-a+a*l/(i-1),d=Math.cos(s||0),f=Math.sin(s||0);e.push(P_(BOXM(.55,.55,2.6,.15),t+d*c-f*o*.5,r+f*c+d*o*.5,n+1.1,"darkmetal")),e.push(P_(BOXM(.55,.55,2.6,.15),t+d*c+f*o*.5,r+f*c-d*o*.5,n+1.1,"darkmetal"))}e.push(P_(BOXM(a,.5,.5,.15),t,r-.5*o,n+3.6,"darkmetal",{r:s||0})),e.push(P_(BOXM(a,.5,.5,.15),t,r+.5*o,n+3.6,"darkmetal",{r:s||0}))}function crate(e,t,r,n,a,o,s){e.push(P_(BOXM(a,.8*a,.62*a,.1*a),t,r,n,o||"olive",{r:s||0})),e.push(P_(BOXM(.92*a,.6,.5,.15),t,r,n+.62*a,"darkmetal",{r:s||0}))}function barrel(e,t,r,n,a?){e.push(P_(CYL(2.1,5.4,14),t,r,n,a||"rust")),e.push(P_(CYL(2.3,.7,14),t,r,n+1.4,"darkmetal")),e.push(P_(CYL(2.3,.7,14),t,r,n+3.6,"darkmetal")),e.push(P_(CYL(1.9,.4,12),t,r,n+5.4,"darkmetal"))}function detailPass(e,t,r,n){if("civ1"===t||"civ2"===t||"civ3"===t||"civ4"===t||"civ5"===t||"hive"===t||"wall"===t||"gate"===t)return;const a="allied"===r,o="soviet"===r,s=.5*n-2.4,i=a?"armor3":o?"concrete2":"carapace2";for(const t of[-1,1])e.push(P_(BOXM(1.9,n-4.6,1.5,.4),t*s,0,3,i)),e.push(P_(BOXM(n-4.6,1.9,1.5,.4),0,t*s,3,i));for(const t of[-1,1])for(const r of[-1,1])e.push(P_(CYL(1.5,3.4,10),t*(s-1.2),r*(s-1.2),3.2,i)),e.push(P_(CYL(1,.6,10),t*(s-1.2),r*(s-1.2),6.6,"gold",{e:1}));hazard(e,0,1-s,3.7,.42*n,0);const l=n>=96;if(a)floodlight(e,s-3,3-s,3.6,l?13:9,-2.2),floodlight(e,3-s,s-3,3.6,l?13:9,.9),vent(e,5.5-s,6-s,3.6,6.5,7,"steel"),l&&acUnit(e,s-6.5,s-7,3.6,8,7,.4),bolts(e,0,2.6-s,3.9,.6*n,0,7,"steel");else if(o)floodlight(e,3-s,3-s,3.6,l?12:9,.8),barrel(e,s-4.5,5-s,3.6),barrel(e,s-4.5,9.6-s,3.6,"olive"),crate(e,6-s,s-5.5,3.6,6.5,"olive",.3),pipeRun(e,2-s,s-4,s-6,s-4,5.4,1.5,"rust"),bolts(e,0,s-2.6,3.9,.6*n,0,9,"rust"),l&&crate(e,6-s,s-13,3.6,6,"rust",-.2);else{for(let t=0;t<4;t++){const r=t*PI2+.78;e.push(P_(CYL(1.1,4.2,10),Math.cos(r)*(s-2),Math.sin(r)*(s-2),3.4,"carapace2")),e.push(P_(DOME(1.5,1.6,10),Math.cos(r)*(s-2),Math.sin(r)*(s-2),7.6,"psi",{e:1}))}e.push(P_(CYL(.3*n,.8,20),0,0,3.6,"carapace2"));for(let t=0;t<10;t++){const r=.628*t;e.push(P_(BOXM(2.6,.9,.5,.15),Math.cos(r)*n*.3,Math.sin(r)*n*.3,4.4,"psi",{r:r,e:1}))}}}function barrelRoofMesh(e,t,r,n?){const a=[];n=n||16;const o=[];for(let t=0;t<=n;t++){const a=Math.PI*t/n;o.push([Math.cos(a)*e/2,Math.sin(a)*r])}for(let s=0;s<n;s++){const n=[o[s][0],-t/2,o[s][1]],i=[o[s+1][0],-t/2,o[s+1][1]],l=[o[s+1][0],t/2,o[s+1][1]],c=[o[s][0],t/2,o[s][1]],d=nrm3(o[s][0]/(e/2),0,o[s][1]/r),f=nrm3(o[s+1][0]/(e/2),0,o[s+1][1]/r);pushTri(a,n,i,l,d,f,f),pushTri(a,n,l,c,d,f,d)}for(let e=0;e<n;e++){const r=[0,-1,0],n=[0,1,0];pushTri(a,[o[e][0],-t/2,o[e][1]],[0,-t/2,0],[o[e+1][0],-t/2,o[e+1][1]],r,r,r),pushTri(a,[o[e+1][0],t/2,o[e+1][1]],[0,t/2,0],[o[e][0],t/2,o[e][1]],n,n,n)}return a}const BARREL=(e,t,r)=>meshOf("BR"+e.toFixed(1)+"_"+t.toFixed(1)+"_"+r.toFixed(1),()=>barrelRoofMesh(e,t,r));function tier(e,t,r,n,a,o,s,i,l,c){const d=void 0===c?.94:c,f=roundRectProfile(t,r,.1*Math.min(t,r),3);e.push(P_(TSLAB(f,n,d,"tr"+l),a,o,s,i));const h=1-.46*(1-d);e.push(P_(BOXM(t*h*.995,r*h*.995,.7,.2),a,o,s+.46*n,"armor3"));const u=1-.9*(1-d);e.push(P_(BOXM(t*u*1.004,r*u*1.004,.085*n,.25),a,o,s+.855*n,"body")),e.push(P_(BOXM(t*u*1.006,r*u*1.006,.5,.15),a,o,s+.855*n+.085*n,"darkmetal"));if(t>10&&r>10){e.push(P_(BOXM(t*1.07,r*1.07,1.1,.35),a,o,s+.05,"concrete2"));const g=Math.max(4,Math.round(t/9)),m=Math.max(4,Math.round(r/9));for(let ci=0;ci<g;ci++){const cx=.5*-t+t*(ci+.5)/g;e.push(P_(BOXM(.8,.3,.88*n,.1),a+cx,o+.5*-r-.08,s+.46*n,"darkmetal")),e.push(P_(BOXM(.8,.3,.88*n,.1),a+cx,o+.5*r+.08,s+.46*n,"darkmetal"))}for(let ri=0;ri<m;ri++){const ry=.5*-r+r*(ri+.5)/m;e.push(P_(BOXM(.3,.8,.88*n,.1),a+.5*-t-.08,o+ry,s+.46*n,"darkmetal")),e.push(P_(BOXM(.3,.8,.88*n,.1),a+.5*t+.08,o+ry,s+.46*n,"darkmetal"))}bolts(e,a,o+.5*-r*.99,s+.855*n,.92*t,0,Math.max(4,Math.round(t/11)),"steel"),bolts(e,a,o+.5*r*.99,s+.855*n,.92*t,0,Math.max(4,Math.round(t/11)),"steel")}}function windows(e,t,r,n,a,o,s?){for(let i=0;i<o;i++){const l=.36*-t+.72*t*(1===o?.5:i/(o-1));e.push(P_(BOXM(.62*t/o+.5,1.9,a+.3,.2),l,.5*-r-.1,n,"darkmetal")),e.push(P_(BOXM(.62*t/o,1.6,a,.25),l,.5*-r,n,s||"glass",{e:1})),e.push(P_(BOXM(.5*t/o,.35,.3,.12),l,.5*-r-.22,n+.5*a+.2,"steel")),e.push(P_(BOXM(.62*t/o+.5,1.9,a+.3,.2),l,.5*r+.1,n,"darkmetal")),e.push(P_(BOXM(.62*t/o,1.6,a,.25),l,.5*r,n,s||"glassdark")),e.push(P_(BOXM(.5*t/o,.35,.3,.12),l,.5*r+.22,n+.5*a+.2,"steel"))}for(let i=0;i<o;i++){const l=.36*-r+.72*r*(1===o?.5:i/(o-1));e.push(P_(BOXM(1.9,.62*r/o+.5,a+.3,.2),.5*-t-.1,l,n,"darkmetal")),e.push(P_(BOXM(1.6,.62*r/o,a,.25),.5*-t,l,n,s||"glassdark")),e.push(P_(BOXM(.35,.5*r/o,.3,.12),.5*-t-.22,l,n+.5*a+.2,"steel")),e.push(P_(BOXM(1.9,.62*r/o+.5,a+.3,.2),.5*t+.1,l,n,"darkmetal")),e.push(P_(BOXM(1.6,.62*r/o,a,.25),.5*t,l,n,s||"glass",{e:1})),e.push(P_(BOXM(.35,.5*r/o,.3,.12),.5*t+.22,l,n+.5*a+.2,"steel"))}}function lattice(e,t,r,n,a,o,s){s=s||"steel";const i=[[-1,-1],[1,-1],[1,1],[-1,1]];for(const[l,c]of i)e.push(P_(BOXM(1.5,1.5,a,.4),t+l*o,r+c*o,n,s));const l=Math.max(2,a/7|0);for(let i=0;i<l;i++){const c=n+a*(i+.5)/l;e.push(P_(BOXM(2*o+1.5,1,.9,.25),t,r-o,c,s)),e.push(P_(BOXM(2*o+1.5,1,.9,.25),t,r+o,c,s)),e.push(P_(BOXM(1,2*o+1.5,.9,.25),t-o,r,c,s)),e.push(P_(BOXM(1,2*o+1.5,.9,.25),t+o,r,c,s));const d=Math.hypot(2*o,a/l);e.push(P_(BOXM(d,.8,.7,.2),t,r-o,c+a/l*.25,s,{ty:Math.atan2(a/l,2*o)})),e.push(P_(BOXM(d,.8,.7,.2),t,r+o,c+a/l*.25,s,{ty:-Math.atan2(a/l,2*o)}))}e.push(P_(SLAB(roundRectProfile(2.9*o,2.9*o,1.5,2),1.2,.3,"ltp"+o.toFixed(1)),t,r,n+a,"darkmetal")),railPosts(e,2.7*o,2.7*o,n+a+1.2,2.4)}function coolTower(e,t,r,n,a,o,s){for(let i=0;i<6;i++){const l=i/6,c=(i+1)/6,d=a*(1-.42*Math.sin(l*Math.PI)),f=a*(1-.42*Math.sin(c*Math.PI));e.push(P_(CONE(d,f,o/6,20),t,r,n+o*l,s||"concrete2"))}e.push(P_(CYL(.62*a,2.6,20),t,r,n+o,"darkmetal")),e.push(P_(CYL(.5*a,1.2,18),t,r,n+o+2.6,"black")),ribs(e,t,r,n+.1*o,.72*a,.5*o,3,"darkmetal"),ladder(e,t+.6*a,r,n,o,0)}function silo(e,t,r,n,a,o,s){e.push(P_(CYL(a,o,20),t,r,n,s||"steel")),ribs(e,t,r,n,a,o,4,"darkmetal"),e.push(P_(CONE(1.04*a,.3*a,.55*a,20),t,r,n+o,"darkmetal")),e.push(P_(CYL(.22*a,3.2,10),t,r,n+o+.55*a,"gunmetal")),e.push(P_(CYL(.3*a,.8,10),t,r,n+o+.55*a+3.2,"glow",{e:1})),ladder(e,t+.92*a,r,n,o,0)}function gantry(e,t,r,n,a,o,s){const i=Math.cos(s||0),l=Math.sin(s||0);for(const s of[.5*-a,.5*a])e.push(P_(BOXM(3,3,o,.8),t+i*s,r+l*s,n,"steel")),e.push(P_(BOXM(4.6,4.6,1.6,.5),t+i*s,r+l*s,n+o-1.6,"darkmetal"));e.push(P_(BOXM(a+4,3.4,3.2,.9),t,r,n+o,"steel",{r:s||0}));const trav={patrol:.15,pw:.5*a,ph:.3*o};e.push(P_(BOXM(5.5,4.2,2.6,.7),t+i*a*.14,r+l*a*.14,n+o-2.4,"gunmetal",{a:trav})),e.push(P_(CYL(.3,4.2,8),t+i*a*.14,r+l*a*.14,n+o-5.5,"darkmetal",{a:Object.assign({spin:.5},trav)})),e.push(P_(BOXM(3.6,3,1.6,.45),t+i*a*.14,r+l*a*.14,n+o-7,"darkmetal",{a:Object.assign({spin:.5},trav)})),e.push(P_(CYL(1,1.2,10),t+i*a*.14,r+l*a*.14,n+o-8,"glow",{e:1,a:Object.assign({spin:.5},trav)})),e.push(P_(BOXM(2.2,2.2,1,.3),t+i*a*.26,r+l*a*.26,n+o-1.4,"gold"))}function solarPanels(e,t,r,n,w,d){const rows=3,cols=2;for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){const x=t-w*.35+j*(w*.35),y=r-d*.3+i*(d*.28);e.push(P_(BOXM(w*.3,d*.22,.4,.15),x,y,n,"darkmetal"));e.push(P_(BOXM(w*.28,d*.2,.25,.12),x,y,n+.4,"crystal",{e:1}));e.push(P_(BOXM(w*.26,d*.02,.15,.08),x,y,n+.55,"steel"));e.push(P_(BOXM(w*.02,d*.18,.15,.08),x,y,n+.55,"steel"))}}
-function roofFarm(e,t,r,n,a){const o=e=>(43758.5453*Math.sin(12.9898*e+78.233*a)%1+1)%1,s=Math.max(4,Math.round(t*r/620));for(let a=0;a<s;a++){const s=(o(a)-.5)*t*.72,i=(o(a+40)-.5)*r*.72,l=o(a+80);l<.34?acUnit(e,s,i,n,6+5*o(a+9),5+4*o(a+3),1.5*o(a+7)):l<.62?vent(e,s,i,n,5+4*o(a+11),5+4*o(a+13),"steel"):l<.82?e.push(P_(BOXM(4.5,4.5,1.4,.4),s,i,n,"darkmetal")):e.push(P_(CYL(1.5,4.5,12),s,i,n,"gunmetal"))}for(let a=0;a<3;a++)pipeRun(e,.42*-t,.24*-r+a*r*.24,.42*t,.24*-r+a*r*.24,n+1.6,1.1,"rust")}function stairs(e,t,r,n,a,o){const s=Math.max(3,a/2.4|0),i=Math.cos(o),l=Math.sin(o);for(let c=0;c<s;c++)e.push(P_(BOXM(2.6,6,.8,.2),t+i*c*2.4,r+l*c*2.4,n+c*(a/s),"darkmetal",{r:o}));e.push(P_(BOXM(2.4*s,.6,.6,.15),t+i*s*1.2,r+l*s*1.2-3,n+.6*a,"darkmetal",{r:o,ty:-Math.atan2(a,2.4*s)})),e.push(P_(BOXM(2.4*s,.6,.6,.15),t+i*s*1.2,r+l*s*1.2+3,n+.6*a,"darkmetal",{r:o,ty:-Math.atan2(a,2.4*s)}))}function veins(e,t,r,n,a,o,s,i){for(let l=0;l<s;l++){const c=l/s*Math.PI*2;e.push(P_(BOXM(1.5,.1*a,o,.35),t+Math.cos(c)*a*.99,r+Math.sin(c)*a*.99,n,i||"psi",{r:c,e:1}))}}function plates(e,t,r,n,a,o,s,i?){for(let l=0;l<o;l++){const c=l/o*Math.PI*2+.2;e.push(P_(WEDGE(.46*a,.3*a,s,.22*s),t+Math.cos(c)*a*.8,r+Math.sin(c)*a*.8,n,i||"carapace2",{r:c+Math.PI}))}}function hive(e,t){const r=t,n=r.x||0,a=r.y||0,o=r.z,s=r.r,i=r.h,l=r.crown,c=r.seg||8;if(e.push(P_(TSLAB(circleProfile(s,c),i,.84,"hv"+s.toFixed(1)+i.toFixed(1)+c),n,a,o,"carapace2")),e.push(P_(TSLAB(circleProfile(.9*s,c),.22*i,.9,"hs"+s.toFixed(1)+i.toFixed(1)+c),n,a,o+i,"carapace")),e.push(P_(DOME(.8*s,l,c),n,a,o+i+.22*i,"carapace")),plates(e,n,a,o,s,c,.62*i),veins(e,n,a,o+.16*i,.86*s,.62*i,c,r.vein||"psi"),!1!==r.crest&&(e.push(P_(CONE(.3*s,.1*s,.72*l,c),n,a,o+i+.22*i+.72*l,"carapace2")),e.push(P_(DOME(.2*s,.24*s,c),n,a,o+i+.22*i+1.44*l,r.vein||"psi",{e:1}))),r.spines)for(let t=0;t<c;t++){const r=t/c*Math.PI*2+.4;spine(e,n+Math.cos(r)*s*.92,a+Math.sin(r)*s*.92,o+.5*i,i*(.55+t%3*.14),.46,"carapace2")}if(r.pods)for(let t=0;t<r.pods;t++){const l=t/r.pods*Math.PI*2+.6,c=n+Math.cos(l)*s*.86,d=a+Math.sin(l)*s*.86;e.push(P_(TSLAB(circleProfile(.2*s,6),.62*i,.8,"hp"+s.toFixed(1)),c,d,o,"carapace2")),e.push(P_(DOME(.17*s,.22*s,6),c,d,o+.62*i,"carapace")),e.push(P_(DOME(.08*s,.1*s,6),c,d,o+.62*i+.16*s,r.vein||"psi",{e:1}))}}function def1Bits(n,fac,cx,cy,z,rs,ks,full){if("allied"===fac){tier(n,.62*rs,.62*rs,.19*rs,cx,cy,z,"armor","d1v"+ks,.92),n.push(P_(CYL(.26*rs,.09*rs,18),cx,cy,z+.19*rs,"armor3"));full&&bolts(n,cx,cy+.27*-rs,4.6,.42*rs,0,5,"steel")}else if("soviet"===fac){tier(n,.72*rs,.72*rs,.2*rs,cx,cy,z,"concrete","d1l"+ks,.9),n.push(P_(CYL(.28*rs,.08*rs,16),cx,cy,z+.2*rs,"armor2"));full&&sandbagRing(n,.45*rs,z,cx,cy)}else{n.push(P_(CYL(.22*rs,.14*rs,16),cx,cy,z,"carapace2")),n.push(P_(DOME(.34*rs,.2*rs,16),cx,cy,z+.14*rs,"carapace"));if(full)for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(CYL(1.2,3.4,8),cx+Math.cos(t)*rs*.25,cy+Math.sin(t)*rs*.25,5.6,"psi",{e:1}))}}}function aaBits(n,fac,cx,cy,z,rs,ks,full){if("allied"===fac){tier(n,.58*rs,.58*rs,.2*rs,cx,cy,z,"armor","aav"+ks,.92),n.push(P_(CYL(.22*rs,.07*rs,16),cx,cy,z+.2*rs,"armor3"));full&&n.push(P_(BOXM(.2*rs,.14*rs,.09*rs,1),cx+.24*rs,cy+.24*-rs,z,"darkmetal"))}else if("soviet"===fac){tier(n,.66*rs,.66*rs,.2*rs,cx,cy,z,"concrete","aal"+ks,.9),n.push(P_(CYL(.24*rs,.07*rs,16),cx,cy,z+.2*rs,"armor2"));full&&(sandbagRing(n,.43*rs,z,cx,cy),crate(n,cx+.3*-rs,cy+.28*rs,z,5.2,"olive",.4))}else{n.push(P_(CONE(.3*rs,.2*rs,.24*rs,18),cx,cy,z,"carapace")),n.push(P_(CYL(.2*rs,.07*rs,16),cx,cy,z+.24*rs,"carapace2"))}}function BMODEL_(e,t,dep,cn,rot){cn=cn||0;const r=32*BLD[e].size,n=[],a="allied"===t,o="soviet"===t,d=!1!==dep;const s=.3*r,i=.24*r,l=3.6,c=l+s;
-// Construction reveal stage (0=bare pad+crane, 4=fully built). Only these
-// keys actually vary this - render.ts passes the live rise fraction (0-1)
-// via dep for them, and bakes the resulting bucket into the geometry cache
-// key (like gateBucket does for gates) so each stage gets its own cached
-// mesh. Every other building key gets bucket 4 (always fully built), so
-// this is a no-op for them.
-const riseBucket="conyard"===e||"factory"===e?Math.round(4*Math.max(0,Math.min(1,+dep||0))):4;
+function roofFarm(e,t,r,n,a){const o=e=>(43758.5453*Math.sin(12.9898*e+78.233*a)%1+1)%1,s=Math.max(4,Math.round(t*r/620));for(let a=0;a<s;a++){const s=(o(a)-.5)*t*.72,i=(o(a+40)-.5)*r*.72,l=o(a+80);l<.34?acUnit(e,s,i,n,6+5*o(a+9),5+4*o(a+3),1.5*o(a+7)):l<.62?vent(e,s,i,n,5+4*o(a+11),5+4*o(a+13),"steel"):l<.82?e.push(P_(BOXM(4.5,4.5,1.4,.4),s,i,n,"darkmetal")):e.push(P_(CYL(1.5,4.5,12),s,i,n,"gunmetal"))}for(let a=0;a<3;a++)pipeRun(e,.42*-t,.24*-r+a*r*.24,.42*t,.24*-r+a*r*.24,n+1.6,1.1,"rust")}function stairs(e,t,r,n,a,o){const s=Math.max(3,a/2.4|0),i=Math.cos(o),l=Math.sin(o);for(let c=0;c<s;c++)e.push(P_(BOXM(2.6,6,.8,.2),t+i*c*2.4,r+l*c*2.4,n+c*(a/s),"darkmetal",{r:o}));e.push(P_(BOXM(2.4*s,.6,.6,.15),t+i*s*1.2,r+l*s*1.2-3,n+.6*a,"darkmetal",{r:o,ty:-Math.atan2(a,2.4*s)})),e.push(P_(BOXM(2.4*s,.6,.6,.15),t+i*s*1.2,r+l*s*1.2+3,n+.6*a,"darkmetal",{r:o,ty:-Math.atan2(a,2.4*s)}))}function veins(e,t,r,n,a,o,s,i){for(let l=0;l<s;l++){const c=l/s*Math.PI*2;e.push(P_(BOXM(1.5,.1*a,o,.35),t+Math.cos(c)*a*.99,r+Math.sin(c)*a*.99,n,i||"psi",{r:c,e:1}))}}function plates(e,t,r,n,a,o,s,i?){for(let l=0;l<o;l++){const c=l/o*Math.PI*2+.2;e.push(P_(WEDGE(.46*a,.3*a,s,.22*s),t+Math.cos(c)*a*.8,r+Math.sin(c)*a*.8,n,i||"carapace2",{r:c+Math.PI}))}}function hive(e,t){const r=t,n=r.x||0,a=r.y||0,o=r.z,s=r.r,i=r.h,l=r.crown,c=r.seg||8;if(e.push(P_(TSLAB(circleProfile(s,c),i,.84,"hv"+s.toFixed(1)+i.toFixed(1)+c),n,a,o,"carapace2")),e.push(P_(TSLAB(circleProfile(.9*s,c),.22*i,.9,"hs"+s.toFixed(1)+i.toFixed(1)+c),n,a,o+i,"carapace")),e.push(P_(DOME(.8*s,l,c),n,a,o+i+.22*i,"carapace")),plates(e,n,a,o,s,c,.62*i),veins(e,n,a,o+.16*i,.86*s,.62*i,c,r.vein||"psi"),!1!==r.crest&&(e.push(P_(CONE(.3*s,.1*s,.72*l,c),n,a,o+i+.22*i+.72*l,"carapace2")),e.push(P_(DOME(.2*s,.24*s,c),n,a,o+i+.22*i+1.44*l,r.vein||"psi",{e:1}))),r.spines)for(let t=0;t<c;t++){const r=t/c*Math.PI*2+.4;spine(e,n+Math.cos(r)*s*.92,a+Math.sin(r)*s*.92,o+.5*i,i*(.55+t%3*.14),.46,"carapace2")}if(r.pods)for(let t=0;t<r.pods;t++){const l=t/r.pods*Math.PI*2+.6,c=n+Math.cos(l)*s*.86,d=a+Math.sin(l)*s*.86;e.push(P_(TSLAB(circleProfile(.2*s,6),.62*i,.8,"hp"+s.toFixed(1)),c,d,o,"carapace2")),e.push(P_(DOME(.17*s,.22*s,6),c,d,o+.62*i,"carapace")),e.push(P_(DOME(.08*s,.1*s,6),c,d,o+.62*i+.16*s,r.vein||"psi",{e:1}))}}function def1Bits(n,fac,cx,cy,z,rs,ks,full){if("allied"===fac){tier(n,.62*rs,.62*rs,.19*rs,cx,cy,z,"armor","d1v"+ks,.92),n.push(P_(CYL(.26*rs,.09*rs,18),cx,cy,z+.19*rs,"armor3"));full&&bolts(n,cx,cy+.27*-rs,4.6,.42*rs,0,5,"steel")}else if("soviet"===fac){tier(n,.72*rs,.72*rs,.2*rs,cx,cy,z,"concrete","d1l"+ks,.9),n.push(P_(CYL(.28*rs,.08*rs,16),cx,cy,z+.2*rs,"armor2"));full&&sandbagRing(n,.45*rs,z,cx,cy)}else{n.push(P_(CYL(.22*rs,.14*rs,16),cx,cy,z,"carapace2")),n.push(P_(DOME(.34*rs,.2*rs,16),cx,cy,z+.14*rs,"carapace"));if(full)for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(CYL(1.2,3.4,8),cx+Math.cos(t)*rs*.25,cy+Math.sin(t)*rs*.25,5.6,"psi",{e:1}))}}}function aaBits(n,fac,cx,cy,z,rs,ks,full){if("allied"===fac){tier(n,.58*rs,.58*rs,.2*rs,cx,cy,z,"armor","aav"+ks,.92),n.push(P_(CYL(.22*rs,.07*rs,16),cx,cy,z+.2*rs,"armor3"));full&&n.push(P_(BOXM(.2*rs,.14*rs,.09*rs,1),cx+.24*rs,cy+.24*-rs,z,"darkmetal"))}else if("soviet"===fac){tier(n,.66*rs,.66*rs,.2*rs,cx,cy,z,"concrete","aal"+ks,.9),n.push(P_(CYL(.24*rs,.07*rs,16),cx,cy,z+.2*rs,"armor2"));full&&(sandbagRing(n,.43*rs,z,cx,cy),crate(n,cx+.3*-rs,cy+.28*rs,z,5.2,"olive",.4))}else{n.push(P_(CONE(.3*rs,.2*rs,.24*rs,18),cx,cy,z,"carapace")),n.push(P_(CYL(.2*rs,.07*rs,16),cx,cy,z+.24*rs,"carapace2"))}}// Building keys whose model has staged construction reveal (see BMODEL_'s
+// riseBucket below). render.ts calls this too, to decide whether to pass
+// the live rise fraction through dep and tag the geometry cache key with
+// it, instead of duplicating this key list in three places.
+function hasStagedBuild(e){return"conyard"===e||"factory"===e||"power"===e||"barracks"===e}
+function BMODEL_(e,t,dep,cn,rot){cn=cn||0;const r=32*BLD[e].size,n=[],a="allied"===t,o="soviet"===t,d=!1!==dep;const s=.3*r,i=.24*r,l=3.6,c=l+s;
+// Construction reveal stage (0=bare pad+crane, 4=fully built). Only keys in
+// hasStagedBuild() actually vary this - render.ts passes the live rise
+// fraction (0-1) via dep for them, and bakes the resulting bucket into the
+// geometry cache key (like gateBucket does for gates) so each stage gets
+// its own cached mesh. Every other building key gets bucket 4 (always
+// fully built), so this is a no-op for them.
+const riseBucket=hasStagedBuild(e)?Math.round(4*Math.max(0,Math.min(1,+dep||0))):4;
 switch(e){case"triturret":{const fac=a?"allied":o?"soviet":"yuri",mat=a?"armor":o?"concrete2":"carapace";n.push(P_(BOXM(1*r,.13*r,.09*r,.2),0,0,l,mat)),def1Bits(n,fac,-.34*r,0,l+.05*r,16,"_tt",!1),aaBits(n,fac,0,0,l+.05*r,16,"_tt",!1),def1Bits(n,fac,.34*r,0,l+.05*r,16,"_tt",!1);break}case"wall":{const h=.68*r,thin=.08*r,half=.5*r,full=r,mat=a?"armor":o?"concrete2":"carapace",bev=a?.15:o?.2:.3,accent=a?"armor3":o?"rust":"carapace2";if(10===cn)n.push(P_(BOXM(full,thin,h,bev),0,0,l,mat));else if(5===cn)n.push(P_(BOXM(thin,full,h,bev),0,0,l,mat));else{n.push(P_(BOXM(thin,thin,h,bev),0,0,l,mat));1&cn&&n.push(P_(BOXM(thin,half,h,bev),0,-half/2,l,mat));2&cn&&n.push(P_(BOXM(half,thin,h,bev),half/2,0,l,mat));4&cn&&n.push(P_(BOXM(thin,half,h,bev),0,half/2,l,mat));8&cn&&n.push(P_(BOXM(half,thin,h,bev),-half/2,0,l,mat));0===cn&&n.push(P_(CYL(thin*.7,h*1.05,8),0,0,l,accent))}break}case"gate":{const h=.68*r,thin=.08*r,half=.5*r,full=r,p=Math.max(0,Math.min(1,+dep||0)),mat=a?"armor2":o?"concrete2":"carapace2",postMat=a?"armor":o?"rust":"carapace",leafMat=a?"gunmetal":o?"rust":"carapace2",horiz=2&cn||8&cn?!0:1&cn||4&cn?!1:Math.round((rot||0)/(Math.PI/2))%2==0;1&cn&&n.push(P_(BOXM(thin,half,h,.2),0,-half/2,l,mat));2&cn&&n.push(P_(BOXM(half,thin,h,.2),half/2,0,l,mat));4&cn&&n.push(P_(BOXM(thin,half,h,.2),0,half/2,l,mat));8&cn&&n.push(P_(BOXM(half,thin,h,.2),-half/2,0,l,mat));0===cn&&n.push(P_(CYL(thin*.7,h*1.05,8),0,0,l,postMat));n.push(P_(horiz?BOXM(full,thin,h,.18):BOXM(thin,full,h,.18),0,0,l-p*h*1.35,leafMat));break}case"oilDerek":{silo(n,0,.16*r,l,.32*r,.4*r,"rust"),n.push(P_(CYL(.05*r,1.5*r,8),-.22*r,-.18*r,l,"darkmetal")),n.push(P_(BOXM(.46*r,.1*r,.1*r,.3),-.22*r,-.18*r,l+1.2*r,"darkmetal",{r:.4})),pipeRun(n,0,.16*r,-.22*r,-.18*r,l,.06*r,"rust");break}case"paradropHangar":{n.push(P_(BOXM(.9*r,.6*r,.42*r,.15),0,0,l,"concrete2")),n.push(P_(CONE(.52*r,.05*r,.3*r,4),0,0,l+.42*r,"armor3",{r:PI2/8})),n.push(P_(CYL(.025*r,.5*r,6),.33*r,.18*r,l+.42*r,"darkmetal"));break}case"empTower":{n.push(P_(CYL(.22*r,.7*r,16),0,0,l,"darkmetal"));for(let e=0;e<3;e++)n.push(P_(CYL(.28*r,.06*r,16),0,0,l+.2*r+e*.22*r,"steel"));n.push(P_(DOME(.24*r,.18*r,10),0,0,l+.9*r,"crystal",{e:1}));break}case"rogueDen":{crate(n,-.22*r,-.18*r,l,.34*r,"olive",.3),crate(n,.2*r,-.1*r,l,.28*r,"rust",-.5),n.push(P_(CONE(.3*r,.02*r,.34*r,10),.05*r,.2*r,l,"sand")),n.push(P_(CYL(.03*r,.5*r,6),.28*r,.24*r,l,"darkmetal"));break}case"conyard":{
 const CORNERS=[[-1,-1],[1,-1],[1,1],[-1,1]];
 n.push(P_(SLAB(roundRectProfile(.92*r,.92*r,4,3),1.2,.5,"cypad"),0,0,l,"asphalt"));
@@ -403,36 +408,54 @@ break;}
 case"power":{
 n.push(P_(SLAB(roundRectProfile(.88*r,.88*r,3,3),1.1,.5,"pwpad"),0,0,l,"asphalt"));
 if(a){
-n.push(P_(BOXM(.2*r,.16*r,.14*r,.3),0,.32*-r,l,"armor"));
-windows(n,.18*r,.14*r,l+.05*r,.07*r,2);
-for(let e=0;e<3;e++)for(let t=0;t<2;t++){
-const x=(e-1)*.22*r,y=(t-.3)*.2*r;
-n.push(P_(BOXM(.18*r,.14*r,.6,.2),x,y,l,"darkmetal"));
-n.push(P_(BOXM(.17*r,.13*r,.35,.15),x,y,l+.6,"crystal",{e:1,ty:.35}));
-n.push(P_(BOXM(.02*r,.12*r,.02*r,.1),x,y,l+.95,"steel"));
+if(riseBucket>=1){
+n.push(P_(BOXM(.22*r,.18*r,.1*r,.25),0,0,l,"armor"));
+railPosts(n,.24*r,.2*r,l+.1*r,1.6);
 }
-n.push(P_(CYL(.05*r,.2*r,10),0,.35*r,l,"steel"));
-n.push(P_(CYL(.03*r,.04*r,8),0,.35*r,l+.2*r,"glow",{e:1}));
+if(riseBucket>=2){
+windows(n,.18*r,.14*r,l+.04*r,.05*r,2);
+n.push(P_(CYL(.035*r,.16*r,10),0,0,l+.1*r,"steel"));
+}
+if(riseBucket>=3){
+solarPanels(n,0,.22*r,l+.02*r,.5*r,.34*r);
+}
+if(riseBucket>=4){
+n.push(P_(CYL(.025*r,.03*r,8),0,0,l+.26*r,"glow",{e:1}));
+}
 }else if(o){
-for(const e of[-1,1]){
-n.push(P_(CYL(.11*r,.2*r,14),e*r*.2,-.08*r,l,"concrete2"));
-n.push(P_(CYL(.09*r,.07*r,12),e*r*.2,-.08*r,l+.2*r,"rust"));
-n.push(P_(CYL(.04*r,.14*r,10),e*r*.2,-.08*r,l+.27*r,"darkmetal"));
-n.push(P_(CYL(.03*r,.05*r,8),e*r*.2,-.08*r,l+.41*r,"glow",{e:1}));
+if(riseBucket>=1){
+n.push(P_(BOXM(.24*r,.18*r,.1*r,.3),0,0,l,"concrete"));
 }
-n.push(P_(BOXM(.24*r,.18*r,.14*r,.3),0,.25*r,l,"concrete"));
-n.push(P_(BOXM(.1*r,.1*r,.08*r,.25),.12*r,.25*r,l+.14*r,"rust"));
-pipeRun(n,-.18*r,-.05*r,.18*r,-.05*r,l+.1*r,1.3,"rust");
+if(riseBucket>=2){
+n.push(P_(BOXM(.1*r,.09*r,.07*r,.2),0,0,l+.1*r,"rust"));
+pipeRun(n,-.16*r,-.06*r,.16*r,-.06*r,l+.08*r,1.3,"rust");
+}
+if(riseBucket>=3){
+for(const e of[-1,1])coolTower(n,e*r*.22,.2*r,l,.1*r,.32*r,"concrete2");
+}
+if(riseBucket>=4){
+for(const e of[-1,1])n.push(P_(CYL(.025*r,.04*r,8),e*r*.22,.2*r,l+.38*r,"glow",{e:1}));
+}
 }else{
+if(riseBucket>=1){
+n.push(P_(CYL(.11*r,.09*r,12),0,0,l,"carapace"));
+}
+if(riseBucket>=2){
+n.push(P_(DOME(.12*r,.1*r,12),0,0,l+.09*r,"psi",{e:1,a:{spin:.5}}));
+}
+if(riseBucket>=3){
 for(let e=0;e<4;e++){
 const t=e*1.57+.4;
 n.push(P_(CYL(.09*r,.14*r,12),Math.cos(t)*r*.24,Math.sin(t)*r*.24,l,"carapace2"));
 n.push(P_(DOME(.09*r,.07*r,10),Math.cos(t)*r*.24,Math.sin(t)*r*.24,l+.14*r,"psi",{e:1,a:{spin:.65}}));
 }
-n.push(P_(CYL(.08*r,.12*r,12),0,0,l,"carapace"));
-n.push(P_(DOME(.1*r,.08*r,12),0,0,l+.12*r,"psi",{e:1}));
+}
+if(riseBucket>=4){
+veins(n,0,0,l+2,.24*r,.16*r,8,"psi");
+}
 }
 crate(n,.3*r,.3*r,l,4,"olive",.2);
+hazard(n,.15*r,.35*r,3.5,.25*r,0);
 break;}
 case"refinery":{
 const sw=.3*r,sd=.26*r,sh=.32*s;
@@ -494,31 +517,61 @@ n.push(P_(CONE(.4,.08,1,6),.04*hl,0,l+.9*hh+.1*r,"psi",{e:1,ty:.1}));
 crate(n,-.1*r,.32*r,l,3.6,"carapace2",.18);
 break;}
 case"barracks":{
-const sw=.4*r,sd=.3*r,sh=.42*s;
 n.push(P_(SLAB(roundRectProfile(.88*r,.88*r,3,3),1.1,.5,"bkpad"),0,0,l,"asphalt"));
 if(a){
-n.push(P_(BOXM(sw,sd,sh,.25),.2*-r,.22*-r,l,"armor"));
-n.push(P_(BOXM(sw*1.04,sd*1.04,1.1,.2),.2*-r,.22*-r,l+sh,"body"));
-windows(n,sw*.9,sd*.85,l+.32*sh,.24*sh,3);
-n.push(P_(BOXM(.1*r,.08*r,.28,.12),.2*-r-.12*sw,.22*-r,l+sh,"darkmetal"));
-n.push(P_(BOXM(.09*r,.07*r,.22,.1),.2*-r-.12*sw,.22*-r,l+sh+.28,"crystal",{e:1,ty:.28}));
-}else if(o){
-n.push(P_(BOXM(sw,sd,sh,.3),.2*-r,.22*-r,l,"concrete"));
-n.push(P_(BOXM(sw*1.05,sd*1.05,1.3,.25),.2*-r,.22*-r,l+sh,"concrete2"));
-windows(n,sw*.9,sd*.85,l+.3*sh,.22*sh,3,"glassdark");
-sandbagRing(n,.28*r,l);
-n.push(P_(CYL(.035*r,.08*r,8),.2*-r+.15*sw,.22*-r,l+sh,"rust"));
-}else{
-hive(n,{x:.2*-r,y:.22*-r,z:l,r:.15*r,h:sh*.85,crown:.06*r,seg:7,spines:1,vein:"psi"});
+if(riseBucket>=1){
+tier(n,.5*r,.36*r,.42*s,0,0,l,"armor","bav1",.94);
 }
-n.push(P_(BOXM(2,1.8,1.5,.35),.18*r,.26*r,l+1.1,"darkmetal"));
-n.push(P_(BOXM(.26*r,1.2,1.2,.3),.18*r,.26*r,l+1.1+1.5,"steel"));
-hazard(n,.12*r,.22*r,3.5,.25*r,0);
-crate(n,.26*r,-.22*r,l,4,"olive",.25);
-crate(n,.33*r,-.15*r,l,3.5,"rust",-.2);
-n.push(P_(CYL(1.1,2.2,10),-.2*r,-.18*r,l,"gunmetal",{a:{spin:1}}));
-n.push(P_(CYL(.55,.9,8),-.2*r,-.18*r,l+2.2,"glow",{e:1,a:{spin:1}}));
-{const yx=.12*r,yy=.22*r,mr=.14*r,mcol=a?"body":o?"olive":"carapace2";
+const bz=l+.42*s;
+if(riseBucket>=2){
+windows(n,.46*r,.32*r,l+.16*s,.13*s,3);
+railPosts(n,.5*r,.36*r,bz,2);
+}
+if(riseBucket>=3){
+n.push(P_(BOXM(.1*r,.08*r,.28,.12),0,-.2*r,bz,"darkmetal"));
+n.push(P_(BOXM(.09*r,.07*r,.22,.1),0,-.2*r,bz+.28,"crystal",{e:1,ty:.28}));
+}
+if(riseBucket>=4){
+n.push(P_(CYL(.02*r,.16*r,8),.22*r,-.16*r,bz,"steel"));
+n.push(P_(BOXM(.11*r,.02*r,.08*r,.1),.22*r,-.16*r,bz+.15*r,"glow",{e:1}));
+}
+}else if(o){
+if(riseBucket>=1){
+tier(n,.54*r,.4*r,.44*s,0,0,l,"concrete","bol1",.95);
+}
+const bz=l+.44*s;
+if(riseBucket>=2){
+windows(n,.5*r,.36*r,l+.15*s,.12*s,3,"glassdark");
+}
+if(riseBucket>=3){
+sandbagRing(n,.34*r,l);
+n.push(P_(CYL(.035*r,.1*r,8),.18*r,-.16*r,bz,"rust"));
+}
+if(riseBucket>=4){
+n.push(P_(CYL(.03*r,.04*r,8),.18*r,-.16*r,bz+.1*r,"red",{e:1,a:{spin:1}}));
+}
+}else{
+if(riseBucket>=1){
+n.push(P_(TSLAB(circleProfile(.24*r,9),.06*s,.9,"bkfound"),0,0,l,"carapace2"));
+}
+if(riseBucket>=2){
+hive(n,{x:0,y:0,z:l,r:.22*r,h:.7*s,crown:.09*r,seg:9,spines:1,vein:"psi"});
+}
+if(riseBucket>=3){
+for(const cc of[[-1,0],[1,0]])hive(n,{x:cc[0]*.3*r,y:.02*r,z:l,r:.07*r,h:.22*s,crown:.04*r,seg:6,crest:!1,vein:"psi"});
+}
+if(riseBucket>=4){
+veins(n,0,0,l+2,.22*r,.24*s,9,"psi");
+}
+}
+n.push(P_(BOXM(2,1.8,1.5,.35),.3*r,.32*r,l+1.1,"darkmetal"));
+n.push(P_(BOXM(.26*r,1.2,1.2,.3),.3*r,.32*r,l+1.1+1.5,"steel"));
+hazard(n,.28*r,.32*r,3.5,.2*r,0);
+crate(n,-.3*r,.3*r,l,4,"olive",.25);
+crate(n,-.36*r,.24*r,l,3.5,"rust",-.2);
+n.push(P_(CYL(1.1,2.2,10),-.3*r,-.28*r,l,"gunmetal",{a:{spin:1}}));
+n.push(P_(CYL(.55,.9,8),-.3*r,-.28*r,l+2.2,"glow",{e:1,a:{spin:1}}));
+{const yx=.28*r,yy=-.28*r,mr=.12*r,mcol=a?"body":o?"olive":"carapace2";
 for(let mi=0;mi<4;mi++){
 const mang=1.5708*mi,mx=yx+Math.cos(mang)*mr,my=yy+Math.sin(mang)*mr;
 n.push(P_(BOXM(.9,.6,1.6,.15),mx,my,l+.9,mcol,{a:{orbit:.7,pvx:yx,pvy:yy}}));
@@ -737,6 +790,7 @@ Object.assign(window, {
   subHull, tankHull, turretProfile, tankTurret, harvesterSoviet, harvesterAllied, harvesterYuri,
   harvesterModel, harvesterAugerModel, harvesterDrumModel, droneLaserModel, droneModel, bastionModel,
   mcvModel, weaponRig, infantry, jet, UMODEL_, UTURRET_, muzzleDist, hasTurret, hasBTurret, treeModel,
+  hasStagedBuild,
   rockModel, scrubModel, stoneModel, fallModel, lampModel, towerModel, carModel, PROPMODEL, craterModel,
   wreckModel, rubbleModel, crane, containerBox, blockM, bandLights, glassBand, railing, stack, dish,
   fan, drum, spine, sandbagRing, ribs, ladder, pipeRun, vent, acUnit, floodlight, railPosts, hazard,

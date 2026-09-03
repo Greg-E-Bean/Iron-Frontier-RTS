@@ -305,6 +305,7 @@ declare global {
   const muzzleDist: AnyFn;
   function hasTurret(key: string): boolean;
   function hasBTurret(key: string, fac: string): boolean;
+  function hasStagedBuild(key: string): boolean;
   const treeModel: AnyFn;
   const rockModel: AnyFn;
   const scrubModel: AnyFn;
