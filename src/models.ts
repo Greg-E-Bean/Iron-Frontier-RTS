@@ -324,7 +324,7 @@ function roofFarm(e,t,r,n,a){const o=e=>(43758.5453*Math.sin(12.9898*e+78.233*a)
 // riseBucket below). render.ts calls this too, to decide whether to pass
 // the live rise fraction through dep and tag the geometry cache key with
 // it, instead of duplicating this key list in three places.
-function hasStagedBuild(e){return"conyard"===e||"factory"===e||"power"===e||"barracks"===e}
+function hasStagedBuild(e){return"conyard"===e||"factory"===e||"power"===e||"barracks"===e||"refinery"===e||"airfield"===e}
 function BMODEL_(e,t,dep,cn,rot){cn=cn||0;const r=32*BLD[e].size,n=[],a="allied"===t,o="soviet"===t,d=!1!==dep;const s=.3*r,i=.24*r,l=3.6,c=l+s;
 // Construction reveal stage (0=bare pad+crane, 4=fully built). Only keys in
 // hasStagedBuild() actually vary this - render.ts passes the live rise
@@ -458,43 +458,66 @@ crate(n,.3*r,.3*r,l,4,"olive",.2);
 hazard(n,.15*r,.35*r,3.5,.25*r,0);
 break;}
 case"refinery":{
-const sw=.3*r,sd=.26*r,sh=.32*s;
 n.push(P_(SLAB(roundRectProfile(.9*r,.9*r,3,3),1.1,.5,"rfpad"),0,0,l,"asphalt"));
 if(a){
-n.push(P_(BOXM(sw,sd,sh,.25),.32*-r,.3*-r,l,"armor"));
-n.push(P_(BOXM(sw*1.04,sd*1.04,1.1,.2),.32*-r,.3*-r,l+sh,"armor3"));
-windows(n,sw*.9,sd*.85,l+.3*sh,.22*sh,2);
-n.push(P_(BOXM(.1*r,.08*r,.3,.15),.32*-r-.1*sw,.3*-r,l+sh,"darkmetal"));
-n.push(P_(BOXM(.09*r,.07*r,.25,.12),.32*-r-.1*sw,.3*-r,l+sh+.3,"crystal",{e:1,ty:.28}));
-silo(n,.25*r,-.3*r,l,.08*r,.3*r,"steel");
+if(riseBucket>=1){
+tier(n,.44*r,.34*r,.32*s,0,0,l,"armor","rfv1",.95);
+}
+const bz=l+.32*s;
+if(riseBucket>=2){
+windows(n,.4*r,.3*r,l+.13*s,.11*s,2);
+n.push(P_(BOXM(.1*r,.08*r,.3,.15),0,-.19*r,bz,"darkmetal"));
+n.push(P_(BOXM(.09*r,.07*r,.25,.12),0,-.19*r,bz+.3,"crystal",{e:1,ty:.28}));
+}
+if(riseBucket>=3){
+silo(n,.28*r,-.3*r,l,.08*r,.3*r,"steel");
 silo(n,.38*r,-.22*r,l,.07*r,.26*r,"steel");
-drum(n,.22*r,.2*r,l+.08*r,.1*r,.12*r,"steel",1.5);
-n.push(P_(CYL(1.8,2.8,12),.3*r,.1*r,l+.12*r,"steel",{a:{spin:2}}));
-n.push(P_(CYL(1.8,2.8,12),.3*r,.2*r,l+.12*r,"crystal",{a:{spin:1.8}}));
+drum(n,.24*r,.3*r,l+.08*r,.1*r,.12*r,"steel",1.5);
+}
+if(riseBucket>=4){
+n.push(P_(CYL(1.8,2.8,12),.34*r,.18*r,l+.12*r,"steel",{a:{spin:2}}));
+n.push(P_(CYL(1.8,2.8,12),.34*r,.28*r,l+.12*r,"crystal",{a:{spin:1.8}}));
+}
 }else if(o){
-n.push(P_(BOXM(sw,sd,sh,.3),.32*-r,.3*-r,l,"concrete"));
-n.push(P_(BOXM(sw*1.05,sd*1.05,1.3,.25),.32*-r,.3*-r,l+sh,"concrete2"));
-windows(n,sw*.9,sd*.85,l+.28*sh,.2*sh,2,"glassdark");
-stack(n,.32*-r-.1*sw,.3*-r,l+sh,.03*r,.12*r,"rust");
-silo(n,.25*r,-.3*r,l,.085*r,.32*r,"rust");
-silo(n,.38*r,-.2*r,l,.075*r,.28*r,"rust");
-drum(n,.2*r,.2*r,l+.08*r,.1*r,.13*r,"rust",1.4);
-n.push(P_(CYL(1.9,2.8,12),.3*r,.1*r,l+.12*r,"rust",{a:{spin:1.9}}));
-n.push(P_(CYL(1.9,2.8,12),.3*r,.2*r,l+.12*r,"darkmetal",{a:{spin:1.7}}));
-pipeRun(n,-.1*r,-.25*r,.2*r,-.25*r,l+.1*r,1.4,"rust");
+if(riseBucket>=1){
+tier(n,.46*r,.36*r,.34*s,0,0,l,"concrete","rfl1",.96);
+}
+const bz=l+.34*s;
+if(riseBucket>=2){
+windows(n,.42*r,.32*r,l+.12*s,.09*s,2,"glassdark");
+stack(n,0,-.2*r,bz,.03*r,.13*r,"rust");
+}
+if(riseBucket>=3){
+silo(n,.28*r,-.3*r,l,.085*r,.32*r,"rust");
+silo(n,.39*r,-.22*r,l,.075*r,.28*r,"rust");
+drum(n,.22*r,.3*r,l+.08*r,.1*r,.13*r,"rust",1.4);
+pipeRun(n,-.12*r,.16*r,.14*r,.16*r,l+.1*r,1.4,"rust");
+}
+if(riseBucket>=4){
+n.push(P_(CYL(1.9,2.8,12),.34*r,.18*r,l+.12*r,"rust",{a:{spin:1.9}}));
+n.push(P_(CYL(1.9,2.8,12),.34*r,.28*r,l+.12*r,"darkmetal",{a:{spin:1.7}}));
+}
 }else{
-hive(n,{x:.32*-r,y:.3*-r,z:l,r:.13*r,h:sh,crown:.055*r,seg:8,pods:2,crest:!0,vein:"psi"});
+if(riseBucket>=1){
+n.push(P_(TSLAB(circleProfile(.18*r,8),.08*s,.9,"rffound"),0,0,l,"carapace2"));
+}
+if(riseBucket>=2){
+hive(n,{x:0,y:0,z:l,r:.16*r,h:.9*s,crown:.06*r,seg:8,pods:2,crest:!0,vein:"psi"});
+}
+if(riseBucket>=3){
 for(let e=0;e<2;e++){
-n.push(P_(CYL(.08*r,.2*r,12),.2*r+e*r*.12,-.25*r,l,"carapace"));
-n.push(P_(DOME(.08*r,.06*r,10),.2*r+e*r*.12,-.25*r,l+.2*r,"psi",{e:1,a:{spin:1.1}}));
+n.push(P_(CYL(.08*r,.2*r,12),.26*r+e*r*.12,.3*r,l,"carapace"));
+n.push(P_(DOME(.08*r,.06*r,10),.26*r+e*r*.12,.3*r,l+.2*r,"psi",{e:1,a:{spin:1.1}}));
 }
-n.push(P_(CYL(2,2.5,12),.28*r,.15*r,l+.1*r,"psi",{e:1,a:{spin:1.6}}));
-n.push(P_(CYL(1.6,2.2,10),.28*r,.25*r,l+.1*r,"carapace2",{a:{spin:1.4}}));
 }
-n.push(P_(CYL(1,1.4,10),.3*r,.15*r,l+.28*r,"glow",{e:1,a:{spin:2}}));
-hazard(n,.15*r,.15*r,4,.3*r,0);
-crate(n,-.3*r,.25*r,l,4.5,"olive",.2);
-barrel(n,-.35*r,.15*r,l);
+if(riseBucket>=4){
+n.push(P_(CYL(2,2.5,12),.34*r,.18*r,l+.1*r,"psi",{e:1,a:{spin:1.6}}));
+n.push(P_(CYL(1.6,2.2,10),.34*r,.28*r,l+.1*r,"carapace2",{a:{spin:1.4}}));
+}
+}
+hazard(n,-.28*r,0,4,.2*r,0);
+crate(n,-.34*r,.16*r,l,4.5,"olive",.2);
+barrel(n,-.38*r,-.14*r,l);
 break;}
 case"hive":{
 const hl=1.02*r,hw=.46*r,hh=.3*s;
@@ -644,26 +667,43 @@ barrel(n,-.1*r,.4*r,l);
 break;}
 case"lab":if(a){tier(n,.66*r,.66*r,s,0,0,l,"armor","lbv1",.94),windows(n,.62*r,.62*r,l+.34*s,.32*s,4),n.push(P_(CYL(.3*r,.26*r,22),0,0,c,"body")),n.push(P_(CYL(.33*r,1.8,22),0,0,c,"armor3"));for(let e=0;e<6;e++){const t=1.047*e;n.push(P_(BOXM(3.4,1.6,2.2,.4),Math.cos(t)*r*.31,Math.sin(t)*r*.31,c+1.8,"crystal",{r:t,e:1}))}n.push(P_(DOME(.3*r,.22*r,22),0,0,c+.26*r,"glass",{e:1})),railPosts(n,.64*r,.64*r,c,2.4),dish(n,.24*r,.24*-r,c,8),acUnit(n,.24*-r,.24*r,c,8,7,.6),lattice(n,.27*-r,.27*-r,c,.26*r,1.9,"steel")}else if(o){tier(n,.7*r,.7*r,s,0,0,l,"concrete","lbl1",.94),windows(n,.66*r,.66*r,l+.34*s,.3*s,4,"glassdark"),n.push(P_(SLAB(roundRectProfile(.76*r,.76*r,4,3),3.2,.88,"lblr"),0,0,c,"concrete2")),n.push(P_(CYL(.26*r,.3*r,20),0,0,c+3.2,"armor2")),ribs(n,0,0,c+3.2,.26*r,.3*r,3,"darkmetal"),n.push(P_(DOME(.26*r,.2*r,20),0,0,c+3.2+.3*r,"armor3"));for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(CYL(1.4,.16*r,10),Math.cos(t)*r*.24,Math.sin(t)*r*.24,c+3.2+.3*r,"steel")),n.push(P_(CYL(1.9,1.3,10),Math.cos(t)*r*.24,Math.sin(t)*r*.24,c+3.2+.46*r,"tesla",{e:1}))}railPosts(n,.72*r,.72*r,c+3.2,2.6);for(let e=0;e<3;e++){const t=2.09*e;n.push(P_(BOXM(.1*r,2.2,1.8,.4),Math.cos(t)*r*.18,Math.sin(t)*r*.18,c+3.2+.31*r,"tesla",{r:t,e:1}))}stack(n,.28*-r,.28*r,c+3.2,3.8,.16*r,"rust"),stairs(n,.26*r,.38*-r,l,s,0)}else{hive(n,{x:0,y:0,z:l,r:.32*r,h:1.15*s,crown:.18*r,seg:6,spines:1,crest:!0,vein:"crystal"});for(let e=0;e<3;e++){const t=2.09*e+.5;n.push(P_(CONE(2.2,.4,.4*r,6),Math.cos(t)*r*.24,Math.sin(t)*r*.24,l+1.2*s,"carapace2",{ty:.24,r:t}))}}break;case"airfield":{
 n.push(P_(SLAB(roundRectProfile(.88*r,.88*r,5,3),1.4,.45,"afp"),0,0,2.6,"asphalt"));
+if(riseBucket>=1){
 for(let e=0;e<20;e++){const t=e/20*Math.PI*2;n.push(P_(BOXM(4.8,1.4,.35,.12),Math.cos(t)*r*.26,Math.sin(t)*r*.26,4,"white",{r:t+PI2}))}
-for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(CYL(1.1,1.4,12),Math.cos(t)*r*.34,Math.sin(t)*r*.34,4,"glow",{e:1,a:{spin:.9}}))}
 hazard(n,0,-.38*r,4,.4*r,0);
-const tw=.22*r,td=.2*r,th=.35*r;
-if(a){
-tier(n,tw,td,th,-.35*r,.35*r,2.6,"armor","afv1",.94);
-n.push(P_(CYL(.05*r,.18*r,12),-.35*r,.35*r,2.6+th,"steel"));
-n.push(P_(SLAB(roundRectProfile(.12*r,.12*r,2,3),.07*r,.75,"afvc"),-.35*r,.35*r,2.6+th+.18*r,"glass",{e:1}));
-dish(n,-.35*r,.35*r,2.6+th+.1*r,.07*r);
-}else if(o){
-tier(n,tw,td,th*.9,-.35*r,.35*r,2.6,"concrete","afl1",.94);
-n.push(P_(SLAB(roundRectProfile(tw*1.1,td*1.1,3,3),2,.65,"aflr"),-.35*r,.35*r,2.6+th*.9,"concrete2"));
-dish(n,-.35*r,.35*r,2.6+th*.9,.065*r);
-barrel(n,.32*r,-.32*r,2.6,"rust");
-barrel(n,-.32*r,-.32*r,2.6,"olive");
-}else{
-n.push(P_(CYL(.1*r,.14*r,14),-.35*r,.35*r,2.6,"carapace2"));
-n.push(P_(DOME(.14*r,.12*r,14),-.35*r,.35*r,2.6+.14*r,"carapace"));
-n.push(P_(DOME(.08*r,.1*r,12),-.35*r,.35*r,2.6+.28*r,"psi",{e:1,a:{spin:1}}));
 }
+if(riseBucket>=2){
+for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(CYL(1.1,1.4,12),Math.cos(t)*r*.34,Math.sin(t)*r*.34,4,"glow",{e:1,a:{spin:.9}}))}
+}
+const tw=.24*r,td=.22*r,th=.4*r,tcx=-.35*r,tcy=.35*r;
+if(a){
+if(riseBucket>=3){
+tier(n,tw,td,th,tcx,tcy,2.6,"armor","afv1",.94);
+railPosts(n,tw,td,2.6+th,1.6);
+}
+if(riseBucket>=4){
+n.push(P_(CYL(.05*r,.18*r,12),tcx,tcy,2.6+th,"steel"));
+n.push(P_(SLAB(roundRectProfile(.13*r,.13*r,2,3),.08*r,.75,"afvc"),tcx,tcy,2.6+th+.18*r,"glass",{e:1}));
+dish(n,tcx,tcy,2.6+th+.1*r,.07*r);
+}
+}else if(o){
+if(riseBucket>=3){
+tier(n,tw,td,th*.9,tcx,tcy,2.6,"concrete","afl1",.94);
+}
+if(riseBucket>=4){
+n.push(P_(SLAB(roundRectProfile(tw*1.1,td*1.1,3,3),2,.65,"aflr"),tcx,tcy,2.6+th*.9,"concrete2"));
+dish(n,tcx,tcy,2.6+th*.9,.065*r);
+}
+}else{
+if(riseBucket>=3){
+n.push(P_(CYL(.11*r,.16*r,14),tcx,tcy,2.6,"carapace2"));
+}
+if(riseBucket>=4){
+n.push(P_(DOME(.15*r,.13*r,14),tcx,tcy,2.6+.16*r,"carapace"));
+n.push(P_(DOME(.09*r,.11*r,12),tcx,tcy,2.6+.32*r,"psi",{e:1,a:{spin:1}}));
+}
+}
+barrel(n,.32*r,-.32*r,2.6,"rust");
+barrel(n,-.15*r,-.38*r,2.6,"olive");
 crate(n,.28*r,.28*r,2.6,4,"olive",.2);
 containerBox(n,.25*r,-.25*r,2.6,5.5,2.8,2.4,"body",.15);
 break;}
