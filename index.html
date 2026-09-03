@@ -1677,7 +1677,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function tickBld(e, t) {
     if (e.rise < 1) {
-      e.rise = Math.min(1, e.rise + t / ("conyard" === e.key ? 4 : 1.15));
+      e.rise = Math.min(1, e.rise + t / ("conyard" === e.key || "factory" === e.key ? 4 : 1.15));
       const r2 = 32 * e.size;
       Math.random() < 0.55 && S.fx.push({ kind: "smoke", x: e.x + rnd(0.45 * -r2, 0.45 * r2), y: e.y + rnd(0.45 * -r2, 0.45 * r2), z: 1, s: 0.7, c: "#b7a98c", t: 0, life: 0.75 }), e.rise >= 1 && sfx("place");
     }
@@ -3715,7 +3715,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     cn = cn || 0;
     const r = 32 * BLD[e].size, n = [], a = "allied" === t, o = "soviet" === t, d = false !== dep;
     const s = 0.3 * r, i = 0.24 * r, l = 3.6, c = l + s;
-    const riseBucket = "conyard" === e ? Math.round(4 * Math.max(0, Math.min(1, +dep || 0))) : 4;
+    const riseBucket = "conyard" === e || "factory" === e ? Math.round(4 * Math.max(0, Math.min(1, +dep || 0))) : 4;
     switch (e) {
       case "triturret": {
         const fac = a ? "allied" : o ? "soviet" : "yuri", mat = a ? "armor" : o ? "concrete2" : "carapace";
@@ -3974,31 +3974,68 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
       }
       case "factory": {
-        const sw = 0.32 * r, sd = 0.28 * r, sh2 = 0.34 * s;
+        const CORNERS = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
         n.push(P_(SLAB(roundRectProfile(0.9 * r, 0.9 * r, 3, 3), 1.1, 0.5, "fcpad"), 0, 0, l, "asphalt"));
         if (a) {
-          n.push(P_(BOXM(sw, sd, sh2, 0.25), 0.3 * -r, 0.3 * -r, l, "armor"));
-          n.push(P_(BOXM(sw * 1.04, sd * 1.04, 1.1, 0.2), 0.3 * -r, 0.3 * -r, l + sh2, "armor3"));
-          windows(n, sw * 0.9, sd * 0.85, l + 0.3 * sh2, 0.22 * sh2, 3);
-          for (let e2 = 0; e2 < 2; e2++) fan(n, 0.3 * -r - 0.08 * sw + e2 * sw * 0.45, 0.3 * -r - 0.12 * sd, l + sh2, 3.5, 4, "gunmetal", 2.5);
-          n.push(P_(BOXM(0.1 * r, 0.08 * r, 0.25, 0.12), 0.3 * -r, 0.3 * -r + 0.12 * sd, l + sh2, "darkmetal"));
-          n.push(P_(BOXM(0.09 * r, 0.07 * r, 0.2, 0.1), 0.3 * -r, 0.3 * -r + 0.12 * sd, l + sh2 + 0.25, "crystal", { e: 1, ty: 0.25 }));
+          if (riseBucket >= 1) {
+            tier(n, 0.6 * r, 0.42 * r, 0.24 * s, 0, 0, l, "armor", "fav1", 0.95);
+            railPosts(n, 0.6 * r, 0.42 * r, l + 0.24 * s, 2.2);
+          }
+          const z2 = l + 0.24 * s;
+          if (riseBucket >= 2) {
+            n.push(P_(BOXM(0.56 * r, 0.38 * r, 0.06 * r, 0.3), 0, 0, z2, "armor3"));
+            windows(n, 0.54 * r, 0.34 * r, l + 0.11 * s, 0.11 * s, 5);
+            n.push(P_(BOXM(0.26 * r, 0.02 * r, 0.15 * r, 0.15), 0, -0.21 * r, l + 0.01 * r, "black"));
+          }
+          if (riseBucket >= 3) {
+            n.push(P_(BOXM(0.24 * r, 0.015 * r, 0.02 * r, 0.1), 0, -0.215 * r, l + 0.09 * r, "glow", { e: 1 }));
+            for (let e2 = 0; e2 < 2; e2++) fan(n, -0.2 * r + e2 * 0.4 * r, 0, z2 + 0.06 * r, 3.4, 4, "gunmetal", 2.2);
+            n.push(P_(BOXM(0.1 * r, 0.08 * r, 0.25, 0.12), 0.26 * r, 0.16 * r, z2, "darkmetal"));
+            n.push(P_(BOXM(0.09 * r, 0.07 * r, 0.2, 0.1), 0.26 * r, 0.16 * r, z2 + 0.25, "crystal", { e: 1, ty: 0.25 }));
+          }
+          if (riseBucket >= 4) {
+            n.push(P_(CYL(0.02 * r, 0.14 * r, 10), 0.28 * r, -0.16 * r, z2 + 0.06 * r, "darkmetal"));
+            n.push(P_(CYL(0.04 * r, 0.05 * r, 8), 0.28 * r, -0.16 * r, z2 + 0.2 * r, "glow", { e: 1, a: { spin: 0.6 } }));
+          }
         } else if (o) {
-          n.push(P_(BOXM(sw, sd, sh2, 0.3), 0.3 * -r, 0.3 * -r, l, "concrete"));
-          n.push(P_(BOXM(sw * 1.05, sd * 1.05, 1.3, 0.25), 0.3 * -r, 0.3 * -r, l + sh2, "concrete2"));
-          windows(n, sw * 0.9, sd * 0.85, l + 0.28 * sh2, 0.2 * sh2, 3, "glassdark");
-          for (const e2 of [-1, 1]) stack(n, 0.3 * -r + e2 * sw * 0.3, 0.3 * -r - 0.1 * sd, l + sh2, 0.03 * r, 0.12 * r, "rust");
+          if (riseBucket >= 1) {
+            tier(n, 0.62 * r, 0.44 * r, 0.26 * s, 0, 0, l, "concrete", "fol1", 0.96);
+          }
+          const z2 = l + 0.26 * s;
+          if (riseBucket >= 2) {
+            n.push(P_(BOXM(0.58 * r, 0.4 * r, 0.08 * r, 0.3), 0, 0, z2, "concrete2"));
+            windows(n, 0.56 * r, 0.36 * r, l + 0.12 * s, 0.1 * s, 5, "glassdark");
+            n.push(P_(BOXM(0.28 * r, 0.02 * r, 0.16 * r, 0.2), 0, -0.22 * r, l + 0.01 * r, "rust"));
+          }
+          if (riseBucket >= 3) {
+            for (const cc of CORNERS) n.push(P_(CYL(0.03 * r, 0.26 * s, 10), cc[0] * 0.26 * r, cc[1] * 0.18 * r, z2, "darkmetal"));
+            for (const e2 of [-1, 1]) stack(n, e2 * 0.24 * r, 0.24 * r, z2 + 0.08 * r, 0.035 * r, 0.16 * r, "rust");
+          }
+          if (riseBucket >= 4) {
+            n.push(P_(CYL(0.03 * r, 0.14 * r, 10), 0, 0, z2 + 0.08 * r, "darkmetal"));
+            n.push(P_(CYL(0.05 * r, 0.05 * r, 8), 0, 0, z2 + 0.08 * r + 0.14 * r, "red", { e: 1, a: { spin: 1 } }));
+          }
         } else {
-          hive(n, { x: 0.3 * -r, y: 0.3 * -r, z: l, r: 0.14 * r, h: sh2, crown: 0.056 * r, seg: 8, pods: 3, crest: false, vein: "psi" });
-          n.push(P_(CYL(1.8, 2.4, 10), 0.3 * -r, 0.3 * -r, l + 0.2 * r, "psi", { e: 1, a: { spin: 1.2 } }));
+          if (riseBucket >= 1) {
+            n.push(P_(TSLAB(circleProfile(0.3 * r, 10), 0.07 * s, 0.92, "fyfound"), 0, 0, l, "carapace2"));
+          }
+          if (riseBucket >= 2) {
+            hive(n, { x: 0, y: 0, z: l, r: 0.28 * r, h: 0.85 * s, crown: 0.1 * r, seg: 9, pods: 4, crest: false, vein: "psi" });
+          }
+          if (riseBucket >= 3) {
+            n.push(P_(CYL(1.8, 2.6, 10), 0, 0, l + 0.5 * s, "psi", { e: 1, a: { spin: 1.2 } }));
+            for (const cc of [[-1, 0], [1, 0]]) hive(n, { x: cc[0] * 0.34 * r, y: 0.04 * r, z: l, r: 0.08 * r, h: 0.28 * s, crown: 0.045 * r, seg: 6, crest: false, vein: "psi" });
+          }
+          if (riseBucket >= 4) {
+            veins(n, 0, 0, l + 2, 0.28 * r, 0.32 * s, 9, "psi");
+          }
         }
-        gantry(n, 0.18 * r, 0.12 * r, l, 0.38 * r, 0.22 * r, 0);
-        for (let e2 = 0; e2 < 4; e2++) n.push(P_(CYL(1.6, 2.5, 12), 0.05 * r + e2 * r * 0.09, 0.28 * r, l + 1.5, "steel", { a: { spin: 1.5 + 0.15 * e2 } }));
-        n.push(P_(CYL(1.2, 1.5, 10), 0.18 * r, 0.28 * r, l + 3.8, "glow", { e: 1, a: { spin: 2 } }));
-        hazard(n, 0.2 * r, 0.08 * r, 4.2, 0.35 * r, 0);
-        crate(n, -0.3 * r, 0.26 * r, l, 5, "olive", -0.2);
-        containerBox(n, -0.32 * r, -0.12 * r, l, 5.5, 2.8, 2.5, "rust", 0.25);
-        barrel(n, 0.32 * r, -0.28 * r, l);
+        gantry(n, 0.18 * r, 0.3 * r, l, 0.38 * r, 0.22 * r, 0);
+        for (let e2 = 0; e2 < 4; e2++) n.push(P_(CYL(1.6, 2.5, 12), 0.05 * r + e2 * r * 0.09, 0.36 * r, l + 1.5, "steel", { a: { spin: 1.5 + 0.15 * e2 } }));
+        hazard(n, 0.2 * r, 0.3 * r, 4.2, 0.35 * r, 0);
+        crate(n, -0.34 * r, 0.28 * r, l, 5, "olive", -0.2);
+        containerBox(n, -0.36 * r, 0.36 * r, l, 5.5, 2.8, 2.5, "rust", 0.25);
+        barrel(n, -0.1 * r, 0.4 * r, l);
         break;
       }
       case "lab":
@@ -6258,8 +6295,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (e2.dead) continue;
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f + 220) continue;
       if (!seen(e2)) continue;
-      const t2 = e2.owner < 0 ? "neutral" : S.players[e2.owner].fac, r2 = e2.owner < 0 ? { body: MAT.neutral, dark: "#6a6252", trim: "#aaa" } : palette(e2.owner), gy = heightAt(e2.x, e2.y), n2 = ("conyard" === e2.key ? 0 : e2.rise >= 1 ? 0 : -(1 - e2.rise) * (32 * e2.size * 0.62 + 30)) + gy, conn = "wall" === e2.key || "gate" === e2.key ? wallNeighborMask(e2.tx, e2.ty, e2.owner) : 0, gateBucket = "gate" === e2.key ? Math.round(8 * (e2.gateT || 0)) : 0, riseBucket = "conyard" === e2.key ? Math.round(4 * Math.min(1, e2.rise)) : 4, a2 = "B" + e2.key + ("hive" === e2.key || "super" === e2.key ? e2.deployed ? "D" : "U" : "gate" === e2.key ? "G" + gateBucket : "conyard" === e2.key ? "R" + riseBucket : "") + (conn ? "_c" + conn : "") + "|" + t2 + "|" + e2.owner;
-      c(a2, () => BMODEL(e2.key, t2, "gate" === e2.key ? gateBucket / 8 : "conyard" === e2.key ? Math.min(1, e2.rise) : e2.deployed, conn, e2.rot || 0), r2, e2.x, e2.y, n2, e2.rot || 0);
+      const t2 = e2.owner < 0 ? "neutral" : S.players[e2.owner].fac, r2 = e2.owner < 0 ? { body: MAT.neutral, dark: "#6a6252", trim: "#aaa" } : palette(e2.owner), gy = heightAt(e2.x, e2.y), n2 = ("conyard" === e2.key || "factory" === e2.key ? 0 : e2.rise >= 1 ? 0 : -(1 - e2.rise) * (32 * e2.size * 0.62 + 30)) + gy, conn = "wall" === e2.key || "gate" === e2.key ? wallNeighborMask(e2.tx, e2.ty, e2.owner) : 0, gateBucket = "gate" === e2.key ? Math.round(8 * (e2.gateT || 0)) : 0, riseBucket = "conyard" === e2.key || "factory" === e2.key ? Math.round(4 * Math.min(1, e2.rise)) : 4, a2 = "B" + e2.key + ("hive" === e2.key || "super" === e2.key ? e2.deployed ? "D" : "U" : "gate" === e2.key ? "G" + gateBucket : "conyard" === e2.key || "factory" === e2.key ? "R" + riseBucket : "") + (conn ? "_c" + conn : "") + "|" + t2 + "|" + e2.owner;
+      c(a2, () => BMODEL(e2.key, t2, "gate" === e2.key ? gateBucket / 8 : "conyard" === e2.key || "factory" === e2.key ? Math.min(1, e2.rise) : e2.deployed, conn, e2.rot || 0), r2, e2.x, e2.y, n2, e2.rot || 0);
       const o2 = GLGEO.get(a2);
       if (o2 && o2.anims) for (let t3 = 0; t3 < o2.anims.length; t3++) {
         const s2 = o2.anims[t3];
