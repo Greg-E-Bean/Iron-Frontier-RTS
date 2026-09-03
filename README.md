@@ -112,4 +112,26 @@ npm install
 npm run build       # regenerates index.html once
 npm run watch       # regenerates index.html on every src/ change
 npm run typecheck   # tsc --noEmit - the actual type check (build doesn't check types)
+npm test            # runs the regression suite against a fresh build (see below)
 ```
+
+### Testing
+
+`tests/*.spec.ts` is a [Playwright](https://playwright.dev/) regression suite
+that drives the actual built `index.html` through its own runtime API — map
+generation, the skirmish AI, FPS mode, save/load, campaigns, the build-menu
+cards, superweapon abilities, audio, the PWA service worker, and the optional
+GLTF/GLB asset loader — via `page.evaluate()` calls into `window.startGame()`,
+`step()`, `S`, `cfg`, and friends, rather than by clicking through the DOM.
+`npm test` starts a static server over the repo root (`scripts/serve.mjs`) and
+runs the suite against it; run `npm run build` first if you've changed
+anything under `src/`. Tests run serially (`workers: 1` in
+`playwright.config.ts`) — several of them drive hundreds of real sim ticks or
+full WebGL/WebAudio frames through a software renderer, and running them
+concurrently starves each other on a constrained CPU rather than actually
+finishing faster.
+
+Pushes and pull requests run this suite in GitHub Actions
+(`.github/workflows/ci.yml`), along with `npm run build` (checking the
+regenerated `index.html` is committed and up to date with `src/`) and
+`npm run typecheck`.
