@@ -361,6 +361,8 @@ declare global {
   const hive: AnyFn;
   const def1Bits: AnyFn;
   const aaBits: AnyFn;
+  const triGunHead: AnyFn;
+  const triAAHead: AnyFn;
   const BMODEL_: AnyFn;
   const BTURRET_: AnyFn;
   function UMODEL(key: string, frame?: number, extra?: any): any;
