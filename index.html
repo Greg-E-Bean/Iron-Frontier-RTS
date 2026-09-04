@@ -3712,7 +3712,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   function hasStagedBuild(e) {
-    return "conyard" === e || "factory" === e || "power" === e || "barracks" === e || "refinery" === e || "airfield" === e || "navalyard" === e;
+    return "conyard" === e || "factory" === e || "power" === e || "barracks" === e || "refinery" === e || "airfield" === e || "navalyard" === e || "lab" === e;
   }
   function BMODEL_(e, t, dep, cn, rot) {
     cn = cn || 0;
@@ -4120,29 +4120,52 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
       case "lab":
         if (a) {
-          tier(n, 0.66 * r, 0.66 * r, s, 0, 0, l, "armor", "lbv1", 0.94), windows(n, 0.62 * r, 0.62 * r, l + 0.34 * s, 0.32 * s, 4), n.push(P_(CYL(0.3 * r, 0.26 * r, 22), 0, 0, c, "body")), n.push(P_(CYL(0.33 * r, 1.8, 22), 0, 0, c, "armor3"));
-          for (let e2 = 0; e2 < 6; e2++) {
-            const t2 = 1.047 * e2;
-            n.push(P_(BOXM(3.4, 1.6, 2.2, 0.4), Math.cos(t2) * r * 0.31, Math.sin(t2) * r * 0.31, c + 1.8, "crystal", { r: t2, e: 1 }));
+          if (riseBucket >= 1) {
+            tier(n, 0.66 * r, 0.66 * r, s, 0, 0, l, "armor", "lbv1", 0.94), windows(n, 0.62 * r, 0.62 * r, l + 0.34 * s, 0.32 * s, 4), railPosts(n, 0.64 * r, 0.64 * r, c, 2.4);
           }
-          n.push(P_(DOME(0.3 * r, 0.22 * r, 22), 0, 0, c + 0.26 * r, "glass", { e: 1 })), railPosts(n, 0.64 * r, 0.64 * r, c, 2.4), dish(n, 0.24 * r, 0.24 * -r, c, 8), acUnit(n, 0.24 * -r, 0.24 * r, c, 8, 7, 0.6), lattice(n, 0.27 * -r, 0.27 * -r, c, 0.26 * r, 1.9, "steel");
+          if (riseBucket >= 2) {
+            n.push(P_(CYL(0.3 * r, 0.26 * r, 22), 0, 0, c, "body")), n.push(P_(CYL(0.33 * r, 1.8, 22), 0, 0, c, "armor3"));
+          }
+          if (riseBucket >= 3) {
+            for (let e2 = 0; e2 < 6; e2++) {
+              const t2 = 1.047 * e2;
+              n.push(P_(BOXM(3.4, 1.6, 2.2, 0.4), Math.cos(t2) * r * 0.31, Math.sin(t2) * r * 0.31, c + 1.8, "crystal", { r: t2, e: 1 }));
+            }
+            dish(n, 0.24 * r, 0.24 * -r, c, 8), acUnit(n, 0.24 * -r, 0.24 * r, c, 8, 7, 0.6);
+          }
+          if (riseBucket >= 4) {
+            n.push(P_(DOME(0.3 * r, 0.22 * r, 22), 0, 0, c + 0.26 * r, "glass", { e: 1 })), lattice(n, 0.27 * -r, 0.27 * -r, c, 0.26 * r, 1.9, "steel");
+          }
         } else if (o) {
-          tier(n, 0.7 * r, 0.7 * r, s, 0, 0, l, "concrete", "lbl1", 0.94), windows(n, 0.66 * r, 0.66 * r, l + 0.34 * s, 0.3 * s, 4, "glassdark"), n.push(P_(SLAB(roundRectProfile(0.76 * r, 0.76 * r, 4, 3), 3.2, 0.88, "lblr"), 0, 0, c, "concrete2")), n.push(P_(CYL(0.26 * r, 0.3 * r, 20), 0, 0, c + 3.2, "armor2")), ribs(n, 0, 0, c + 3.2, 0.26 * r, 0.3 * r, 3, "darkmetal"), n.push(P_(DOME(0.26 * r, 0.2 * r, 20), 0, 0, c + 3.2 + 0.3 * r, "armor3"));
-          for (let e2 = 0; e2 < 4; e2++) {
-            const t2 = e2 * PI2 + 0.78;
-            n.push(P_(CYL(1.4, 0.16 * r, 10), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, c + 3.2 + 0.3 * r, "steel")), n.push(P_(CYL(1.9, 1.3, 10), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, c + 3.2 + 0.46 * r, "tesla", { e: 1 }));
+          if (riseBucket >= 1) {
+            tier(n, 0.7 * r, 0.7 * r, s, 0, 0, l, "concrete", "lbl1", 0.94), windows(n, 0.66 * r, 0.66 * r, l + 0.34 * s, 0.3 * s, 4, "glassdark"), railPosts(n, 0.72 * r, 0.72 * r, c + 3.2, 2.6);
           }
-          railPosts(n, 0.72 * r, 0.72 * r, c + 3.2, 2.6);
-          for (let e2 = 0; e2 < 3; e2++) {
-            const t2 = 2.09 * e2;
-            n.push(P_(BOXM(0.1 * r, 2.2, 1.8, 0.4), Math.cos(t2) * r * 0.18, Math.sin(t2) * r * 0.18, c + 3.2 + 0.31 * r, "tesla", { r: t2, e: 1 }));
+          if (riseBucket >= 2) {
+            n.push(P_(SLAB(roundRectProfile(0.76 * r, 0.76 * r, 4, 3), 3.2, 0.88, "lblr"), 0, 0, c, "concrete2")), n.push(P_(CYL(0.26 * r, 0.3 * r, 20), 0, 0, c + 3.2, "armor2")), ribs(n, 0, 0, c + 3.2, 0.26 * r, 0.3 * r, 3, "darkmetal");
           }
-          stack(n, 0.28 * -r, 0.28 * r, c + 3.2, 3.8, 0.16 * r, "rust"), stairs(n, 0.26 * r, 0.38 * -r, l, s, 0);
+          if (riseBucket >= 3) {
+            for (let e2 = 0; e2 < 4; e2++) {
+              const t2 = e2 * PI2 + 0.78;
+              n.push(P_(CYL(1.4, 0.16 * r, 10), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, c + 3.2 + 0.3 * r, "steel"));
+            }
+            stack(n, 0.28 * -r, 0.28 * r, c + 3.2, 3.8, 0.16 * r, "rust"), stairs(n, 0.26 * r, 0.38 * -r, l, s, 0);
+          }
+          if (riseBucket >= 4) {
+            n.push(P_(DOME(0.26 * r, 0.2 * r, 20), 0, 0, c + 3.2 + 0.3 * r, "armor3"));
+            for (let e2 = 0; e2 < 4; e2++) {
+              const t2 = e2 * PI2 + 0.78;
+              n.push(P_(CYL(1.9, 1.3, 10), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, c + 3.2 + 0.46 * r, "tesla", { e: 1 }));
+            }
+          }
         } else {
-          hive(n, { x: 0, y: 0, z: l, r: 0.32 * r, h: 1.15 * s, crown: 0.18 * r, seg: 6, spines: 1, crest: true, vein: "crystal" });
-          for (let e2 = 0; e2 < 3; e2++) {
-            const t2 = 2.09 * e2 + 0.5;
-            n.push(P_(CONE(2.2, 0.4, 0.4 * r, 6), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, l + 1.2 * s, "carapace2", { ty: 0.24, r: t2 }));
+          if (riseBucket >= 1) {
+            hive(n, { x: 0, y: 0, z: l, r: 0.32 * r, h: 1.15 * s, crown: 0.18 * r, seg: 6, spines: 1, crest: true, vein: "crystal" });
+          }
+          if (riseBucket >= 3) {
+            for (let e2 = 0; e2 < 3; e2++) {
+              const t2 = 2.09 * e2 + 0.5;
+              n.push(P_(CONE(2.2, 0.4, 0.4 * r, 6), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, l + 1.2 * s, "carapace2", { ty: 0.24, r: t2 }));
+            }
           }
         }
         break;
@@ -4276,6 +4299,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
             n.push(P_(CONE(2.2, 0.4, 0.34 * r, 6), Math.cos(t2) * r * 0.16, Math.sin(t2) * r * 0.16, l + 1.02 * s + 0.2 * r + 0.3 * riseZ, "crystal", d ? { r: t2, ty: 0.42, e: 1, a: { spin: -1 } } : { r: t2, ty: 0.42, e: 1 }));
           }
         }
+        railPosts(n, 0.94 * r, 0.94 * r, l + 1.2, 2.4);
         break;
       case "civ1":
         tier(n, 0.78 * r, 0.72 * r, 0.34 * r, 0, 0, l, "neutral", "cv1", 0.96), n.push(P_(SLAB(roundRectProfile(0.86 * r, 0.8 * r, 3, 3), 2.8, 0.8, "cv1r"), 0, 0, l + 0.34 * r, "rust")), windows(n, 0.74 * r, 0.68 * r, l + 0.12 * r, 0.1 * r, 3, "glassdark"), roofFarm(n, 0.6 * r, 0.56 * r, l + 0.34 * r + 2.8, 71), n.push(P_(CYL(3, 0.16 * r, 14), 0.24 * r, 0, l + 0.34 * r + 2.8, "rust"));
