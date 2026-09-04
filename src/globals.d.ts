@@ -146,6 +146,7 @@ declare global {
   const unitFacOwner: AnyFn;
   function countBld(owner: number, key: string): number;
   function canBuildBld(owner: Player, key: string, inProgress?: number): boolean;
+  const bldKind: AnyFn;
   const siloBonus: AnyFn;
   function canBuildUnit(owner: Player, key: string, inProgress?: number): boolean;
   const qCount: AnyFn;

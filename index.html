@@ -956,7 +956,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var S = { players: [], units: [], blds: [], bldById: /* @__PURE__ */ new Map(), projs: [], fx: [], rockets: [], traffic: [], spyReveals: [], nextId: 1, time: 0, running: false, over: false, speed: 1, sel: [], placing: null, selMode: false, tab: "bld", hoverT: null };
   function newPlayer(e, t, r, n, a, o) {
-    return { id: e, fac: t, f: FACTIONS[t], isAI: r, diff: n, team: null != a ? a : e, color: o && o.body || null, dark: o && o.dark || null, tint: o && o.tint || null, credits: 1e4, power: 0, drain: 0, queues: { bld: null, inf: null, veh: null, air: null }, ready: { bld: null }, ai: { t: 0, wave: 0, attack: false, rally: null, target: null, expand: 0 }, defeated: false, kills: 0, lost: 0 };
+    return { id: e, fac: t, f: FACTIONS[t], isAI: r, diff: n, team: null != a ? a : e, color: o && o.body || null, dark: o && o.dark || null, tint: o && o.tint || null, credits: 1e4, power: 0, drain: 0, queues: { bld: null, def: null, inf: null, veh: null, air: null }, ready: { bld: null, def: null }, ai: { t: 0, wave: 0, attack: false, rally: null, target: null, expand: 0 }, defeated: false, kills: 0, lost: 0 };
   }
   var P = () => S.players[0];
   function addBuilding(e, t, r, n, a) {
@@ -1075,6 +1075,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function countBld(e, t) {
     return S.blds.filter((r) => r.owner === e && !r.dead && r.key === t).length;
   }
+  var DEF_BLD_KEYS = /* @__PURE__ */ new Set(["def1", "aa", "def2", "wall", "gate", "super"]);
+  function bldKind(e) {
+    return DEF_BLD_KEYS.has(e) ? "def" : "bld";
+  }
   function canBuildBld(e, t, inProgress) {
     const r = BLD[t];
     if ("conyard" === t) return false;
@@ -1082,7 +1086,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const t2 of r.prereq) if (!hasBld(e.id, t2)) return false;
     if (!hasBld(e.id, "conyard")) return false;
     if (r.limit) {
-      if (S.blds.filter((r2) => r2.owner === e.id && !r2.dead && r2.key === t).length + qCount(e, "bld", t) + (e.ready.bld === t ? 1 : 0) - (inProgress ? 1 : 0) >= r.limit) return false;
+      const k = bldKind(t);
+      if (S.blds.filter((r2) => r2.owner === e.id && !r2.dead && r2.key === t).length + qCount(e, k, t) + (e.ready[k] === t ? 1 : 0) - (inProgress ? 1 : 0) >= r.limit) return false;
     }
     return true;
   }
@@ -1104,8 +1109,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return true;
   }
-  var costOf = (e, t) => "bld" === e ? BLD[t].cost : UNITS[t].cost;
-  var timeOf = (e, t) => "bld" === e ? BLD[t].build : Math.max(2.2, UNITS[t].cost / 190);
+  var costOf = (e, t) => "bld" === e || "def" === e ? BLD[t].cost : UNITS[t].cost;
+  var timeOf = (e, t) => "bld" === e || "def" === e ? BLD[t].build : Math.max(2.2, UNITS[t].cost / 190);
   function qCount(e, t, r) {
     const n = e.queues[t];
     return n ? n.list.reduce((e2, t2) => e2 + (t2 === r ? 1 : 0), 0) : 0;
@@ -1127,10 +1132,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const n = e.queues[t];
     if (!n) return;
     let a = r ? n.list.lastIndexOf(r) : n.list.length - 1;
-    a < 0 || (0 === a && (e.credits += n.paid, n.paid = 0, n.prog = 0, "bld" === t && e.ready.bld === n.list[0] && (e.ready.bld = null)), n.list.splice(a, 1), n.list.length || (e.queues[t] = null));
+    a < 0 || (0 === a && (e.credits += n.paid, n.paid = 0, n.prog = 0, ("bld" === t || "def" === t) && e.ready[t] === n.list[0] && (e.ready[t] = null)), n.list.splice(a, 1), n.list.length || (e.queues[t] = null));
   }
   function activeSourceOk(e, n, o) {
-    if ("bld" === n) return hasActiveBld(e.id, "conyard");
+    if ("bld" === n || "def" === n) return hasActiveBld(e.id, "conyard");
     const r = UNITS[o];
     if (FACTIONS[e.f.key].units.includes(o) || o === e.f.miner) return hasActiveBld(e.id, r.from);
     const ff = unitFacOwner(o);
@@ -1138,12 +1143,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function tickProduction(e, t) {
     const r = powerFactor(e);
-    for (const n of ["bld", "inf", "veh", "air", "sea"]) {
+    for (const n of ["bld", "def", "inf", "veh", "air", "sea"]) {
       const a = e.queues[n];
       if (!a || !a.list.length) continue;
-      if ("bld" === n && e.ready.bld) continue;
+      if (("bld" === n || "def" === n) && e.ready[n]) continue;
       const o = a.list[0], s = costOf(n, o), i = timeOf(n, o);
-      if (!("bld" === n ? canBuildBld(e, o, true) : canBuildUnit(e, o, true))) {
+      if (!("bld" === n || "def" === n ? canBuildBld(e, o, true) : canBuildUnit(e, o, true))) {
         a.hold = true;
         continue;
       }
@@ -1154,7 +1159,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       let l = 1;
       "inf" === n && (l = 1 + 0.35 * (countBld(e.id, "barracks") - 1)), "veh" === n && (l = 1 + 0.35 * (countBld(e.id, "factory") - 1)), "air" === n && (l = 1 + 0.35 * (countBld(e.id, "airfield") - 1)), "sea" === n && (l = 1 + 0.35 * (countBld(e.id, "navalyard") - 1));
       const c = Math.min(s * (t / i * r * l), e.credits, s - a.paid);
-      c <= 0 && a.paid < s ? a.hold = true : (a.hold = false, e.credits -= c, a.paid += c, a.prog = Math.min(1, a.paid / s), a.prog >= 1 && ("bld" === n ? (e.ready.bld = o, e.isAI || (hint(bname(o, e.fac) + " ready \u2014 tap it, then tap the map"), sfx("ready"))) : (spawnUnit(e, o), a.list.shift(), a.prog = 0, a.paid = 0, a.list.length || (e.queues[n] = null))));
+      c <= 0 && a.paid < s ? a.hold = true : (a.hold = false, e.credits -= c, a.paid += c, a.prog = Math.min(1, a.paid / s), a.prog >= 1 && ("bld" === n || "def" === n ? (e.ready[n] = o, e.isAI || (hint(bname(o, e.fac) + " ready \u2014 tap it, then tap the map"), sfx("ready"))) : (spawnUnit(e, o), a.list.shift(), a.prog = 0, a.paid = 0, a.list.length || (e.queues[n] = null))));
     }
   }
   function spawnUnit(e, t) {
@@ -1167,14 +1172,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const l = addUnit(e.id, t, o, s);
     l && (r.fly && (l.alt = 0, l.ammo = r.ammo || 0, l.home = "airfield" === a.key ? a : null), "miner" === r.role ? l.order = "harvest" : a.rally && cmdMove([l], a.rally.x, a.rally.y), e.isAI || sfx("unit"));
   }
-  function placeReady(e, t, r) {
-    const n = e.ready.bld;
+  function placeReady(e, kind, t, r) {
+    const n = e.ready[kind];
     if (!n) return false;
     if (!canPlace(n, t, r, e.id)) return false;
     const a = addBuilding(e.id, n, t, r, true);
-    a && (a.rise = 0), ("wall" === n || "gate" === n) && autoLinkWall(e.id, t, r), "gate" === n && a && placeGatePair(a), e.ready.bld = null;
-    const o = e.queues.bld;
-    return o && (o.list[0] === n && o.list.shift(), o.prog = 0, o.paid = 0, o.list.length || (e.queues.bld = null)), sfx("place"), true;
+    a && (a.rise = 0), ("wall" === n || "gate" === n) && autoLinkWall(e.id, t, r), "gate" === n && a && placeGatePair(a), e.ready[kind] = null;
+    const o = e.queues[kind];
+    return o && (o.list[0] === n && o.list.shift(), o.prog = 0, o.paid = 0, o.list.length || (e.queues[kind] = null)), sfx("place"), true;
   }
   function cmdMove(e, t, r, n) {
     const a = e.length, o = Math.ceil(Math.sqrt(a)), s = Math.max(34, 3.6 * e.reduce((e2, t2) => Math.max(e2, t2.d.radius), 8));
@@ -1800,6 +1805,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     unitFacOwner,
     countBld,
     canBuildBld,
+    bldKind,
     siloBonus,
     canBuildUnit,
     qCount,
@@ -1941,11 +1947,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (e.ai.t -= t, e.ai.t > 0) return;
     if (e.ai.t = r.tick, e.ready.bld) {
       const t2 = aiFindSpot(e, e.ready.bld);
-      t2 ? placeReady(e, t2[0], t2[1]) : e.ready.bld = null;
+      t2 ? placeReady(e, "bld", t2[0], t2[1]) : e.ready.bld = null;
     }
-    if (!(e.queues.bld && e.queues.bld.list.length || e.ready.bld)) {
+    if (e.ready.def) {
+      const t2 = aiFindSpot(e, e.ready.def);
+      t2 ? placeReady(e, "def", t2[0], t2[1]) : e.ready.def = null;
+    }
+    if (!(e.queues.bld && e.queues.bld.list.length || e.ready.bld) || !(e.queues.def && e.queues.def.list.length || e.ready.def)) {
       const t2 = aiNextBld(e);
-      t2 && canBuildBld(e, t2) && e.credits > 0.5 * BLD[t2].cost && startBuild(e, "bld", t2);
+      if (t2) {
+        const k = bldKind(t2);
+        !(e.queues[k] && e.queues[k].list.length || e.ready[k]) && canBuildBld(e, t2) && e.credits > 0.5 * BLD[t2].cost && startBuild(e, k, t2);
+      }
     }
     const yu = "yuri" === e.f.key;
     if (yu) {
@@ -5068,7 +5081,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function drawGhost() {
     if (!S.placing || !S.ghost) return;
     const e = S.placing, t = BLD[e].size, r = S.ghost.tx, n = S.ghost.ty, a = S.deployUnit ? canDeploy(e, r, n, S.deployUnit) : canPlace(e, r, n, 0), o = palette(0), s = 32 * (r + t / 2), i = 32 * (n + t / 2);
-    blit(sprite("B" + e + "|" + S.players[0].fac + "|g", BMODEL(e, S.players[0].fac), 0, o), w2sx(s, i), w2sy(s, i), cam.z, 0.55), ctx.fillStyle = a ? "rgba(90,230,110,.28)" : "rgba(230,70,60,.30)", footprintPath(r, n, t), ctx.fill(), ctx.strokeStyle = a ? "#9dffab" : "#ff9c92", ctx.lineWidth = 2, ctx.stroke();
+    blit(sprite("B" + e + "|" + S.players[0].fac + "|g", BMODEL(e, S.players[0].fac, 1), 0, o), w2sx(s, i), w2sy(s, i), cam.z, 0.55), ctx.fillStyle = a ? "rgba(90,230,110,.28)" : "rgba(230,70,60,.30)", footprintPath(r, n, t), ctx.fill(), ctx.strokeStyle = a ? "#9dffab" : "#ff9c92", ctx.lineWidth = 2, ctx.stroke();
     for (let e2 = 1; e2 < t; e2++) {
       ctx.globalAlpha = 0.35, ctx.beginPath();
       let a2 = w2sx(32 * (r + e2), 32 * n), o2 = w2sy(32 * (r + e2), 32 * n);
@@ -5168,7 +5181,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function iconFor(e, t, r, n) {
     const a = palette(n || 0);
     if ("ability" === e) return makeSprite("super" === t ? BMODEL("super", r, 0) : jet(20, 10, 0, r), 0, a);
-    const o = "bld" === e ? BMODEL(t, r) : UMODEL(t, 0), s = "bld" === e ? BTURRET(t, r, 0) : UTURRET(t, 0), i = "bld" === e ? 0 : faceAng(faceIdx(2.5));
+    const isBld = "bld" === e || "def" === e, o = isBld ? BMODEL(t, r, 1) : UMODEL(t, 0), s = isBld ? BTURRET(t, r, 0) : UTURRET(t, 0), i = isBld ? 0 : faceAng(faceIdx(2.5));
     return makeSprite(s ? o.concat(s) : o, i, a);
   }
   function drawRads() {
@@ -7443,7 +7456,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function tabList(e) {
     const t = P().f;
     if ("bld" === e) return ["power", "refinery", "barracks", "factory", "silo", "repair", "lab", "airfield", "navalyard"].filter((e2) => "refinery" !== e2 || "yuri" !== t.key).map((e2) => ({ kind: "bld", key: e2 }));
-    if ("def" === e) return [{ kind: "bld", key: "def1" }, { kind: "bld", key: "aa" }, { kind: "bld", key: "def2" }, { kind: "bld", key: "wall" }, { kind: "bld", key: "gate" }, { kind: "veh", key: "bastion" }, { kind: "bld", key: "super" }, { kind: "ability", key: "super" }, { kind: "ability", key: "spy" }, { kind: "ability", key: "paradrop" }, { kind: "ability", key: "emp" }];
+    if ("def" === e) return [{ kind: "def", key: "def1" }, { kind: "def", key: "aa" }, { kind: "def", key: "def2" }, { kind: "def", key: "wall" }, { kind: "def", key: "gate" }, { kind: "veh", key: "bastion" }, { kind: "def", key: "super" }, { kind: "ability", key: "super" }, { kind: "ability", key: "spy" }, { kind: "ability", key: "paradrop" }, { kind: "ability", key: "emp" }];
     const own = t.units.filter((t2) => UNITS[t2].tab === e), capFacs = new Set(S.blds.filter((b) => b.owner === P().id && !b.dead && b.capturedFac).map((b) => b.capturedFac)), foreign = [];
     for (const fac of capFacs) for (const u of FACTIONS[fac].units) UNITS[u].tab === e && !own.includes(u) && !foreign.includes(u) && foreign.push(u);
     return own.concat(foreign).map((t2) => ({ kind: e, key: t2, foreign: !own.includes(t2) }));
@@ -7453,7 +7466,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     r.width = 108, r.height = 88, r.style.width = "54px", r.style.height = "44px";
     const n = r.getContext("2d");
     n.scale(2, 2);
-    const a = iconFor(e, t, P().fac, 0), o = Math.min(54 / (a.w + 2), 44 / (a.h + 2), "bld" === e ? 0.62 : 1.5);
+    const a = iconFor(e, t, P().fac, 0), o = Math.min(54 / (a.w + 2), 44 / (a.h + 2), "bld" === e || "def" === e ? 0.62 : 1.5);
     return n.drawImage(a.c, 27 - a.w * o / 2, 22 - a.h * o / 2, a.w * o, a.h * o), r;
   }
   var cardEls = [];
@@ -7463,7 +7476,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     for (const t of tabList(S.tab)) {
       const r = document.createElement("div");
       r.className = "card";
-      const n = ("bld" === t.kind ? bname(t.key, e.fac) : "ability" === t.kind ? ABILITIES[t.key].name : uname(t.key, e.fac)) + (t.foreign ? " (Captured)" : ""), a = "bld" === t.kind ? BLD[t.key].cost : "ability" === t.kind ? ABILITIES[t.key].cost || 0 : UNITS[t.key].cost;
+      const n = ("bld" === t.kind || "def" === t.kind ? bname(t.key, e.fac) : "ability" === t.kind ? ABILITIES[t.key].name : uname(t.key, e.fac)) + (t.foreign ? " (Captured)" : ""), a = "bld" === t.kind || "def" === t.kind ? BLD[t.key].cost : "ability" === t.kind ? ABILITIES[t.key].cost || 0 : UNITS[t.key].cost;
       r.appendChild(iconCanvas(t.kind, t.key));
       const o = document.createElement("div");
       o.className = "prog", o.style.transform = "scaleY(0)", r.appendChild(o);
@@ -7475,7 +7488,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       l.className = "cs", l.textContent = "ability" === t.kind && !a ? "" : "$" + a, r.appendChild(l);
       const c = document.createElement("div");
       c.className = "qn", r.appendChild(c);
-      if ("bld" !== t.kind && "ability" !== t.kind) {
+      if ("bld" !== t.kind && "def" !== t.kind && "ability" !== t.kind) {
         const rt = unitRoleTag(t.key);
         if (rt) {
           const rl = document.createElement("div");
@@ -7495,8 +7508,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function cardClick(e) {
     const t = P();
     if ("ability" === e.kind) return void abilityClick(e.key);
-    if ("bld" === e.kind) {
-      if (t.ready.bld === e.key) return S.placing = e.key, S.ghost = null, S.deployUnit = null, void hint("Drag on the map, lift to place");
+    if ("bld" === e.kind || "def" === e.kind) {
+      if (t.ready[e.kind] === e.key) return S.placing = e.key, S.ghost = null, S.deployUnit = null, void hint("Drag on the map, lift to place");
       if (!canBuildBld(t, e.key)) {
         const r = BLD[e.key].prereq.filter((e2) => !hasBld(0, e2));
         return void hint("Needs " + (r.length ? r : BLD[e.key].prereq).map((e2) => bname(e2, t.fac)).join(" + "));
@@ -7507,10 +7520,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
     startBuild(t, e.kind, e.key), sfx("sel");
   }
-  var QLABEL = (e, t) => "bld" === e ? bname(t, P().fac) : UNITS[t].name;
+  var QLABEL = (e, t) => "bld" === e || "def" === e ? bname(t, P().fac) : UNITS[t].name;
   function updateQueueStrip() {
     const e = P(), t = $("#qstrip"), r = [];
-    for (const t2 of ["bld", "inf", "veh", "air", "sea"]) {
+    for (const t2 of ["bld", "def", "inf", "veh", "air", "sea"]) {
       const n2 = e.queues[t2];
       if (!n2 || !n2.list.length) continue;
       const a = [];
@@ -7518,13 +7531,13 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         t3 > 0 && a.length && a[a.length - 1].k === e2 ? a[a.length - 1].n++ : a.push({ k: e2, n: 1, head: 0 === t3 });
       }), a.forEach((e2) => r.push({ kind: t2, ...e2 }));
     }
-    const n = r.map((e2) => e2.kind + e2.k + e2.n + (e2.head ? "*" : "")).join("|") + (e.ready.bld || "") + (e.queues.bld ? Math.round(20 * e.queues.bld.prog) : "");
+    const n = r.map((e2) => e2.kind + e2.k + e2.n + (e2.head ? "*" : "")).join("|") + (e.ready.bld || "") + (e.ready.def || "") + (e.queues.bld ? Math.round(20 * e.queues.bld.prog) : "") + (e.queues.def ? Math.round(20 * e.queues.def.prog) : "");
     t._sig !== n && (t._sig = n, t.innerHTML = "", r.length ? (t.style.paddingTop = "4px", r.forEach((r2) => {
       const n2 = document.createElement("div");
       n2.className = "qi" + (r2.head ? " b" : "");
-      const a = r2.head ? e.ready.bld === r2.k && "bld" === r2.kind ? "READY" : Math.round(100 * (e.queues[r2.kind].prog || 0)) + "%" : "";
+      const a = r2.head ? e.ready[r2.kind] === r2.k ? "READY" : Math.round(100 * (e.queues[r2.kind].prog || 0)) + "%" : "";
       n2.innerHTML = QLABEL(r2.kind, r2.k) + (r2.n > 1 ? " <i>x" + r2.n + "</i>" : "") + (a ? " <i>" + a + "</i>" : ""), n2.addEventListener("click", (t2) => {
-        t2.stopPropagation(), r2.head && "bld" === r2.kind && e.ready.bld === r2.k ? (S.placing = r2.k, S.ghost = null, S.deployUnit = null, hint("Drag on the map, lift to place")) : (cancelBuild(e, r2.kind, r2.k), sfx("sel"));
+        t2.stopPropagation(), r2.head && e.ready[r2.kind] === r2.k ? (S.placing = r2.k, S.ghost = null, S.deployUnit = null, hint("Drag on the map, lift to place")) : (cancelBuild(e, r2.kind, r2.k), sfx("sel"));
       }), t.appendChild(n2);
     })) : t.style.paddingTop = "0");
   }
@@ -7573,7 +7586,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         t2.el.classList.toggle("dis", dis), t2.el.classList.toggle("rdy", ready), t2.el.classList.toggle("head", "super" === t2.it.key ? superAim : "spy" === t2.it.key ? spyAim : "paradrop" === t2.it.key ? paradropAim : "emp" === t2.it.key && empAim), t2.pg.style.transform = "scaleY(0)", t2.qn.style.display = "none", t2.bd.style.display = "", t2.bd.textContent = badge;
         continue;
       }
-      const r2 = e.queues[t2.it.kind], n = qCount(e, t2.it.kind, t2.it.key), a = r2 && r2.list.length && r2.list[0] === t2.it.key, o = "bld" === t2.it.kind && e.ready.bld === t2.it.key, s = "bld" === t2.it.kind ? canBuildBld(e, t2.it.key) : canBuildUnit(e, t2.it.key);
+      const r2 = e.queues[t2.it.kind], n = qCount(e, t2.it.kind, t2.it.key), a = r2 && r2.list.length && r2.list[0] === t2.it.key, isBld = "bld" === t2.it.kind || "def" === t2.it.kind, o = isBld && e.ready[t2.it.kind] === t2.it.key, s = isBld ? canBuildBld(e, t2.it.key) : canBuildUnit(e, t2.it.key);
       t2.el.classList.toggle("dis", !s && !n && !o), t2.el.classList.toggle("rdy", !!o), t2.el.classList.toggle("head", !!a && !o), t2.pg.style.transform = "scaleY(" + (a && !o ? 1 - (r2.prog || 0) : 0) + ")", n > 1 ? (t2.qn.style.display = "", t2.qn.textContent = "x" + n) : t2.qn.style.display = "none", o ? (t2.bd.style.display = "", t2.bd.textContent = "PLACE") : a && r2.hold ? (t2.bd.style.display = "", t2.bd.textContent = "$") : a ? (t2.bd.style.display = "", t2.bd.textContent = Math.round(100 * (r2.prog || 0)) + "%") : t2.bd.style.display = "none";
     }
     updateQueueStrip(), updateSelBar(), elCred.textContent = Math.floor(e.credits), elPwr.textContent = Math.round((e.power, e.drain, e.power)) + "/" + e.drain;
@@ -7664,7 +7677,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const u = S.deployUnit;
       return void (u.dead ? (S.placing = null, S.ghost = null, S.deployUnit = null, hint("Unit lost")) : canDeploy(S.placing, r.tx, r.ty, u) ? (finishDeploy(u, S.placing, r.tx, r.ty), S.placing = null, S.ghost = null, S.deployUnit = null) : hint("Cannot deploy here \u2014 drag to a clear, open spot"));
     }
-    if (placeReady(P(), r.tx, r.ty)) S.placing = null, S.ghost = null;
+    if (placeReady(P(), bldKind(S.placing), r.tx, r.ty)) S.placing = null, S.ghost = null;
     else {
       const bd = BLD[S.placing];
       bd && bd.naval && !nearWater(r.tx, r.ty, bd.size, 2) ? hint("Cannot build there \u2014 must be near the coast") : hint("Cannot build there \u2014 must be near your base");
@@ -8075,7 +8088,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       return np.f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, np.fac = "neutral", np.neutral = true, np.credits = rec.credits || 0, np;
     }
     const p = newPlayer(rec.id, rec.fac, rec.isAI, rec.diff, rec.team, { body: rec.color, dark: rec.dark, tint: rec.tint });
-    return p.credits = rec.credits, p.power = rec.power, p.drain = rec.drain, p.queues = rec.queues || { bld: null, inf: null, veh: null, air: null }, p.ready = rec.ready || { bld: null }, p.kills = rec.kills || 0, p.lost = rec.lost || 0, p.defeated = !!rec.defeated, p.spawnX = rec.spawnX, p.spawnY = rec.spawnY, p.spyCD = rec.spyCD || 0, p.paradropCD = rec.paradropCD || 0, p.empCD = rec.empCD || 0, p.isAI && rec.ai && (p.ai.t = rec.ai.t, p.ai.wave = rec.ai.wave || 0, p.ai.expand = rec.ai.expand || 0), p;
+    return p.credits = rec.credits, p.power = rec.power, p.drain = rec.drain, p.queues = rec.queues || { bld: null, def: null, inf: null, veh: null, air: null }, p.ready = rec.ready || { bld: null, def: null }, p.kills = rec.kills || 0, p.lost = rec.lost || 0, p.defeated = !!rec.defeated, p.spawnX = rec.spawnX, p.spawnY = rec.spawnY, p.spyCD = rec.spyCD || 0, p.paradropCD = rec.paradropCD || 0, p.empCD = rec.empCD || 0, p.isAI && rec.ai && (p.ai.t = rec.ai.t, p.ai.wave = rec.ai.wave || 0, p.ai.expand = rec.ai.expand || 0), p;
   }
   function serializeMap() {
     return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
