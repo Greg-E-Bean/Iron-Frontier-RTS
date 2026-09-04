@@ -3645,10 +3645,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.push(P_(CYL(3.6, 3.2, 10), cx, cy, z, mat)), e.push(P_(DOME(3.8, 3, 10), cx, cy, z + 3.2, "carapace"));
     let px = cx, py = cy;
     for (let k = 0; k < segs; k++) {
-      const rad = 2.6 - 0.42 * k, bA = Object.assign({ bob: 1 + 0.32 * k }, swA);
-      e.push(P_(CYL(rad, segLen * 1.05, 10), px, py, z + h, mat, { ty: PI2, a: bA })), px += segLen;
+      const rad = 2.6 - 0.42 * k;
+      e.push(P_(CYL(rad, segLen * 1.05, 10), px, py, z + h, mat, { ty: PI2, a: swA })), px += segLen;
     }
-    e.push(P_(DOME(1.7, 2, 10), px, py, z + h, "psi", { e: 1, a: Object.assign({ bob: 1.8 }, swA) }));
+    e.push(P_(DOME(1.7, 2, 10), px, py, z + h, "psi", { e: 1, a: swA }));
   }
   function solarPanels(e, t, r, n, w, d) {
     const rows2 = 3, cols = 2;
