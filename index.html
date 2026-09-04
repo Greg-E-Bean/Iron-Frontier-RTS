@@ -3712,7 +3712,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   function hasStagedBuild(e) {
-    return "conyard" === e || "factory" === e || "power" === e || "barracks" === e || "refinery" === e || "airfield" === e;
+    return "conyard" === e || "factory" === e || "power" === e || "barracks" === e || "refinery" === e || "airfield" === e || "navalyard" === e;
   }
   function BMODEL_(e, t, dep, cn, rot) {
     cn = cn || 0;
@@ -3969,12 +3969,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         }
         n.push(P_(BOXM(0.62 * hl, 0.42 * hw, 0.1 * hh, 0.04 * hh), 0.02 * hl, 0, l + 0.9 * hh, "gunmetal"));
         for (const side of [-1, 1]) for (let i2 = 0; i2 < 2; i2++) n.push(P_(CYL(0.075 * r, 0.1 * r, 10), (-0.28 + 0.5 * i2) * hl, side * 0.56 * hw, l + 0.075 * r, "darkmetal", { r: 1.5708 }));
+        for (let i2 = 0; i2 < 5; i2++) {
+          const sx = (-0.36 + 0.18 * i2) * hl;
+          n.push(P_(CONE(0.06 * r, 0.015 * r, 0.16 * r, 6), sx, 0, l + 0.85 * hh, "carapace2"));
+        }
+        veins(n, 0.02 * hl, 0, l + 0.55 * hh, 0.16 * hl, 0.22 * hh, 8, "psi");
         if (d) {
           n.push(P_(WEDGE(0.4 * r, 0.24 * r, 0, 0.9 * hh), -0.72 * r, 0, l, "darkmetal"));
           n.push(P_(BOXM(0.4 * r, 0.018 * r, 0.018 * r, 7e-3), -0.72 * r, -0.11 * r, l + 0.01, "gunmetal"));
           n.push(P_(BOXM(0.4 * r, 0.018 * r, 0.018 * r, 7e-3), -0.72 * r, 0.11 * r, l + 0.01, "gunmetal"));
           for (const sx of [-1, 1]) n.push(P_(DOME(0.15 * r, 0.14 * r, 12), sx * 0.2 * hl, 0, l + 0.9 * hh, "crystal", { e: 1 }));
           n.push(P_(CONE(0.7, 0.12, 2, 7), 0.04 * hl, 0, l + 0.9 * hh + 0.14 * r + 0.7, "psi", { e: 1 }));
+          n.push(P_(DOME(0.09 * r, 0.08 * r, 10), 0, 0, l + 0.9 * hh + 0.02 * r, "psi", { e: 1, a: { spin: 0.6 } }));
         } else {
           for (const sx of [-1, 1]) n.push(P_(DOME(0.12 * r, 0.1 * r, 10), sx * 0.18 * hl, 0, l + 0.9 * hh, "carapace2"));
           n.push(P_(CONE(0.4, 0.08, 1, 6), 0.04 * hl, 0, l + 0.9 * hh + 0.1 * r, "psi", { e: 1, ty: 0.1 }));
@@ -4277,9 +4283,29 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       case "civ2":
         tier(n, 0.64 * r, 0.64 * r, 0.52 * r, 0, 0, l, "neutral", "cv2", 0.94), n.push(P_(SLAB(roundRectProfile(0.72 * r, 0.72 * r, 3, 3), 2.8, 0.8, "cv2r"), 0, 0, l + 0.52 * r, "concrete2")), windows(n, 0.6 * r, 0.6 * r, l + 0.12 * r, 0.1 * r, 3, "glassdark"), windows(n, 0.6 * r, 0.6 * r, l + 0.34 * r, 0.1 * r, 3, "glassdark"), roofFarm(n, 0.46 * r, 0.46 * r, l + 0.52 * r + 2.8, 81), n.push(P_(CYL(1.4, 0.12 * r, 10), 0.22 * r, 0.22 * -r, l + 0.52 * r + 2.8, "darkmetal"));
         break;
-      case "navalyard":
-        n.push(P_(SLAB(roundRectProfile(0.88 * r, 0.6 * r, 4, 3), 1.6, 0.6, "nydk"), 0, -0.1 * r, l, "asphalt")), n.push(P_(BOXM(0.46 * r, 0.4 * r, 0.32 * r, 1.2), -0.14 * r, -0.16 * r, l, a ? "armor" : o ? "concrete" : "carapace")), n.push(P_(BOXM(0.38 * r, 0.32 * r, 0.06 * r, 1), -0.14 * r, -0.16 * r, l + 0.32 * r, a ? "armor2" : o ? "concrete2" : "carapace2")), n.push(P_(BOXM(0.1 * r, 0.1 * r, 0.6 * r, 0.3), 0.26 * r, 0.18 * r, l, "gunmetal")), n.push(P_(BOXM(0.5 * r, 0.09 * r, 0.09 * r, 0.5), 0.02 * r, 0.18 * r, l + 0.58 * r, "steel")), n.push(P_(CYL(1.5, 1.6, 10), 0.24 * r, 0.18 * r, l + 0.6 * r, "glow", { e: 1 })), n.push(P_(CYL(0.07 * r, 0.24 * r, 10), 0.3 * -r, 0.22 * -r, l, o ? "rust" : "steel")), n.push(P_(CYL(0.07 * r, 0.24 * r, 10), 0.3 * -r, 0.22 * r, l, o ? "rust" : "steel")), n.push(P_(BOXM(0.24 * r, 0.9 * r, 0.05 * r, 0.3), 0.02 * r, 0.02 * r, l + 0.02 * r, "wood"));
+      case "navalyard": {
+        n.push(P_(SLAB(roundRectProfile(0.88 * r, 0.6 * r, 4, 3), 1.6, 0.6, "nydk"), 0, -0.1 * r, l, "asphalt"));
+        if (riseBucket >= 1) {
+          n.push(P_(BOXM(0.46 * r, 0.4 * r, 0.32 * r, 1.2), -0.14 * r, -0.16 * r, l, a ? "armor" : o ? "concrete" : "carapace"));
+        }
+        if (riseBucket >= 2) {
+          n.push(P_(BOXM(0.38 * r, 0.32 * r, 0.06 * r, 1), -0.14 * r, -0.16 * r, l + 0.32 * r, a ? "armor2" : o ? "concrete2" : "carapace2"));
+          n.push(P_(BOXM(0.4 * r, 0.02 * r, 0.16 * r, 0.1), -0.14 * r, -0.37 * r, l + 0.1 * r, a ? "glass" : o ? "glassdark" : "psi", { e: 1 }));
+        }
+        if (riseBucket >= 3) {
+          gantry(n, 0.2 * r, 0.05 * r, l, 0.4 * r, 0.24 * r, 1.5708);
+        }
+        if (riseBucket >= 4) {
+          n.push(P_(BOXM(0.1 * r, 0.1 * r, 0.6 * r, 0.3), 0.26 * r, 0.18 * r, l, "gunmetal"));
+          n.push(P_(BOXM(0.5 * r, 0.09 * r, 0.09 * r, 0.5), 0.02 * r, 0.18 * r, l + 0.58 * r, "steel"));
+          n.push(P_(CYL(1.5, 1.6, 10), 0.24 * r, 0.18 * r, l + 0.6 * r, a ? "crystal" : o ? "glow" : "psi", { e: 1, a: { spin: a ? 1.4 : 0 } }));
+          if (a) dish(n, -0.14 * r, -0.42 * r, l + 0.32 * r + 0.06 * r, 0.045 * r);
+          else if (o) stack(n, -0.3 * r, -0.3 * r, l, 0.025 * r, 0.14 * r, "rust");
+          else n.push(P_(DOME(0.05 * r, 0.045 * r, 10), -0.14 * r, -0.42 * r, l + 0.32 * r + 0.06 * r, "psi", { e: 1, a: { spin: 0.6 } }));
+        }
+        n.push(P_(CYL(0.07 * r, 0.24 * r, 10), 0.3 * -r, 0.22 * -r, l, o ? "rust" : "steel")), n.push(P_(CYL(0.07 * r, 0.24 * r, 10), 0.3 * -r, 0.22 * r, l, o ? "rust" : "steel")), n.push(P_(BOXM(0.24 * r, 0.9 * r, 0.05 * r, 0.3), 0.02 * r, 0.02 * r, l + 0.02 * r, "wood"));
         break;
+      }
       case "civ4":
         for (const p of towerModel(1)) n.push(p);
         break;
