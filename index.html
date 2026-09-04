@@ -8415,7 +8415,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     for (const t of S.blds) tickBld(t, e);
     tickProjectiles(e), tickRads(e), tickTiberium(e), tickTraffic(e), tickRockets(e), tickGates(e);
     for (const t of S.fx) t.t += e;
-    if (S.fx = S.fx.filter((e2) => e2.t < e2.life), S.units = S.units.filter((e2) => !e2.dead), S.blds = S.blds.filter((e2) => !e2.dead), Math.floor(2 * S.time) % 4 == 0) for (let e2 = 0; e2 < NEUTRAL; e2++) S.blds.some((t) => t.owner === e2 && !t.d.civ) || S.units.some((t) => t.owner === e2) || S.players[e2].defeated || (S.players[e2].defeated = true);
+    if (S.fx = S.fx.filter((e2) => e2.t < e2.life), S.units = S.units.filter((e2) => !e2.dead), S.blds = S.blds.filter((e2) => !e2.dead), Math.floor(2 * S.time) % 4 == 0) for (let e2 = 0; e2 < NEUTRAL; e2++) S.blds.some((t) => t.owner === e2 && !t.d.civ) || S.units.some((t) => t.owner === e2 && "mcv" === t.key) || S.players[e2].defeated || (S.players[e2].defeated = true);
     if (!S.over) {
       if (S.mission) {
         const r = checkMissionOutcome();
