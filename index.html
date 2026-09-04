@@ -7818,12 +7818,27 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const e = MAP_SPAWNS[key] || [[13, 13], [76, 56]], cx = 46, cy = 36, rot = (e2) => [clamp(Math.round(cx - (e2[1] - cy)), 6, 85), clamp(Math.round(cy + (e2[0] - cx)), 6, 65)];
     return e.concat([rot(e[0]), rot(e[1])]);
   }
+  var _mapPrevCache = {};
+  function mapPreviewImg(key) {
+    const c = _mapPrevCache[key];
+    if (c) return c;
+    genMap(1337, key);
+    const cv2 = document.createElement("canvas");
+    cv2.width = 92, cv2.height = 72;
+    const cx = cv2.getContext("2d"), img = cx.createImageData(92, 72);
+    for (let i = 0; i < 6624; i++) {
+      const t = G.terr[i], col = 2 === t ? [34, 73, 111] : 3 === t ? [91, 95, 104] : 1 === t ? [122, 106, 76] : [74, 100, 64];
+      img.data[4 * i] = col[0], img.data[4 * i + 1] = col[1], img.data[4 * i + 2] = col[2], img.data[4 * i + 3] = 255;
+    }
+    cx.putImageData(img, 0, 0), mmCache = null;
+    return _mapPrevCache[key] = cv2.toDataURL();
+  }
   function mapPreviewSVG(key, mp) {
-    const spots = mapSpots(key).slice(0, mp || 4), W = 140, H = 100, pts = spots.map((e, t) => {
+    const spots = mapSpots(key).slice(0, mp || 4), W = 140, H = 100, img = mapPreviewImg(key), pts = spots.map((e, t) => {
       const x = (e[0] / 92 * W).toFixed(1), y = (e[1] / 72 * H).toFixed(1);
       return '<circle cx="' + x + '" cy="' + y + '" r="7" fill="#f0a72c" stroke="#1a1206" stroke-width="1.2"/><text x="' + x + '" y="' + y + '" font-size="8" fill="#1a1206" text-anchor="middle" dy=".3em" font-weight="700">' + String.fromCharCode(65 + t) + "</text>";
     }).join("");
-    return '<svg viewBox="0 0 ' + W + " " + H + '"><rect width="' + W + '" height="' + H + '" fill="#16211a" stroke="#2a3a30"/>' + pts + "</svg>";
+    return '<svg viewBox="0 0 ' + W + " " + H + '"><rect width="' + W + '" height="' + H + '" fill="#16211a" stroke="#2a3a30"/><image href="' + img + '" x="0" y="0" width="' + W + '" height="' + H + '" preserveAspectRatio="none"/>' + pts + "</svg>";
   }
   function fillSelect(id, opts, val, cb) {
     const e = $("#" + id);
