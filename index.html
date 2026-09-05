@@ -3033,22 +3033,37 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         return harvesterModel(t, "soviet");
       case "miner_yuri":
         return harvesterModel(t, "yuri");
-      case "grizzly":
-        return extra && extra.dep ? deployedPillar(PILLAR_H.grizzly, 13, "allied") : tankHull(35, 13, t, { fac: "allied" });
-      case "lasher":
-        return extra && extra.dep ? deployedPillar(PILLAR_H.lasher, 13, "yuri") : tankHull(34, 13, t, { fac: "yuri", legs: 6 });
-      case "rhino":
-        return extra && extra.dep ? deployedPillar(PILLAR_H.rhino, 14.5, "soviet") : tankHull(38, 14.5, t, { wheels: 6, fac: "soviet" });
+      case "grizzly": {
+        if (extra && extra.dep) return deployedPillar(PILLAR_H.grizzly, 13, "allied");
+        const p = tankHull(35, 13, t, { fac: "allied" }), s = 4.42;
+        return p.push(P_(CYL(0.35, 2.4, 6), 0.36 * 35, -4.6, s + 6.2, "darkmetal", { ty: PI2, r: -0.25 })), p.push(P_(CYL(0.35, 2.4, 6), 0.36 * 35, -3.2, s + 6.2, "darkmetal", { ty: PI2, r: -0.15 })), p.push(P_(CYL(0.35, 2.4, 6), 0.36 * 35, -1.8, s + 6.2, "darkmetal", { ty: PI2, r: -0.05 })), p.push(P_(CYL(0.13, 9.5, 5), -0.4 * 35, 4.4, s + 9.8, "dark2")), p;
+      }
+      case "lasher": {
+        if (extra && extra.dep) return deployedPillar(PILLAR_H.lasher, 13, "yuri");
+        const p = tankHull(34, 13, t, { fac: "yuri", legs: 6 }), s = 4.42;
+        return [-8, -1, 6].forEach((x) => p.push(P_(CONE(1.1, 0.15, 2.8, 7), x, 0, s + 8.2, "carapace2"))), p.push(P_(BOXM(16, 0.5, 0.4, 0.1), -1, 0, s + 8.3, "psi", { e: 1 })), p;
+      }
+      case "rhino": {
+        if (extra && extra.dep) return deployedPillar(PILLAR_H.rhino, 14.5, "soviet");
+        const p = tankHull(38, 14.5, t, { wheels: 6, fac: "soviet" }), s = 4.42;
+        for (const sgn of [-1, 1]) p.push(P_(CYL(0.55, 3.2, 8), -0.46 * 38, sgn * 2.6, s + 7.6, "rust")), p.push(P_(CYL(0.42, 0.7, 6), -0.46 * 38, sgn * 2.6, s + 10.8, "glow", { e: 1 })), p.push(P_(BOXM(4.2, 1.2, 1.6, 0.3), 0.05 * 38, sgn * (0.5 * 14.5 + 0.7), s + 2.4, "darkmetal"));
+        return p;
+      }
       case "apoc":
         return tankHull(43, 17.5, t, { wheels: 6, skirt: true, th: 9.5, trkW: 8, fac: "soviet" });
       case "prism":
         return tankHull(32, 13, t, { fac: "allied", deployed: !!(extra && extra.dep) });
-      case "gattling":
-        return tankHull(32, 12.5, t, { fac: "yuri", legs: 6 });
+      case "gattling": {
+        const p = tankHull(32, 12.5, t, { fac: "yuri", legs: 6 }), s = 4.42;
+        for (const sgn of [-1, 1]) p.push(P_(CONE(1.4, 0.2, 4.5, 7), 0.42 * 32, sgn * 2.6, s + 4, "carapace2", { ty: PI2, r: sgn * 0.3 }));
+        return p.push(P_(CONE(1.6, 0.3, 6, 8), -0.4 * 32, 0, s + 5, "carapace2", { ty: PI2 })), p.push(P_(DOME(0.9, 0.8, 7), -0.62 * 32, 0, s + 5, "psi", { e: 1 })), p;
+      }
       case "mastermind":
         return tankHull(35, 15, t, { skirt: true, fac: "yuri", legs: 8 });
-      case "ifv":
-        return tankHull(26, 12, t, { wheeled: true, th: 7, fac: "allied" });
+      case "ifv": {
+        const p = tankHull(26, 12, t, { wheeled: true, th: 7, fac: "allied" }), s = 3.64;
+        return p.push(P_(BOXM(7, 8, 3, 0.6), -8, 0, s + 8.4, "armor3")), p.push(P_(BOXM(1.6, 1.6, 0.5, 0.15), -6, -2.4, s + 10, "darkmetal")), p.push(P_(BOXM(1.6, 1.6, 0.5, 0.15), -6, 2.4, s + 10, "darkmetal")), p.push(P_(CYL(0.1, 8.5, 5), -9, 3, s + 10.2, "dark2")), p;
+      }
       case "hover": {
         const e2 = [], t2 = 30, r = 13;
         e2.push(P_(SLAB(roundRectProfile(1.02 * t2, r + 7, 5.5, 3), 5, 1.6, "hvs"), 0, 0, 1.2, "rubber")), e2.push(P_(SLAB(hullProfile(t2, r + 1, "yuri"), 6.2, 1.8, "hvh"), 0, 0, 6, "armor2")), e2.push(P_(WEDGE(0.22 * t2, 0.84 * r, 5.6, 2), 0.34 * t2, 0, 12.2, "armor")), e2.push(P_(SLAB(hullProfile(0.58 * t2, 0.82 * r, "yuri"), 4.6, 1.4, "hvd"), 0.04 * -t2, 0, 12.2, "armor")), e2.push(P_(BOXM(0.2 * t2, 0.66 * r, 2.4, 0.7), 0.34 * -t2, 0, 12.2, "armor3"));
@@ -3057,8 +3072,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
       case "bulwark":
         return tankHull(40, 16.5, t, { wheels: 7, skirt: true, th: 9.5, trkW: 8, fac: "allied" });
-      case "hound":
-        return tankHull(24, 11, t, { wheeled: true, th: 6.5, fac: "soviet" });
+      case "hound": {
+        const p = tankHull(24, 11, t, { wheeled: true, th: 6.5, fac: "soviet" }), s = 3.38;
+        return p.push(P_(CYL(1, 0.3, 8), -0.36 * 24, 0, s + 7.6, "dark2", { ty: PI2 })), p.push(P_(DOME(1, 0.45, 8), -0.36 * 24, 0, s + 7.6, "gunmetal", { ty: PI2 })), p.push(P_(CYL(0.5, 1.6, 6), 0.42 * 24, -3.4, s + 6.4, "lightY", { e: 1 })), p.push(P_(CYL(0.5, 1.6, 6), 0.42 * 24, 3.4, s + 6.4, "lightY", { e: 1 })), p;
+      }
       case "sledge":
         return tankHull(36, 15, t, { wheels: 6, skirt: true, th: 9, fac: "soviet" });
       case "shard":
