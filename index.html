@@ -2681,8 +2681,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.push(P_(org ? DOME(6, 4.5, 10) : DOME(6, 5, 10), 15, 0, 11, org ? "carapace" : "glass"));
     e.push(P_(BOXM(18, 3, 3, 1), -20, 0, 11, org ? "carapace2" : "dark2"));
     e.push(P_(BOXM(2, 10, 6, 1), -28, 0, 11, org ? "carapace2" : "dark"));
+    const tandem = "allied" === fac;
     e.push(P_(CYL(0.8, 6, 8), 2, 0, 16, org ? "psi" : "gunmetal", { e: org }));
-    e.push(P_(CYL(1.2, 5, 8), -28, 0, 13, org ? "psi" : "gunmetal", { ty: -PI2, e: org }));
+    e.push(P_(CYL(tandem ? 0.8 : 1.2, tandem ? 6 : 5, 8), -28, 0, tandem ? 16 : 13, org ? "psi" : "gunmetal", tandem ? { e: org } : { ty: -PI2, e: org }));
     for (const s of [-1, 1]) e.push(P_(CYL(0.6, 3.5, 6), 4, 6 * s, 4, org ? "carapace2" : "gunmetal"));
     return e;
   }
@@ -3056,17 +3057,25 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         for (const sgn of [-1, 1]) p.push(P_(CYL(0.55, 3.2, 8), -0.46 * 38, sgn * 2.6, s + 7.6, "rust")), p.push(P_(CYL(0.42, 0.7, 6), -0.46 * 38, sgn * 2.6, s + 10.8, "glow", { e: 1 })), p.push(P_(BOXM(4.2, 1.2, 1.6, 0.3), 0.05 * 38, sgn * (0.5 * 14.5 + 0.7), s + 2.4, "darkmetal"));
         return p;
       }
-      case "apoc":
-        return tankHull(43, 17.5, t, { wheels: 6, skirt: true, th: 9.5, trkW: 8, fac: "soviet" });
-      case "prism":
-        return tankHull(32, 13, t, { fac: "allied", deployed: !!(extra && extra.dep) });
+      case "apoc": {
+        const p = tankHull(43, 17.5, t, { wheels: 6, skirt: true, th: 9.5, trkW: 8, fac: "soviet" }), s = 4.94;
+        for (const sgn of [-1, 1]) for (const xo of [-10, 5]) p.push(P_(BOXM(3.4, 0.5, 2.4, 0.2), xo, sgn * (0.5 * 17.5 + 0.4), s + 5, "darkmetal", { r: sgn * 0.08 }));
+        return p.push(P_(CYL(0.9, 0.6, 8), 0.46 * 43, 0, s + 6, "lightY", { e: 1, ty: PI2 })), p;
+      }
+      case "prism": {
+        const p = tankHull(32, 13, t, { fac: "allied", deployed: !!(extra && extra.dep) }), s = 4.42;
+        return p.push(P_(DOME(1.3, 1.1, 8), 0.4 * 32, -3, s + 7, "crystal", { e: 1 })), p.push(P_(DOME(1.3, 1.1, 8), 0.4 * 32, 3, s + 7, "crystal", { e: 1 })), p.push(P_(CONE(0.6, 0.1, 4, 7), -0.3 * 32, 0, s + 8, "crystal", { e: 1 })), p;
+      }
       case "gattling": {
         const p = tankHull(32, 12.5, t, { fac: "yuri", legs: 6 }), s = 4.42;
         for (const sgn of [-1, 1]) p.push(P_(CONE(1.4, 0.2, 4.5, 7), 0.42 * 32, sgn * 2.6, s + 4, "carapace2", { ty: PI2, r: sgn * 0.3 }));
         return p.push(P_(CONE(1.6, 0.3, 6, 8), -0.4 * 32, 0, s + 5, "carapace2", { ty: PI2 })), p.push(P_(DOME(0.9, 0.8, 7), -0.62 * 32, 0, s + 5, "psi", { e: 1 })), p;
       }
-      case "mastermind":
-        return tankHull(35, 15, t, { skirt: true, fac: "yuri", legs: 8 });
+      case "mastermind": {
+        const p = tankHull(35, 15, t, { skirt: true, fac: "yuri", legs: 8 }), s = 4.42;
+        for (const sgn of [-1, 1]) p.push(P_(CYL(0.25, 7, 6), 0, sgn * 4, s + 8, "psi", { e: 1, tx: sgn * 0.5 }));
+        return p.push(P_(BOXM(18, 0.4, 0.3, 0.1), -2, 0, s + 7, "psi", { e: 1 })), p;
+      }
       case "ifv": {
         const p = tankHull(26, 12, t, { wheeled: true, th: 7, fac: "allied" }), s = 3.64;
         return p.push(P_(BOXM(7, 8, 3, 0.6), -8, 0, s + 8.4, "armor3")), p.push(P_(BOXM(1.6, 1.6, 0.5, 0.15), -6, -2.4, s + 10, "darkmetal")), p.push(P_(BOXM(1.6, 1.6, 0.5, 0.15), -6, 2.4, s + 10, "darkmetal")), p.push(P_(CYL(0.1, 8.5, 5), -9, 3, s + 10.2, "dark2")), p;
@@ -3077,16 +3086,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         for (const n of [-1, 1]) e2.push(P_(CYL(3, 7, 12), 0.36 * -t2, n * (0.5 * r + 2), 8, "gunmetal", { ty: -PI2 })), e2.push(P_(CYL(2.2, 1.6, 10), 0.36 * -t2 - 6.4, n * (0.5 * r + 2), 8, "glow", { ty: -PI2, e: 1 }));
         return e2.push(P_(BOXM(0.3 * t2, 1.2, 2.4, 0.4), 0, -(0.5 * r + 0.6), 12, "body")), e2.push(P_(BOXM(0.3 * t2, 1.2, 2.4, 0.4), 0, 0.5 * r + 0.6, 12, "body")), e2.push(P_(CYL(1.4, 1.7, 8), 0.4 * t2, 0.26 * -r, 13, "lightY", { e: 1 })), e2.push(P_(CYL(1.4, 1.7, 8), 0.4 * t2, 0.26 * r, 13, "lightY", { e: 1 })), e2;
       }
-      case "bulwark":
-        return tankHull(40, 16.5, t, { wheels: 7, skirt: true, th: 9.5, trkW: 8, fac: "allied" });
+      case "bulwark": {
+        const p = tankHull(40, 16.5, t, { wheels: 7, skirt: true, th: 9.5, trkW: 8, fac: "allied" }), s = 4.94;
+        return p.push(P_(BOXM(1.5, 0.85 * 16.5, 4, 0.4), 0.46 * 40, 0, s + 3, "darkmetal")), p.push(P_(BOXM(3, 2, 2, 0.3), 0, -(0.5 * 16.5 + 1.2), s + 7, "steel")), p.push(P_(BOXM(3, 2, 2, 0.3), 0, 0.5 * 16.5 + 1.2, s + 7, "steel")), p;
+      }
       case "hound": {
         const p = tankHull(24, 11, t, { wheeled: true, th: 6.5, fac: "soviet" }), s = 3.38;
         return p.push(P_(CYL(1, 0.3, 8), -0.36 * 24, 0, s + 7.6, "dark2", { ty: PI2 })), p.push(P_(DOME(1, 0.45, 8), -0.36 * 24, 0, s + 7.6, "gunmetal", { ty: PI2 })), p.push(P_(CYL(0.5, 1.6, 6), 0.42 * 24, -3.4, s + 6.4, "lightY", { e: 1 })), p.push(P_(CYL(0.5, 1.6, 6), 0.42 * 24, 3.4, s + 6.4, "lightY", { e: 1 })), p;
       }
-      case "sledge":
-        return tankHull(36, 15, t, { wheels: 6, skirt: true, th: 9, fac: "soviet" });
-      case "shard":
-        return tankHull(34, 14.5, t, { skirt: true, fac: "yuri", legs: 8 });
+      case "sledge": {
+        const p = tankHull(36, 15, t, { wheels: 6, skirt: true, th: 9, fac: "soviet" }), s = 4.68;
+        for (const sgn of [-1, 1]) p.push(P_(BOXM(1.2, 3, 3.4, 0.3), -0.48 * 36, sgn * 5, s + 1.5, "darkmetal"));
+        return p.push(P_(BOXM(5, 3, 2, 0.3), 0.15 * 36, 0.5 * 15 + 0.6, s + 2.5, "olive")), p;
+      }
+      case "shard": {
+        const p = tankHull(34, 14.5, t, { skirt: true, fac: "yuri", legs: 8 }), s = 4.42;
+        return [-9, -2, 6].forEach((x) => p.push(P_(CONE(1.6, 0.2, 4.2, 7), x, 0, s + 9, "crystal", { e: 1 }))), p.push(P_(DOME(1.1, 1, 7), 0, 0, -0.4, "psi", { e: 1 })), p;
+      }
       case "longbow":
         return longbowModel(t);
       case "rift":
@@ -6589,7 +6605,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f) continue;
       if (!seen(e2)) continue;
       const t2 = palette(e2.owner), r2 = unitFrame(e2), gy = e2.d.naval ? 2.6 : heightAt(e2.x, e2.y), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
-      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang), hasTurret(e2.key) && c("UT" + e2.key + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0), t2, e2.x, e2.y, gy + (e2.alt || 0) + turRise, e2.tang), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key || "gullet" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), c("UTR" + e2.key + "|" + e2.owner, heliTailRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + 17, e2.rotorSpin || 0)), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
+      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang), hasTurret(e2.key) && c("UT" + e2.key + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0), t2, e2.x, e2.y, gy + (e2.alt || 0) + turRise, e2.tang), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key || "gullet" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), c("UTR" + e2.key + "|" + e2.owner, "chinook" === e2.key ? heliRotor : heliTailRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + ("chinook" === e2.key ? 22 : 17), e2.rotorSpin || 0)), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
     }
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
     if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind);
