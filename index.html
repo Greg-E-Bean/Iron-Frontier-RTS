@@ -82,6 +82,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 .tab:active{transform:translateY(1px) scale(.96)}
 .tab.on{background:linear-gradient(160deg,#324352 0%,#182026 100%);color:var(--amber2);
   box-shadow:inset 0 -2px 0 var(--amber),0 -2px 10px #f0a72c26}
+.tab.locked{opacity:.35;pointer-events:none}
 #cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px;padding:6px;
   max-height:104px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;
   -webkit-overflow-scrolling:touch;scrollbar-width:thin}
@@ -7627,6 +7628,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   function updateCards() {
     const e = P();
+    const tabsEl = document.querySelectorAll(".tab");
+    let curLocked = false;
+    tabsEl.forEach((el) => {
+      const req = TAB_REQ[el.dataset.t];
+      const locked = !!req && !hasBld(e.id, req);
+      el.classList.toggle("locked", locked), el.dataset.t === S.tab && locked && (curLocked = true);
+    });
+    if (curLocked) return S.tab = "bld", tabsEl.forEach((el) => el.classList.toggle("on", "bld" === el.dataset.t)), void buildCards();
     for (const t2 of cardEls) {
       if ("ability" === t2.it.kind) {
         let ready = false, dis = false, badge = "";
@@ -7655,7 +7664,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const r = S.units.filter((e2) => 0 === e2.owner && !e2.dead).length;
     $("#popTxt").textContent = r + " units", $("#cancelPlace").classList.toggle("hidden", !S.placing);
   }
+  var TAB_REQ = { inf: "barracks", veh: "factory", air: "airfield", sea: "navalyard" };
   document.querySelectorAll(".tab").forEach((e) => e.addEventListener("click", () => {
+    if (e.classList.contains("locked")) return void hint("Needs " + bname(TAB_REQ[e.dataset.t], P().fac));
     document.querySelectorAll(".tab").forEach((e2) => e2.classList.remove("on")), e.classList.add("on"), S.tab = e.dataset.t, buildCards(), sfx("sel");
   })), $("#more").addEventListener("click", () => {
     const e = $("#cards").classList.toggle("tall");
@@ -7721,6 +7732,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   var pinch = null;
   var moved = 0;
   var lastTap = 0;
+  var ctrlGroups = [[], [], [], [], [], [], [], [], [], []];
   function endPtr(e) {
     if (FPS.on) return void ptrs.delete(e.pointerId);
     const t = ptrs.get(e.pointerId);
@@ -7830,7 +7842,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   cv.addEventListener("pointerdown", (e) => {
     if (FPS.on) return;
-    if (cv.setPointerCapture(e.pointerId), ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY }), 1 === ptrs.size) moved = 0, dragStart = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, t: performance.now() }, S.placing ? (dragMode = "ghost", updateGhost(e.clientX, e.clientY, false)) : S.selMode ? (dragMode = "box", S.box = { x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY }) : dragMode = "pan";
+    if (cv.setPointerCapture(e.pointerId), ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY }), 1 === ptrs.size) moved = 0, dragStart = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, t: performance.now() }, S.placing ? (dragMode = "ghost", updateGhost(e.clientX, e.clientY, false)) : S.selMode || "mouse" === e.pointerType ? (dragMode = "box", S.box = { x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY }) : dragMode = "pan";
     else if (2 === ptrs.size) {
       const [e2, t] = [...ptrs.values()];
       pinch = { d: dist(e2.x, e2.y, t.x, t.y), z: cam.z, mx: (e2.x + t.x) / 2, my: (e2.y + t.y) / 2 }, dragMode = "pinch", S.box = null;
@@ -7855,13 +7867,24 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }), cv.addEventListener("pointerup", endPtr), cv.addEventListener("pointercancel", endPtr), cv.addEventListener("wheel", (e) => {
     e.preventDefault();
     camZTarget = clamp(camZTarget * (e.deltaY > 0 ? 0.9 : 1.1), 0.3, 2.3), zoomPivot = { sx: e.clientX, sy: e.clientY };
-  }, { passive: false }), mm.addEventListener("pointerdown", (e) => {
+  }, { passive: false }), cv.addEventListener("contextmenu", (e) => e.preventDefault()), mm.addEventListener("pointerdown", (e) => {
     const t = mm.getBoundingClientRect();
     cam.x = (e.clientX - t.left) / t.width * 2944, cam.y = (e.clientY - t.top) / t.height * 2304, clampCam(), e.stopPropagation();
   }), window.addEventListener("keydown", (e) => {
-    "Escape" === e.key && (S.placing = null, S.ghost = null, S.deployUnit = null, S.sel = []), " " === e.key && (S.running = !S.running);
-    const t = 50 / cam.z;
-    "ArrowLeft" === e.key && (cam.x -= t, cam.y += t), "ArrowRight" === e.key && (cam.x += t, cam.y -= t), "ArrowUp" === e.key && (cam.x -= t, cam.y -= t), "ArrowDown" === e.key && (cam.x += t, cam.y += t), clampCam();
+    if (FPS.on) return;
+    const ae = document.activeElement;
+    if (ae && ("INPUT" === ae.tagName || "TEXTAREA" === ae.tagName)) return;
+    "Escape" === e.key && (S.placing = null, S.ghost = null, S.deployUnit = null, S.sel = []), " " === e.key && (e.preventDefault(), S.running = !S.running);
+    const t = 50 / cam.z, k = e.key.toLowerCase();
+    ("ArrowLeft" === e.key || "a" === k) && (cam.x -= t, cam.y += t), ("ArrowRight" === e.key || "d" === k) && (cam.x += t, cam.y -= t), ("ArrowUp" === e.key || "w" === k) && (cam.x -= t, cam.y -= t), ("ArrowDown" === e.key || "s" === k) && (cam.x += t, cam.y += t), clampCam();
+    if (e.key >= "0" && e.key <= "9") {
+      const g = +e.key;
+      if (e.ctrlKey || e.metaKey) e.preventDefault(), S.sel.length && (ctrlGroups[g] = S.sel.slice());
+      else {
+        const grp = ctrlGroups[g].filter((u) => !u.dead);
+        grp.length && (S.sel = grp, sfx("sel"));
+      }
+    }
   });
   var COLORSETS = [{ k: "def", n: "DEFAULT", body: null, dark: null, tint: null }, { k: "red", n: "RED", body: "#7a3530", dark: "#3f1a17", tint: "#c99a90" }, { k: "blue", n: "BLUE", body: "#355070", dark: "#1c2838", tint: "#9db4cc" }, { k: "green", n: "GREEN", body: "#4a6b3a", dark: "#25341d", tint: "#a8c290" }, { k: "yellow", n: "YELLOW", body: "#8a7a30", dark: "#453d18", tint: "#d8c890" }, { k: "purple", n: "PURPLE", body: "#5f4a6b", dark: "#312638", tint: "#a99bb2" }, { k: "orange", n: "ORANGE", body: "#8a5530", dark: "#452b18", tint: "#d0a074" }, { k: "teal", n: "TEAL", body: "#357070", dark: "#1c3838", tint: "#9dc4c4" }, { k: "grey", n: "GREY", body: "#6a6a6a", dark: "#363636", tint: "#b8b8b8" }];
   function colorSet(k) {
