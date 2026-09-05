@@ -363,6 +363,8 @@ declare global {
   const aaBits: AnyFn;
   const triGunHead: AnyFn;
   const triAAHead: AnyFn;
+  const heliRotor: AnyFn;
+  const heliTailRotor: AnyFn;
   const BMODEL_: AnyFn;
   const BTURRET_: AnyFn;
   function UMODEL(key: string, frame?: number, extra?: any): any;
