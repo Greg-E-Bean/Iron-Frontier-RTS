@@ -1,3 +1,4 @@
+export {};
 const FAC_NAME={allied:"Vanguard",soviet:"Legion",yuri:"Syndicate"};
 function otherFacs(fac){return["allied","soviet","yuri"].filter(f=>f!==fac)}
 const CAMPAIGNS={allied:{title:"Operation Clean Slate",missions:[
