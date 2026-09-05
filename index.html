@@ -1245,6 +1245,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function fire(e, t, r, n) {
     e.d && e.d.sub && (e.revealT = 3);
     const a = dist(e.x, e.y, t.x, t.y), o = Math.atan2(t.y - e.y, t.x - e.x);
+    teamOf(e.owner) === teamOf(0) && a > sightOf(e) && S.spyReveals.push({ x: t.x, y: t.y, r: 70, t: 2.5 });
     let s = dmgMult(r, t);
     r.aaBonus && "u" === t.e && t.alt > 2 && (s *= r.aaBonus);
     const i = r.dmg * s * ("u" === e.e ? vDmg(e) : 1), l = "u" === e.e && "function" == typeof muzzleDist ? muzzleDist(e) : 12;
@@ -5323,8 +5324,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } catch (e2) {
       S.drawWarned || (S.drawWarned = 1, console.error("hud", e2));
     }
-    for (const e2 of S.projs) e2.dead || drawProj(e2);
-    for (const e2 of S.fx) drawFx(e2);
+    for (const e2 of S.projs) e2.dead || 2 !== visAt(e2.x, e2.y) || drawProj(e2);
+    for (const e2 of S.fx) (2 === visAt(e2.x, e2.y) || void 0 !== e2.x2 && 2 === visAt(e2.x2, e2.y2)) && drawFx(e2);
     drawGhost(), drawBox(), drawMarker(), drawMM();
   }
   function unitHUD(e) {
@@ -5367,8 +5368,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } catch (e2) {
       S.drawWarned || (S.drawWarned = 1, console.error("draw", e2));
     }
-    for (const e2 of S.projs) e2.dead || drawProj(e2);
-    for (const e2 of S.fx) drawFx(e2);
+    for (const e2 of S.projs) e2.dead || 2 !== visAt(e2.x, e2.y) || drawProj(e2);
+    for (const e2 of S.fx) (2 === visAt(e2.x, e2.y) || void 0 !== e2.x2 && 2 === visAt(e2.x2, e2.y2)) && drawFx(e2);
     drawGhost(), drawBox(), drawMarker(), drawMM(), drawVignette();
   }
   var NEUTRAL = 2;
@@ -6525,10 +6526,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (e2.dead) continue;
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f + 220) continue;
       if (!seen(e2)) continue;
+      const live = 2 === visAt(e2.x, e2.y);
       const t2 = e2.owner < 0 ? "neutral" : S.players[e2.owner].fac, r2 = e2.owner < 0 ? { body: MAT.neutral, dark: "#6a6252", trim: "#aaa" } : palette(e2.owner), gy = heightAt(e2.x, e2.y), n2 = (hasStagedBuild(e2.key) ? 0 : e2.rise >= 1 ? 0 : -(1 - e2.rise) * (32 * e2.size * 0.62 + 30)) + gy, conn = "wall" === e2.key || "gate" === e2.key ? wallNeighborMask(e2.tx, e2.ty, e2.owner) : 0, gateBucket = "gate" === e2.key ? Math.round(8 * (e2.gateT || 0)) : 0, riseBucket = hasStagedBuild(e2.key) ? Math.round(4 * Math.min(1, e2.rise)) : 4, a2 = "B" + e2.key + ("hive" === e2.key || "super" === e2.key ? e2.deployed ? "D" : "U" : "gate" === e2.key ? "G" + gateBucket : hasStagedBuild(e2.key) ? "R" + riseBucket : "") + (conn ? "_c" + conn : "") + "|" + t2 + "|" + e2.owner;
       c(a2, () => BMODEL(e2.key, t2, "gate" === e2.key ? gateBucket / 8 : hasStagedBuild(e2.key) ? Math.min(1, e2.rise) : e2.deployed, conn, e2.rot || 0), r2, e2.x, e2.y, n2, e2.rot || 0);
       const o2 = GLGEO.get(a2);
-      if (o2 && o2.anims) for (let t3 = 0; t3 < o2.anims.length; t3++) {
+      if (live && o2 && o2.anims) for (let t3 = 0; t3 < o2.anims.length; t3++) {
         const s2 = o2.anims[t3];
         let px = s2.px, py = s2.py, pz = s2.pz, rot = s2.spin ? d * s2.spin : 0;
         if (s2.orbit) {
@@ -6543,10 +6545,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         }
         c(a2 + "#a" + t3, null, r2, e2.x + px, e2.y + py, n2 + pz + (s2.bob ? 4.5 * Math.sin(d * s2.bob) : 0), rot, 0, s2.geo);
       }
-      hasBTurret(e2.key, t2) && c("BT" + e2.key + "|" + t2 + "|" + e2.owner, () => BTURRET(e2.key, t2, 0), r2, e2.x, e2.y, n2, e2.tang || 0);
+      live && (e2.frTang = e2.tang || 0, e2.frTang2 = e2.tang2 || 0);
+      hasBTurret(e2.key, t2) && c("BT" + e2.key + "|" + t2 + "|" + e2.owner, () => BTURRET(e2.key, t2, 0), r2, e2.x, e2.y, n2, live ? e2.tang || 0 : e2.frTang || 0);
       if ("triturret" === e2.key) {
         const off = 0.34 * 32 * e2.size, ownKey = "|" + t2 + "|" + e2.owner;
-        c("BTt1" + ownKey, () => triGunHead(t2), r2, e2.x - off, e2.y, n2, e2.tang || 0), c("BTt2" + ownKey, () => triGunHead(t2), r2, e2.x + off, e2.y, n2, e2.tang || 0), c("BTt3" + ownKey, () => triAAHead(t2), r2, e2.x, e2.y, n2, e2.tang2 || 0);
+        c("BTt1" + ownKey, () => triGunHead(t2), r2, e2.x - off, e2.y, n2, live ? e2.tang || 0 : e2.frTang || 0), c("BTt2" + ownKey, () => triGunHead(t2), r2, e2.x + off, e2.y, n2, live ? e2.tang || 0 : e2.frTang || 0), c("BTt3" + ownKey, () => triAAHead(t2), r2, e2.x, e2.y, n2, live ? e2.tang2 || 0 : e2.frTang2 || 0);
       }
     }
     for (const e2 of S.units) {
@@ -6585,6 +6588,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     for (const p2 of S.projs) {
       if (p2.dead) continue;
+      if (2 !== visAt(p2.x, p2.y)) continue;
       const pf = S.players[p2.owner] && S.players[p2.owner].fac || "";
       c("PJ" + p2.kind + pf, () => projModel(p2.kind, pf), TIBPAL, p2.x, p2.y, p2.z || 0, p2.ang, false);
     }
@@ -6592,7 +6596,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (rk.dead) continue;
       rk.mesh || (rk.mesh = buildRocketMesh3D(), GL.scene.add(rk.mesh));
       const arc = rocketArc(rk), dx = (rk.tx - rk.x0) / rk.dur, dy = (rk.ty - rk.y0) / rk.dur, dz = arc.peak * 4 * (1 - 2 * arc.p) / rk.dur, fwd = new THREE.Vector3(dx, dz, dy);
-      rk.mesh.position.set(arc.x, arc.z, arc.y), fwd.lengthSq() > 1e-6 && rk.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), fwd.normalize());
+      rk.mesh.position.set(arc.x, arc.z, arc.y), fwd.lengthSq() > 1e-6 && rk.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), fwd.normalize()), rk.mesh.visible = 2 === visAt(arc.x, arc.y);
     }
     for (const [e2, t2] of GL.groups) t2.touched || (t2.list.length = 0), glFlush(t2, e2);
     GL.renderer.render(GL.scene, e);
