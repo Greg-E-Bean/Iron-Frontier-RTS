@@ -166,6 +166,8 @@ declare global {
   const targetsOf: AnyFn;
   const effRange: AnyFn;
   const acquire: AnyFn;
+  function buildUnitGrid(): void;
+  const gridNear: AnyFn;
   const inRange: AnyFn;
   function fire(shooter: GameEntity, target: GameEntity, weapon: EntityDef, secondary?: boolean): void;
   function tickProjectiles(dt: number): void;
