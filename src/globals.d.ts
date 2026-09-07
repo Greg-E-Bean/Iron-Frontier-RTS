@@ -285,7 +285,10 @@ declare global {
   const riftModel: AnyFn;
   const riftTurret: AnyFn;
   const boatHull: AnyFn;
-  const transportHeli: AnyFn;
+  const kestrelModel: AnyFn;
+  const chinookModel: AnyFn;
+  const skyhaulerModel: AnyFn;
+  const gulletModel: AnyFn;
   const subHull: AnyFn;
   const tankHull: AnyFn;
   const turretProfile: AnyFn;
@@ -302,7 +305,6 @@ declare global {
   const mcvModel: AnyFn;
   const weaponRig: AnyFn;
   const infantry: AnyFn;
-  const jet: AnyFn;
   const UMODEL_: AnyFn;
   const UTURRET_: AnyFn;
   const muzzleDist: AnyFn;

@@ -137,6 +137,8 @@ export interface Unit {
   frozen: number;
   state: unknown;
   home: unknown;
+  padHome?: Building | null;
+  padIdx?: number | null;
   fac?: string;
   rally?: Vec2 | null;
   rot?: number;
@@ -196,6 +198,7 @@ export interface Building {
   furnCols?: unknown[];
   interior?: unknown;
   cargo?: Unit[];
+  pads?: (Unit | null)[] | null;
   [field: string]: unknown;
 }
 

@@ -963,7 +963,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var P = () => S.players[0];
   function addBuilding(e, t, r, n, a) {
-    const o = BLD[t], s = S.players[e], i = { id: S.nextId++, e: "b", key: t, d: o, owner: e, tx: r, ty: n, size: o.size, x: 32 * (r + o.size / 2), y: 32 * (n + o.size / 2), hp: a ? o.hp : 0.25 * o.hp, maxhp: o.hp, name: bname(t, s.fac), cool: 0, target: null, dead: false, rally: null, sellT: 0, repair: false, chargeT: 0, rise: 1, w: bweapon(t, s.fac), w2: o.weapon2 || null, spin: 0, rot: 0 };
+    const o = BLD[t], s = S.players[e], i = { id: S.nextId++, e: "b", key: t, d: o, owner: e, tx: r, ty: n, size: o.size, x: 32 * (r + o.size / 2), y: 32 * (n + o.size / 2), hp: a ? o.hp : 0.25 * o.hp, maxhp: o.hp, name: bname(t, s.fac), cool: 0, target: null, dead: false, rally: null, sellT: 0, repair: false, chargeT: 0, rise: 1, w: bweapon(t, s.fac), w2: o.weapon2 || null, spin: 0, rot: 0, pads: "airfield" === t ? [null, null, null, null] : null };
     for (let e2 = n; e2 < n + o.size; e2++) for (let t2 = r; t2 < r + o.size; t2++) inMap(t2, e2) && (G.occ[idx(t2, e2)] = i.id, G.ore[idx(t2, e2)] = 0, G.tib[idx(t2, e2)] = 0);
     if (S.blds.push(i), S.bldById.set(i.id, i), recalcPower(e), evict(i), "refinery" === t) {
       const t2 = addUnit(e, s.f.miner, i.x, i.y + 70.4);
@@ -2699,16 +2699,42 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return a;
   }
-  function transportHeli(t, fac) {
-    const e = [], org = "yuri" === fac;
-    e.push(P_(org ? DOME(13, 7, 12) : BOXM(26, 10, 9, 3), 2, 0, 10, "body"));
-    e.push(P_(org ? DOME(6, 4.5, 10) : DOME(6, 5, 10), 15, 0, 11, org ? "carapace" : "glass"));
-    e.push(P_(BOXM(18, 3, 3, 1), -20, 0, 11, org ? "carapace2" : "dark2"));
-    e.push(P_(BOXM(2, 10, 6, 1), -28, 0, 11, org ? "carapace2" : "dark"));
-    const tandem = "allied" === fac;
-    e.push(P_(CYL(0.8, 6, 8), 2, 0, 16, org ? "psi" : "gunmetal", { e: org }));
-    e.push(P_(CYL(tandem ? 0.8 : 1.2, tandem ? 6 : 5, 8), -28, 0, tandem ? 16 : 13, org ? "psi" : "gunmetal", tandem ? { e: org } : { ty: -PI2, e: org }));
-    for (const s of [-1, 1]) e.push(P_(CYL(0.6, 3.5, 6), 4, 6 * s, 4, org ? "carapace2" : "gunmetal"));
+  function chinookModel() {
+    const e = [];
+    e.push(P_(BOXM(28, 9, 8, 1.4), -1, 0, 10, "body"));
+    e.push(P_(BOXM(10, 8.4, 7, 1), -15, 0, 10, "dark2", { r: -0.1 }));
+    e.push(P_(BOXM(3, 8.6, 7.4, 0.8), 13.5, 0, 10, "body"));
+    e.push(P_(DOME(5, 4, 9), 14.5, 0, 11.5, "glass", { e: 1 }));
+    e.push(P_(BOXM(1.6, 9, 1, 0.2), -28, 0, 11.6, "dark"));
+    e.push(P_(CYL(0.8, 6, 8), 2, 0, 16, "gunmetal"));
+    e.push(P_(CYL(0.8, 6, 8), -28, 0, 16, "gunmetal"));
+    for (const s of [-1, 1]) e.push(P_(CYL(0.6, 3.5, 6), 4, 6 * s, 4, "gunmetal"));
+    return e;
+  }
+  function skyhaulerModel() {
+    const e = [];
+    e.push(P_(CYL(4.4, 20, 14), 0, 0, 10, "body", { ty: -PI2 }));
+    e.push(P_(DOME(4.4, 4.4, 12), 10, 0, 10, "body", { ty: -PI2 }));
+    e.push(P_(DOME(4.4, 3.8, 10), -10, 0, 10, "dark2", { ty: PI2 }));
+    e.push(P_(DOME(4, 3.4, 10), 14, 0, 11, "glass", { e: 1 }));
+    e.push(P_(BOXM(2, 9, 1, 0.2), -24, 0, 11.6, "dark"));
+    e.push(P_(CYL(1.2, 6, 8), 1, 0, 15, "gunmetal", { ty: -PI2, e: 0 }));
+    e.push(P_(CYL(0.8, 4, 6), -24, 0, 12, "gunmetal", { ty: -PI2 }));
+    for (const s of [-1, 1]) e.push(P_(CYL(2.2, 11, 9), -2, s * 7, 7, "gunmetal", { ty: -PI2 })), e.push(P_(DOME(2.2, 2.2, 8), 3.5, s * 7, 7, "darkmetal", { ty: -PI2 }));
+    return e;
+  }
+  function gulletModel() {
+    const e = [];
+    e.push(P_(DOME(6, 4.4, 12), 3, 0, 10, "carapace2"));
+    e.push(P_(CONE(4.4, 1.6, 15, 12), -8, 0, 10, "carapace2", { ty: -PI2 }));
+    e.push(P_(DOME(3.6, 3, 10), 12.5, 0, 10.5, "carapace"));
+    e.push(P_(DOME(2.2, 1.8, 9), 15, 0, 11, "psi", { e: 1 }));
+    e.push(P_(DOME(1, 0.8, 8), -17.5, 0, 10, "psi", { e: 1 }));
+    for (const s of [-1, 1]) e.push(P_(CONE(1.6, 0.3, 7.5, 8), -3, s * 5.6, 8, "carapace2", { ty: -PI2 }));
+    for (let i = 0; i < 4; i++) {
+      const a = i * PI2 / 4 + 0.4;
+      e.push(P_(CYL(0.9, 0.9, 8), 4 + 5 * Math.cos(a), 5 * Math.sin(a), 5.4, "psi", { e: 1, a: { spin: 1 + 0.2 * i } }));
+    }
     return e;
   }
   function heliRotor() {
@@ -3034,14 +3060,41 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const r = 1.26, n = [], a = (t = t || {}).cloth || "body", o = t.gear || "dark", s = [0, 1, 0, -1][3 & e], i = 1 & e ? 0.34 : 0, l = 0.55 * s;
     return n.push(P_(BOXM(3.2, 2.9, 1.3, 0.6), 1.6 * s, -2, 0, "dark2")), n.push(P_(BOXM(3.2, 2.9, 1.3, 0.6), -1.6 * s, 2, 0, "dark2")), n.push(P_(CYL(1.35, 0.7, 7), 1.2 * s, -2, 1.3, "dark2")), n.push(P_(CYL(1.35, 0.7, 7), -1.2 * s, 2, 1.3, "dark2")), n.push(P_(CYL(1.3, 3.6, 7), 1.2 * s, -2, 1.5, o)), n.push(P_(CYL(1.3, 3.6, 7), -1.2 * s, 2, 1.5, o)), n.push(P_(CYL(1.42, 0.6, 7), 0.8 * s, -2, 4.5, o)), n.push(P_(CYL(1.42, 0.6, 7), -0.8 * s, 2, 4.5, o)), n.push(P_(CYL(1.55, 2.4, 7), 0.8 * s, -2, 4.7, a)), n.push(P_(CYL(1.55, 2.4, 7), -0.8 * s, 2, 4.7, a)), n.push(P_(BOXM(4.6, 5.6, 1.8, 1), 0, 0, 6.5 + i, a)), n.push(P_(TSLAB(roundRectProfile(5, 5.6, 1.8, 2), 4.8, 0.9, "inftor"), 0, 0, 6.8 + i, a)), n.push(P_(BOXM(3.9, 5.9, 2.1, 0.5), 0.3, 0, 8.2 + i, o)), n.push(P_(BOXM(0.6, 3, 1, 0.18), 2.1, 0, 8.6 + i, "trim")), n.push(P_(BOXM(2.9, 3, 1.9, 0.6), -0.3, -3.3, 11 + i, o, { r: -0.18 * s })), n.push(P_(BOXM(2.9, 3, 1.9, 0.6), -0.3, 3.3, 11 + i, o, { r: 0.18 * s })), n.push(P_(DOME(1.15, 1.1, 8), 1 - l, -2.8, 8 + i, a)), n.push(P_(DOME(1.15, 1.1, 8), 1 + l, 2.8, 8 + i, a)), n.push(P_(BOXM(2.9, 4.8, 4.2, 1), -2.5, 0, 8.2 + i, t.pack || o)), t.tank && (n.push(P_(CYL(1.15, 5, 8), -2.6, -1.7, 8.8 + i, t.tank)), n.push(P_(CYL(1.15, 5, 8), -2.6, 1.7, 8.8 + i, t.tank)), n.push(P_(DOME(1.15, 0.9, 8), -2.6, -1.7, 13.8 + i, "steel")), n.push(P_(DOME(1.15, 0.9, 8), -2.6, 1.7, 13.8 + i, "steel"))), n.push(P_(CYL(1.05, 3.9, 7), 1 - l, -2.8, 8.1 + i, a)), n.push(P_(CYL(1.05, 3.9, 7), 1 + l, 2.8, 8.1 + i, a)), n.push(P_(CYL(0.9, 1.6, 6), 1.6 - l, -2.6, 6.8 + i, "skin")), n.push(P_(CYL(0.9, 1.6, 6), 1.6 + l, 2.6, 6.8 + i, "skin")), n.push(P_(CYL(1.3, 1.8, 8), 0, 0, 12 + i, "skin")), n.push(P_(DOME(2.35, 2.15, 11), -0.1, 0, 14.6 + i, t.helmet || "armor3")), n.push(P_(CYL(2.4, 1.3, 11), -0.1, 0, 13.6 + i, t.helmet || "armor3")), n.push(P_(BOXM(1.2, 3.2, 1.1, 0.3), 1.4, 0, 14.4 + i, t.visor || "glass", { e: 1 })), t.beret && n.push(P_(CYL(2.45, 0.9, 11), 0.2, 0, 15.6 + i, t.beret)), t.hood && n.push(P_(CONE(2.9, 1, 4.8, 9), -0.2, 0, 14.4 + i, t.hood)), n.push(P_(BOXM(1.1, 1.3, 1.5, 0.3), 0.9, -1.5, 9 + i, "dark2")), n.push(P_(BOXM(1.1, 1.3, 1.5, 0.3), 0.9, 1.5, 9 + i, "dark2")), n.push(P_(CYL(0.3, 4.2, 6), -1.7, -0.4, 13.9 + i, "darkmetal", { tx: -0.3 })), weaponRig(n, t.weapon || "rifle", i, s, a), n.map((e2) => Object.assign({}, e2, { x: e2.x * r, y: e2.y * r, z: e2.z * r, sx: (e2.sx || 1) * r, sy: (e2.sy || 1) * r, sz: (e2.sz || 1) * r }));
   }
-  function jet(e, t, r, fac) {
-    const n = [], fr = "soviet" === fac ? 1.5 : 3.1, fs = "soviet" === fac ? 2 : 4;
-    n.push(P_(TSLAB(roundRectProfile(1.05 * e, 6, fr, fs), 4.6, 0.55, "fus" + e + fac), 0, 0, -2.3, "body")), n.push(P_(CONE(2.9, 0.5, 0.24 * e, 9), 0.4 * e, 0, 0, "dark", { ty: PI2 })), n.push(P_(DOME(2.7, 2.4, 11), 0.16 * e, 0, 1.9, "glass", { e: 1 })), n.push(P_(SLAB(filletPoly([[0.18 * e, 0], [0.02 * e, 0.72 * t], [0.14 * -e, 0.62 * t], [0.1 * -e, 0], [0.14 * -e, 0.62 * -t], [0.02 * e, 0.72 * -t]], 0.05 * Math.min(e, t), 2), 2, 0.6, "wg" + e + t), 0.02 * -e, 0, 0, "body")), n.push(P_(BOXM(0.1 * e, 1.3 * t, 1, 0.3), 0.24 * -e, 0, 0.3, "dark")), n.push(P_(BOXM(0.18 * e, 0.5 * t, 1.7, 0.5), 0.4 * -e, 0, 0.4, "body"));
-    for (const a of [-1, 1]) n.push(P_(WEDGE(0.15 * e, 1.7, 5.6, 1.7), 0.4 * -e, a * 0.18 * t, 1.5, "dark", { r: a * 0.16 })), n.push(P_(BOXM(0.2 * e, 0.7, 1.5, 0.22), 0.15 * e, a * 0.18 * t, 1.8, "trim"));
-    for (const a of [0.26 * -t, 0.26 * t]) n.push(P_(CYL(2.3, 0.36 * e, 10), 0.3 * -e, a, -1.5, "steel", { ty: -PI2 })), n.push(P_(CYL(1.7, 1.8, 8), 0.47 * -e, a, -1.5, r ? "glow" : "rust", { ty: -PI2, e: r ? 1 : 0 }));
-    for (const r2 of [0.4 * -t, 0.4 * t]) n.push(P_(CYL(1.2, 0.34 * e, 8), 0.1 * -e, r2, -3.6, "white", { ty: PI2 })), n.push(P_(CONE(1.3, 0.4, 2.4, 7), 0.25 * e, r2, -3.6, "red", { ty: PI2 }));
-    if ("soviet" === fac) for (const r2 of [0.5 * -t, 0.5 * t]) n.push(P_(CYL(0.85, 3.6, 8), 0.06 * -e, r2, -1.5, "rust", { ty: -PI2 })), n.push(P_(CYL(0.55, 0.7, 7), 0.24 * -e, r2, -1.5, "black", { ty: -PI2 }));
-    else if ("allied" === fac) for (const r2 of [0.48 * -t, 0.48 * t]) n.push(P_(CYL(0.6, 2.6, 8), 0.1 * -e, r2, 0.3, "tesla", { e: 1, ty: -PI2 }));
+  function jetBase(len, fac) {
+    const fr = "soviet" === fac ? 1.5 : 3.1, fs = "soviet" === fac ? 2 : 4;
+    return [P_(TSLAB(roundRectProfile(1.05 * len, 6, fr, fs), 4.6, 0.55, "fus" + len + fac), 0, 0, -2.3, "body"), P_(CONE(2.9, 0.5, 0.24 * len, 9), 0.4 * len, 0, 0, "dark", { ty: PI2 }), P_(DOME(2.7, 2.4, 11), 0.16 * len, 0, 1.9, "glass", { e: 1 })];
+  }
+  function kestrelModel(lit) {
+    const len = 20, wid = 14, n = jetBase(len, "allied");
+    n.push(P_(SLAB(filletPoly([[0.1 * len, 0], [-0.08 * len, 0.62 * wid], [-0.42 * len, 0.62 * wid], [-0.46 * len, 0], [-0.42 * len, -0.62 * wid], [-0.08 * len, -0.62 * wid]], 1.4, 2), 2, 0.55, "wgkes"), -0.02 * len, 0, 0, "body")), n.push(P_(WEDGE(0.14 * len, 1.7, 5.2, 1.6), -0.44 * len, 0, 1.5, "dark", { r: 0.15 })), n.push(P_(BOXM(0.16 * len, 0.6, 1.4, 0.2), -0.22 * len, 0, 1.8, "trim"));
+    for (const s of [0.2 * -wid, 0.2 * wid]) n.push(P_(CYL(1.7, 0.28 * len, 9), -0.26 * len, s, -1.4, "steel", { ty: -PI2 })), n.push(P_(CYL(1.2, 1.4, 7), -0.42 * len, s, -1.4, lit ? "glow" : "rust", { ty: -PI2, e: lit ? 1 : 0 }));
+    for (const s of [0.42 * -wid, 0.42 * wid]) n.push(P_(CYL(0.5, 0.2 * len, 7), 0.04 * len, s, -2.6, "gunmetal", { ty: PI2 })), n.push(P_(CONE(0.5, 0.15, 1.5, 6), 0.14 * len, s, -2.6, "black", { ty: PI2 }));
+    return n;
+  }
+  function jackalModel(lit) {
+    const len = 21, wid = 14, n = jetBase(len, "soviet");
+    n.push(P_(SLAB(filletPoly([[0.2 * len, 0], [-0.02 * len, 0.5 * wid], [-0.34 * len, 0.3 * wid], [-0.4 * len, 0], [-0.34 * len, -0.3 * wid], [-0.02 * len, -0.5 * wid]], 1.2, 2), 2, 0.55, "wgjak"), -0.03 * len, 0, 0, "body"));
+    for (const s of [-1, 1]) n.push(P_(WEDGE(0.13 * len, 1.5, 4.6, 1.5), -0.4 * len, s * 0.22 * wid, 1.5, "dark", { r: s * 0.28 }));
+    n.push(P_(BOXM(0.14 * len, 1.6, 1.3, 0.3), 0.28 * len, 0, -2.2, "dark2"));
+    for (const s of [0.2 * -wid, 0.2 * wid]) n.push(P_(CYL(1.7, 0.28 * len, 9), -0.26 * len, s, -1.4, "steel", { ty: -PI2 })), n.push(P_(CYL(1.2, 1.4, 7), -0.42 * len, s, -1.4, lit ? "glow" : "rust", { ty: -PI2, e: lit ? 1 : 0 }));
+    for (const s of [0.4 * -wid, 0.4 * wid]) n.push(P_(CYL(0.5, 0.2 * len, 7), 0.04 * len, s, -2.6, "gunmetal", { ty: PI2 })), n.push(P_(CONE(0.5, 0.15, 1.5, 6), 0.14 * len, s, -2.6, "black", { ty: PI2 }));
+    return n;
+  }
+  function harrierModel(lit) {
+    const len = 25, wid = 19, n = jetBase(len, "allied");
+    n.push(P_(SLAB(filletPoly([[0.06 * len, 0], [-0.1 * len, 0.68 * wid], [-0.3 * len, 0.6 * wid], [-0.36 * len, 0], [-0.3 * len, -0.6 * wid], [-0.1 * len, -0.68 * wid]], 1.8, 2), 2.4, 0.55, "wghar"), -0.04 * len, 0, 0, "body")), n.push(P_(WEDGE(0.16 * len, 2, 6, 1.9), -0.36 * len, 0, 1.7, "dark", { r: 0.13 })), n.push(P_(BOXM(0.18 * len, 0.7, 1.6, 0.22), -0.18 * len, 0, 2, "trim"));
+    for (const s of [0.2 * -wid, 0.2 * wid]) n.push(P_(CYL(2.1, 0.32 * len, 10), -0.28 * len, s, -1.6, "steel", { ty: -PI2 })), n.push(P_(CYL(1.5, 1.6, 8), -0.46 * len, s, -1.6, lit ? "glow" : "rust", { ty: -PI2, e: lit ? 1 : 0 }));
+    n.push(P_(CYL(1.6, 0.3 * len, 9), 0.02 * len, 0, -4.4, "gunmetal", { ty: PI2 })), n.push(P_(DOME(1.6, 1.2, 8), 0.16 * len, 0, -4.4, "dark2", { ty: PI2 }));
+    for (const s of [0.42 * -wid, 0.42 * wid]) n.push(P_(CYL(1.2, 0.22 * len, 8), 0.06 * len, s, -3.4, "white", { ty: PI2 })), n.push(P_(CONE(1.3, 0.4, 2.2, 7), 0.2 * len, s, -3.4, "red", { ty: PI2 }));
+    return n;
+  }
+  function eagleModel(lit) {
+    const len = 27, wid = 20, n = jetBase(len, "soviet");
+    n.push(P_(SLAB(filletPoly([[0.06 * len, 0], [-0.1 * len, 0.68 * wid], [-0.3 * len, 0.6 * wid], [-0.36 * len, 0], [-0.3 * len, -0.6 * wid], [-0.1 * len, -0.68 * wid]], 1.8, 2), 2.4, 0.55, "wgeag"), -0.04 * len, 0, 0, "body"));
+    for (const s of [0.24 * -wid, 0.24 * wid]) n.push(P_(BOXM(0.12 * len, 1.6, 1.6, 0.25), 0.02 * len, s, -1, "dark2"));
+    for (const s of [0.3 * -wid, 0.3 * wid]) n.push(P_(CYL(0.55, 0.34 * len, 8), -0.14 * len, s, -1.8, "darkmetal", { ty: -PI2 })), n.push(P_(WEDGE(0.1 * len, 1.4, 4, 1.4), -0.42 * len, s, 1.2, "dark", { r: 0.16 * (s < 0 ? 1 : -1) }));
+    n.push(P_(CYL(1.5, 0.28 * len, 9), 0.02 * len, 0, -4.2, "gunmetal", { ty: PI2 }));
+    for (const s of [0.42 * -wid, 0.42 * wid]) n.push(P_(CYL(1.2, 0.22 * len, 8), 0.06 * len, s, -3.2, "white", { ty: PI2 })), n.push(P_(CONE(1.3, 0.4, 2.2, 7), 0.2 * len, s, -3.2, "red", { ty: PI2 }));
     return n;
   }
   function locustModel(t) {
@@ -3210,13 +3263,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         return e2.push(P_(CYL(1.7, 8, 8), -3, -3.2, 5.6, "steel")), e2.push(P_(CYL(1.7, 8, 8), -3, 3.2, 5.6, "steel")), e2.push(P_(CONE(1.6, 0.6, 3.4, 7), -3, -3.2, 2.4, t ? "glow" : "red", { e: 1, ty: Math.PI })), e2.push(P_(CONE(1.6, 0.6, 3.4, 7), -3, 3.2, 2.4, t ? "glow" : "red", { e: 1, ty: Math.PI })), e2.push(P_(CYL(0.8, 8, 6), 3, -2.2, 7.4, "darkmetal", { ty: PI2 })), e2.push(P_(CYL(0.8, 8, 6), 3, 2.2, 7.4, "darkmetal", { ty: PI2 })), e2;
       }
       case "harrier":
-        return jet(24, 19, t, "allied");
+        return harrierModel(t);
       case "eagle":
-        return jet(26, 20, t, "soviet");
+        return eagleModel(t);
       case "kestrel":
-        return jet(20, 15, t, "allied");
+        return kestrelModel(t);
       case "jackal":
-        return jet(21, 15, t, "soviet");
+        return jackalModel(t);
       case "locust":
         return locustModel(t);
       case "disc": {
@@ -3301,9 +3354,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       for (const sgn of [-1, 1]) p.push(P_(CONE(0.5, 0.08, 5, 6), -0.46 * 38, sgn * 1.5, rad, "carapace2", { ty: PI2 }));
       return p.push(P_(DOME(0.5, 0.4, 7), 0.3 * 38, 0, rad + 0.6, "psi", { e: 1 })), p;
     }
-    if ("chinook" === e) return transportHeli(t, "allied");
-    if ("skyhauler" === e) return transportHeli(t, "soviet");
-    if ("gullet" === e) return transportHeli(t, "yuri");
+    if ("chinook" === e) return chinookModel();
+    if ("skyhauler" === e) return skyhaulerModel();
+    if ("gullet" === e) return gulletModel();
     if ("lst" === e) {
       const p = boatHull(46, 17, t, { fac: "allied" }), th = 6.5;
       p.push(P_(WEDGE(0.16 * 46, 0.7 * 17, 3, 0.4), 0.46 * 46, 0, th + 0.5, "steel"));
@@ -4352,52 +4405,48 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         }
         break;
       case "airfield": {
-        n.push(P_(SLAB(roundRectProfile(0.88 * r, 0.88 * r, 5, 3), 1.4, 0.45, "afp"), 0, 0, 2.6, "asphalt"));
-        if (riseBucket >= 1) {
-          for (let e2 = 0; e2 < 20; e2++) {
-            const t2 = e2 / 20 * Math.PI * 2;
-            n.push(P_(BOXM(4.8, 1.4, 0.35, 0.12), Math.cos(t2) * r * 0.26, Math.sin(t2) * r * 0.26, 4, "white", { r: t2 + PI2 }));
+        const PAD_Q = [[-1, -1], [1, -1], [-1, 1], [1, 1]], pw = 0.4 * r, pd = 0.4 * r;
+        for (let pi = 0; pi < 4; pi++) {
+          const px = 26 * PAD_Q[pi][0], py = 26 * PAD_Q[pi][1];
+          n.push(P_(SLAB(roundRectProfile(pw, pd, 4, 3), 1.4, 0.45, "afp" + pi), px, py, 2.6, "asphalt"));
+          if (riseBucket >= 1) {
+            for (const cx of [-1, 1]) for (const cy of [-1, 1]) n.push(P_(BOXM(3.2, 3.2, 0.35, 0.12), px + cx * pw * 0.4, py + cy * pd * 0.4, 4, "white", { r: PI2 / 8 }));
+            hazard(n, px, py, 4, 0.42 * Math.min(pw, pd), 0);
           }
-          hazard(n, 0, -0.38 * r, 4, 0.4 * r, 0);
+          if (riseBucket >= 2) for (const cn2 of [-1, 1]) n.push(P_(CYL(1, 1.3, 10), px + cn2 * pw * 0.44, py, 4, "glow", { e: 1, a: { spin: 0.9 + 0.1 * pi } }));
         }
-        if (riseBucket >= 2) {
-          for (let e2 = 0; e2 < 4; e2++) {
-            const t2 = e2 * PI2 + 0.78;
-            n.push(P_(CYL(1.1, 1.4, 12), Math.cos(t2) * r * 0.34, Math.sin(t2) * r * 0.34, 4, "glow", { e: 1, a: { spin: 0.9 } }));
-          }
-        }
-        const tw = 0.24 * r, td = 0.22 * r, th = 0.4 * r, tcx = -0.35 * r, tcy = 0.35 * r;
+        const th = 0.32 * r;
         if (a) {
           if (riseBucket >= 3) {
-            tier(n, tw, td, th, tcx, tcy, 2.6, "armor", "afv1", 0.94);
-            railPosts(n, tw, td, 2.6 + th, 1.6);
+            tier(n, 0.2 * r, 0.2 * r, th, 0, 0, 2.6, "armor", "afv1", 0.94);
+            railPosts(n, 0.2 * r, 0.2 * r, 2.6 + th, 1.6);
           }
           if (riseBucket >= 4) {
-            n.push(P_(CYL(0.05 * r, 0.18 * r, 12), tcx, tcy, 2.6 + th, "steel"));
-            n.push(P_(SLAB(roundRectProfile(0.13 * r, 0.13 * r, 2, 3), 0.08 * r, 0.75, "afvc"), tcx, tcy, 2.6 + th + 0.18 * r, "glass", { e: 1 }));
-            dish(n, tcx, tcy, 2.6 + th + 0.1 * r, 0.07 * r);
+            n.push(P_(CYL(0.045 * r, 0.16 * r, 12), 0, 0, 2.6 + th, "steel"));
+            n.push(P_(SLAB(roundRectProfile(0.11 * r, 0.11 * r, 2, 3), 0.07 * r, 0.75, "afvc"), 0, 0, 2.6 + th + 0.16 * r, "glass", { e: 1 }));
+            dish(n, 0, 0, 2.6 + th + 0.09 * r, 0.06 * r);
           }
         } else if (o) {
           if (riseBucket >= 3) {
-            tier(n, tw, td, th * 0.9, tcx, tcy, 2.6, "concrete", "afl1", 0.94);
+            tier(n, 0.2 * r, 0.18 * r, th * 0.9, 0, 0, 2.6, "concrete", "afl1", 0.94);
           }
           if (riseBucket >= 4) {
-            n.push(P_(SLAB(roundRectProfile(tw * 1.1, td * 1.1, 3, 3), 2, 0.65, "aflr"), tcx, tcy, 2.6 + th * 0.9, "concrete2"));
-            dish(n, tcx, tcy, 2.6 + th * 0.9, 0.065 * r);
+            n.push(P_(SLAB(roundRectProfile(0.22 * r, 0.2 * r, 3, 3), 2, 0.65, "aflr"), 0, 0, 2.6 + th * 0.9, "concrete2"));
+            dish(n, 0, 0, 2.6 + th * 0.9, 0.058 * r);
           }
         } else {
           if (riseBucket >= 3) {
-            n.push(P_(CYL(0.11 * r, 0.16 * r, 14), tcx, tcy, 2.6, "carapace2"));
+            n.push(P_(CYL(0.095 * r, 0.14 * r, 14), 0, 0, 2.6, "carapace2"));
           }
           if (riseBucket >= 4) {
-            n.push(P_(DOME(0.15 * r, 0.13 * r, 14), tcx, tcy, 2.6 + 0.16 * r, "carapace"));
-            n.push(P_(DOME(0.09 * r, 0.11 * r, 12), tcx, tcy, 2.6 + 0.32 * r, "psi", { e: 1, a: { spin: 1 } }));
+            n.push(P_(DOME(0.13 * r, 0.11 * r, 14), 0, 0, 2.6 + 0.14 * r, "carapace"));
+            n.push(P_(DOME(0.08 * r, 0.1 * r, 12), 0, 0, 2.6 + 0.28 * r, "psi", { e: 1, a: { spin: 1 } }));
           }
         }
-        barrel(n, 0.32 * r, -0.32 * r, 2.6, "rust");
-        barrel(n, -0.15 * r, -0.38 * r, 2.6, "olive");
-        crate(n, 0.28 * r, 0.28 * r, 2.6, 4, "olive", 0.2);
-        containerBox(n, 0.25 * r, -0.25 * r, 2.6, 5.5, 2.8, 2.4, "body", 0.15);
+        barrel(n, 0.46 * r, -0.46 * r, 2.6, "rust");
+        barrel(n, -0.46 * r, -0.46 * r, 2.6, "olive");
+        crate(n, 0.46 * r, 0.46 * r, 2.6, 4, "olive", 0.2);
+        containerBox(n, -0.46 * r, 0.46 * r, 2.6, 5.5, 2.8, 2.4, "body", 0.15);
         break;
       }
       case "def1":
@@ -4767,7 +4816,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     riftModel,
     riftTurret,
     boatHull,
-    transportHeli,
+    kestrelModel,
+    chinookModel,
+    skyhaulerModel,
+    gulletModel,
     subHull,
     tankHull,
     turretProfile,
@@ -4784,7 +4836,6 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     mcvModel,
     weaponRig,
     infantry,
-    jet,
     UMODEL_,
     UTURRET_,
     muzzleDist,
@@ -5342,7 +5393,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function iconFor(e, t, r, n) {
     const a = palette(n || 0);
-    if ("ability" === e) return makeSprite("super" === t ? BMODEL("super", r, 0) : jet(20, 10, 0, r), 0, a);
+    if ("ability" === e) return makeSprite("super" === t ? BMODEL("super", r, 0) : kestrelModel(0), 0, a);
     const isBld = "bld" === e || "def" === e, o = isBld ? BMODEL(t, r, 1) : UMODEL(t, 0), s = isBld ? BTURRET(t, r, 0) : UTURRET(t, 0), i = isBld ? 0 : faceAng(faceIdx(2.5));
     return makeSprite(s ? o.concat(s) : o, i, a);
   }
@@ -5758,21 +5809,65 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const t = S.blds.filter((t2) => t2.owner === e.owner && !t2.dead && "airfield" === t2.key);
     return t.length ? (e.home && !e.home.dead && t.includes(e.home) || (t.sort((t2, r) => dist2(t2.x, t2.y, e.x, e.y) - dist2(r.x, r.y, e.x, e.y)), e.home = t[0]), e.home) : null;
   }
+  var PAD_OFFSETS = [[-26, -26], [26, -26], [-26, 26], [26, 26]];
+  function padWorldPos(bld, idx2) {
+    if (null == idx2) return { x: bld.x, y: bld.y };
+    const q = PAD_OFFSETS[idx2];
+    return { x: bld.x + q[0], y: bld.y + q[1] };
+  }
+  function freePad(bld) {
+    bld.pads || (bld.pads = [null, null, null, null]);
+    for (let i = 0; i < 4; i++) {
+      const u = bld.pads[i];
+      if (!u || u.dead) return i;
+    }
+    return -1;
+  }
+  function releasePad(u) {
+    u.padHome && u.padHome.pads && null != u.padIdx && u.padHome.pads[u.padIdx] === u && (u.padHome.pads[u.padIdx] = null), u.padHome = null, u.padIdx = null;
+  }
+  function dockAt(e) {
+    const bld = homePad(e);
+    if (!bld) return null;
+    let target = bld, idx2 = freePad(bld);
+    if (idx2 < 0) {
+      const alts = S.blds.filter((b) => b.owner === e.owner && !b.dead && "airfield" === b.key && b !== bld).sort((a, b) => dist2(a.x, a.y, e.x, e.y) - dist2(b.x, b.y, e.x, e.y));
+      for (const alt of alts) {
+        const j = freePad(alt);
+        if (j >= 0) {
+          target = alt, idx2 = j;
+          break;
+        }
+      }
+    }
+    return idx2 < 0 ? (e.padIdx = null, bld) : (target.pads[idx2] = e, e.padHome = target, e.padIdx = idx2, target);
+  }
   function tickAir(e, t) {
     const r = e.d;
     e.rotorSpin = (e.rotorSpin || 0) + 18 * t;
     e.cool > 0 && (e.cool -= t), e.muzzle > 0 && (e.muzzle -= t);
     const n = "land" === e.state ? 0 : r.transport && S.units.some((u) => "load" === u.order && u.target === e) ? 0 : r.alt;
     if (e.alt = void 0 === e.alt ? r.alt : e.alt + clamp(n - e.alt, -70 * t, 70 * t), r.ammo && e.ammo <= 0 && "land" !== e.state && "rtb" !== e.state) {
-      const t2 = homePad(e);
+      const t2 = dockAt(e);
       t2 && (e.state = "rtb", e.rtb = t2);
     }
     if ("rtb" === e.state) {
       const r2 = e.rtb;
-      if (r2 && !r2.dead) return flyTo(e, r2.x, r2.y, t), void (dist2(e.x, e.y, r2.x, r2.y) < 324 && (e.state = "land", e.reload = 4.5));
-      e.state = null;
+      if (r2 && !r2.dead) {
+        const pp = padWorldPos(r2, e.padIdx);
+        return flyTo(e, pp.x, pp.y, t), void (dist2(e.x, e.y, pp.x, pp.y) < 324 && (e.state = "land", e.reload = 6));
+      }
+      e.state = null, releasePad(e);
     }
-    if ("land" === e.state) return e.reload -= t, void (e.alt < 2 && e.reload <= 0 && (e.ammo = r.ammo, e.state = null, e.lastTarget && !e.lastTarget.dead ? (e.target = e.lastTarget, e.order = "attack") : e.order = "idle"));
+    if ("land" === e.state) {
+      e.reload -= t, e.reload <= 0 && (e.ammo = r.ammo);
+      const p = S.players[e.owner];
+      if (e.hp < e.maxhp && p) {
+        const cost = 0.25 * r.cost * t / 6;
+        p.credits >= cost && (p.credits -= cost, e.hp = Math.min(e.maxhp, e.hp + e.maxhp * t / 6));
+      }
+      return void (e.alt < 2 && e.reload <= 0 && (e.state = null, releasePad(e), e.lastTarget && !e.lastTarget.dead ? (e.target = e.lastTarget, e.order = "attack") : e.order = "idle"));
+    }
     if (!("idle" !== e.order && "amove" !== e.order || e.target && canTarget(e, e.target) && e.target.owner !== e.owner)) {
       let t2 = null, n2 = 1e9;
       const a = r.range + 300;
@@ -5801,7 +5896,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           e.ang = angLerp(e.ang, r2, 3 * t);
         }
         if (e.tang = Math.atan2(n2.y - e.y, n2.x - e.x), e.cool <= 0 && (!r.ammo || e.ammo > 0) && (e.cool = r.rof * vRof(e), fire(e, n2, r), r.ammo && (e.ammo--, e.ammo <= 0))) {
-          const t2 = homePad(e);
+          const t2 = dockAt(e);
           t2 && (e.state = "rtb", e.rtb = t2);
         }
       } else flyTo(e, n2.x, n2.y, t);
@@ -6687,7 +6782,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f) continue;
       if (!seen(e2)) continue;
       const t2 = palette(e2.owner), r2 = unitFrame(e2), gy = e2.d.naval ? 2.6 : heightAt(e2.x, e2.y), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
-      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang), hasTurret(e2.key) && c("UT" + e2.key + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0), t2, e2.x, e2.y, gy + (e2.alt || 0) + turRise, e2.tang), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key || "gullet" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), c("UTR" + e2.key + "|" + e2.owner, "chinook" === e2.key ? heliRotor : heliTailRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + ("chinook" === e2.key ? 22 : 17), e2.rotorSpin || 0)), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
+      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang), hasTurret(e2.key) && c("UT" + e2.key + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0), t2, e2.x, e2.y, gy + (e2.alt || 0) + turRise, e2.tang), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), c("UTR" + e2.key + "|" + e2.owner, "chinook" === e2.key ? heliRotor : heliTailRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + ("chinook" === e2.key ? 22 : 17), e2.rotorSpin || 0)), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
     }
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
     if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind);
@@ -8243,21 +8338,21 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var entRef = (v) => v ? { id: v.id, e: v.e } : null;
   function unitToObj(u) {
-    return { id: u.id, key: u.key, owner: u.owner, x: u.x, y: u.y, hp: u.hp, maxhp: u.maxhp, ang: u.ang, tang: u.tang, order: u.order, tx: u.tx, ty: u.ty, cool: u.cool, cargo: u.cargo, ore: u.ore, unload: u.unload, deployed: u.deployed, xp: u.xp, vet: u.vet, alt: u.alt, ammo: u.ammo, inside: entRef(u.inside), host: entRef(u.host), drone: entRef(u.drone), erase: u.erase, frozen: u.frozen, state: u.state, home: entRef(u.home), origOwner: u.origOwner, slaves: (u.slaves || []).map(entRef), ctrlBy: entRef(u.ctrlBy), target: entRef(u.target), ref: entRef(u.ref), guard: u.guard, ctrl: u.ctrl, rangeMul: u.rangeMul, slowT: u.slowT, retreatT: u.retreatT, revealT: u.revealT };
+    return { id: u.id, key: u.key, owner: u.owner, x: u.x, y: u.y, hp: u.hp, maxhp: u.maxhp, ang: u.ang, tang: u.tang, order: u.order, tx: u.tx, ty: u.ty, cool: u.cool, cargo: u.cargo, ore: u.ore, unload: u.unload, deployed: u.deployed, xp: u.xp, vet: u.vet, alt: u.alt, ammo: u.ammo, inside: entRef(u.inside), host: entRef(u.host), drone: entRef(u.drone), erase: u.erase, frozen: u.frozen, state: u.state, home: entRef(u.home), padHome: entRef(u.padHome), padIdx: null != u.padIdx ? u.padIdx : null, origOwner: u.origOwner, slaves: (u.slaves || []).map(entRef), ctrlBy: entRef(u.ctrlBy), target: entRef(u.target), ref: entRef(u.ref), guard: u.guard, ctrl: u.ctrl, rangeMul: u.rangeMul, slowT: u.slowT, retreatT: u.retreatT, revealT: u.revealT };
   }
   function bldToObj(b) {
-    return { id: b.id, key: b.key, owner: b.owner, tx: b.tx, ty: b.ty, size: b.size, hp: b.hp, maxhp: b.maxhp, cool: b.cool, target: entRef(b.target), rally: b.rally, sellT: b.sellT, repair: b.repair, chargeT: b.chargeT, charge: b.charge, rise: b.rise, spin: b.spin, capturedFac: b.capturedFac, garrison: (b.garrison || []).map(entRef), deployed: b.deployed, rot: b.rot, open: b.open, pairId: entRef(b.pairId ? { id: b.pairId, e: "b" } : null) };
+    return { id: b.id, key: b.key, owner: b.owner, tx: b.tx, ty: b.ty, size: b.size, hp: b.hp, maxhp: b.maxhp, cool: b.cool, target: entRef(b.target), rally: b.rally, sellT: b.sellT, repair: b.repair, chargeT: b.chargeT, charge: b.charge, rise: b.rise, spin: b.spin, capturedFac: b.capturedFac, garrison: (b.garrison || []).map(entRef), deployed: b.deployed, rot: b.rot, open: b.open, pairId: entRef(b.pairId ? { id: b.pairId, e: "b" } : null), pads: b.pads ? b.pads.map(entRef) : null };
   }
   function restoreUnit(rec) {
     const d = UNITS[rec.key];
     if (!d) return null;
-    return { id: rec.id, e: "u", key: rec.key, d, owner: rec.owner, x: rec.x, y: rec.y, hp: rec.hp, maxhp: rec.maxhp, ang: rec.ang || 0, tang: rec.tang || 0, order: rec.order || "idle", tx: rec.tx, ty: rec.ty, path: null, pi: 0, repath: 0, target: null, cool: rec.cool || 0, cargo: rec.cargo || 0, ore: rec.ore || null, ref: null, unload: rec.unload || 0, dead: false, vx: 0, vy: 0, moving: false, stuck: 0, ctrl: rec.ctrl || 0, ctrlBy: null, origOwner: null != rec.origOwner ? rec.origOwner : rec.owner, slaves: [], recoil: 0, muzzle: 0, deployed: rec.deployed, guard: rec.guard, xp: rec.xp || 0, vet: rec.vet || 0, alt: rec.alt || 0, ammo: rec.ammo || 0, inside: null, host: null, drone: null, erase: rec.erase || 0, frozen: rec.frozen || 0, state: rec.state || null, home: null, rangeMul: rec.rangeMul, slowT: rec.slowT, retreatT: rec.retreatT, revealT: rec.revealT, _refTarget: rec.target, _refRef: rec.ref, _refCtrlBy: rec.ctrlBy, _refInside: rec.inside, _refHost: rec.host, _refDrone: rec.drone, _refHome: rec.home, _refSlaves: rec.slaves || [] };
+    return { id: rec.id, e: "u", key: rec.key, d, owner: rec.owner, x: rec.x, y: rec.y, hp: rec.hp, maxhp: rec.maxhp, ang: rec.ang || 0, tang: rec.tang || 0, order: rec.order || "idle", tx: rec.tx, ty: rec.ty, path: null, pi: 0, repath: 0, target: null, cool: rec.cool || 0, cargo: rec.cargo || 0, ore: rec.ore || null, ref: null, unload: rec.unload || 0, dead: false, vx: 0, vy: 0, moving: false, stuck: 0, ctrl: rec.ctrl || 0, ctrlBy: null, origOwner: null != rec.origOwner ? rec.origOwner : rec.owner, slaves: [], recoil: 0, muzzle: 0, deployed: rec.deployed, guard: rec.guard, xp: rec.xp || 0, vet: rec.vet || 0, alt: rec.alt || 0, ammo: rec.ammo || 0, inside: null, host: null, drone: null, erase: rec.erase || 0, frozen: rec.frozen || 0, state: rec.state || null, home: null, padHome: null, padIdx: null != rec.padIdx ? rec.padIdx : null, rangeMul: rec.rangeMul, slowT: rec.slowT, retreatT: rec.retreatT, revealT: rec.revealT, _refTarget: rec.target, _refRef: rec.ref, _refCtrlBy: rec.ctrlBy, _refInside: rec.inside, _refHost: rec.host, _refDrone: rec.drone, _refHome: rec.home, _refPadHome: rec.padHome, _refSlaves: rec.slaves || [] };
   }
   function restoreBld(rec) {
     const bd = BLD[rec.key];
     if (!bd) return null;
     const owner = S.players[rec.owner], fac = owner ? owner.fac : "allied", sz = rec.size || bd.size;
-    return { id: rec.id, e: "b", key: rec.key, d: bd, owner: rec.owner, tx: rec.tx, ty: rec.ty, size: sz, x: 32 * (rec.tx + sz / 2), y: 32 * (rec.ty + sz / 2), hp: rec.hp, maxhp: rec.maxhp, name: bname(rec.key, fac), cool: rec.cool || 0, target: null, dead: false, rally: rec.rally || null, sellT: rec.sellT || 0, repair: !!rec.repair, chargeT: rec.chargeT || 0, charge: rec.charge || 0, rise: null != rec.rise ? rec.rise : 1, w: bweapon(rec.key, fac), w2: bd.weapon2 || null, spin: rec.spin || 0, capturedFac: rec.capturedFac || null, deployed: rec.deployed, rot: rec.rot || 0, open: !!rec.open, gateT: rec.open ? 1 : 0, garrison: [], _refTarget: rec.target, _refGarrison: rec.garrison || [], _refPairId: rec.pairId };
+    return { id: rec.id, e: "b", key: rec.key, d: bd, owner: rec.owner, tx: rec.tx, ty: rec.ty, size: sz, x: 32 * (rec.tx + sz / 2), y: 32 * (rec.ty + sz / 2), hp: rec.hp, maxhp: rec.maxhp, name: bname(rec.key, fac), cool: rec.cool || 0, target: null, dead: false, rally: rec.rally || null, sellT: rec.sellT || 0, repair: !!rec.repair, chargeT: rec.chargeT || 0, charge: rec.charge || 0, rise: null != rec.rise ? rec.rise : 1, w: bweapon(rec.key, fac), w2: bd.weapon2 || null, spin: rec.spin || 0, capturedFac: rec.capturedFac || null, deployed: rec.deployed, rot: rec.rot || 0, open: !!rec.open, gateT: rec.open ? 1 : 0, garrison: [], pads: null, _refTarget: rec.target, _refGarrison: rec.garrison || [], _refPairId: rec.pairId, _refPads: rec.pads || null };
   }
   function resolveRefs() {
     const findE = (r) => {
@@ -8266,14 +8361,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       return list.find((o) => o.id === r.id) || null;
     };
     for (const u of S.units) {
-      u.target = findE(u._refTarget), u.ref = findE(u._refRef), u.ctrlBy = findE(u._refCtrlBy), u.inside = findE(u._refInside), u.host = findE(u._refHost), u.drone = findE(u._refDrone), u.home = findE(u._refHome), u.slaves = (u._refSlaves || []).map(findE).filter(Boolean);
-      delete u._refTarget, delete u._refRef, delete u._refCtrlBy, delete u._refInside, delete u._refHost, delete u._refDrone, delete u._refHome, delete u._refSlaves;
+      u.target = findE(u._refTarget), u.ref = findE(u._refRef), u.ctrlBy = findE(u._refCtrlBy), u.inside = findE(u._refInside), u.host = findE(u._refHost), u.drone = findE(u._refDrone), u.home = findE(u._refHome), u.padHome = findE(u._refPadHome), u.slaves = (u._refSlaves || []).map(findE).filter(Boolean);
+      delete u._refTarget, delete u._refRef, delete u._refCtrlBy, delete u._refInside, delete u._refHost, delete u._refDrone, delete u._refHome, delete u._refPadHome, delete u._refSlaves;
     }
     for (const b of S.blds) {
       b.target = findE(b._refTarget), b.garrison = (b._refGarrison || []).map(findE).filter(Boolean);
       const pairE = findE(b._refPairId);
-      b.pairId = pairE ? pairE.id : null;
-      delete b._refTarget, delete b._refGarrison, delete b._refPairId;
+      b.pairId = pairE ? pairE.id : null, b.pads = b._refPads ? b._refPads.map(findE) : null;
+      delete b._refTarget, delete b._refGarrison, delete b._refPairId, delete b._refPads;
     }
   }
   function playerToObj(p) {
