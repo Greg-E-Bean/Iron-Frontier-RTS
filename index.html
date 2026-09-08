@@ -2858,7 +2858,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const s = e2 * Math.PI / 3 + (n.f ? 0.5 : 0);
         a.push(P_(CYL(0.85, r, 6), 1.3 * t, 2.3 * Math.cos(s), o + 2.3 * Math.sin(s), "gunmetal", { ty: PI2 }));
       }
-    } else if (n.beam) a.push(P_(CONE(3.6, 2.2, 6, 8), 0.9 * t, 0, o - 2.4, "crystal", { ty: PI2 })), a.push(P_(CYL(1.9, r, 8), 1.3 * t, 0, o, "crystal", { ty: PI2, e: 1 }));
+    } else if (n.beam) a.push(P_(CONE(3.6, 2.2, 6, 8), 0.9 * t, 0, o - 2.4, "crystal", { ty: PI2 })), a.push(P_(CYL(1.6, r, 8), 1.3 * t, 0, o, "crystal", { ty: PI2 })), a.push(P_(CYL(2, 2.4, 8), 1.3 * t + r - 2.4, 0, o, "crystal", { ty: PI2, e: 1 }));
     else if (n.pods) for (const e2 of [-3.4, 3.4]) a.push(P_(BOXM(9, 3.8, 3.4, 1), 0.5 * t, e2, o - 0.6, "steel")), a.push(P_(CONE(1.5, 0.4, 2.4, 7), 0.5 * t + 4.6, e2, o + 0.4, "red", { ty: PI2 }));
     else if (n.dome) {
       a.push(P_(DOME(1.15 * t, 0.95 * t, 12), 0, 0, e + 6, "psi")), a.push(P_(DOME(0.5 * t, 0.5 * t, 10), 0, 0, e + 6 + 0.9 * t, "glass", { e: 1 }));
@@ -3225,10 +3225,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
       case "terror": {
         const e2 = [];
-        e2.push(P_(DOME(6.5, 4.5, 10), 0, 0, 5, "carapace2")), e2.push(P_(CYL(6.5, 5, 10), 0, 0, 3, "dark2")), e2.push(P_(DOME(4.2, 3, 9), 0, 0, 8.6, "carapace")), e2.push(P_(DOME(2.4, 2, 8), 0, 0, 9.5, "glass", { e: 1 })), e2.push(P_(CONE(1.6, 0.3, 3, 6), 0, 0, 11.6, "psi", { e: 1 }));
+        e2.push(P_(DOME(6.5, 4.5, 10), 0, 0, 5, "darkmetal")), e2.push(P_(CYL(6.5, 5, 10), 0, 0, 3, "dark2")), e2.push(P_(DOME(4.2, 3, 9), 0, 0, 8.6, "rust")), e2.push(P_(DOME(2.4, 2, 8), 0, 0, 9.5, "glass", { e: 1 })), e2.push(P_(CONE(1.6, 0.3, 3, 6), 0, 0, 11.6, "glow", { e: 1 }));
         for (let r = 0; r < 4; r++) {
           const n = r * PI2 + 0.78, a = 7.2 * Math.cos(n), o = 7.2 * Math.sin(n), s = 2.4 * (1 & t ? r % 2 : 1 - r % 2);
-          e2.push(P_(CYL(0.85, 11.5, 6), a, o, 3 + 0.5 * s, "steel", { r: n, ty: -1.25 })), e2.push(P_(CONE(1.3, 0.35, 4, 6), 2.15 * a, 2.15 * o, 0.2 + s, "darkmetal", { r: n })), e2.push(P_(DOME(0.7, 0.6, 6), 1.55 * a, 1.55 * o, 2 + s, "psi", { e: 1 }));
+          e2.push(P_(CYL(0.85, 11.5, 6), a, o, 3 + 0.5 * s, "steel", { r: n, ty: -1.25 })), e2.push(P_(CONE(1.3, 0.35, 4, 6), 2.15 * a, 2.15 * o, 0.2 + s, "darkmetal", { r: n })), e2.push(P_(DOME(0.7, 0.6, 6), 1.55 * a, 1.55 * o, 2 + s, "glow", { e: 1 }));
         }
         return e2;
       }
@@ -3424,7 +3424,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       case "miner_allied":
         return tankTurret(9, 5.5, 6.5, { pods: true, fac: "allied" });
       case "grizzly":
-        return tankTurret(11.5, 9.2, 17, { twin: true, fac: "allied" });
+        return tankTurret(11.5, 9.2, 20, { fac: "allied" });
       case "lasher":
         return tankTurret(11.5, 9.2, 16, { beam: true, fac: "yuri" });
       case "rhino":
