@@ -2320,7 +2320,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const r = S.players[e], t = r.f;
     return { body: r.color || t.color, dark: r.dark || t.dark, trim: r.tint || t.tint };
   }
-  var MAT = { metal: "#868f99", steel: "#6b7178", dark2: "#24272d", tread: "#1c1e22", glass: "#9fd0ff", glassdark: "#4d6b8c", gold: "#d4a537", crystal: "#7ff0ff", psi: "#c98cff", skin: "#c39a76", olive: "#4d5438", white: "#c8cdd2", red: "#c8382b", concrete: "#8b8474", roof: "#4d545e", rust: "#7a5c3a", green: "#5aa653", black: "#131417", tesla: "#8fd8ff", neutral: "#8d8474", wood: "#5f4c36", rubber: "#141519", darkmetal: "#40454c", lightY: "#ffe9a0", sand: "#8f7d58", armor: "#828d9b", armor2: "#6a7280", armor3: "#4d5560", gunmetal: "#1a1d23", nose: "#646d79", rock2: "#635b4d", rock3: "#4d473c", concrete2: "#6f685c", asphalt: "#2f3237", carapace: "#8f7aa8", carapace2: "#6a5a80", tibG: "#d69a2e", tibGlit: "#ffe08a", tibB: "#7fd8e8", tibBlit: "#d8fbff", bark: "#4a4030", pod: "#6e5f45", glow: "#ffb347", green2: "#3f7a3d", green3: "#6cae4a", pine: "#3f5f4c", autumn: "#9a6a2e", bark2: "#5a4632", scorch: "#1c1a17", wreck: "#3a3128" };
+  var MAT = { metal: "#868f99", steel: "#6b7178", dark2: "#24272d", tread: "#1c1e22", glass: "#9fd0ff", glassdark: "#4d6b8c", gold: "#d4a537", crystal: "#7ff0ff", psi: "#c98cff", skin: "#c39a76", olive: "#4d5438", white: "#c8cdd2", red: "#c8382b", concrete: "#8b8474", roof: "#4d545e", rust: "#7a5c3a", green: "#5aa653", black: "#131417", tesla: "#8fd8ff", neutral: "#8d8474", wood: "#5f4c36", rubber: "#141519", darkmetal: "#40454c", lightY: "#ffe9a0", sand: "#8f7d58", armor: "#828d9b", armor2: "#6a7280", armor3: "#4d5560", gunmetal: "#1a1d23", nose: "#646d79", rock2: "#635b4d", rock3: "#4d473c", concrete2: "#6f685c", asphalt: "#2f3237", carapace: "#8f7aa8", carapace2: "#6a5a80", bile: "#8ba33c", bile2: "#5f7a2c", flesh: "#b5495f", bone: "#cdbf94", tibG: "#d69a2e", tibGlit: "#ffe08a", tibB: "#7fd8e8", tibBlit: "#d8fbff", bark: "#4a4030", pod: "#6e5f45", glow: "#ffb347", green2: "#3f7a3d", green3: "#6cae4a", pine: "#3f5f4c", autumn: "#9a6a2e", bark2: "#5a4632", scorch: "#1c1a17", wreck: "#3a3128" };
   function colOf(e, t) {
     return t[e] || MAT[e] || e;
   }
@@ -2350,7 +2350,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const p = 0.92 * s * c, m = 0.29 * c;
     return _L[0] = m + 1 * p + 0.24 * i * 0.58 + 0.15 * l * 0.62 + h + 0.72 * f, _L[1] = m + 0.955 * p + 0.24 * i * 0.7 + 0.15 * l * 0.54 + h + 0.86 * f, _L[2] = m + 0.875 * p + 0.24 * i * 0.92 + 0.15 * l * 0.42 + h + 1 * f, _L;
   }
-  var SURF = { glass: [1.05, 70], glassdark: [0.85, 60], crystal: [1.2, 80], tesla: [0.95, 60], metal: [0.74, 42], steel: [0.66, 38], armor: [0.54, 32], armor2: [0.5, 30], armor3: [0.46, 28], gunmetal: [0.64, 38], darkmetal: [0.54, 32], white: [0.4, 24], gold: [0.78, 38], rubber: [0.08, 8], tread: [0.1, 9], concrete: [0.1, 7], concrete2: [0.09, 7], asphalt: [0.12, 9], sand: [0.08, 6], olive: [0.12, 10], wood: [0.14, 10], skin: [0.22, 14], black: [0.32, 22], rust: [0.11, 9], neutral: [0.13, 10] };
+  var SURF = { glass: [1.05, 70], glassdark: [0.85, 60], crystal: [1.2, 80], tesla: [0.95, 60], metal: [0.74, 42], steel: [0.66, 38], armor: [0.54, 32], armor2: [0.5, 30], armor3: [0.46, 28], gunmetal: [0.64, 38], darkmetal: [0.54, 32], white: [0.4, 24], gold: [0.78, 38], rubber: [0.08, 8], tread: [0.1, 9], concrete: [0.1, 7], concrete2: [0.09, 7], asphalt: [0.12, 9], sand: [0.08, 6], olive: [0.12, 10], wood: [0.14, 10], skin: [0.22, 14], black: [0.32, 22], rust: [0.11, 9], neutral: [0.13, 10], bile: [0.16, 12], flesh: [0.24, 16], bone: [0.2, 14] };
   var _hexc = /* @__PURE__ */ new Map();
   function rgbOf(e) {
     let t = _hexc.get(e);
@@ -3924,14 +3924,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   function hive(e, t) {
-    const r = t, n = r.x || 0, a = r.y || 0, o = r.z, s = r.r, i = r.h, l = r.crown, c = r.seg || 8;
-    if (e.push(P_(TSLAB(circleProfile(s, c), i, 0.84, "hv" + s.toFixed(1) + i.toFixed(1) + c), n, a, o, "carapace2")), e.push(P_(TSLAB(circleProfile(0.9 * s, c), 0.22 * i, 0.9, "hs" + s.toFixed(1) + i.toFixed(1) + c), n, a, o + i, "carapace")), e.push(P_(DOME(0.8 * s, l, c), n, a, o + i + 0.22 * i, "carapace")), plates(e, n, a, o, s, c, 0.62 * i), veins(e, n, a, o + 0.16 * i, 0.86 * s, 0.62 * i, c, r.vein || "psi"), false !== r.crest && (e.push(P_(CONE(0.3 * s, 0.1 * s, 0.72 * l, c), n, a, o + i + 0.22 * i + 0.72 * l, "carapace2")), e.push(P_(DOME(0.2 * s, 0.24 * s, c), n, a, o + i + 0.22 * i + 1.44 * l, r.vein || "psi", { e: 1 }))), r.spines) for (let t2 = 0; t2 < c; t2++) {
+    const r = t, n = r.x || 0, a = r.y || 0, o = r.z, s = r.r, i = r.h, l = r.crown, c = r.seg || 8, bd = r.body || "carapace", bd2 = r.body2 || "carapace2";
+    if (e.push(P_(TSLAB(circleProfile(s, c), i, 0.84, "hv" + s.toFixed(1) + i.toFixed(1) + c), n, a, o, bd2)), e.push(P_(TSLAB(circleProfile(0.9 * s, c), 0.22 * i, 0.9, "hs" + s.toFixed(1) + i.toFixed(1) + c), n, a, o + i, bd)), e.push(P_(DOME(0.8 * s, l, c), n, a, o + i + 0.22 * i, bd)), plates(e, n, a, o, s, c, 0.62 * i, bd2), veins(e, n, a, o + 0.16 * i, 0.86 * s, 0.62 * i, c, r.vein || "psi"), false !== r.crest && (e.push(P_(CONE(0.3 * s, 0.1 * s, 0.72 * l, c), n, a, o + i + 0.22 * i + 0.72 * l, bd2)), e.push(P_(DOME(0.2 * s, 0.24 * s, c), n, a, o + i + 0.22 * i + 1.44 * l, r.vein || "psi", { e: 1 }))), r.spines) for (let t2 = 0; t2 < c; t2++) {
       const r2 = t2 / c * Math.PI * 2 + 0.4;
-      spine(e, n + Math.cos(r2) * s * 0.92, a + Math.sin(r2) * s * 0.92, o + 0.5 * i, i * (0.55 + t2 % 3 * 0.14), 0.46, "carapace2");
+      spine(e, n + Math.cos(r2) * s * 0.92, a + Math.sin(r2) * s * 0.92, o + 0.5 * i, i * (0.55 + t2 % 3 * 0.14), 0.46, bd2);
     }
     if (r.pods) for (let t2 = 0; t2 < r.pods; t2++) {
       const l2 = t2 / r.pods * Math.PI * 2 + 0.6, c2 = n + Math.cos(l2) * s * 0.86, d = a + Math.sin(l2) * s * 0.86;
-      e.push(P_(TSLAB(circleProfile(0.2 * s, 6), 0.62 * i, 0.8, "hp" + s.toFixed(1)), c2, d, o, "carapace2")), e.push(P_(DOME(0.17 * s, 0.22 * s, 6), c2, d, o + 0.62 * i, "carapace")), e.push(P_(DOME(0.08 * s, 0.1 * s, 6), c2, d, o + 0.62 * i + 0.16 * s, r.vein || "psi", { e: 1 }));
+      e.push(P_(TSLAB(circleProfile(0.2 * s, 6), 0.62 * i, 0.8, "hp" + s.toFixed(1)), c2, d, o, bd2)), e.push(P_(DOME(0.17 * s, 0.22 * s, 6), c2, d, o + 0.62 * i, bd)), e.push(P_(DOME(0.08 * s, 0.1 * s, 6), c2, d, o + 0.62 * i + 0.16 * s, r.vein || "psi", { e: 1 }));
     }
   }
   function def1Bits(n, fac, cx, cy, z, rs, ks, full) {
@@ -4162,20 +4162,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           }
         } else {
           if (riseBucket >= 1) {
-            n.push(P_(CYL(0.11 * r, 0.09 * r, 12), 0, 0, l, "carapace"));
+            n.push(P_(CYL(0.11 * r, 0.09 * r, 12), 0, 0, l, "bile"));
           }
           if (riseBucket >= 2) {
-            n.push(P_(DOME(0.12 * r, 0.1 * r, 12), 0, 0, l + 0.09 * r, "psi", { e: 1, a: { spin: 0.5 } }));
+            n.push(P_(DOME(0.12 * r, 0.1 * r, 12), 0, 0, l + 0.09 * r, "glow", { e: 1, a: { spin: 0.5 } }));
           }
           if (riseBucket >= 3) {
             for (let e2 = 0; e2 < 4; e2++) {
               const t2 = e2 * 1.57 + 0.4;
-              n.push(P_(CYL(0.09 * r, 0.14 * r, 12), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, l, "carapace2"));
-              n.push(P_(DOME(0.09 * r, 0.07 * r, 10), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, l + 0.14 * r, "psi", { e: 1, a: { spin: 0.65 } }));
+              n.push(P_(CYL(0.09 * r, 0.14 * r, 12), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, l, "bile2"));
+              n.push(P_(DOME(0.09 * r, 0.07 * r, 10), Math.cos(t2) * r * 0.24, Math.sin(t2) * r * 0.24, l + 0.14 * r, "glow", { e: 1, a: { spin: 0.65 } }));
             }
           }
           if (riseBucket >= 4) {
-            veins(n, 0, 0, l + 2, 0.24 * r, 0.16 * r, 8, "psi");
+            veins(n, 0, 0, l + 2, 0.24 * r, 0.16 * r, 8, "glow");
           }
         }
         crate(n, 0.3 * r, 0.3 * r, l, 4, "olive", 0.2);
@@ -4227,17 +4227,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
             n.push(P_(TSLAB(circleProfile(0.18 * r, 8), 0.08 * s, 0.9, "rffound"), 0, 0, l, "carapace2"));
           }
           if (riseBucket >= 2) {
-            hive(n, { x: 0, y: 0, z: l, r: 0.16 * r, h: 0.9 * s, crown: 0.06 * r, seg: 8, pods: 2, crest: true, vein: "psi" });
+            hive(n, { x: 0, y: 0, z: l, r: 0.16 * r, h: 0.9 * s, crown: 0.06 * r, seg: 8, pods: 2, crest: true, vein: "psi", body: "flesh", body2: "bile2" });
           }
           if (riseBucket >= 3) {
             for (let e2 = 0; e2 < 2; e2++) {
-              n.push(P_(CYL(0.08 * r, 0.2 * r, 12), 0.26 * r + e2 * r * 0.12, 0.3 * r, l, "carapace"));
+              n.push(P_(CYL(0.08 * r, 0.2 * r, 12), 0.26 * r + e2 * r * 0.12, 0.3 * r, l, "flesh"));
               n.push(P_(DOME(0.08 * r, 0.06 * r, 10), 0.26 * r + e2 * r * 0.12, 0.3 * r, l + 0.2 * r, "psi", { e: 1, a: { spin: 1.1 } }));
             }
           }
           if (riseBucket >= 4) {
             n.push(P_(CYL(2, 2.5, 12), 0.34 * r, 0.18 * r, l + 0.1 * r, "psi", { e: 1, a: { spin: 1.6 } }));
-            n.push(P_(CYL(1.6, 2.2, 10), 0.34 * r, 0.28 * r, l + 0.1 * r, "carapace2", { a: { spin: 1.4 } }));
+            n.push(P_(CYL(1.6, 2.2, 10), 0.34 * r, 0.28 * r, l + 0.1 * r, "bile2", { a: { spin: 1.4 } }));
           }
         }
         hazard(n, -0.28 * r, 0, 4, 0.2 * r, 0);
@@ -4386,7 +4386,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
             n.push(P_(TSLAB(circleProfile(0.3 * r, 10), 0.07 * s, 0.92, "fyfound"), 0, 0, l, "carapace2"));
           }
           if (riseBucket >= 2) {
-            hive(n, { x: 0, y: 0, z: l, r: 0.28 * r, h: 0.85 * s, crown: 0.1 * r, seg: 9, pods: 4, crest: false, vein: "psi" });
+            hive(n, { x: 0, y: 0, z: l, r: 0.28 * r, h: 0.85 * s, crown: 0.1 * r, seg: 9, pods: 4, crest: false, vein: "psi", body: "bone", body2: "bile2" });
           }
           if (riseBucket >= 3) {
             n.push(P_(CYL(1.8, 2.6, 10), 0, 0, l + 0.5 * s, "psi", { e: 1, a: { spin: 1.2 } }));
@@ -4445,7 +4445,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           }
         } else {
           if (riseBucket >= 1) {
-            hive(n, { x: 0, y: 0, z: l, r: 0.32 * r, h: 1.15 * s, crown: 0.18 * r, seg: 6, spines: 1, crest: true, vein: "crystal" });
+            hive(n, { x: 0, y: 0, z: l, r: 0.32 * r, h: 1.15 * s, crown: 0.18 * r, seg: 6, spines: 1, crest: true, vein: "crystal", body: "bone" });
           }
           if (riseBucket >= 3) {
             for (let e2 = 0; e2 < 3; e2++) {
