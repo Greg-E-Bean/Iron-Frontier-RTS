@@ -2741,16 +2741,19 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return e;
   }
   function skyhaulerModel() {
-    const e = [];
-    e.push(P_(CYL(4.4, 20, 14), 0, 0, 10, "body", { ty: -PI2 }));
-    e.push(P_(DOME(4.4, 4.4, 12), 10, 0, 10, "body", { ty: -PI2 }));
-    e.push(P_(DOME(4.4, 3.8, 10), -10, 0, 10, "dark2", { ty: PI2 }));
-    e.push(P_(CYL(2.6, 9, 10), -17, 0, 10.3, "dark2", { ty: -PI2 }));
-    e.push(P_(DOME(4, 3.4, 10), 14, 0, 11, "glass", { e: 1 }));
-    e.push(P_(BOXM(1.8, 1, 7, 0.2), -22, 0, 13, "dark"));
-    e.push(P_(CYL(1.2, 6, 8), 1, 0, 15, "gunmetal", { ty: -PI2, e: 0 }));
-    e.push(P_(CYL(0.8, 4, 6), -22, 0, 12, "gunmetal", { ty: -PI2 }));
-    for (const s of [-1, 1]) e.push(P_(CYL(2.2, 11, 9), -2, s * 7, 7, "gunmetal", { ty: -PI2 })), e.push(P_(DOME(2.2, 2.2, 8), 3.5, s * 7, 7, "darkmetal", { ty: -PI2 }));
+    const e = [], FZ = 10;
+    e.push(P_(CYL(4.2, 16, 14), -10, 0, FZ, "body", { ty: PI2 }));
+    e.push(P_(DOME(4.2, 4, 12), 6, 0, FZ, "body", { ty: PI2 }));
+    e.push(P_(DOME(3.6, 3.4, 10), -10, 0, FZ, "dark2", { ty: -PI2 }));
+    e.push(P_(CYL(2.4, 9, 10), -13.4, 0, FZ + 0.3, "dark2", { ty: -PI2 }));
+    e.push(P_(DOME(3.2, 2.8, 10), 6, 0, FZ + 2, "glass", { e: 1, ty: PI2 }));
+    e.push(P_(BOXM(1.6, 1, 7, 0.2), -22, 0, FZ - 1, "dark"));
+    e.push(P_(CYL(1.2, 6, 8), 1, 0, FZ + 4, "gunmetal"));
+    e.push(P_(CYL(0.7, 6, 6), -22, 0, FZ + 5, "gunmetal", { ty: -PI2 }));
+    for (const s of [-1, 1]) {
+      e.push(P_(CYL(2, 10, 9), -4, s * 7, FZ - 2, "gunmetal", { ty: PI2 }));
+      e.push(P_(DOME(2, 2, 8), 6, s * 7, FZ - 2, "darkmetal", { ty: PI2 }));
+    }
     return e;
   }
   function gulletModel() {
