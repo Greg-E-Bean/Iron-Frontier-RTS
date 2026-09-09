@@ -2769,11 +2769,21 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function heliRotor() {
     const n = [];
-    return n.push(P_(BOXM(24, 1.6, 0.6, 0.3), 0, 0, 0, "darkmetal")), n;
+    n.push(P_(CYL(1.1, 0.9, 10), 0, 0, -0.3, "darkmetal"));
+    for (let i = 0; i < 3; i++) {
+      const a = i * Math.PI * 2 / 3;
+      n.push(P_(BOXM(11.5, 1.15, 0.28, 0.12), 6 * Math.cos(a), 6 * Math.sin(a), 0, "darkmetal", { r: a })), n.push(P_(BOXM(1.4, 1.4, 0.3, 0.1), Math.cos(a), Math.sin(a), 0, "gunmetal", { r: a }));
+    }
+    return n;
   }
   function heliTailRotor() {
     const n = [];
-    return n.push(P_(BOXM(9, 1.2, 0.5, 0.3), 0, 0, 0, "darkmetal")), n;
+    n.push(P_(CYL(0.6, 0.7, 8), 0, 0, -0.2, "darkmetal"));
+    for (let i = 0; i < 2; i++) {
+      const a = i * Math.PI;
+      n.push(P_(BOXM(4.3, 0.9, 0.22, 0.1), 2.4 * Math.cos(a), 2.4 * Math.sin(a), 0, "darkmetal", { r: a }));
+    }
+    return n;
   }
   function subHull(e, t, r, n) {
     n = n || {};

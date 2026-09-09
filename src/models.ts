@@ -142,8 +142,8 @@ for(const s of[-1,1])e.push(P_(CONE(1.6,.3,7.5,8),-3,s*5.6,8,"carapace2",{ty:-PI
 for(let i=0;i<4;i++){const a=i*PI2/4+.4;e.push(P_(CYL(.9,.9,8),4+5*Math.cos(a),5*Math.sin(a),5.4,"psi",{e:1,a:{spin:1+.2*i}}))}
 return e;
 }
-function heliRotor(){const n=[];return n.push(P_(BOXM(24,1.6,.6,.3),0,0,0,"darkmetal")),n}
-function heliTailRotor(){const n=[];return n.push(P_(BOXM(9,1.2,.5,.3),0,0,0,"darkmetal")),n}
+function heliRotor(){const n=[];n.push(P_(CYL(1.1,.9,10),0,0,-.3,"darkmetal"));for(let i=0;i<3;i++){const a=i*Math.PI*2/3;n.push(P_(BOXM(11.5,1.15,.28,.12),6*Math.cos(a),6*Math.sin(a),0,"darkmetal",{r:a})),n.push(P_(BOXM(1.4,1.4,.3,.1),Math.cos(a),Math.sin(a),0,"gunmetal",{r:a}))}return n}
+function heliTailRotor(){const n=[];n.push(P_(CYL(.6,.7,8),0,0,-.2,"darkmetal"));for(let i=0;i<2;i++){const a=i*Math.PI;n.push(P_(BOXM(4.3,.9,.22,.1),2.4*Math.cos(a),2.4*Math.sin(a),0,"darkmetal",{r:a}))}return n}
 function subHull(e,t,r,n){
 n=n||{};
 const a=[],rad=.42*t,org="yuri"===n.fac;
