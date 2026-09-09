@@ -2280,11 +2280,28 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var isoY = (e, t) => 0.5 * (e + t);
   var camZTarget = cam.z;
   var zoomPivot = null;
-  function w2sx(e, t) {
+  var _fpsProjVec = typeof THREE < "u" ? new THREE.Vector3() : null;
+  function fpsProject(e, t, r) {
+    return _fpsProjVec.set(e, r || 0, t).project(FPS.cam);
+  }
+  function w2sx(e, t, r) {
+    if (FPS.on && FPS.cam) {
+      const n = fpsProject(e, t, r);
+      return n.z >= 1 ? -99999 : (n.x + 1) / 2 * CW;
+    }
     return (isoX(e, t) - isoX(cam.x, cam.y)) * cam.z + CW / 2;
   }
   function w2sy(e, t, r) {
+    if (FPS.on && FPS.cam) {
+      const n = fpsProject(e, t, r);
+      return n.z >= 1 ? -99999 : (1 - n.y) / 2 * CH;
+    }
     return (isoY(e, t) - isoY(cam.x, cam.y)) * cam.z + CH / 2 - (r || 0) * ZH * cam.z;
+  }
+  function fpsScale(e, t) {
+    if (!FPS.on || !FPS.cam || !FPS.u) return cam.z;
+    const r = Math.max(1, Math.hypot(e - FPS.u.x, t - FPS.u.y)), n = FPS.cam.fov * Math.PI / 180;
+    return CH / 2 / Math.tan(n / 2) / r;
   }
   function s2w(e, t) {
     const r = (e - CW / 2) / cam.z + isoX(cam.x, cam.y), n = (t - CH / 2) / cam.z + isoY(cam.x, cam.y);
@@ -4827,6 +4844,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     w2sx,
     w2sy,
     s2w,
+    fpsScale,
     setQuality,
     resize,
     clampCam,
@@ -5149,8 +5167,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function groundShadow(e, t, r, n) {
     if (QUALITY < 1) return;
-    const a = w2sx(e, t), o = w2sy(e, t);
-    ctx.fillStyle = "rgba(0,0,0," + (n || 0.32) + ")", ctx.beginPath(), ctx.ellipse(a, o, r * cam.z, 0.5 * r * cam.z, 0, 0, 6.3), ctx.fill();
+    const a = w2sx(e, t), o = w2sy(e, t), s = fpsScale(e, t);
+    ctx.fillStyle = "rgba(0,0,0," + (n || 0.32) + ")", ctx.beginPath(), ctx.ellipse(a, o, r * s, 0.5 * r * s, 0, 0, 6.3), ctx.fill();
   }
   var bakeBudget = 2;
   var bakeMs = 0;
@@ -5290,7 +5308,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }), ctx.closePath();
   }
   function drawProj(e) {
-    const t = cam.z, r = e.z || 8, n = w2sx(e.x, e.y), a = w2sy(e.x, e.y, r);
+    const t = fpsScale(e.x, e.y), r = e.z || 8, n = w2sx(e.x, e.y), a = w2sy(e.x, e.y, r);
     if (!(n < -40 || a < -40 || n > CW + 40 || a > CH + 40)) if (groundShadow(e.x, e.y, 3, 0.18), "bullet" === e.kind) {
       const o = w2sx(e.x - 9 * Math.cos(e.ang), e.y - 9 * Math.sin(e.ang)), s = w2sy(e.x - 9 * Math.cos(e.ang), e.y - 9 * Math.sin(e.ang), r);
       ctx.strokeStyle = "#ffe9a8", ctx.lineWidth = 1.6 * t, ctx.beginPath(), ctx.moveTo(o, s), ctx.lineTo(n, a), ctx.stroke();
@@ -5306,7 +5324,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function drawFx(e) {
     if (e.t < 0) return;
-    const t = cam.z, r = e.t / e.life, n = w2sx(e.x, e.y, e.z || 0), a = w2sy(e.x, e.y, e.z || 0);
+    const t = fpsScale(e.x, e.y), r = e.t / e.life, n = w2sx(e.x, e.y, e.z || 0), a = w2sy(e.x, e.y, e.z || 0);
     if ("boom" === e.kind) {
       const o = Math.max(0, (7 + 24 * e.s) * (0.35 + r) * t);
       ctx.globalAlpha = 1 - r;
@@ -5484,7 +5502,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var voidGrad = null;
   var voidH = 0;
   function render() {
-    if (bakeBudget = 3, bakeMs = 0, GL) return renderGL(), ctx.clearRect(0, 0, CW, CH), drawVignette(), drawLightning(), FPS.on ? (fpsHUD(), void drawMM()) : void drawOverlay();
+    if (bakeBudget = 3, bakeMs = 0, GL) return renderGL(), ctx.clearRect(0, 0, CW, CH), drawVignette(), drawLightning(), FPS.on ? (drawFxProj(), fpsHUD(), void drawMM()) : void drawOverlay();
     render2D();
   }
   function fpsHUD() {
@@ -5541,6 +5559,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
     }
   }
+  function drawFxProj() {
+    for (const e of S.projs) e.dead || 2 !== visAt(e.x, e.y) || drawProj(e);
+    for (const e of S.fx) (2 === visAt(e.x, e.y) || void 0 !== e.x2 && 2 === visAt(e.x2, e.y2)) && drawFx(e);
+  }
   function drawOverlay() {
     drawRads();
     const e = [];
@@ -5551,9 +5573,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } catch (e2) {
       S.drawWarned || (S.drawWarned = 1, console.error("hud", e2));
     }
-    for (const e2 of S.projs) e2.dead || 2 !== visAt(e2.x, e2.y) || drawProj(e2);
-    for (const e2 of S.fx) (2 === visAt(e2.x, e2.y) || void 0 !== e2.x2 && 2 === visAt(e2.x2, e2.y2)) && drawFx(e2);
-    drawGhost(), drawBox(), drawMarker(), drawMM();
+    drawFxProj(), drawGhost(), drawBox(), drawMarker(), drawMM();
   }
   function unitHUD(e) {
     const t = cam.z, r = e.alt || 0, n = w2sx(e.x, e.y), a = w2sy(e.x, e.y, r);

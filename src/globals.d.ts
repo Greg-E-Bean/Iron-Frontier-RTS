@@ -246,6 +246,7 @@ declare global {
   function w2sx(x: number, y: number, z?: number): number;
   function w2sy(x: number, y: number, z?: number): number;
   function s2w(sx: number, sy: number): Vec2;
+  function fpsScale(x: number, y: number): number;
   function setQuality(level: number): void;
   function resize(): void;
   function clampCam(): void;
