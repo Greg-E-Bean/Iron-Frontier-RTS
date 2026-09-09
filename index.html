@@ -3942,7 +3942,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       tier(n, 0.72 * rs, 0.72 * rs, 0.2 * rs, cx, cy, z, "concrete", "d1l" + ks, 0.9), n.push(P_(CYL(0.28 * rs, 0.08 * rs, 16), cx, cy, z + 0.2 * rs, "armor2"));
       full && (sandbagRing(n, 0.45 * rs, z, cx, cy), stack(n, cx + 0.24 * rs, cy - 0.24 * rs, z, 0.045 * rs, 3.4, "rust"));
     } else {
-      n.push(P_(CYL(0.22 * rs, 0.14 * rs, 16), cx, cy, z, "carapace2")), n.push(P_(DOME(0.3 * rs, 0.22 * rs, 16), cx, cy, z + 0.14 * rs, "carapace")), n.push(P_(CONE(0.1 * rs, 0.04 * rs, 0.22 * rs, 10), cx + 0.14 * rs, cy, z + 0.2 * rs, "flesh", { ty: PI2 })), n.push(P_(DOME(0.055 * rs, 0.05 * rs, 8), cx + 0.14 * rs + 0.2 * rs, cy, z + 0.2 * rs, "psi", { e: 1 })), veins(n, cx, cy, z + 0.05 * rs, 0.2 * rs, 0.07 * rs, 6, "psi");
+      n.push(P_(CYL(0.22 * rs, 0.14 * rs, 16), cx, cy, z, "carapace2")), n.push(P_(DOME(0.3 * rs, 0.22 * rs, 16), cx, cy, z + 0.14 * rs, "carapace")), n.push(P_(CYL(0.07 * rs, 0.22 * rs, 10), cx + 0.14 * rs, cy, z + 0.2 * rs, "psi", { ty: PI2, e: 1 })), veins(n, cx, cy, z + 0.05 * rs, 0.2 * rs, 0.07 * rs, 6, "psi");
       if (full) for (let e = 0; e < 4; e++) {
         const t = e * PI2 + 0.78;
         n.push(P_(CYL(1.2, 3.4, 8), cx + Math.cos(t) * rs * 0.25, cy + Math.sin(t) * rs * 0.25, z + 2, "psi", { e: 1 }));
