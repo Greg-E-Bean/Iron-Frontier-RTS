@@ -99,22 +99,22 @@ a.push(P_(BOXM(.12*e,.09*t,.7,.25),-.22*e,0,th+2.6,"gunmetal"));
 return a;
 }
 function chinookModel(){
-const e=[];
-e.push(P_(BOXM(22,8.6,7.6,1.2),-2,0,10,"body"));
-e.push(P_(BOXM(6,8,7.2,1),12,0,10,"body"));
-e.push(P_(BOXM(4.2,7.6,3.8,.4),14,0,12.6,"glass",{e:1}));
-e.push(P_(BOXM(2.6,6.4,3.2,.3),16.6,0,12.2,"glass",{e:1}));
-for(const s of[-1,1])e.push(P_(BOXM(16,2.2,2.4,.6),-3,3.7*s,6.4,"dark2"));
-e.push(P_(WEDGE(14,7.6,2.4,7.4),-20,0,6.2,"body"));
-e.push(P_(BOXM(5.5,7,3,.6),4,0,13.6,"dark2"));
-e.push(P_(BOXM(5,6,4.6,.7),-24,0,9.6,"dark2"));
-e.push(P_(CYL(.8,7,8),2,0,16,"gunmetal"));
-e.push(P_(CYL(.8,7,8),-27,0,14.2,"gunmetal"));
+const e=[],FL=6,FT=FL+7.6;
+e.push(P_(BOXM(22,8.6,7.6,1.2),-2,0,FL,"body"));
+e.push(P_(BOXM(6,8,7.6,1),12,0,FL,"body"));
+e.push(P_(BOXM(3,7.6,4,.4),14.2,0,8,"glass",{e:1}));
+e.push(P_(BOXM(1.8,6,2.6,.3),15.6,0,7,"glass",{e:1}));
+for(const s of[-1,1])e.push(P_(BOXM(16,2.2,2.4,.6),-3,3.7*s,FL-2.4,"dark2"));
+e.push(P_(WEDGE(14,7.6,2.2,7.6),-20,0,FL,"body"));
+e.push(P_(BOXM(5.5,7,3,.6),4,0,FT,"dark2"));
+e.push(P_(BOXM(6,6,5,.7),-25,0,9,"dark2"));
+e.push(P_(CYL(.8,6,8),2,0,FT+3,"gunmetal"));
+e.push(P_(CYL(.8,7,8),-27,0,14,"gunmetal"));
 for(const s of[-1,1]){
-e.push(P_(CYL(.25,2.6,6),9,3.6*s,3.5,"darkmetal"));
-e.push(P_(CYL(1,1.3,8),9,3.6*s,2.2,"rubber"));
-e.push(P_(CYL(.3,3,6),-13,4.4*s,3.2,"darkmetal"));
-e.push(P_(CYL(1.2,1.5,8),-13,4.4*s,1.8,"rubber"));
+e.push(P_(CYL(.8,1,8),12,3.6*s,0,"rubber"));
+e.push(P_(CYL(.2,5,6),12,3.6*s,1,"darkmetal"));
+e.push(P_(CYL(1,1.3,8),-13,4.4*s,0,"rubber"));
+e.push(P_(CYL(.25,4.7,6),-13,4.4*s,1.3,"darkmetal"));
 }
 return e;
 }
