@@ -2700,20 +2700,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     a.push(P_(SLAB(hullProfile(e, t, n.fac), th, 1.8, "bh" + e.toFixed(1) + t.toFixed(1) + (n.fac || "")), 0, 0, 0, "body"));
     a.push(P_(SLAB(hullProfile(0.82 * e, 0.74 * t, n.fac), 1.8, 1, "bd" + e.toFixed(1) + t.toFixed(1) + (n.fac || "")), 0, 0, th, "dark"));
     if (org) {
-      a.push(P_(DOME(0.18 * e, 0.4 * t, 10), 0.42 * e, 0, th, "dark"));
-      a.push(P_(DOME(0.16 * e, 0.34 * t, 10), -0.3 * e, 0, th + 2.8, "carapace2"));
-      a.push(P_(DOME(0.09 * e, 0.22 * t, 8), -0.3 * e, 0, th + 4.6, "carapace"));
-      a.push(P_(CONE(1.4, 0.3, 3.6, 7), -0.32 * e, 0, th + 6.2, "psi", { e: 1 }));
+      a.push(P_(DOME(0.18 * e, 0.4 * t, 10), 0.32 * e, 0, th, "dark"));
+      a.push(P_(DOME(0.16 * e, 0.34 * t, 10), -0.3 * e, 0, th + 1.8, "carapace2"));
+      a.push(P_(DOME(0.09 * e, 0.22 * t, 8), -0.3 * e, 0, th + 3.6, "carapace"));
+      a.push(P_(CONE(1.4, 0.3, 3.6, 7), -0.32 * e, 0, th + 5.2, "psi", { e: 1 }));
     } else {
-      a.push(P_(WEDGE(0.2 * e, 0.46 * t, 2.6, 1), 0.42 * e, 0, th, "trim"));
+      a.push(P_(WEDGE(0.2 * e, 0.46 * t, 2.6, 1), 0.34 * e, 0, th, "trim"));
       a.push(P_(BOXM(0.2 * e, 0.44 * t, 3.6, 0.6), -0.3 * e, 0, th + 1.8, "armor2"));
-      a.push(P_(BOXM(0.12 * e, 0.3 * t, 1.3, 0.3), -0.3 * e, 0, th + 3.6, "armor3"));
-      a.push(P_(CYL(0.35, 4.6, 6), -0.32 * e, 0, th + 4.4, "gunmetal"));
+      a.push(P_(BOXM(0.12 * e, 0.3 * t, 1.3, 0.3), -0.3 * e, 0, th + 5.4, "armor3"));
+      a.push(P_(CYL(0.35, 4.6, 6), -0.32 * e, 0, th + 6.7, "gunmetal"));
     }
     a.push(P_(CYL(0.18 * t, 1.4, 12), 0.16 * e, 0, th + 1, org ? "carapace2" : "trim"));
     a.push(P_(BOXM(0.14 * e, 0.1 * t, 0.75, 0.25), 0.24 * e, 0, th + 1.7, "gunmetal"));
-    a.push(P_(CYL(0.5, 0.7, 8), -0.46 * e, -0.28 * t, th + 1.7, "lightY", { e: 1 }));
-    a.push(P_(CYL(0.5, 0.7, 8), -0.46 * e, 0.28 * t, th + 1.7, "lightY", { e: 1 }));
+    a.push(P_(CYL(0.5, 0.7, 8), -0.46 * e, -0.28 * t, th - 0.2, "lightY", { e: 1 }));
+    a.push(P_(CYL(0.5, 0.7, 8), -0.46 * e, 0.28 * t, th - 0.2, "lightY", { e: 1 }));
     if (n.twin) {
       a.push(P_(CYL(0.16 * t, 1.3, 12), -0.14 * e, 0, th + 2, org ? "carapace2" : "trim"));
       a.push(P_(BOXM(0.12 * e, 0.09 * t, 0.7, 0.25), -0.22 * e, 0, th + 2.6, "gunmetal"));
@@ -2792,8 +2792,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     n = n || {};
     const a = [], rad = 0.42 * t, org = "yuri" === n.fac;
     a.push(P_(CYL(rad, 0.86 * e, 12), 0, 0, rad, "body", { ty: -PI2 }));
-    a.push(P_(CONE(rad, 0.25 * rad, 0.2 * e, 10), 0.5 * 0.86 * e + 0.1 * e, 0, rad, org ? "carapace2" : "dark", { ty: -PI2 }));
-    a.push(P_(CONE(rad, 0.15 * rad, 0.16 * e, 10), -0.5 * 0.86 * e - 0.08 * e, 0, rad, org ? "carapace2" : "dark", { ty: PI2 }));
+    a.push(P_(CONE(rad, 0.25 * rad, 0.2 * e, 10), 0, 0, rad, org ? "carapace2" : "dark", { ty: PI2 }));
+    a.push(P_(CONE(rad, 0.15 * rad, 0.16 * e, 10), -0.86 * e, 0, rad, org ? "carapace2" : "dark", { ty: -PI2 }));
     a.push(P_(org ? DOME(0.16 * e, 0.5 * rad, 10) : BOXM(0.14 * e, 0.22 * t, 1.3 * rad, 0.4), 0.04 * e, 0, rad + 0.9 * rad, org ? "carapace" : "armor2"));
     a.push(P_(CYL(1.1, 0.7 * rad, 6), 0.04 * e, 0, rad + 1.6 * rad, org ? "psi" : "gunmetal", { e: org }));
     a.push(P_(BOXM(0.05 * e, 0.5 * t, 0.35, 0.15), -0.44 * e, 0, rad, "dark"));
@@ -3438,7 +3438,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if ("gullet" === e) return gulletModel();
     if ("lst" === e) {
       const p = boatHull(46, 17, t, { fac: "allied" }), th = 6.5;
-      p.push(P_(WEDGE(0.16 * 46, 0.7 * 17, 3, 0.4), 0.46 * 46, 0, th + 0.5, "steel"));
+      p.push(P_(WEDGE(0.16 * 46, 0.7 * 17, 3, 0.4), 0.34 * 46, 0, th, "steel"));
       for (const xo of [-8, 0, 8]) p.push(P_(BOXM(4, 4, 3, 0.3), xo, -4, th + 2.6, "rust"));
       return p;
     }
