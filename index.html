@@ -2074,13 +2074,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   function aiMicro(e, t) {
+    const repairBld = S.blds.find((bl) => bl.owner === e.id && !bl.dead && "repair" === bl.key);
     for (const u of aiArmy(e)) {
       if (u.retreatT > 0) {
         u.retreatT -= t;
         continue;
       }
       if ("attack" !== u.order || !u.target || u.deployed || u.hp >= 0.3 * u.maxhp) continue;
-      const b = aiBaseCenter(e);
+      const b = !u.d.fly && repairBld || aiBaseCenter(e);
       u.order = "move", u.tx = clamp(b.x + rnd(-60, 60), 8, 2936), u.ty = clamp(b.y + rnd(-60, 60), 8, 2296), u.target = null, u.ore = null, u.retreatT = 8, u.d.fly ? (u.path = null, u.state = null) : repath(u);
     }
   }
@@ -6008,7 +6009,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.rotorSpin = (e.rotorSpin || 0) + 18 * t;
     e.cool > 0 && (e.cool -= t), e.muzzle > 0 && (e.muzzle -= t);
     const n = "land" === e.state ? 0 : r.transport && S.units.some((u) => "load" === u.order && u.target === e) ? 0 : r.alt;
-    if (e.alt = void 0 === e.alt ? r.alt : e.alt + clamp(n - e.alt, -70 * t, 70 * t), r.ammo && e.ammo <= 0 && "land" !== e.state && "rtb" !== e.state) {
+    if (e.alt = void 0 === e.alt ? r.alt : e.alt + clamp(n - e.alt, -70 * t, 70 * t), (r.ammo && e.ammo <= 0 || e.hp < 0.35 * e.maxhp) && "land" !== e.state && "rtb" !== e.state) {
       const t2 = dockAt(e);
       t2 && (e.state = "rtb", e.rtb = t2);
     }
