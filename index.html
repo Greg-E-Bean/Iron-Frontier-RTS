@@ -2759,11 +2759,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function gulletModel() {
     const e = [];
     e.push(P_(DOME(6, 4.4, 12), 3, 0, 10, "carapace2"));
-    e.push(P_(CONE(4.4, 1.6, 15, 12), -8, 0, 10, "carapace2", { ty: -PI2 }));
+    e.push(P_(CONE(4.4, 1.6, 15, 12), -3, 0, 10, "carapace2", { ty: -PI2 }));
     e.push(P_(DOME(3.6, 3, 10), 12.5, 0, 10.5, "carapace"));
     e.push(P_(DOME(2.2, 1.8, 9), 15, 0, 11, "psi", { e: 1 }));
     e.push(P_(DOME(1, 0.8, 8), -15, 0, 10, "psi", { e: 1 }));
-    for (const s of [-1, 1]) e.push(P_(CONE(1.6, 0.3, 7.5, 8), -3, s * 5.6, 8, "carapace2", { ty: -PI2 }));
+    for (const s of [-1, 1]) e.push(P_(CONE(1.6, 0.3, 7.5, 8), 0, s * 4.8, 9.4, "carapace2", { ty: -PI2 }));
     for (let i = 0; i < 4; i++) {
       const a = i * PI2 / 4 + 0.4;
       e.push(P_(CYL(0.9, 0.9, 8), 4 + 5 * Math.cos(a), 5 * Math.sin(a), 5.4, "psi", { e: 1, a: { spin: 1 + 0.2 * i } }));
