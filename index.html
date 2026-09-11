@@ -8106,7 +8106,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function endPtr(e) {
     if (FPS.on) return void ptrs.delete(e.pointerId);
     const t = ptrs.get(e.pointerId);
-    ptrs.delete(e.pointerId), "pinch" !== dragMode ? t && ("box" === dragMode && S.box ? (moved > 14 ? boxSelect(S.box) : tap(e.clientX, e.clientY), S.box = null) : "ghost" === dragMode ? tryPlace(e.clientX, e.clientY) : moved < 14 && tap(e.clientX, e.clientY), dragMode = null, dragStart = null) : ptrs.size < 2 && (dragMode = null, dragStart = null);
+    ptrs.delete(e.pointerId), "pinch" !== dragMode ? t && ("box" === dragMode && S.box ? (moved > 14 ? boxSelect(S.box) : tapSelect(e.clientX, e.clientY), S.box = null) : "ghost" === dragMode ? tryPlace(e.clientX, e.clientY) : "rmove" === dragMode ? tapCommand(e.clientX, e.clientY) : moved < 14 && tap(e.clientX, e.clientY), dragMode = null, dragStart = null) : ptrs.size < 2 && (dragMode = null, dragStart = null);
   }
   function updateGhost(e, t, r) {
     const n = s2w(e, t - (r ? Math.min(46, 26 / Math.max(0.35, cam.z)) : 0)), a = n.x, o = n.y, s = BLD[S.placing].size;
@@ -8197,6 +8197,54 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (i && 0 === i.owner) return i.rally = { x: n, y: a }, S.marker = { x: n, y: a, t: 0, c: "#7dc4ff" }, void hint("Rally point set");
     S.sel = [];
   }
+  function tapSelect(e, t) {
+    if (S.placing) return void tryPlace(e, t);
+    const r = s2w(e, t), n = r.x, a = r.y;
+    if (superAim) return superAim = false, void (fireSuper(0, n, a) && (cam.x = n, cam.y = a, clampCam(), S.marker = { x: n, y: a, t: 0 }, hint("Strike inbound")));
+    if (spyAim) return spyAim = false, void spyStrike(0, n, a);
+    if (paradropAim) return paradropAim = false, void paradropStrike(0, n, a);
+    if (empAim) return empAim = false, void fireEmp(0, n, a);
+    const o = entAt(n, a, e, t);
+    if (sellMode) return void (o && "b" === o.e && 0 === o.owner && "conyard" !== o.key ? (P().credits += 0.5 * o.d.cost, textFx(o.x, o.y, "+$" + Math.round(0.5 * o.d.cost)), killBld(o), sellMode = false, $("#bSell").classList.remove("on")) : hint("Select one of your structures"));
+    if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, hint(o.repair ? "Repairing" : "Repair off"))));
+    if (o && 0 === o.owner) {
+      const e2 = performance.now();
+      "u" === o.e ? (e2 - lastTap < 330 && S.sel.includes(o) ? (S.sel = S.units.filter((e3) => 0 === e3.owner && !e3.dead && e3.key === o.key), hint("Selected all " + o.d.name)) : S.sel.includes(o) && S.sel.length > 1 ? (S.sel = S.sel.filter((e3) => e3 !== o), hint("Dropped " + o.d.name)) : S.sel.includes(o) && 1 === S.sel.length ? (S.sel = [], hint("Deselected")) : S.sel = [o], lastTap = e2) : S.sel = S.sel.includes(o) ? [] : [o], sfx("sel");
+      return;
+    }
+    S.sel = [];
+  }
+  function tapCommand(e, t) {
+    if (S.placing || superAim || spyAim || paradropAim || empAim || sellMode || repairMode) return;
+    const r = s2w(e, t), n = r.x, a = r.y, o = entAt(n, a, e, t);
+    if (o) {
+      if (0 === o.owner) {
+        if ("u" === o.e && o.d.transport) {
+          const loadable = S.sel.filter((u) => "u" === u.e && u !== o && 0 === u.owner && !u.d.transport && !u.d.fly);
+          if (loadable.length) return loadable.forEach((u) => {
+            u.order = "load", u.target = o, u.path = null;
+          }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, void sfx("go");
+        }
+        const engs = "b" === o.e ? S.sel.filter((u) => "u" === u.e && "engineer" === u.d.role) : [];
+        if (engs.length) return engs.forEach((u) => {
+          u.order = "capture", u.target = o, u.path = null;
+        }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, void sfx("go");
+      } else if (teamOf(o.owner) === teamOf(0)) {
+        return void hint((o.d.name || "Ally") + " \u2014 allied, cannot attack");
+      } else {
+        const atk = S.sel.filter((e2) => "u" === e2.e);
+        if (atk.length) return cmdAttack(atk, o), S.marker = { x: o.x, y: o.y, t: 0, c: "#ff7d7d" }, void sfx("go");
+        return;
+      }
+    }
+    const s = S.sel.filter((e2) => "u" === e2.e && 0 === e2.owner);
+    if (s.length) {
+      const ex = Math.floor(n / 32), ey = Math.floor(a / 32);
+      return inMap(ex, ey) && G.ore[idx(ex, ey)] > 0 && s.some((e2) => "miner" === e2.d.role) ? (cmdHarvest(s, ex, ey), s.filter((e2) => "miner" !== e2.d.role).forEach((e2) => cmdMove([e2], n, a)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }, void sfx("go")) : (cmdMove(s, n, a), S.marker = { x: n, y: a, t: 0, c: "#7dff8a" }, void sfx("go"));
+    }
+    const i = S.sel.find((e2) => "b" === e2.e);
+    if (i && 0 === i.owner) return void (i.rally = { x: n, y: a }, S.marker = { x: n, y: a, t: 0, c: "#7dc4ff" }, hint("Rally point set"));
+  }
   function boxSelect(e) {
     const t = Math.min(e.x0, e.x1), r = Math.max(e.x0, e.x1), n = Math.min(e.y0, e.y1), a = Math.max(e.y0, e.y1), o = [];
     for (const e2 of S.units) {
@@ -8212,8 +8260,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   cv.addEventListener("pointerdown", (e) => {
     if (FPS.on) return;
-    if (2 === e.button) return void (S.sel.length && (S.sel = [], hint("Deselected"), sfx("sel")));
-    if (cv.setPointerCapture(e.pointerId), ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY }), 1 === ptrs.size) moved = 0, dragStart = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, t: performance.now() }, S.placing ? (dragMode = "ghost", updateGhost(e.clientX, e.clientY, false)) : S.selMode || "mouse" === e.pointerType ? (dragMode = "box", S.box = { x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY }) : dragMode = "pan";
+    if (cv.setPointerCapture(e.pointerId), ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY }), 1 === ptrs.size) moved = 0, dragStart = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, t: performance.now() }, 2 === e.button && "mouse" === e.pointerType ? dragMode = "rmove" : S.placing ? (dragMode = "ghost", updateGhost(e.clientX, e.clientY, false)) : S.selMode || "mouse" === e.pointerType ? (dragMode = "box", S.box = { x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY }) : dragMode = "pan";
     else if (2 === ptrs.size) {
       const [e2, t] = [...ptrs.values()];
       pinch = { d: dist(e2.x, e2.y, t.x, t.y), z: cam.z, mx: (e2.x + t.x) / 2, my: (e2.y + t.y) / 2 }, dragMode = "pinch", S.box = null;
