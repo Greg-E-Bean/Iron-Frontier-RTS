@@ -257,6 +257,8 @@ declare global {
   function s2w(sx: number, sy: number): Vec2;
   function fpsScale(x: number, y: number): number;
   function setQuality(level: number): void;
+  function setGraphicsPref(pref: string): void;
+  var graphicsPref: string;
   function resize(): void;
   function clampCam(): void;
   const shade: AnyFn;
@@ -613,6 +615,10 @@ declare global {
   function gameOver(win: boolean): void;
   function pickWeather(): string;
   function startGame(): void;
+  function captureKeybind(action: string, cb: (key: string) => void): void;
+  function resetKeybinds(): void;
+  function keyLabel(key: string): string;
+  var KEYBINDS: { [action: string]: string };
   var cfg: GameConfig;
 
   // === saveload.js ===

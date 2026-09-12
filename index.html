@@ -2397,11 +2397,26 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var QUALITY = 2;
   var lastQualityChange = -1e9;
+  var graphicsPref = "auto";
+  try {
+    graphicsPref = localStorage.getItem("ifr_gfx") || "auto";
+  } catch (e) {
+  }
+  var GFX_LEVELS = { low: 0, med: 1, high: 2 };
+  "auto" !== graphicsPref && (QUALITY = GFX_LEVELS[graphicsPref] ?? 2);
   function setQuality(e) {
     e !== QUALITY && (S.time - lastQualityChange < 12 || (lastQualityChange = S.time, QUALITY = e, tileSprites = null, resize(), e < 2 && S.running && hint("Graphics scaled down to keep it smooth")));
   }
+  function setGraphicsPref(e) {
+    graphicsPref = e;
+    try {
+      localStorage.setItem("ifr_gfx", e);
+    } catch (t) {
+    }
+    "auto" !== e && (QUALITY = GFX_LEVELS[e], tileSprites = null, resize());
+  }
   function resize() {
-    DPR = QUALITY >= 2 ? Math.min(3, window.devicePixelRatio || 1) : 1;
+    DPR = QUALITY >= 2 ? Math.min(3, window.devicePixelRatio || 1) : QUALITY >= 1 ? Math.min(1.5, window.devicePixelRatio || 1) : 1;
     const e = document.documentElement;
     CW = e && e.clientWidth || window.innerWidth, CH = e && e.clientHeight || window.innerHeight, cv.width = CW * DPR, cv.height = CH * DPR, cv.style.width = CW + "px", cv.style.height = CH + "px", ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     const t = Math.min(150, Math.max(96, Math.floor(0.3 * CW))), r = Math.round(72 * t / 92);
@@ -5020,6 +5035,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     s2w,
     fpsScale,
     setQuality,
+    setGraphicsPref,
     resize,
     clampCam,
     shade,
@@ -5167,6 +5183,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       zoomPivot = v;
     }, configurable: true },
     QUALITY: { get: () => QUALITY, configurable: true },
+    graphicsPref: { get: () => graphicsPref, configurable: true },
     CW: { get: () => CW, configurable: true },
     CH: { get: () => CH, configurable: true },
     DPR: { get: () => DPR, configurable: true }
@@ -6428,7 +6445,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } catch (e2) {
       return false;
     }
-    t.setPixelRatio(Math.min(3, window.devicePixelRatio || 1)), t.shadowMap.enabled = true, t.shadowMap.type = THREE.PCFSoftShadowMap, void 0 !== THREE.sRGBEncoding && (t.outputEncoding = THREE.sRGBEncoding), t.toneMapping = THREE.ACESFilmicToneMapping, t.toneMappingExposure = 0.97, t.setClearColor(725273, 1);
+    t.setPixelRatio(glPixelRatioCap()), t.shadowMap.enabled = QUALITY >= 1, t.shadowMap.type = THREE.PCFSoftShadowMap, void 0 !== THREE.sRGBEncoding && (t.outputEncoding = THREE.sRGBEncoding), t.toneMapping = THREE.ACESFilmicToneMapping, t.toneMappingExposure = 0.97, t.setClearColor(725273, 1);
     const r = new THREE.Scene();
     r.fog = new THREE.Fog(725273, FOG_NEAR, FOG_FAR);
     const n = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 9e3);
@@ -6446,8 +6463,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const e2 in GL.mats) fogPatch(GL.mats[e2]);
     return buildTerrainGL(), buildSkyGL(), true;
   }
+  function glPixelRatioCap() {
+    return QUALITY >= 2 ? Math.min(3, window.devicePixelRatio || 1) : QUALITY >= 1 ? Math.min(1.5, window.devicePixelRatio || 1) : 1;
+  }
+  function applyGLQuality() {
+    if (!GL) return;
+    const shadowsOn = QUALITY >= 1;
+    GL.renderer.shadowMap.enabled = shadowsOn, GL.sun.castShadow = shadowsOn;
+    if (shadowsOn) {
+      const sz = QUALITY >= 2 ? Math.min(window.innerWidth, window.innerHeight) < 560 ? 2048 : 3072 : 1024;
+      GL.sun.shadow.mapSize.x !== sz && (GL.sun.shadow.mapSize.set(sz, sz), GL.sun.shadow.map && (GL.sun.shadow.map.dispose(), GL.sun.shadow.map = null));
+    }
+  }
   function resizeGL() {
-    GL && (GL.renderer.setPixelRatio(Math.min(3, window.devicePixelRatio || 1)), GL.renderer.setSize(CW, CH, true));
+    GL && (GL.renderer.setPixelRatio(glPixelRatioCap()), GL.renderer.setSize(CW, CH, true), applyGLQuality());
   }
   var GLBUCKET = { glass: "glass", glassdark: "glass", crystal: "glass", tesla: "glass", lightY: "glass", concrete: "concrete", concrete2: "concrete", asphalt: "concrete", sand: "matte", olive: "foliage", wood: "matte", skin: "matte", rubber: "rubber", tread: "rubber", rust: "matte", neutral: "matte", carapace: "organic", carapace2: "organic", pod: "organic", bark: "matte", roof: "concrete", rock2: "concrete", rock3: "concrete", tibG: "glass", tibB: "glass", green: "foliage", green2: "foliage", green3: "foliage", pine: "foliage", autumn: "foliage", bark2: "matte", scorch: "matte", wreck: "matte" };
   function glMerge(e, t) {
@@ -6909,7 +6938,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return g;
   }
   function updateLitPool(camX, camY, dayF) {
-    const pool = GL.litPool, maxLights = 14, cands = [];
+    const pool = GL.litPool, maxLights = QUALITY >= 2 ? 14 : QUALITY >= 1 ? 8 : 4, cands = [];
     for (const b of S.blds) {
       if (b.dead || "wall" === b.key || "gate" === b.key) continue;
       const dx = b.x - camX, dy = b.y - camY, d2 = dx * dx + dy * dy;
@@ -8180,6 +8209,37 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 <script>
 (() => {
   // src/ui.ts
+  var KEYBINDS_DEFAULT = { camUp: "w", camDown: "s", camLeft: "a", camRight: "d", attackMove: "q", pause: " " };
+  var KEYBIND_LABEL = { camUp: "Pan Camera Up", camDown: "Pan Camera Down", camLeft: "Pan Camera Left", camRight: "Pan Camera Right", attackMove: "Attack-Move", pause: "Pause / Resume" };
+  var KEYBINDS = { ...KEYBINDS_DEFAULT };
+  try {
+    const saved = JSON.parse(localStorage.getItem("ifr_keybinds") || "null");
+    saved && (KEYBINDS = Object.assign({}, KEYBINDS_DEFAULT, saved));
+  } catch (e) {
+  }
+  function saveKeybinds() {
+    try {
+      localStorage.setItem("ifr_keybinds", JSON.stringify(KEYBINDS));
+    } catch (e) {
+    }
+  }
+  function resetKeybinds() {
+    KEYBINDS = { ...KEYBINDS_DEFAULT }, saveKeybinds();
+  }
+  function keyLabel(k) {
+    return " " === k ? "SPACE" : k.length === 1 ? k.toUpperCase() : k;
+  }
+  var capturingAction = null;
+  var capturingCb = null;
+  function captureKeybind(action, cb) {
+    capturingAction = action, capturingCb = cb;
+  }
+  function handleKeybindCapture(e) {
+    e.preventDefault();
+    const action = capturingAction, cb = capturingCb;
+    capturingAction = null, capturingCb = null;
+    "Escape" !== e.key && (KEYBINDS[action] = e.key.toLowerCase(), saveKeybinds()), cb && cb(KEYBINDS[action]);
+  }
   var sellMode = false;
   var repairMode = false;
   var amoveAim = false;
@@ -8405,13 +8465,15 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const t = mm.getBoundingClientRect();
     cam.x = (e.clientX - t.left) / t.width * 2944, cam.y = (e.clientY - t.top) / t.height * 2304, clampCam(), e.stopPropagation();
   }), window.addEventListener("keydown", (e) => {
+    if (capturingAction) return void handleKeybindCapture(e);
     if (FPS.on) return;
     const ae = document.activeElement;
     if (ae && ("INPUT" === ae.tagName || "TEXTAREA" === ae.tagName)) return;
-    "Escape" === e.key && (S.placing = null, S.ghost = null, S.deployUnit = null, S.sel = [], amoveAim = false), " " === e.key && (e.preventDefault(), S.running = !S.running);
+    "Escape" === e.key && (S.placing = null, S.ghost = null, S.deployUnit = null, S.sel = [], amoveAim = false);
+    e.key.toLowerCase() === KEYBINDS.pause && (e.preventDefault(), S.running = !S.running);
     const t = 50 / cam.z, k = e.key.toLowerCase();
-    ("ArrowLeft" === e.key || "a" === k) && (cam.x -= t, cam.y += t), ("ArrowRight" === e.key || "d" === k) && (cam.x += t, cam.y -= t), ("ArrowUp" === e.key || "w" === k) && (cam.x -= t, cam.y -= t), ("ArrowDown" === e.key || "s" === k) && (cam.x += t, cam.y += t), clampCam();
-    "q" === k && (amoveAim ? amoveAim = false : S.sel.some((u) => "u" === u.e && 0 === u.owner) ? (amoveAim = true, hint("Attack-move armed \u2014 right-click a destination")) : hint("Select units first"));
+    ("ArrowLeft" === e.key || k === KEYBINDS.camLeft) && (cam.x -= t, cam.y += t), ("ArrowRight" === e.key || k === KEYBINDS.camRight) && (cam.x += t, cam.y -= t), ("ArrowUp" === e.key || k === KEYBINDS.camUp) && (cam.x -= t, cam.y -= t), ("ArrowDown" === e.key || k === KEYBINDS.camDown) && (cam.x += t, cam.y += t), clampCam();
+    k === KEYBINDS.attackMove && (amoveAim ? amoveAim = false : S.sel.some((u) => "u" === u.e && 0 === u.owner) ? (amoveAim = true, hint("Attack-move armed \u2014 right-click a destination")) : hint("Select units first"));
     if (e.key >= "0" && e.key <= "9") {
       const g = +e.key;
       if (e.ctrlKey || e.metaKey) e.preventDefault(), S.sel.length && (ctrlGroups[g] = S.sel.slice());
@@ -8540,7 +8602,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       } else if ("settings" === e) {
         const trackOpts = ['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + e2.name + "</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value));
+        const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
+        const kbRows = Object.keys(KEYBINDS).map((action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>").join("");
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
@@ -8550,7 +8614,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         };
         wireVol("masterVolOpt", setMasterVol), wireVol("sfxVolOpt", (e2) => {
           setSfxVol(e2), sfx("sel");
-        }), wireVol("musicVolOpt", setMusicVol), $("#trackSelOpt").addEventListener("change", (e2) => setTrackSel(+e2.target.value)), $("#settingsClose").addEventListener("click", () => openMenu("pause"));
+        }), wireVol("musicVolOpt", setMusicVol), $("#trackSelOpt").addEventListener("change", (e2) => setTrackSel(+e2.target.value)), $("#settingsClose").addEventListener("click", () => openMenu("pause")), $("#kbReset").addEventListener("click", () => {
+          resetKeybinds(), openMenu("settings");
+        }), $("#panelMain").querySelectorAll(".kbBtn").forEach((b) => b.addEventListener("click", () => {
+          const action = b.dataset.a;
+          b.textContent = "Press a key\u2026", captureKeybind(action, (key) => {
+            b.textContent = keyLabel(key);
+          });
+        }));
       }
     } else t.classList.add("hidden");
   }
@@ -8675,12 +8746,16 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     openMenu,
     gameOver,
     pickWeather,
-    startGame
+    startGame,
+    captureKeybind,
+    resetKeybinds,
+    keyLabel
   });
   Object.defineProperties(window, {
     cfg: { get: () => cfg, set: (v) => {
       cfg = v;
-    }, configurable: true }
+    }, configurable: true },
+    KEYBINDS: { get: () => KEYBINDS, configurable: true }
   });
 })();
 
@@ -9129,7 +9204,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
       clampCam();
     }
-    ema = 0.92 * ema + 0.08 * t, S.running && (ema > 0.036 ? ++slow > 90 && (slow = 0, setQuality(Math.max(0, QUALITY - 1))) : slow = Math.max(0, slow - 1)), S.running && !S.over && (sfxBudget = 0, FPS.on && fpsTick(t), step(t)), FPS.entering && tickFpsEntry(t), hintT > 0 && (hintT -= t, hintT <= 0 && $("#hint").classList.remove("show")), S.marker && (S.marker.t += t), S.players.length && (render(), updateCards(), updateSuperPanel(), updateTutorial(), updateTutorialPanel());
+    ema = 0.92 * ema + 0.08 * t, S.running && "auto" === graphicsPref && (ema > 0.036 ? ++slow > 90 && (slow = 0, setQuality(Math.max(0, QUALITY - 1))) : slow = Math.max(0, slow - 1)), S.running && !S.over && (sfxBudget = 0, FPS.on && fpsTick(t), step(t)), FPS.entering && tickFpsEntry(t), hintT > 0 && (hintT -= t, hintT <= 0 && $("#hint").classList.remove("show")), S.marker && (S.marker.t += t), S.players.length && (render(), updateCards(), updateSuperPanel(), updateTutorial(), updateTutorialPanel());
   }
   function tickFpsEntry(dt) {
     const fe = FPS.entering;
