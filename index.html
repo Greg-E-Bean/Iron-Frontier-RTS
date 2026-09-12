@@ -958,7 +958,22 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let n = 1; n < 18; n++) for (let a = -n; a <= n; a++) for (let o = -n; o <= n; o++) if (Math.max(Math.abs(o), Math.abs(a)) === n && r(e + o, t + a)) return [e + o, t + a];
     return null;
   }
-  var S = { players: [], units: [], blds: [], bldById: /* @__PURE__ */ new Map(), projs: [], fx: [], rockets: [], traffic: [], spyReveals: [], nextId: 1, time: 0, running: false, over: false, speed: 1, sel: [], placing: null, selMode: false, tab: "bld", hoverT: null };
+  var gameSpeedDefault = (() => {
+    try {
+      const e = localStorage.getItem("ifr_speed");
+      return null === e ? 1 : +e;
+    } catch (e) {
+      return 1;
+    }
+  })();
+  function setGameSpeed(v) {
+    S.speed = v;
+    try {
+      localStorage.setItem("ifr_speed", "" + v);
+    } catch (e) {
+    }
+  }
+  var S = { players: [], units: [], blds: [], bldById: /* @__PURE__ */ new Map(), projs: [], fx: [], rockets: [], traffic: [], spyReveals: [], nextId: 1, time: 0, running: false, over: false, speed: gameSpeedDefault, sel: [], placing: null, selMode: false, tab: "bld", hoverT: null };
   function newPlayer(e, t, r, n, a, o) {
     return { id: e, fac: t, f: FACTIONS[t], isAI: r, diff: n, team: null != a ? a : e, color: o && o.body || null, dark: o && o.dark || null, tint: o && o.tint || null, credits: 1e4, power: 0, drain: 0, queues: { bld: null, def: null, inf: null, veh: null, air: null }, ready: { bld: null, def: null }, ai: { t: 0, wave: 0, attack: false, rally: null, target: null, expand: 0 }, defeated: false, kills: 0, lost: 0 };
   }
@@ -1099,6 +1114,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const t = S.blds.filter((t2) => t2.owner === e && !t2.dead && "silo" === t2.key).length;
     return 1 + 0.09 * Math.min(3, t);
   }
+  function airCapacity(e) {
+    return 4 * countBld(e.id, "airfield");
+  }
+  function airCommitted(e) {
+    const alive = S.units.filter((u) => !u.dead && u.owner === e.id && u.d.ammo && "airfield" === u.d.from).length;
+    const q = e.queues.air, queued = q ? q.list.filter((k) => UNITS[k].ammo).length : 0;
+    return alive + queued;
+  }
   function canBuildUnit(e, t, inProgress) {
     const r = UNITS[t];
     if (FACTIONS[e.f.key].units.includes(t) || t === e.f.miner) {
@@ -1110,6 +1133,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (r.req && !hasBld(e.id, r.req)) return false;
     if (r.limit) {
       if (S.units.filter((r2) => r2.owner === e.id && !r2.dead && r2.key === t).length + qCount(e, r.tab, t) - (inProgress ? 1 : 0) >= r.limit) return false;
+    }
+    if (r.ammo && "airfield" === r.from) {
+      if (airCommitted(e) - (inProgress ? 1 : 0) >= airCapacity(e)) return false;
     }
     return true;
   }
@@ -1146,6 +1172,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return !!ff && hasActiveBld(e.id, r.from, ff);
   }
   function tickProduction(e, t) {
+    t *= S.speed;
     const r = powerFactor(e);
     for (const n of ["bld", "def", "inf", "veh", "air", "sea"]) {
       const a = e.queues[n];
@@ -1273,7 +1300,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function inRange(e, t) {
     if (e.d.c4 && "b" === t.e) {
-      const r2 = e.d.radius + 16 * t.size + 50;
+      const r2 = 16 * t.size + 20;
       return dist2(e.x, e.y, t.x, t.y) < r2 * r2;
     }
     const r = effRange(e) + ("b" === t.e ? 32 * t.size * 0.38 : 0);
@@ -1470,6 +1497,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return r.length ? (r.sort((t2, r2) => r2.y - t2.y || Math.abs(t2.x - e.x) - Math.abs(r2.x - e.x)), r[(t || 0) % r.length]) : { x: e.x, y: e.y + 32 * e.size * 0.5 + 16 };
   }
   function tickMiner(e, t) {
+    const st = t * S.speed;
     if (e.d.dmg > 0) {
       if (!e.target || e.target.dead || !canTarget(e, e.target)) {
         e.target = null, e.acqT = (e.acqT || 0) - t;
@@ -1484,7 +1512,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if ("harvest" !== e.order && "return" !== e.order && "move" !== e.order && "refine" !== e.order && (e.order = "harvest"), "move" === e.order) return moveAlong(e, t), void (e.path || (e.order = "harvest"));
     if ("refine" === e.order) {
       e.moving = false, e.path = null;
-      const total = 17, rate = 700 / total, n = Math.min(e.cargo, rate * t), a = Math.min(n, e.blue || 0);
+      const total = 17, rate = 700 / total, n = Math.min(e.cargo, rate * st), a = Math.min(n, e.blue || 0);
       e.blue = Math.max(0, (e.blue || 0) - a), e.cargo -= n, S.players[e.owner].credits += (n + 0.75 * a) * siloBonus(e.owner);
       Math.random() < 3 * t && S.fx.push({ kind: "spark", x: e.x + rnd(-11, 11), y: e.y + rnd(-11, 11), z: 4, s: 0.4, c: "#ffd75e", t: 0, life: 0.4 });
       return void (e.cargo <= 0.5 && (e.cargo = 0, e.order = "harvest", e.path = null, textFx(e.x, e.y - 20, "+$", "#ffd75e")));
@@ -1498,7 +1526,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const r = 32 * e.ore.tx + 16, n = 32 * e.ore.ty + 16;
       if (Math.floor(e.x / 32) === e.ore.tx && Math.floor(e.y / 32) === e.ore.ty || dist2(e.x, e.y, r, n) < 676) {
         e.moving = false;
-        const r2 = idx(e.ore.tx, e.ore.ty), n2 = Math.min(G.ore[r2], 100 * t, 700 - e.cargo);
+        const r2 = idx(e.ore.tx, e.ore.ty), n2 = Math.min(G.ore[r2], 100 * st, 700 - e.cargo);
         G.ore[r2] -= n2, e.cargo += n2, e.harvT = (e.harvT || 0) + t, e.augerSpin = (e.augerSpin || 0) + 9 * t, 2 === G.tib[r2] && (e.blue = (e.blue || 0) + n2), G.ore[r2] < 20 && (G.ore[r2] = 0, G.tib[r2] = 0, e.ore = null), e.cargo >= 700 && (e.order = e.d.mobileRefine ? "refine" : "return", e.path = null);
       } else e.tx = r, e.ty = n, e.repath -= t, (!e.path || e.repath <= 0) && (repath(e), e.repath = 1.5), moveAlong(e, t), e.path && e.path.length || !(dist2(e.x, e.y, r, n) > 900) || (e.ore = null, e.stuck = 0);
       return;
@@ -1509,19 +1537,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       r.dock || (r.dock = refDock(r));
       const n = r.dock.x, a = r.dock.y;
       if (e.d.teleport) {
-        e.teleCd = (e.teleCd || 0) - t;
         const dd = dist2(e.x, e.y, n, a);
-        if (e.teleCd <= 0 && dd > 4e4) {
-          const dx = n - e.x, dy = a - e.y, dist3 = Math.sqrt(dd), hop = Math.min(dist3 - 40, 260);
-          if (hop > 40) {
-            const ang = Math.atan2(dy, dx);
-            S.fx.push({ kind: "ring", x: e.x, y: e.y, z: 6, s: 0.9, c: "#ff5a3c", t: 0, life: 0.4 }), e.x = clamp(e.x + Math.cos(ang) * hop, 6, 2938), e.y = clamp(e.y + Math.sin(ang) * hop, 6, 2298), S.fx.push({ kind: "ring", x: e.x, y: e.y, z: 6, s: 0.9, c: "#ff5a3c", t: 0, life: 0.4 }), e.teleCd = 13, e.path = null;
-          }
+        if (dd > 4e4) {
+          S.fx.push({ kind: "ring", x: e.x, y: e.y, z: 6, s: 0.9, c: "#ff5a3c", t: 0, life: 0.4 }), e.x = clamp(n, 6, 2938), e.y = clamp(a, 6, 2298), S.fx.push({ kind: "ring", x: e.x, y: e.y, z: 6, s: 0.9, c: "#ff5a3c", t: 0, life: 0.4 }), e.path = null;
         }
       }
       if (dist2(e.x, e.y, n, a) < 1936) {
         e.moving = false;
-        const n2 = 500 * t, a2 = Math.min(e.cargo, n2), o = Math.min(a2, e.blue || 0);
+        const n2 = 500 * st, a2 = Math.min(e.cargo, n2), o = Math.min(a2, e.blue || 0);
         e.blue = Math.max(0, (e.blue || 0) - o), e.cargo -= a2, S.players[e.owner].credits += (a2 + 0.75 * o) * siloBonus(e.owner), e.unload = 0.25, e.cargo <= 0.5 && (e.cargo = 0, e.order = "harvest", e.path = null, textFx(r.x, r.y - 20, "+$", "#ffd75e"));
       } else {
         if (e.tx = n, e.ty = a, e.repath -= t, (!e.path || e.repath <= 0) && (repath(e), e.repath = 1.5), moveAlong(e, t), e.path) e.dockFail = 0;
@@ -1531,7 +1554,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           t2 && t2 !== r && (e.ref = t2);
         }
         if (e.cargo > 0 && dist2(e.x, e.y, r.x, r.y) < (32 * r.size * 0.5 + 30) ** 2) {
-          const r2 = Math.min(e.cargo, 500 * t), n2 = Math.min(r2, e.blue || 0);
+          const r2 = Math.min(e.cargo, 500 * st), n2 = Math.min(r2, e.blue || 0);
           e.blue = Math.max(0, (e.blue || 0) - n2), e.cargo -= r2, S.players[e.owner].credits += (r2 + 0.75 * n2) * siloBonus(e.owner), e.cargo <= 0.5 && (e.cargo = 0, e.order = "harvest", e.path = null);
         }
       }
@@ -1750,7 +1773,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       r2.credits >= n2 ? (r2.credits -= n2, e.hp = Math.min(e.maxhp, e.hp + e.maxhp * t / 6)) : e.repair = false, e.hp >= e.maxhp && (e.repair = false);
     }
     if (e.d.civ) return void tickGarrison(e, t);
-    if ("oilDerek" === e.key) return void (e.owner !== NEUTRAL && (S.players[e.owner].credits += (e.d.econIncome || 14) * t));
+    if ("oilDerek" === e.key) return void (e.owner !== NEUTRAL && (S.players[e.owner].credits += (e.d.econIncome || 14) * t * S.speed));
     if ("rogueDen" === e.key) return void tickRogueDen(e, t);
     if ("repair" === e.key) return void tickRepairBay(e, t);
     if ("navalyard" === e.key) return void tickNavalRepair(e, t);
@@ -1806,6 +1829,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    setGameSpeed,
     walkable,
     walkableW,
     walkableTeam,
@@ -1857,6 +1881,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     bldKind,
     siloBonus,
     canBuildUnit,
+    airCapacity,
+    airCommitted,
     qCount,
     startBuild,
     cancelBuild,
@@ -7962,7 +7988,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
     } else if (!canBuildUnit(t, e.key)) {
       const r = UNITS[e.key];
-      return void (r.limit ? hint("Only " + r.limit + " " + r.name + " allowed") : hint("Needs " + bname(r.req || r.from, t.fac)));
+      return void (r.limit ? hint("Only " + r.limit + " " + r.name + " allowed") : r.ammo && "airfield" === r.from && hasBld(t.id, "airfield") ? hint("Airfield at capacity \u2014 build another airfield") : hint("Needs " + bname(r.req || r.from, t.fac)));
     }
     startBuild(t, e.kind, e.key), sfx("sel");
   }
@@ -8443,7 +8469,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => S.mission ? launchMission(S.mission.fac, S.mission.idx) : location.reload());
       } else if ("settings" === e) {
         const trackOpts = ['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + e2.name + "</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel;
+        const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
@@ -9002,7 +9029,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       (S.thunderT = (void 0 === S.thunderT ? 6 + 10 * Math.random() : S.thunderT) - e) <= 0 && (S.thunderT = 9 + 14 * Math.random(), sfx("thunder"), lightningT = 0.16 + 0.12 * Math.random());
     }
     S.spyReveals && S.spyReveals.length && (S.spyReveals.forEach((r) => r.t -= e), S.spyReveals = S.spyReveals.filter((r) => r.t > 0));
-    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), tickProduction(t, e), t.isAI && (t.credits += 8 * DIFFS[t.diff].inc * e, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e)));
+    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), tickProduction(t, e), t.isAI && (t.credits += 8 * DIFFS[t.diff].inc * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e)));
     for (const t of S.units) tickUnit(t, e);
     for (const t of S.blds) tickBld(t, e);
     tickProjectiles(e), tickRads(e), tickTiberium(e), tickTraffic(e), tickRockets(e), tickGates(e);

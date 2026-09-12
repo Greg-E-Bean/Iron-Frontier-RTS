@@ -83,6 +83,7 @@ declare global {
   var mmPings: { x: number; y: number; spawnTime: number }[];
   function angDiff(a: number, b: number): number;
 
+  function setGameSpeed(v: number): void;
   function walkable(tx: number, ty: number): boolean;
   function walkableW(tx: number, ty: number): boolean;
   function walkableTeam(team: number): AnyFn;
@@ -149,6 +150,8 @@ declare global {
   const bldKind: AnyFn;
   const siloBonus: AnyFn;
   function canBuildUnit(owner: Player, key: string, inProgress?: number): boolean;
+  function airCapacity(owner: Player): number;
+  function airCommitted(owner: Player): number;
   const qCount: AnyFn;
   const startBuild: AnyFn;
   const cancelBuild: AnyFn;

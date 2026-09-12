@@ -296,6 +296,7 @@ export interface GameState {
   placing: string | null;
   tab: string;
   nextId: number;
+  speed: number;
   // The rest are only populated once startGame() actually starts a
   // match, not at S's initial module-load literal - optional reflects
   // that real lifecycle rather than forcing a premature initializer.
