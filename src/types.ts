@@ -141,6 +141,7 @@ export interface Unit {
   padIdx?: number | null;
   fac?: string;
   rally?: Vec2 | null;
+  queue?: { x: number; y: number; amove?: boolean }[];
   rot?: number;
   spin?: number;
   fps?: number;
@@ -311,6 +312,8 @@ export interface GameState {
   spyReveals?: { t: number; [k: string]: unknown }[];
   thunderT?: number;
   traffic?: any[];
+  history?: { t: number; p: { kills: number; lost: number; units: number; value: number }[] }[];
+  histT?: number;
   [field: string]: unknown;
 }
 

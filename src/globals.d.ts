@@ -156,7 +156,8 @@ declare global {
   function tickProduction(p: Player, dt: number): void;
   const spawnUnit: AnyFn;
   const placeReady: AnyFn;
-  function cmdMove(units: Unit[], x: number, y: number, amove?: boolean): void;
+  function cmdMove(units: Unit[], x: number, y: number, amove?: boolean, queue?: boolean): void;
+  function nextWaypoint(u: Unit): boolean;
   function cmdAttack(units: Unit[], target: GameEntity): void;
   function cmdHarvest(units: Unit[], tx: number, ty: number): void;
   const repath: AnyFn;

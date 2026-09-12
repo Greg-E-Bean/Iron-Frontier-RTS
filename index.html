@@ -1185,14 +1185,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const o = e.queues[kind];
     return o && (o.list[0] === n && o.list.shift(), o.prog = 0, o.paid = 0, o.list.length || (e.queues[kind] = null)), sfx("place"), true;
   }
-  function cmdMove(e, t, r, n) {
+  function cmdMove(e, t, r, n, queue) {
     const a = e.length, o = Math.ceil(Math.sqrt(a)), s = Math.max(34, 3.6 * e.reduce((e2, t2) => Math.max(e2, t2.d.radius), 8));
     let i = 0;
     const l = e.slice().sort((e2, n2) => dist2(e2.x, e2.y, t, r) - dist2(n2.x, n2.y, t, r));
     for (const e2 of l) {
-      const a2 = t + (i % o - (o - 1) / 2) * s, l2 = r + (Math.floor(i / o) - (o - 1) / 2) * s;
-      i++, e2.deployed && toggleDeploy(e2), e2.order = n ? "amove" : "move", e2.target = null, e2.ore = null, e2.tx = clamp(a2, 8, 2936), e2.ty = clamp(l2, 8, 2296), e2.d.fly ? (e2.path = null, e2.state = null) : repath(e2);
+      const a2 = clamp(t + (i % o - (o - 1) / 2) * s, 8, 2936), c = clamp(r + (Math.floor(i / o) - (o - 1) / 2) * s, 8, 2296);
+      if (i++, queue && e2.order && "idle" !== e2.order) {
+        (e2.queue = e2.queue || []).push({ x: a2, y: c, amove: !!n });
+        continue;
+      }
+      queue || (e2.queue = []), e2.deployed && toggleDeploy(e2), e2.order = n ? "amove" : "move", e2.target = null, e2.ore = null, e2.tx = a2, e2.ty = c, e2.d.fly ? (e2.path = null, e2.state = null) : repath(e2);
     }
+  }
+  function nextWaypoint(e) {
+    if (!e.queue || !e.queue.length) return false;
+    const t = e.queue.shift();
+    return e.order = t.amove ? "amove" : "move", e.target = null, e.ore = null, e.tx = t.x, e.ty = t.y, e.d.fly ? (e.path = null, e.state = null) : repath(e), true;
   }
   function cmdAttack(e, t) {
     smartOrder(e, t) && (e = e.filter((e2) => "capture" !== e2.order && "garrison" !== e2.order && "load" !== e2.order));
@@ -1336,8 +1345,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           const r2 = e.target;
           return void (inRange(e, r2) ? (e.moving = false, e.path = null, faceAndShoot(e, r2, t)) : e.deployed ? (e.moving = false, e.path = null) : (e.tx = r2.x, e.ty = r2.y, e.repath -= t, (!e.path || e.repath <= 0) && (repath(e), e.repath = 0.7), moveAlong(e, t)));
         }
-        if ("amove" === e.order) return e.target && dist2(e.x, e.y, e.target.x, e.target.y) < effRange(e) * effRange(e) ? (e.moving = false, void faceAndShoot(e, e.target, t)) : (moveAlong(e, t), void ((!e.path || e.pi >= e.path.length) && (e.order = "idle")));
-        if ("move" === e.order) return e.deployed ? void (e.order = "idle") : (moveAlong(e, t), void ((!e.path || e.pi >= e.path.length) && (e.order = "idle")));
+        if ("amove" === e.order) return e.target && dist2(e.x, e.y, e.target.x, e.target.y) < effRange(e) * effRange(e) ? (e.moving = false, void faceAndShoot(e, e.target, t)) : (moveAlong(e, t), void ((!e.path || e.pi >= e.path.length) && !nextWaypoint(e) && (e.order = "idle")));
+        if ("move" === e.order) return e.deployed ? void (e.order = "idle") : (moveAlong(e, t), void ((!e.path || e.pi >= e.path.length) && !nextWaypoint(e) && (e.order = "idle")));
         e.target && inRange(e, e.target) && faceAndShoot(e, e.target, t), e.moving = false;
       } else tickMiner(e, t);
       else tickGarrisonMove(e, t);
@@ -1857,6 +1866,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     placeReady,
     cmdMove,
     cmdAttack,
+    nextWaypoint,
     cmdHarvest,
     repath,
     dmgMult,
@@ -5475,6 +5485,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const r = w2sx(e.x, e.y), n = w2sy(e.x, e.y);
     ctx.strokeStyle = e.c || "#7dff8a", ctx.lineWidth = 2, ctx.globalAlpha = 1 - t, ctx.beginPath(), ctx.ellipse(r, n, 6 + 20 * t, 0.5 * (6 + 20 * t), 0, 0, 6.3), ctx.stroke(), ctx.globalAlpha = 1;
   }
+  function drawRallyFlags() {
+    for (const b of S.blds) {
+      if (b.dead || 0 !== b.owner || !b.rally) continue;
+      const sx = w2sx(b.rally.x, b.rally.y), sy = w2sy(b.rally.x, b.rally.y), bx = w2sx(b.x, b.y), by = w2sy(b.x, b.y);
+      ctx.save(), ctx.strokeStyle = "rgba(125,196,255,.5)", ctx.lineWidth = 1.5, ctx.setLineDash([5, 5]), ctx.beginPath(), ctx.moveTo(bx, by), ctx.lineTo(sx, sy), ctx.stroke(), ctx.setLineDash([]), ctx.strokeStyle = "#7dc4ff", ctx.fillStyle = "#7dc4ff", ctx.lineWidth = 2, ctx.beginPath(), ctx.moveTo(sx, sy + 8), ctx.lineTo(sx, sy - 16), ctx.stroke(), ctx.beginPath(), ctx.moveTo(sx, sy - 16), ctx.lineTo(sx + 11, sy - 11), ctx.lineTo(sx, sy - 6), ctx.closePath(), ctx.fill(), ctx.restore();
+    }
+  }
   var mmCache = null;
   function buildMMCache() {
     const e = document.createElement("canvas");
@@ -5665,7 +5682,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } catch (e2) {
       S.drawWarned || (S.drawWarned = 1, console.error("hud", e2));
     }
-    drawFxProj(), drawGhost(), drawBox(), drawMarker(), drawMM();
+    drawFxProj(), drawRallyFlags(), drawGhost(), drawBox(), drawMarker(), drawMM();
   }
   function unitHUD(e) {
     const t = cam.z, r = e.alt || 0, n = w2sx(e.x, e.y), a = w2sy(e.x, e.y, r);
@@ -6064,7 +6081,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       } else flyTo(e, n2.x, n2.y, t);
       return;
     }
-    if ("move" === e.order || "amove" === e.order) return flyTo(e, e.tx, e.ty, t), void (dist2(e.x, e.y, e.tx, e.ty) < 676 && (e.order = "idle"));
+    if ("move" === e.order || "amove" === e.order) return flyTo(e, e.tx, e.ty, t), void (dist2(e.x, e.y, e.tx, e.ty) < 676 && !nextWaypoint(e) && (e.order = "idle"));
     e.moving = false;
   }
   function flyTo(e, t, r, n, a) {
@@ -8070,6 +8087,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   // src/ui.ts
   var sellMode = false;
   var repairMode = false;
+  var amoveAim = false;
   $("#bSel").addEventListener("click", () => {
     S.selMode = !S.selMode, $("#bSel").classList.toggle("on", S.selMode), S.selMode && hint("Drag on the map to box-select");
   }), $("#bAll").addEventListener("click", () => {
@@ -8106,7 +8124,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function endPtr(e) {
     if (FPS.on) return void ptrs.delete(e.pointerId);
     const t = ptrs.get(e.pointerId);
-    ptrs.delete(e.pointerId), "pinch" !== dragMode ? t && ("box" === dragMode && S.box ? (moved > 14 ? boxSelect(S.box) : tapSelect(e.clientX, e.clientY), S.box = null) : "ghost" === dragMode ? tryPlace(e.clientX, e.clientY) : "rmove" === dragMode ? tapCommand(e.clientX, e.clientY) : moved < 14 && tap(e.clientX, e.clientY), dragMode = null, dragStart = null) : ptrs.size < 2 && (dragMode = null, dragStart = null);
+    ptrs.delete(e.pointerId), "pinch" !== dragMode ? t && ("box" === dragMode && S.box ? (moved > 14 ? boxSelect(S.box) : tapSelect(e.clientX, e.clientY), S.box = null) : "ghost" === dragMode ? tryPlace(e.clientX, e.clientY) : "rmove" === dragMode ? tapCommand(e.clientX, e.clientY, e.shiftKey) : moved < 14 && tap(e.clientX, e.clientY), dragMode = null, dragStart = null) : ptrs.size < 2 && (dragMode = null, dragStart = null);
   }
   function updateGhost(e, t, r) {
     const n = s2w(e, t - (r ? Math.min(46, 26 / Math.max(0.35, cam.z)) : 0)), a = n.x, o = n.y, s = BLD[S.placing].size;
@@ -8198,6 +8216,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     S.sel = [];
   }
   function tapSelect(e, t) {
+    amoveAim = false;
     if (S.placing) return void tryPlace(e, t);
     const r = s2w(e, t), n = r.x, a = r.y;
     if (superAim) return superAim = false, void (fireSuper(0, n, a) && (cam.x = n, cam.y = a, clampCam(), S.marker = { x: n, y: a, t: 0 }, hint("Strike inbound")));
@@ -8214,8 +8233,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
     S.sel = [];
   }
-  function tapCommand(e, t) {
+  function tapCommand(e, t, queueMod) {
     if (S.placing || superAim || spyAim || paradropAim || empAim || sellMode || repairMode) return;
+    const wasAmove = amoveAim;
+    amoveAim = false;
     const r = s2w(e, t), n = r.x, a = r.y, o = entAt(n, a, e, t);
     if (o) {
       if (0 === o.owner) {
@@ -8240,7 +8261,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const s = S.sel.filter((e2) => "u" === e2.e && 0 === e2.owner);
     if (s.length) {
       const ex = Math.floor(n / 32), ey = Math.floor(a / 32);
-      return inMap(ex, ey) && G.ore[idx(ex, ey)] > 0 && s.some((e2) => "miner" === e2.d.role) ? (cmdHarvest(s, ex, ey), s.filter((e2) => "miner" !== e2.d.role).forEach((e2) => cmdMove([e2], n, a)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }, void sfx("go")) : (cmdMove(s, n, a), S.marker = { x: n, y: a, t: 0, c: "#7dff8a" }, void sfx("go"));
+      return inMap(ex, ey) && G.ore[idx(ex, ey)] > 0 && s.some((e2) => "miner" === e2.d.role) ? (cmdHarvest(s, ex, ey), s.filter((e2) => "miner" !== e2.d.role).forEach((e2) => cmdMove([e2], n, a, wasAmove, queueMod)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }, void sfx("go")) : (cmdMove(s, n, a, wasAmove, queueMod), S.marker = { x: n, y: a, t: 0, c: wasAmove ? "#ff9a3c" : "#7dff8a" }, void sfx("go"));
     }
     const i = S.sel.find((e2) => "b" === e2.e);
     if (i && 0 === i.owner) return void (i.rally = { x: n, y: a }, S.marker = { x: n, y: a, t: 0, c: "#7dc4ff" }, hint("Rally point set"));
@@ -8292,9 +8313,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (FPS.on) return;
     const ae = document.activeElement;
     if (ae && ("INPUT" === ae.tagName || "TEXTAREA" === ae.tagName)) return;
-    "Escape" === e.key && (S.placing = null, S.ghost = null, S.deployUnit = null, S.sel = []), " " === e.key && (e.preventDefault(), S.running = !S.running);
+    "Escape" === e.key && (S.placing = null, S.ghost = null, S.deployUnit = null, S.sel = [], amoveAim = false), " " === e.key && (e.preventDefault(), S.running = !S.running);
     const t = 50 / cam.z, k = e.key.toLowerCase();
     ("ArrowLeft" === e.key || "a" === k) && (cam.x -= t, cam.y += t), ("ArrowRight" === e.key || "d" === k) && (cam.x += t, cam.y -= t), ("ArrowUp" === e.key || "w" === k) && (cam.x -= t, cam.y -= t), ("ArrowDown" === e.key || "s" === k) && (cam.x += t, cam.y += t), clampCam();
+    "q" === k && (amoveAim ? amoveAim = false : S.sel.some((u) => "u" === u.e && 0 === u.owner) ? (amoveAim = true, hint("Attack-move armed \u2014 right-click a destination")) : hint("Select units first"));
     if (e.key >= "0" && e.key <= "9") {
       const g = +e.key;
       if (e.ctrlKey || e.metaKey) e.preventDefault(), S.sel.length && (ctrlGroups[g] = S.sel.slice());
@@ -8435,6 +8457,37 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
     } else t.classList.add("hidden");
   }
+  function buildHistoryChart() {
+    const hist = S.history;
+    if (!hist || hist.length < 2) return "";
+    const w = 280, h = 120, padL = 30, padR = 6, padT = 6, padB = 16, plotW = w - padL - padR, plotH = h - padT - padB, players = S.players.filter((p) => !p.neutral);
+    let maxVal = 1;
+    for (const snap of hist) for (const pp of snap.p) maxVal = Math.max(maxVal, pp.value);
+    const maxT = Math.max(1, S.time), xOf = (tt) => padL + tt / maxT * plotW, yOf = (v) => padT + plotH - v / maxVal * plotH;
+    const paths = players.map((pl, pi) => {
+      const col = pl.color || pl.f.color || "#8ab4d8", d = hist.map((snap, si) => {
+        const pp = snap.p[pi];
+        return (0 === si ? "M" : "L") + xOf(snap.t).toFixed(1) + "," + yOf(pp ? pp.value : 0).toFixed(1);
+      }).join(" ");
+      return '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="2"/>';
+    }).join("");
+    const gridY = [0, 0.25, 0.5, 0.75, 1].map((f) => {
+      const y = (padT + plotH * (1 - f)).toFixed(1);
+      return '<line x1="' + padL + '" y1="' + y + '" x2="' + (w - padR) + '" y2="' + y + '" stroke="#28384c" stroke-width="1"/>';
+    }).join("");
+    const legend = players.map((pl) => {
+      const col = pl.color || pl.f.color || "#8ab4d8";
+      return '<span style="color:' + col + '">\u25A0</span> ' + pl.f.name + (0 === pl.id ? " (You)" : "");
+    }).join("&nbsp;&nbsp;&nbsp;");
+    return '<div class="sub" style="margin-top:12px">ARMY &amp; ECONOMY VALUE OVER TIME</div><svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + " " + h + '" style="background:#0f1620;border-radius:6px;max-width:100%">' + gridY + paths + '</svg><div class="small" style="margin-top:4px">' + legend + "</div>";
+  }
+  function buildResultsTable() {
+    const rows = S.players.filter((p) => !p.neutral).map((p) => {
+      const col = p.color || p.f.color || "#8ab4d8";
+      return '<div style="display:flex;justify-content:space-between;padding:3px 0' + (0 === p.id ? ";font-weight:bold" : "") + '"><span><span style="color:' + col + '">\u25A0</span>&nbsp;' + p.f.name + (0 === p.id ? " (You)" : "") + "</span><span>Kills " + p.kills + " &nbsp;\xB7&nbsp; Lost " + p.lost + "</span></div>";
+    }).join("");
+    return '<div class="sub" style="margin-top:10px">RESULTS</div><div class="small">' + rows + "</div>";
+  }
   function gameOver(win) {
     S.over = true, S.running = false, setRainAmbience(false), sfx(win ? "win" : "lose");
     $("#menu").classList.remove("hidden");
@@ -8442,7 +8495,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     mission && win && unlockNext(mission.fac, mission.idx);
     const hasNext = !!mission && mission.idx + 1 < CAMPAIGNS[mission.fac].missions.length;
     const label = mission ? win ? hasNext ? "NEXT MISSION" : "BACK TO MENU" : "RETRY MISSION" : "NEW SKIRMISH";
-    $("#panelMain").innerHTML = '<div id="result" style="color:' + (win ? "#6fe36f" : "#e0473a") + '">' + (win ? "MISSION ACCOMPLISHED" : "MISSION FAILED") + '</div><div class="sub">' + t.f.name.toUpperCase() + " vs " + rivalNames(t) + '</div><div class="small">Units killed: ' + t.kills + " &nbsp;\xB7&nbsp; Units lost: " + t.lost + "<br>Time: " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + 's</div><button id="play">' + label + "</button>" + (mission ? '<button id="backCamp2" ' + SECBTN + ">MISSION SELECT</button>" : ""), $("#play").addEventListener("click", () => {
+    $("#panelMain").innerHTML = '<div id="result" style="color:' + (win ? "#6fe36f" : "#e0473a") + '">' + (win ? "MISSION ACCOMPLISHED" : "MISSION FAILED") + '</div><div class="sub">' + t.f.name.toUpperCase() + " vs " + rivalNames(t) + '</div><div class="small">Units killed: ' + t.kills + " &nbsp;\xB7&nbsp; Units lost: " + t.lost + "<br>Time: " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + "s</div>" + buildResultsTable() + buildHistoryChart() + '<button id="play">' + label + "</button>" + (mission ? '<button id="backCamp2" ' + SECBTN + ">MISSION SELECT</button>" : ""), $("#play").addEventListener("click", () => {
       if (!mission) return void location.reload();
       win ? hasNext ? showBriefing(mission.fac, mission.idx + 1) : (S.mission = null, showCampaign()) : launchMission(mission.fac, mission.idx);
     }), mission && $("#backCamp2").addEventListener("click", () => {
@@ -8457,7 +8510,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     audio(), startMusic(), genMap(Math.floor(1e3 * Math.random()), cfg.map), mmCache = null, NEUTRAL = 1 + cfg.slots.length, S.players = [newPlayer(0, cfg.fac, false, "normal", cfg.team, colorSet(cfg.color))];
     cfg.slots.forEach((e, t) => {
       S.players.push(newPlayer(t + 1, e.fac, true, e.diff || "normal", e.team, colorSet(e.color)));
-    }), S.players[NEUTRAL] = newPlayer(NEUTRAL, "allied", false, "normal"), S.players[NEUTRAL].team = -1, S.players[NEUTRAL].f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, S.players[NEUTRAL].fac = "neutral", S.players[NEUTRAL].neutral = true, S.rads = [], S.weather = pickWeather(), setRainAmbience("rain" === S.weather), GL ? rebuildTerrainGL() : initGL(), FOG_ON = "off" !== cfg.fog, G.vis.fill(FOG_ON ? 0 : 2), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), resizeGL(), S.units = [], S.blds = [], S.bldById = /* @__PURE__ */ new Map(), S.projs = [], S.fx = [], S.rockets = [], S.sel = [], S.time = 0, S.over = false, S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map();
+    }), S.players[NEUTRAL] = newPlayer(NEUTRAL, "allied", false, "normal"), S.players[NEUTRAL].team = -1, S.players[NEUTRAL].f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, S.players[NEUTRAL].fac = "neutral", S.players[NEUTRAL].neutral = true, S.rads = [], S.weather = pickWeather(), setRainAmbience("rain" === S.weather), GL ? rebuildTerrainGL() : initGL(), FOG_ON = "off" !== cfg.fog, G.vis.fill(FOG_ON ? 0 : 2), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), resizeGL(), S.units = [], S.blds = [], S.bldById = /* @__PURE__ */ new Map(), S.projs = [], S.fx = [], S.rockets = [], S.sel = [], S.time = 0, S.over = false, S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.history = [], S.histT = 0;
     for (let i = 1; i < NEUTRAL; i++) S.players[i].credits = DIFFS[S.players[i].diff].cash;
     const allSpots = (G.spots && G.spots.length ? G.spots : [[13, 13], [76, 56], [16, 66], [76, 10]]).map((e) => [e[0], e[1]]), wanted = [cfg.spawn, ...cfg.slots.map((e) => e.spawn)].map((e) => clamp(e, 0, allSpots.length - 1)), usedSpots = /* @__PURE__ */ new Set(), order = wanted.map((e) => {
       let t = e;
@@ -8611,7 +8664,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     resolveRefs();
     for (const b of S.blds) if (!("gate" === b.key && b.open)) for (let ty = b.ty; ty < b.ty + b.size; ty++) for (let tx = b.tx; tx < b.tx + b.size; tx++) inMap(tx, ty) && (G.occ[idx(tx, ty)] = b.id);
     for (const p of S.players) recalcPower(p.id);
-    S.time = data.time, S.weather = data.weather || "clear", setRainAmbience("rain" === S.weather), S.over = false, S.running = true, S.sel = [], S.projs = [], S.fx = [], S.rockets = [], S.traffic = [], S.rads = (data.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.nextId = data.nextId || Math.max(1, ...S.units.map((u) => u.id), ...S.blds.map((b) => b.id)) + 1, S.mission = data.mission || null, FOG_ON = data.fogOn, cam.x = data.cam.x, cam.y = data.cam.y, cam.z = camZTarget = data.cam.z, mmCache = null, GL ? rebuildTerrainGL() : initGL(), resizeGL(), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), S.running = true, openMenu(null), hint("Game loaded");
+    S.time = data.time, S.weather = data.weather || "clear", setRainAmbience("rain" === S.weather), S.over = false, S.running = true, S.sel = [], S.projs = [], S.fx = [], S.rockets = [], S.traffic = [], S.history = [], S.histT = 0, S.rads = (data.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.nextId = data.nextId || Math.max(1, ...S.units.map((u) => u.id), ...S.blds.map((b) => b.id)) + 1, S.mission = data.mission || null, FOG_ON = data.fogOn, cam.x = data.cam.x, cam.y = data.cam.y, cam.z = camZTarget = data.cam.z, mmCache = null, GL ? rebuildTerrainGL() : initGL(), resizeGL(), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), S.running = true, openMenu(null), hint("Game loaded");
   }
   function loadSlot(n) {
     try {
@@ -8933,8 +8986,18 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function beginFpsEntry(e) {
     FPS.entering = { u: e, t: 0, dur: 0.9, x0: cam.x, y0: cam.y, z0: cam.z }, hint("Entering first person\u2026");
   }
+  function sampleHistory(dt) {
+    S.histT = (S.histT || 0) + dt;
+    if (S.histT < 10) return;
+    S.histT = 0;
+    const snap = { t: S.time, p: S.players.filter((p) => !p.neutral).map((p) => {
+      const own = S.units.filter((u) => u.owner === p.id && !u.dead), bld = S.blds.filter((b) => b.owner === p.id && !b.dead);
+      return { kills: p.kills, lost: p.lost, units: own.length, value: own.reduce((s, u) => s + (u.d.cost || 0), 0) + bld.reduce((s, b) => s + (b.d.cost || 0), 0) };
+    }) };
+    (S.history = S.history || []).push(snap), S.history.length > 300 && S.history.shift();
+  }
   function step(e) {
-    buildUnitGrid(), S.time += e, updateFog(e), lightningT = Math.max(0, lightningT - e);
+    buildUnitGrid(), S.time += e, sampleHistory(e), updateFog(e), lightningT = Math.max(0, lightningT - e);
     if ("rain" === S.weather) {
       (S.thunderT = (void 0 === S.thunderT ? 6 + 10 * Math.random() : S.thunderT) - e) <= 0 && (S.thunderT = 9 + 14 * Math.random(), sfx("thunder"), lightningT = 0.16 + 0.12 * Math.random());
     }
