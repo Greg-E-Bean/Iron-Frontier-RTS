@@ -68,6 +68,7 @@ export interface EntityDef {
   c4?: boolean;
   push?: number;
   econIncome?: number;
+  gunnerSlot?: boolean;
   alt?: number;
   prereq?: string[];
   from?: string;
@@ -157,6 +158,8 @@ export interface Unit {
   cool_?: number;
   isAI?: boolean;
   retreatT?: number;
+  gunner?: { key: string } | null;
+  gunKey?: string | null;
   [field: string]: unknown;
 }
 

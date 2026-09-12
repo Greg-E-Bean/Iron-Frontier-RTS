@@ -475,6 +475,10 @@ declare global {
   const flyTo: AnyFn;
   const cargoUsed: AnyFn;
   function canLoad(transport: Unit, cargo: Unit): boolean;
+  function canCrewIfv(vehicle: Unit, inf: Unit): boolean;
+  function crewIfv(vehicle: Unit, inf: Unit): void;
+  function ejectGunner(vehicle: Unit): void;
+  function ifvGunnerD(baseKey: string, gunnerKey: string | null | undefined): EntityDef;
   function smartOrder(units: Unit[], target: GameEntity): boolean;
   function tickLoadMove(u: Unit, dt: number): void;
   function unloadCargo(u: Unit): void;
