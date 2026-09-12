@@ -158,6 +158,7 @@ export interface Unit {
   cool_?: number;
   isAI?: boolean;
   retreatT?: number;
+  aiRetargetT?: number;
   gunner?: { key: string } | null;
   gunKey?: string | null;
   [field: string]: unknown;

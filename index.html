@@ -1966,12 +1966,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 (() => {
   // src/ai.ts
   var AI_PERSONALITY = {
-    rush: { graceMul: 0.45, armyMul: 0.55, eliteChance: 0.2, defMul: 0.4, minerMul: 0.85, refMul: 0.8 },
-    turtle: { graceMul: 1.7, armyMul: 1.6, eliteChance: 0.65, defMul: 2, minerMul: 1, refMul: 1 },
-    boom: { graceMul: 1.9, armyMul: 1.35, eliteChance: 0.55, defMul: 0.6, minerMul: 1.7, refMul: 1.6 }
+    rush: { graceMul: 0.45, armyMul: 0.55, eliteChance: 0.2, defMul: 0.4, minerMul: 0.85, refMul: 0.8, retreatHp: 0.15 },
+    turtle: { graceMul: 1.7, armyMul: 1.6, eliteChance: 0.65, defMul: 2, minerMul: 1, refMul: 1, retreatHp: 0.4 },
+    boom: { graceMul: 1.9, armyMul: 1.35, eliteChance: 0.55, defMul: 0.6, minerMul: 1.7, refMul: 1.6, retreatHp: 0.3 }
   };
   function aiPersonality(e) {
     return AI_PERSONALITY[e.ai.personality] || AI_PERSONALITY.turtle;
+  }
+  function aiUnitDps(u) {
+    return (u.d.dmg || 0) / Math.max(0.1, u.d.rof || 1);
+  }
+  function aiThreatScore(u) {
+    return aiUnitDps(u) * (1.6 - u.hp / (u.maxhp || 1));
   }
   function aiBaseCenter(e) {
     const t = S.blds.find((t2) => t2.owner === e.id && !t2.dead && "conyard" === t2.key);
@@ -2113,6 +2119,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
     }
     const team = teamOf(e.id), s = aiArmy(e), i = nearestEnemy(e), l = aiBaseCenter(e), c = S.units.filter((t2) => t2.owner !== e.id && t2.owner !== NEUTRAL && teamOf(t2.owner) !== team && !t2.dead && dist2(t2.x, t2.y, l.x, l.y) < 230400 && visibleToTeam(t2.x, t2.y, team));
+    c.length > 1 && c.sort((a2, b) => aiThreatScore(b) - aiThreatScore(a2));
     if (c.length) {
       const e2 = s.filter((e3) => "idle" === e3.order || "guard" === e3.order);
       if (e2.length) {
@@ -2144,15 +2151,33 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   function aiMicro(e, t) {
-    const repairBld = S.blds.find((bl) => bl.owner === e.id && !bl.dead && "repair" === bl.key);
+    const repairBld = S.blds.find((bl) => bl.owner === e.id && !bl.dead && "repair" === bl.key), pz = aiPersonality(e);
     for (const u of aiArmy(e)) {
       if (u.retreatT > 0) {
         u.retreatT -= t;
         continue;
       }
-      if ("attack" !== u.order || !u.target || u.deployed || u.hp >= 0.3 * u.maxhp) continue;
-      const b = !u.d.fly && repairBld || aiBaseCenter(e);
-      u.order = "move", u.tx = clamp(b.x + rnd(-60, 60), 8, 2936), u.ty = clamp(b.y + rnd(-60, 60), 8, 2296), u.target = null, u.ore = null, u.retreatT = 8, u.d.fly ? (u.path = null, u.state = null) : repath(u);
+      const engaged = ("attack" === u.order || "amove" === u.order) && u.target && !u.target.dead;
+      if (engaged && !u.deployed && u.hp < (pz.retreatHp || 0.3) * u.maxhp) {
+        const b = !u.d.fly && repairBld || aiBaseCenter(e);
+        u.order = "move", u.tx = clamp(b.x + rnd(-60, 60), 8, 2936), u.ty = clamp(b.y + rnd(-60, 60), 8, 2296), u.target = null, u.ore = null, u.retreatT = 8, u.d.fly ? (u.path = null, u.state = null) : repath(u);
+        continue;
+      }
+      if (engaged && !u.deployed && u.d.dmg > 0 && "b" !== u.target.e) {
+        u.aiRetargetT = (u.aiRetargetT || 0) - t;
+        if (u.aiRetargetT <= 0) {
+          u.aiRetargetT = 1.2 + 0.8 * Math.random();
+          const range = effRange(u) + 40, team = teamOf(u.owner);
+          let best = null, bestScore = -1;
+          gridNear(u.x, u.y, range, (cand) => {
+            if (cand.dead || "u" !== cand.e || cand.owner === u.owner || cand.owner === NEUTRAL || teamOf(cand.owner) === team) return;
+            if (dist2(u.x, u.y, cand.x, cand.y) > range * range) return;
+            if (!canTarget(u, cand)) return;
+            const sc = aiThreatScore(cand);
+            sc > bestScore && (bestScore = sc, best = cand);
+          }), best && best !== u.target && bestScore > 1.25 * aiThreatScore(u.target) && (u.target = best);
+        }
+      }
     }
   }
   Object.assign(window, {
@@ -2163,7 +2188,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     aiValue,
     adaptDifficulty,
     aiNextBld,
-    aiCap
+    aiCap,
+    aiThreatScore
   });
 })();
 

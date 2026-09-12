@@ -212,6 +212,7 @@ declare global {
   const adaptDifficulty: AnyFn;
   const aiNextBld: AnyFn;
   const aiCap: AnyFn;
+  const aiThreatScore: AnyFn;
 
   // === models.js (3D model library + shared camera/canvas state) ===
   const cv: HTMLCanvasElement;
