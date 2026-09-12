@@ -633,6 +633,7 @@ declare global {
   function launchTutorial(): void;
   function updateTutorial(): void;
   function updateTutorialPanel(): void;
+  function skipTutorial(): void;
 
   // === loop.js (main loop, wall/gate mechanics, remaining menu screens) ===
   const showCampaign: AnyFn;

@@ -156,10 +156,13 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #tutorialPanel{position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:9;
   max-width:260px;background:#05080bd8;border:1px solid var(--amber);border-radius:8px;padding:10px 12px;
   font-size:12px;color:#cfe0f5;pointer-events:none}
-#tutorialPanel .th{color:var(--amber2);font-weight:bold;letter-spacing:1px;margin-bottom:6px;font-size:11px}
+#tutorialPanel .th{color:var(--amber2);font-weight:bold;letter-spacing:1px;margin-bottom:6px;font-size:11px;display:flex;justify-content:space-between;align-items:center}
 #tutorialPanel .ts{display:flex;gap:6px;align-items:flex-start;padding:2px 0;opacity:.5}
 #tutorialPanel .ts.cur{opacity:1;color:#ffd75e}
 #tutorialPanel .ts.done{opacity:.65;text-decoration:line-through;color:#7dff8a}
+#tutorialPanel .tSkip{pointer-events:auto;cursor:pointer;font-size:10px;letter-spacing:.4px;padding:2px 8px;
+  border-radius:4px;border:1px solid var(--amber);background:#1a140a;color:var(--amber2)}
+#tutorialPanel .tSkip:active{background:var(--amber);color:#1a140a}
 #menu{position:fixed;inset:0;z-index:30;background:
   radial-gradient(120% 80% at 50% 0%,#14201c 0%,#070a0b 60%),#070a0b;display:flex;align-items:center;
   justify-content:center;padding:16px;overflow:auto}
@@ -8524,7 +8527,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       cfg.fog = e, refreshMenu();
     });
   }
-  var rivalNames = (e) => S.players.filter((t) => t && !t.neutral && t.id !== e.id).map((t) => t.f.name.toUpperCase()).join(" / ");
+  var PERSONALITY_LABEL = { rush: "Aggressive", turtle: "Defensive", boom: "Economic" };
+  var rivalNames = (e) => S.players.filter((t) => t && !t.neutral && t.id !== e.id).map((t) => t.f.name.toUpperCase() + (t.isAI && t.ai && t.ai.personality ? " (" + PERSONALITY_LABEL[t.ai.personality] + ")" : "")).join(" / ");
   function openMenu(e) {
     const t = $("#menu");
     if (null !== e) {
@@ -8643,6 +8647,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         for (let e = 0; e < 3; e++) addUnit(t, o.base, 32 * (r + 3.5) + rnd(-40, 40), 32 * (n + 5) + rnd(-20, 30));
       }
     }), spawnCivs(), spawnSpecials(), applyPendingMission(), S.players[0].credits = 1e4, S.running = true, $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), openMenu(null), hint("COMMAND: select your Mobile HQ and tap DEPLOY"), setTimeout(() => {
+      S.running && S.players.some((p) => p.isAI) && hint("Intel: " + rivalNames(S.players[0]));
+    }, 5e3), setTimeout(() => {
       S.running && hint("COMMAND: tap a card again to queue more");
     }, 12e3), setTimeout(() => {
       S.running && hint("COMMAND: gem veins pay far more than plain ore");
@@ -8730,7 +8736,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
   }
   function playerToObj(p) {
-    return { id: p.id, fac: p.fac, isAI: p.isAI, diff: p.diff, team: p.team, color: p.color, dark: p.dark, tint: p.tint, neutral: p.neutral, credits: p.credits, power: p.power, drain: p.drain, queues: p.queues, ready: p.ready, kills: p.kills, lost: p.lost, defeated: p.defeated, spawnX: p.spawnX, spawnY: p.spawnY, spyCD: p.spyCD, paradropCD: p.paradropCD, empCD: p.empCD, ai: p.isAI ? { t: p.ai.t, wave: p.ai.wave, expand: p.ai.expand } : null };
+    return { id: p.id, fac: p.fac, isAI: p.isAI, diff: p.diff, team: p.team, color: p.color, dark: p.dark, tint: p.tint, neutral: p.neutral, credits: p.credits, power: p.power, drain: p.drain, queues: p.queues, ready: p.ready, kills: p.kills, lost: p.lost, defeated: p.defeated, spawnX: p.spawnX, spawnY: p.spawnY, spyCD: p.spyCD, paradropCD: p.paradropCD, empCD: p.empCD, ai: p.isAI ? { t: p.ai.t, wave: p.ai.wave, expand: p.ai.expand, personality: p.ai.personality, diffScale: p.ai.diffScale, adaptT: p.ai.adaptT } : null };
   }
   function restorePlayer(rec) {
     if (rec.neutral) {
@@ -8738,7 +8744,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       return np.f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, np.fac = "neutral", np.neutral = true, np.credits = rec.credits || 0, np;
     }
     const p = newPlayer(rec.id, rec.fac, rec.isAI, rec.diff, rec.team, { body: rec.color, dark: rec.dark, tint: rec.tint });
-    return p.credits = rec.credits, p.power = rec.power, p.drain = rec.drain, p.queues = rec.queues || { bld: null, def: null, inf: null, veh: null, air: null }, p.ready = rec.ready || { bld: null, def: null }, p.kills = rec.kills || 0, p.lost = rec.lost || 0, p.defeated = !!rec.defeated, p.spawnX = rec.spawnX, p.spawnY = rec.spawnY, p.spyCD = rec.spyCD || 0, p.paradropCD = rec.paradropCD || 0, p.empCD = rec.empCD || 0, p.isAI && rec.ai && (p.ai.t = rec.ai.t, p.ai.wave = rec.ai.wave || 0, p.ai.expand = rec.ai.expand || 0), p;
+    return p.credits = rec.credits, p.power = rec.power, p.drain = rec.drain, p.queues = rec.queues || { bld: null, def: null, inf: null, veh: null, air: null }, p.ready = rec.ready || { bld: null, def: null }, p.kills = rec.kills || 0, p.lost = rec.lost || 0, p.defeated = !!rec.defeated, p.spawnX = rec.spawnX, p.spawnY = rec.spawnY, p.spyCD = rec.spyCD || 0, p.paradropCD = rec.paradropCD || 0, p.empCD = rec.empCD || 0, p.isAI && rec.ai && (p.ai.t = rec.ai.t, p.ai.wave = rec.ai.wave || 0, p.ai.expand = rec.ai.expand || 0, rec.ai.personality && (p.ai.personality = rec.ai.personality), p.ai.diffScale = rec.ai.diffScale || 1, p.ai.adaptT = rec.ai.adaptT || 0), p;
   }
   function serializeMap() {
     return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
@@ -8914,6 +8920,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     } catch (e) {
     }
   }
+  function skipTutorial() {
+    S.mission = null, hint("Tutorial skipped \u2014 good luck!");
+  }
   function updateTutorialPanel() {
     const m = S.mission, el = $("#tutorialPanel");
     if (!m || !m.tutorial) return void el.classList.add("hidden");
@@ -8925,8 +8934,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const done = m.doneSteps && m.doneSteps[i], cur = i === m.curStep;
       return '<div class="ts' + (done ? " done" : cur ? " cur" : "") + '"><b>' + (done ? "\u2713" : i + 1 + ".") + "</b><span>" + s.text + "</span></div>";
     }).join("");
-    el.innerHTML = '<div class="th">TUTORIAL</div>' + rows;
+    el.innerHTML = '<div class="th">TUTORIAL<button class="tSkip">SKIP</button></div>' + rows;
   }
+  $("#tutorialPanel").addEventListener("click", (e) => {
+    e.target.closest(".tSkip") && skipTutorial();
+  });
   Object.assign(window, {
     FAC_NAME,
     CAMPAIGNS,
@@ -8938,7 +8950,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     otherFacs,
     launchTutorial,
     updateTutorial,
-    updateTutorialPanel
+    updateTutorialPanel,
+    skipTutorial
   });
   Object.defineProperties(window, {
     pendingMission: { get: () => pendingMission, configurable: true }

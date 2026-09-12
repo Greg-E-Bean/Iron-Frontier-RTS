@@ -156,10 +156,13 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #tutorialPanel{position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:9;
   max-width:260px;background:#05080bd8;border:1px solid var(--amber);border-radius:8px;padding:10px 12px;
   font-size:12px;color:#cfe0f5;pointer-events:none}
-#tutorialPanel .th{color:var(--amber2);font-weight:bold;letter-spacing:1px;margin-bottom:6px;font-size:11px}
+#tutorialPanel .th{color:var(--amber2);font-weight:bold;letter-spacing:1px;margin-bottom:6px;font-size:11px;display:flex;justify-content:space-between;align-items:center}
 #tutorialPanel .ts{display:flex;gap:6px;align-items:flex-start;padding:2px 0;opacity:.5}
 #tutorialPanel .ts.cur{opacity:1;color:#ffd75e}
 #tutorialPanel .ts.done{opacity:.65;text-decoration:line-through;color:#7dff8a}
+#tutorialPanel .tSkip{pointer-events:auto;cursor:pointer;font-size:10px;letter-spacing:.4px;padding:2px 8px;
+  border-radius:4px;border:1px solid var(--amber);background:#1a140a;color:var(--amber2)}
+#tutorialPanel .tSkip:active{background:var(--amber);color:#1a140a}
 #menu{position:fixed;inset:0;z-index:30;background:
   radial-gradient(120% 80% at 50% 0%,#14201c 0%,#070a0b 60%),#070a0b;display:flex;align-items:center;
   justify-content:center;padding:16px;overflow:auto}
