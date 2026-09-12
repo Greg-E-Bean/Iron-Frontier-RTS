@@ -8240,6 +8240,28 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     capturingAction = null, capturingCb = null;
     "Escape" !== e.key && (KEYBINDS[action] = e.key.toLowerCase(), saveKeybinds()), cb && cb(KEYBINDS[action]);
   }
+  var edgeMouseX = null;
+  var edgeMouseY = null;
+  var edgePanEnabled = true;
+  try {
+    edgePanEnabled = "0" !== localStorage.getItem("ifr_edgepan");
+  } catch (e) {
+  }
+  function setEdgePan(v) {
+    edgePanEnabled = v;
+    try {
+      localStorage.setItem("ifr_edgepan", v ? "1" : "0");
+    } catch (e) {
+    }
+  }
+  function tickEdgeScroll(dt) {
+    if (!edgePanEnabled || null === edgeMouseX || null === edgeMouseY || FPS.on || !S.running || !$("#menu").classList.contains("hidden")) return;
+    const EDGE = 18, SPEED = 640 / cam.z;
+    const left = edgeMouseX < EDGE, right = edgeMouseX > CW - EDGE, up = edgeMouseY < EDGE, down = edgeMouseY > CH - EDGE;
+    if (!left && !right && !up && !down) return;
+    const t = SPEED * dt;
+    left && (cam.x -= t, cam.y += t), right && (cam.x += t, cam.y -= t), up && (cam.x -= t, cam.y -= t), down && (cam.x += t, cam.y += t), clampCam();
+  }
   var sellMode = false;
   var repairMode = false;
   var amoveAim = false;
@@ -8442,6 +8464,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       pinch = { d: dist(e2.x, e2.y, t.x, t.y), z: cam.z, mx: (e2.x + t.x) / 2, my: (e2.y + t.y) / 2 }, dragMode = "pinch", S.box = null;
     }
   }), cv.addEventListener("pointermove", (e) => {
+    "mouse" === e.pointerType && (edgeMouseX = e.clientX, edgeMouseY = e.clientY);
     if (FPS.on) return;
     const t = ptrs.get(e.pointerId);
     if (t) {
@@ -8458,7 +8481,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         cam.x = dragStart.cx + (r / 0.5 / 2 + t2 / 2), cam.y = dragStart.cy + (r / 0.5 / 2 - t2 / 2), clampCam();
       } else "box" === dragMode && S.box ? (S.box.x1 = e.clientX, S.box.y1 = e.clientY) : "ghost" === dragMode && updateGhost(e.clientX, e.clientY, moved > 12);
     }
-  }), cv.addEventListener("pointerup", endPtr), cv.addEventListener("pointercancel", endPtr), cv.addEventListener("wheel", (e) => {
+  }), cv.addEventListener("pointerup", endPtr), cv.addEventListener("pointercancel", endPtr), cv.addEventListener("pointerleave", (e) => {
+    "mouse" === e.pointerType && (edgeMouseX = null, edgeMouseY = null);
+  }), cv.addEventListener("wheel", (e) => {
     e.preventDefault();
     camZTarget = clamp(camZTarget * (e.deltaY > 0 ? 0.9 : 1.1), 0.3, 2.3), zoomPivot = { sx: e.clientX, sy: e.clientY };
   }, { passive: false }), cv.addEventListener("contextmenu", (e) => e.preventDefault()), mm.addEventListener("pointerdown", (e) => {
@@ -8604,7 +8629,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
         const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
         const kbRows = Object.keys(KEYBINDS).map((action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>").join("");
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value));
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
@@ -8749,13 +8774,16 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     startGame,
     captureKeybind,
     resetKeybinds,
-    keyLabel
+    keyLabel,
+    tickEdgeScroll,
+    setEdgePan
   });
   Object.defineProperties(window, {
     cfg: { get: () => cfg, set: (v) => {
       cfg = v;
     }, configurable: true },
-    KEYBINDS: { get: () => KEYBINDS, configurable: true }
+    KEYBINDS: { get: () => KEYBINDS, configurable: true },
+    edgePanEnabled: { get: () => edgePanEnabled, configurable: true }
   });
 })();
 
@@ -9204,7 +9232,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
       clampCam();
     }
-    ema = 0.92 * ema + 0.08 * t, S.running && "auto" === graphicsPref && (ema > 0.036 ? ++slow > 90 && (slow = 0, setQuality(Math.max(0, QUALITY - 1))) : slow = Math.max(0, slow - 1)), S.running && !S.over && (sfxBudget = 0, FPS.on && fpsTick(t), step(t)), FPS.entering && tickFpsEntry(t), hintT > 0 && (hintT -= t, hintT <= 0 && $("#hint").classList.remove("show")), S.marker && (S.marker.t += t), S.players.length && (render(), updateCards(), updateSuperPanel(), updateTutorial(), updateTutorialPanel());
+    tickEdgeScroll(t), ema = 0.92 * ema + 0.08 * t, S.running && "auto" === graphicsPref && (ema > 0.036 ? ++slow > 90 && (slow = 0, setQuality(Math.max(0, QUALITY - 1))) : slow = Math.max(0, slow - 1)), S.running && !S.over && (sfxBudget = 0, FPS.on && fpsTick(t), step(t)), FPS.entering && tickFpsEntry(t), hintT > 0 && (hintT -= t, hintT <= 0 && $("#hint").classList.remove("show")), S.marker && (S.marker.t += t), S.players.length && (render(), updateCards(), updateSuperPanel(), updateTutorial(), updateTutorialPanel());
   }
   function tickFpsEntry(dt) {
     const fe = FPS.entering;

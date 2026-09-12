@@ -619,6 +619,9 @@ declare global {
   function resetKeybinds(): void;
   function keyLabel(key: string): string;
   var KEYBINDS: { [action: string]: string };
+  function tickEdgeScroll(dt: number): void;
+  function setEdgePan(enabled: boolean): void;
+  var edgePanEnabled: boolean;
   var cfg: GameConfig;
 
   // === saveload.js ===
