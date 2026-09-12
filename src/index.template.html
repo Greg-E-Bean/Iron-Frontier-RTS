@@ -153,6 +153,13 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
   box-shadow:0 0 18px #f0a72c22}
 #hint.show{opacity:1}
+#tutorialPanel{position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:9;
+  max-width:260px;background:#05080bd8;border:1px solid var(--amber);border-radius:8px;padding:10px 12px;
+  font-size:12px;color:#cfe0f5;pointer-events:none}
+#tutorialPanel .th{color:var(--amber2);font-weight:bold;letter-spacing:1px;margin-bottom:6px;font-size:11px}
+#tutorialPanel .ts{display:flex;gap:6px;align-items:flex-start;padding:2px 0;opacity:.5}
+#tutorialPanel .ts.cur{opacity:1;color:#ffd75e}
+#tutorialPanel .ts.done{opacity:.65;text-decoration:line-through;color:#7dff8a}
 #menu{position:fixed;inset:0;z-index:30;background:
   radial-gradient(120% 80% at 50% 0%,#14201c 0%,#070a0b 60%),#070a0b;display:flex;align-items:center;
   justify-content:center;padding:16px;overflow:auto}
@@ -356,6 +363,7 @@ body.fps #mmWrap{opacity:.55}
   <button class="tbtn" id="btnMenu"><svg class="ico"><use href="#i-menu"></use></svg></button>
 </div>
 <div id="superPanel" class="hidden"></div>
+<div id="tutorialPanel" class="hidden"></div>
 
 <div id="mmWrap" class="hidden"><canvas id="minimap"></canvas></div>
 
@@ -410,7 +418,7 @@ body.fps #mmWrap{opacity:.55}
       <div class="fld"><label>Map</label><select id="mapSel"></select><div id="mapPreview"></div></div>
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
     </div>
-    <button id="play">START SKIRMISH</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button>
+    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
       Tap a build card again to queue more · ▾ expands the build panel.<br>
       <b style="color:#e0b050">Ore:</b> amber ore feeds your economy, pale gem veins pay far more,

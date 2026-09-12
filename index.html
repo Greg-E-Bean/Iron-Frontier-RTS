@@ -153,6 +153,13 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
   box-shadow:0 0 18px #f0a72c22}
 #hint.show{opacity:1}
+#tutorialPanel{position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:9;
+  max-width:260px;background:#05080bd8;border:1px solid var(--amber);border-radius:8px;padding:10px 12px;
+  font-size:12px;color:#cfe0f5;pointer-events:none}
+#tutorialPanel .th{color:var(--amber2);font-weight:bold;letter-spacing:1px;margin-bottom:6px;font-size:11px}
+#tutorialPanel .ts{display:flex;gap:6px;align-items:flex-start;padding:2px 0;opacity:.5}
+#tutorialPanel .ts.cur{opacity:1;color:#ffd75e}
+#tutorialPanel .ts.done{opacity:.65;text-decoration:line-through;color:#7dff8a}
 #menu{position:fixed;inset:0;z-index:30;background:
   radial-gradient(120% 80% at 50% 0%,#14201c 0%,#070a0b 60%),#070a0b;display:flex;align-items:center;
   justify-content:center;padding:16px;overflow:auto}
@@ -356,6 +363,7 @@ body.fps #mmWrap{opacity:.55}
   <button class="tbtn" id="btnMenu"><svg class="ico"><use href="#i-menu"></use></svg></button>
 </div>
 <div id="superPanel" class="hidden"></div>
+<div id="tutorialPanel" class="hidden"></div>
 
 <div id="mmWrap" class="hidden"><canvas id="minimap"></canvas></div>
 
@@ -410,7 +418,7 @@ body.fps #mmWrap{opacity:.55}
       <div class="fld"><label>Map</label><select id="mapSel"></select><div id="mapPreview"></div></div>
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
     </div>
-    <button id="play">START SKIRMISH</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button>
+    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
       Tap a build card again to queue more · ▾ expands the build panel.<br>
       <b style="color:#e0b050">Ore:</b> amber ore feeds your economy, pale gem veins pay far more,
@@ -975,7 +983,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var S = { players: [], units: [], blds: [], bldById: /* @__PURE__ */ new Map(), projs: [], fx: [], rockets: [], traffic: [], spyReveals: [], nextId: 1, time: 0, running: false, over: false, speed: gameSpeedDefault, sel: [], placing: null, selMode: false, tab: "bld", hoverT: null };
   function newPlayer(e, t, r, n, a, o) {
-    return { id: e, fac: t, f: FACTIONS[t], isAI: r, diff: n, team: null != a ? a : e, color: o && o.body || null, dark: o && o.dark || null, tint: o && o.tint || null, credits: 1e4, power: 0, drain: 0, queues: { bld: null, def: null, inf: null, veh: null, air: null }, ready: { bld: null, def: null }, ai: { t: 0, wave: 0, attack: false, rally: null, target: null, expand: 0 }, defeated: false, kills: 0, lost: 0 };
+    return { id: e, fac: t, f: FACTIONS[t], isAI: r, diff: n, team: null != a ? a : e, color: o && o.body || null, dark: o && o.dark || null, tint: o && o.tint || null, credits: 1e4, power: 0, drain: 0, queues: { bld: null, def: null, inf: null, veh: null, air: null }, ready: { bld: null, def: null }, ai: { t: 0, wave: 0, attack: false, rally: null, target: null, expand: 0, personality: r ? pick(["rush", "turtle", "boom"]) : null }, defeated: false, kills: 0, lost: 0 };
   }
   var P = () => S.players[0];
   function addBuilding(e, t, r, n, a) {
@@ -1213,6 +1221,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return o && (o.list[0] === n && o.list.shift(), o.prog = 0, o.paid = 0, o.list.length || (e.queues[kind] = null)), sfx("place"), true;
   }
   function cmdMove(e, t, r, n, queue) {
+    S.mission && S.mission.tutorial && e.some((u) => 0 === u.owner) && (n ? S.tutorialAmoved = true : S.tutorialMoved = true);
     const a = e.length, o = Math.ceil(Math.sqrt(a)), s = Math.max(34, 3.6 * e.reduce((e2, t2) => Math.max(e2, t2.d.radius), 8));
     let i = 0;
     const l = e.slice().sort((e2, n2) => dist2(e2.x, e2.y, t, r) - dist2(n2.x, n2.y, t, r));
@@ -1953,6 +1962,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/ai.ts
+  var AI_PERSONALITY = {
+    rush: { graceMul: 0.45, armyMul: 0.55, eliteChance: 0.2, defMul: 0.4, minerMul: 0.85, refMul: 0.8 },
+    turtle: { graceMul: 1.7, armyMul: 1.6, eliteChance: 0.65, defMul: 2, minerMul: 1, refMul: 1 },
+    boom: { graceMul: 1.9, armyMul: 1.35, eliteChance: 0.55, defMul: 0.6, minerMul: 1.7, refMul: 1.6 }
+  };
+  function aiPersonality(e) {
+    return AI_PERSONALITY[e.ai.personality] || AI_PERSONALITY.turtle;
+  }
   function aiBaseCenter(e) {
     const t = S.blds.find((t2) => t2.owner === e.id && !t2.dead && "conyard" === t2.key);
     if (t) return t;
@@ -1986,8 +2003,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return void 0 === e.ai.superRoll && (e.ai.superRoll = Math.random()), e.ai.superRoll < DIFFS[e.diff].superBuildChance;
   }
   function aiNextBld(e) {
-    const t = (t2) => countBld(e.id, t2), y = "yuri" === e.f.key, rk = "refinery";
-    return e.drain + 25 > e.power ? "power" : !y && t(rk) < 1 ? rk : t("barracks") < 1 ? "barracks" : t("factory") < 1 ? "factory" : !y && t(rk) < 2 ? rk : t("def1") < 2 && t("barracks") > 0 ? "def1" : t("aa") < 1 && enemyAir(e) ? "aa" : t("lab") < 1 ? "lab" : t("silo") < 1 && (y ? t(rk) >= 1 : t(rk) > 1) ? "silo" : t("repair") < 1 && e.credits > 2200 ? "repair" : t("super") < 1 && t("lab") > 0 && e.credits > 5200 && aiWantsSuper(e) ? "super" : t("airfield") < 1 && e.credits > 2500 ? "airfield" : t("navalyard") < 1 && e.credits > 2200 && aiHasCoast(e) ? "navalyard" : t("aa") < 3 && enemyAir(e) ? "aa" : !y && t(rk) < 5 && e.credits > 4e3 ? rk : t("def2") < 4 && t("lab") > 0 ? "def2" : t("factory") < 4 && e.credits > 5e3 ? "factory" : t("barracks") < 4 && e.credits > 4e3 ? "barracks" : t("airfield") < 3 && e.credits > 4500 ? "airfield" : t("navalyard") < 3 && e.credits > 4500 && aiHasCoast(e) ? "navalyard" : t("def1") < 10 && e.credits > 3e3 ? "def1" : null;
+    const t = (t2) => countBld(e.id, t2), y = "yuri" === e.f.key, rk = "refinery", pz = aiPersonality(e);
+    return e.drain + 25 > e.power ? "power" : !y && t(rk) < 1 ? rk : t("barracks") < 1 ? "barracks" : t("factory") < 1 ? "factory" : !y && t(rk) < 2 ? rk : t("def1") < Math.round(2 * pz.defMul) && t("barracks") > 0 ? "def1" : t("aa") < 1 && enemyAir(e) ? "aa" : t("lab") < 1 ? "lab" : t("silo") < 1 && (y ? t(rk) >= 1 : t(rk) > 1) ? "silo" : t("repair") < 1 && e.credits > 2200 ? "repair" : t("super") < 1 && t("lab") > 0 && e.credits > 5200 && aiWantsSuper(e) ? "super" : t("airfield") < 1 && e.credits > 2500 ? "airfield" : t("navalyard") < 1 && e.credits > 2200 && aiHasCoast(e) ? "navalyard" : t("aa") < 3 && enemyAir(e) ? "aa" : !y && t(rk) < Math.round(5 * pz.refMul) && e.credits > 4e3 ? rk : t("def2") < Math.round(4 * pz.defMul) && t("lab") > 0 ? "def2" : t("factory") < 4 && e.credits > 5e3 ? "factory" : t("barracks") < 4 && e.credits > 4e3 ? "barracks" : t("airfield") < 3 && e.credits > 4500 ? "airfield" : t("navalyard") < 3 && e.credits > 4500 && aiHasCoast(e) ? "navalyard" : t("def1") < Math.round(10 * pz.defMul) && e.credits > 3e3 ? "def1" : null;
   }
   function enemyAir(e) {
     return S.units.some((t) => !t.dead && t.owner !== e.id && t.owner !== NEUTRAL && t.d.fly);
@@ -1996,7 +2013,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return S.units.filter((t) => t.owner === e.id && !t.dead && "miner" !== t.d.role);
   }
   function aiCap(e) {
-    return DIFFS[e.diff].cap + Math.min(20, Math.floor(S.time / 60)) + Math.min(25, Math.floor(e.credits / 3e3));
+    return Math.round((DIFFS[e.diff].cap + Math.min(20, Math.floor(S.time / 60)) + Math.min(25, Math.floor(e.credits / 3e3))) * (e.ai.diffScale || 1));
+  }
+  function aiValue(p) {
+    const own = S.units.filter((u) => u.owner === p.id && !u.dead), bld = S.blds.filter((b) => b.owner === p.id && !b.dead);
+    return own.reduce((s, u) => s + (u.d.cost || 0), 0) + bld.reduce((s, b) => s + (b.d.cost || 0), 0);
+  }
+  function adaptDifficulty(e, tick) {
+    e.ai.adaptT = (e.ai.adaptT || 0) - tick;
+    if (e.ai.adaptT > 0) return;
+    e.ai.adaptT = 20;
+    const human = S.players[0];
+    if (!human || human.neutral || human.isAI) return;
+    const me = aiValue(e), foe = aiValue(human), total = me + foe || 1, playerShare = foe / total, target = playerShare > 0.6 ? 1.15 : playerShare < 0.4 ? 0.85 : 1;
+    e.ai.diffScale = clamp((e.ai.diffScale || 1) + (target - (e.ai.diffScale || 1)) * 0.25, 0.7, 1.4);
   }
   function aiSuper(e) {
     if (!superReady(e.id)) return;
@@ -2021,8 +2051,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return r[n < 0.45 ? 0 : n < 0.75 ? Math.min(1, r.length - 1) : Math.random() * r.length | 0];
   }
   function tickAI(e, t) {
-    const r = DIFFS[e.diff], as = aiArmy(e).length;
+    const r = DIFFS[e.diff], as = aiArmy(e).length, pz = aiPersonality(e);
     if (e.ai.t -= t, e.ai.t > 0) return;
+    adaptDifficulty(e, r.tick);
     if (e.ai.t = r.tick, e.ready.bld) {
       const t2 = aiFindSpot(e, e.ready.bld);
       t2 ? placeReady(e, "bld", t2[0], t2[1]) : e.ready.bld = null;
@@ -2045,11 +2076,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     aiSuper(e);
     for (const t2 of S.blds) t2.owner === e.id && !t2.dead && !t2.d.civ && t2.hp < 0.6 * t2.maxhp && (t2.repair = true);
-    const n = S.units.filter((t2) => t2.owner === e.id && !t2.dead && "miner" === t2.d.role).length, a = Math.min(6, 2 * countBld(e.id, "refinery") + 1), o = e.f;
+    const n = S.units.filter((t2) => t2.owner === e.id && !t2.dead && "miner" === t2.d.role).length, a = Math.min(9, Math.round(pz.minerMul * (2 * countBld(e.id, "refinery") + 1))), o = e.f;
     if (!e.queues.veh && hasBld(e.id, yu ? "power" : "factory")) {
       if (n < 2) e.credits > 700 && startBuild(e, "veh", o.miner);
       else if (n < a && e.credits > 1400) startBuild(e, "veh", o.miner);
-      else if (as < aiCap(e) && e.credits > 2400 && canBuildUnit(e, o.elite) && Math.random() < 0.55) startBuild(e, "veh", o.elite);
+      else if (as < aiCap(e) && e.credits > 2400 && canBuildUnit(e, o.elite) && Math.random() < pz.eliteChance) startBuild(e, "veh", o.elite);
       else if (as < aiCap(e) && e.credits > 900) {
         const t2 = (Math.random() < 0.55 ? aiPickUnit(e, "veh") : null) || o.main;
         startBuild(e, "veh", t2);
@@ -2087,8 +2118,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       return;
     }
     const known = S.knownEnemy.get(team), knownBlds = !FOG_ON ? S.blds.filter((b) => !b.dead && b.owner !== NEUTRAL && teamOf(b.owner) !== team) : known ? S.blds.filter((b) => !b.dead && known.has(b.id) && teamOf(b.owner) !== team) : [], scoutPt = i ? null != i.spawnX ? { x: i.spawnX, y: i.spawnY } : aiBaseCenter(i) : null;
-    const d = r.army + 2 * e.ai.wave;
-    if (!e.ai.attack && s.length >= d && S.time > r.grace) {
+    const d = Math.round((r.army + 2 * e.ai.wave) * pz.armyMul);
+    if (!e.ai.attack && s.length >= d && S.time > r.grace * pz.graceMul) {
       e.ai.attack = true, e.ai.wave++;
       let r2 = null;
       knownBlds.length && (knownBlds.sort((e2, t2) => dist2(e2.x, e2.y, l.x, l.y) - dist2(t2.x, t2.y, l.x, l.y)), r2 = Math.random() < 0.5 ? knownBlds[0] : knownBlds.find((e2) => "refinery" === e2.key) || knownBlds[0]);
@@ -2124,7 +2155,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   Object.assign(window, {
     aiBaseCenter,
     tickAI,
-    aiMicro
+    aiMicro,
+    aiPersonality,
+    aiValue,
+    adaptDifficulty,
+    aiNextBld,
+    aiCap
   });
 })();
 
@@ -8496,7 +8532,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const e2 = P();
         $("#panelMain").innerHTML = '<h1>PAUSED</h1><div class="sub">' + e2.f.name.toUpperCase() + " COMMAND vs " + rivalNames(e2) + '</div><div class="small" style="margin:0 0 6px">$' + Math.floor(e2.credits) + " &nbsp;\xB7&nbsp; power " + e2.power + "/" + e2.drain + " &nbsp;\xB7&nbsp; " + S.units.filter((e3) => 0 === e3.owner).length + " units &nbsp;\xB7&nbsp; " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + "s<br>Killed " + e2.kills + " \xB7 lost " + e2.lost + '</div><button id="play">RESUME</button><button id="openSettings" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SETTINGS</button><button id="openSaveG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SAVE GAME</button><button id="openLoadG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="restart" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">RESTART</button><div class="small">Tap a card repeatedly to queue it \xB7 long-press a card (or tap a chip in the queue bar) to remove one \xB7 \u25BE expands the build panel \xB7 DEPLOY toggles Desolators, evacuates a garrison, sends aircraft home.</div>', $("#play").addEventListener("click", () => {
           S.running = true, openMenu(null);
-        }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => S.mission ? launchMission(S.mission.fac, S.mission.idx) : location.reload());
+        }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => S.mission ? S.mission.tutorial ? launchTutorial() : launchMission(S.mission.fac, S.mission.idx) : location.reload());
       } else if ("settings" === e) {
         const trackOpts = ['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + e2.name + "</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
@@ -8548,14 +8584,16 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function gameOver(win) {
     S.over = true, S.running = false, setRainAmbience(false), sfx(win ? "win" : "lose");
     $("#menu").classList.remove("hidden");
-    const t = P(), mission = S.mission;
-    mission && win && unlockNext(mission.fac, mission.idx);
-    const hasNext = !!mission && mission.idx + 1 < CAMPAIGNS[mission.fac].missions.length;
-    const label = mission ? win ? hasNext ? "NEXT MISSION" : "BACK TO MENU" : "RETRY MISSION" : "NEW SKIRMISH";
-    $("#panelMain").innerHTML = '<div id="result" style="color:' + (win ? "#6fe36f" : "#e0473a") + '">' + (win ? "MISSION ACCOMPLISHED" : "MISSION FAILED") + '</div><div class="sub">' + t.f.name.toUpperCase() + " vs " + rivalNames(t) + '</div><div class="small">Units killed: ' + t.kills + " &nbsp;\xB7&nbsp; Units lost: " + t.lost + "<br>Time: " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + "s</div>" + buildResultsTable() + buildHistoryChart() + '<button id="play">' + label + "</button>" + (mission ? '<button id="backCamp2" ' + SECBTN + ">MISSION SELECT</button>" : ""), $("#play").addEventListener("click", () => {
+    const t = P(), mission = S.mission, tut = !!(mission && mission.tutorial);
+    mission && !tut && win && unlockNext(mission.fac, mission.idx);
+    const hasNext = !!mission && !tut && mission.idx + 1 < CAMPAIGNS[mission.fac].missions.length;
+    const label = tut ? win ? "NEW SKIRMISH" : "RETRY TUTORIAL" : mission ? win ? hasNext ? "NEXT MISSION" : "BACK TO MENU" : "RETRY MISSION" : "NEW SKIRMISH";
+    const resultTxt = tut ? win ? "TUTORIAL COMPLETE" : "TUTORIAL FAILED" : win ? "MISSION ACCOMPLISHED" : "MISSION FAILED";
+    $("#panelMain").innerHTML = '<div id="result" style="color:' + (win ? "#6fe36f" : "#e0473a") + '">' + resultTxt + '</div><div class="sub">' + t.f.name.toUpperCase() + " vs " + rivalNames(t) + '</div><div class="small">Units killed: ' + t.kills + " &nbsp;\xB7&nbsp; Units lost: " + t.lost + "<br>Time: " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + "s</div>" + buildResultsTable() + buildHistoryChart() + '<button id="play">' + label + "</button>" + (mission && !tut ? '<button id="backCamp2" ' + SECBTN + ">MISSION SELECT</button>" : ""), $("#play").addEventListener("click", () => {
+      if (tut) return void (win ? location.reload() : launchTutorial());
       if (!mission) return void location.reload();
       win ? hasNext ? showBriefing(mission.fac, mission.idx + 1) : (S.mission = null, showCampaign()) : launchMission(mission.fac, mission.idx);
-    }), mission && $("#backCamp2").addEventListener("click", () => {
+    }), mission && !tut && $("#backCamp2").addEventListener("click", () => {
       S.mission = null, showMissionList(mission.fac);
     });
   }
@@ -8792,8 +8830,28 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const foes = otherFacs(fac);
     cfg.fac = fac, cfg.map = m.map, cfg.fog = "on", cfg.slots = m.diffs.map((d, i) => ({ fac: foes[i % foes.length], team: 2 + i, color: "def", spawn: i + 1, diff: d })), pendingMission = { fac, idx, objective: JSON.parse(JSON.stringify(m.objective)), noBuild: !!m.noBuild }, startGame();
   }
+  var TUTORIAL_STEPS = [
+    { text: "Select your Mobile HQ and tap DEPLOY to build your base.", done: () => hasBld(0, "conyard") },
+    { text: "Build a Power Plant.", done: () => hasBld(0, "power") },
+    { text: "Build a Refinery \u2014 your harvester starts mining automatically.", done: () => hasBld(0, "refinery") || hasBld(0, "hive") },
+    { text: "Build a Barracks and train a soldier.", done: () => hasBld(0, "barracks") && S.units.some((u) => 0 === u.owner && !u.dead && "inf" === u.d.kind) },
+    { text: "Select your soldier and tap the map to move.", done: () => !!S.tutorialMoved },
+    { text: "Press Q, then tap a spot toward the enemy to attack-move.", done: () => !!S.tutorialAmoved },
+    { text: "Destroy the enemy base to finish the exercise.", done: () => S.players.some((p) => !p.neutral && 0 !== p.id && p.defeated) }
+  ];
+  function launchTutorial() {
+    const foe = otherFacs(cfg.fac)[0];
+    cfg.map = "dust", cfg.fog = "off", cfg.slots = [{ fac: foe, team: 2, color: "def", spawn: 1, diff: "easy" }], pendingMission = { tutorial: true }, startGame();
+  }
+  function updateTutorial() {
+    const m = S.mission;
+    if (!m || !m.tutorial) return;
+    m.doneSteps = m.doneSteps || [], m.curStep = m.curStep || 0;
+    for (let i = 0; i < TUTORIAL_STEPS.length; i++) !m.doneSteps[i] && TUTORIAL_STEPS[i].done() && (m.doneSteps[i] = true, i === m.curStep && (m.curStep = i + 1, hint("Nice work!")));
+  }
   function applyPendingMission() {
     if (!pendingMission) return void (S.mission = null);
+    if (pendingMission.tutorial) return S.mission = { tutorial: true, curStep: 0, doneSteps: [] }, S.tutorialMoved = false, S.tutorialAmoved = false, void (pendingMission = null);
     S.mission = { fac: pendingMission.fac, idx: pendingMission.idx, objective: pendingMission.objective, noBuild: pendingMission.noBuild };
     if ("capture" === S.mission.objective.type) {
       const cx = 1472, cy = 1152;
@@ -8813,7 +8871,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     pendingMission = null;
   }
   function checkMissionOutcome() {
-    const obj = S.mission.objective;
+    const m = S.mission;
+    if (m.tutorial) {
+      if (S.players[0].defeated) return "lose";
+      let allDead = true;
+      for (let t = 1; t < NEUTRAL; t++) teamOf(t) !== teamOf(0) && !S.players[t].defeated && (allDead = false);
+      return allDead ? "win" : null;
+    }
+    const obj = m.objective;
     if (S.players[0].defeated) return "lose";
     if ("elim" === obj.type) {
       let allDead = true;
@@ -8849,6 +8914,19 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     } catch (e) {
     }
   }
+  function updateTutorialPanel() {
+    const m = S.mission, el = $("#tutorialPanel");
+    if (!m || !m.tutorial) return void el.classList.add("hidden");
+    el.classList.remove("hidden");
+    const sig = (m.doneSteps || []).join(",") + "|" + m.curStep;
+    if (el._sig === sig) return;
+    el._sig = sig;
+    const rows = TUTORIAL_STEPS.map((s, i) => {
+      const done = m.doneSteps && m.doneSteps[i], cur = i === m.curStep;
+      return '<div class="ts' + (done ? " done" : cur ? " cur" : "") + '"><b>' + (done ? "\u2713" : i + 1 + ".") + "</b><span>" + s.text + "</span></div>";
+    }).join("");
+    el.innerHTML = '<div class="th">TUTORIAL</div>' + rows;
+  }
   Object.assign(window, {
     FAC_NAME,
     CAMPAIGNS,
@@ -8856,7 +8934,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     checkMissionOutcome,
     campaignUnlocked,
     unlockNext,
-    applyPendingMission
+    applyPendingMission,
+    otherFacs,
+    launchTutorial,
+    updateTutorial,
+    updateTutorialPanel
   });
   Object.defineProperties(window, {
     pendingMission: { get: () => pendingMission, configurable: true }
@@ -8912,6 +8994,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     cb && (cb.onclick = showCampaign);
     const lb = $("#loadBtn");
     lb && (lb.onclick = () => showSaveLoad("load"));
+    const tb = $("#tutorialBtn");
+    tb && (tb.onclick = launchTutorial);
   }
   function wallNeighborMask(tx, ty, owner) {
     let m = 0;
@@ -9032,7 +9116,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
       clampCam();
     }
-    ema = 0.92 * ema + 0.08 * t, S.running && (ema > 0.036 ? ++slow > 90 && (slow = 0, setQuality(Math.max(0, QUALITY - 1))) : slow = Math.max(0, slow - 1)), S.running && !S.over && (sfxBudget = 0, FPS.on && fpsTick(t), step(t)), FPS.entering && tickFpsEntry(t), hintT > 0 && (hintT -= t, hintT <= 0 && $("#hint").classList.remove("show")), S.marker && (S.marker.t += t), S.players.length && (render(), updateCards(), updateSuperPanel());
+    ema = 0.92 * ema + 0.08 * t, S.running && (ema > 0.036 ? ++slow > 90 && (slow = 0, setQuality(Math.max(0, QUALITY - 1))) : slow = Math.max(0, slow - 1)), S.running && !S.over && (sfxBudget = 0, FPS.on && fpsTick(t), step(t)), FPS.entering && tickFpsEntry(t), hintT > 0 && (hintT -= t, hintT <= 0 && $("#hint").classList.remove("show")), S.marker && (S.marker.t += t), S.players.length && (render(), updateCards(), updateSuperPanel(), updateTutorial(), updateTutorialPanel());
   }
   function tickFpsEntry(dt) {
     const fe = FPS.entering;
@@ -9060,7 +9144,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       (S.thunderT = (void 0 === S.thunderT ? 6 + 10 * Math.random() : S.thunderT) - e) <= 0 && (S.thunderT = 9 + 14 * Math.random(), sfx("thunder"), lightningT = 0.16 + 0.12 * Math.random());
     }
     S.spyReveals && S.spyReveals.length && (S.spyReveals.forEach((r) => r.t -= e), S.spyReveals = S.spyReveals.filter((r) => r.t > 0));
-    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), tickProduction(t, e), t.isAI && (t.credits += 8 * DIFFS[t.diff].inc * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e)));
+    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), tickProduction(t, e), t.isAI && (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e)));
     for (const t of S.units) tickUnit(t, e);
     for (const t of S.blds) tickBld(t, e);
     tickProjectiles(e), tickRads(e), tickTiberium(e), tickTraffic(e), tickRockets(e), tickGates(e);

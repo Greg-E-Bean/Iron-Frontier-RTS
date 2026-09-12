@@ -207,6 +207,11 @@ declare global {
   const aiBaseCenter: AnyFn;
   function tickAI(p: Player, dt: number): void;
   function aiMicro(p: Player, dt: number): void;
+  const aiPersonality: AnyFn;
+  const aiValue: AnyFn;
+  const adaptDifficulty: AnyFn;
+  const aiNextBld: AnyFn;
+  const aiCap: AnyFn;
 
   // === models.js (3D model library + shared camera/canvas state) ===
   const cv: HTMLCanvasElement;
@@ -624,6 +629,10 @@ declare global {
   function unlockNext(fac: string, idx: number): void;
   function applyPendingMission(): void;
   const pendingMission: { noBuild?: boolean; [k: string]: unknown } | null;
+  function otherFacs(fac: string): string[];
+  function launchTutorial(): void;
+  function updateTutorial(): void;
+  function updateTutorialPanel(): void;
 
   // === loop.js (main loop, wall/gate mechanics, remaining menu screens) ===
   const showCampaign: AnyFn;
