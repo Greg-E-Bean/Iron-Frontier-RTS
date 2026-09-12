@@ -3215,7 +3215,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function restorerModel(t) {
     const e = [], s = 3.4;
     wheelUnit(e, 26, 13, 6.5, t);
-    e.push(P_(SLAB(hullProfile(0.9 * 26, 14.5, "allied"), 5, 1.6, "resA"), 0, 0, s, "armor2"));
+    e.push(P_(SLAB(hullProfile(0.9 * 26, 14.5, "allied"), 5, 1.6, "resA"), 0, 0, s, "body"));
     const hTop = s + 5;
     e.push(P_(BOXM(8, 10.5, 3.6, 0.6), -2, 0, hTop, "armor2"));
     e.push(P_(BOXM(4, 7, 2, 0.3), -5.5, 0, hTop + 3.6, "glass", { e: 1 }));
@@ -3232,7 +3232,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function salvagerModel(t) {
     const e = [], s = 4.2;
     trackUnit(e, 30, 15, 8, t, { wheels: 6, trkW: 7.5 });
-    e.push(P_(SLAB(hullProfile(0.94 * 30, 16.5, "soviet"), 7, 1.8, "salvS"), 0, 0, s, "armor2"));
+    e.push(P_(SLAB(hullProfile(0.94 * 30, 16.5, "soviet"), 7, 1.8, "salvS"), 0, 0, s, "body"));
     const hTop = s + 7;
     e.push(P_(BOXM(8, 11, 3.6, 0.7), -4, 0, hTop, "dark2"));
     e.push(P_(BOXM(5, 7, 1.8, 0.3), -6.5, 0, hTop + 3.6, "glassdark"));
@@ -3250,7 +3250,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function cultivatorModel(t) {
     const e = [], s = 4.42;
     legWalker(e, 26, 14, 8.5, t, 6);
-    e.push(P_(SLAB(hullProfile(0.94 * 26, 15.5, "yuri"), 7, 1.8, "cultY"), 0, 0, s, "dark2"));
+    e.push(P_(SLAB(hullProfile(0.94 * 26, 15.5, "yuri"), 7, 1.8, "cultY"), 0, 0, s, "body"));
     const hTop = s + 7;
     e.push(P_(DOME(7, 5, 12), 0, 0, hTop, "carapace"));
     e.push(P_(DOME(3.5, 3, 10), 0, 0, hTop + 3, "bile", { e: 1 }));
