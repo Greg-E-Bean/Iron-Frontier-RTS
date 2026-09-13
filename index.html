@@ -538,11 +538,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const r = idx(e, t);
     return G.terr[r] < 2 && 0 === G.occ[r] && !G.blk[r];
   }
-  function hasLineOfFire(x0, y0, x1, y1) {
+  function losEyeH(e) {
+    return "b" === e.e ? 18 + 6 * (e.size || 1) : (e.alt || 0) + fpsEyeH(e);
+  }
+  function hasLineOfFire(x0, y0, x1, y1, h0, h1) {
     let x = Math.floor(x0 / 32), y = Math.floor(y0 / 32);
     const tx = Math.floor(x1 / 32), ty = Math.floor(y1 / 32);
     if (x === tx && y === ty) return true;
-    const dx = Math.abs(tx - x), dy = Math.abs(ty - y), sx = x < tx ? 1 : -1, sy = y < ty ? 1 : -1;
+    const dx = Math.abs(tx - x), dy = Math.abs(ty - y), sx = x < tx ? 1 : -1, sy = y < ty ? 1 : -1, dist2D = Math.hypot(x1 - x0, y1 - y0), hasH = null != h0 && null != h1;
     let err = dx - dy;
     for (let guard = 0; guard < 160; guard++) {
       if (x === tx && y === ty) return true;
@@ -559,6 +562,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         if (occ) {
           const b = S.bldById.get(occ);
           if (b && !b.dead && "wall" !== b.key && "gate" !== b.key) return false;
+        }
+        if (hasH) {
+          const wx = 32 * x + 16, wy = 32 * y + 16, p = Math.hypot(wx - x0, wy - y0) / dist2D, rayH = h0 + (h1 - h0) * p;
+          if (G.elev[idx(x, y)] > rayH - 2) return false;
         }
       }
     }
@@ -1960,6 +1967,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     walkableTeam,
     walkableWIgnore,
     hasLineOfFire,
+    losEyeH,
     hash2,
     noise2,
     vnoise,
@@ -6011,7 +6019,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (airOnly && t.alt <= 2) return false;
       if (t.d && t.d.sub && !subRevealed(t)) return false;
     } else if (airOnly) return false;
-    if (!(e.d && e.d.fly) && !(t.alt > 2) && !hasLineOfFire(e.x, e.y, t.x, t.y)) return false;
+    if (!(e.d && e.d.fly) && !(t.alt > 2) && !hasLineOfFire(e.x, e.y, t.x, t.y, heightAt(e.x, e.y) + losEyeH(e), heightAt(t.x, t.y) + losEyeH(t))) return false;
     return true;
   }
   function spawnCivs() {
@@ -7313,7 +7321,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [], glowC = "allied" === fac ? "#8fe0ff" : "soviet" === fac ? "#ff9c4a" : "yuri" === fac ? "#c98cff" : "glow", bodyC = "soviet" === fac ? "#8a7a6a" : "allied" === fac ? "#d8e8ee" : "yuri" === fac ? "#7a5f8a" : "white", noseC = "soviet" === fac ? "#c0392b" : "allied" === fac ? "#3ba0c9" : "yuri" === fac ? "#8c3fc9" : "red", shellC = "soviet" === fac ? "#e8c04a" : "allied" === fac ? "#c9d8e0" : "yuri" === fac ? "#b98cd8" : "gold";
     return "bullet" === kind || "flak" === kind ? e.push(P_(CYL(0.5, 4.5, 6), 0, 0, 0, glowC, { ty: PI2, e: 1 })) : "flame" === kind ? e.push(P_(CYL(0.9, 3, 6), 0, 0, 0, "yuri" === fac ? "#8fe06a" : "tibGlit", { ty: PI2, e: 1 })) : "rocket" === kind || "missile" === kind || "aamissile" === kind ? (e.push(P_(CYL(0.7, 4.5, 7), 0, 0, 0, bodyC, { ty: PI2 })), e.push(P_(CONE(0.7, 0.2, 1.6, 7), 4.5, 0, 0, noseC, { ty: PI2 })), e.push(P_(CYL(0.95, 1.6, 6), -0.6, 0, 0, glowC, { ty: PI2, e: 1 }))) : "bomb" === kind ? e.push(P_(CYL(1.1, 3.5, 8), 0, 0, 0, "darkmetal", { ty: PI2 })) : "grenade" === kind ? (e.push(P_(CYL(1.3, 1.9, 8), 0, 0, 0, "olive", { ty: PI2 })), e.push(P_(CYL(0.35, 0.5, 6), 0, 1.1, 0, "darkmetal", { ty: PI2 }))) : e.push(P_(CYL(0.55, 3.4, 6), 0, 0, 0, shellC, { ty: PI2 })), e;
   }
-  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false };
+  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false };
   var fpsPromptTarget = null;
   var rotateTarget = null;
   function fpsEyeH(e) {
@@ -7448,7 +7456,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         if ("b" === l.e && t.noBld) continue;
         const f = (dx * n + dy * a) / d;
         if (f < coneMin) continue;
-        if (!e.inside && !((l.alt || 0) > 2) && !hasLineOfFire(e.x, e.y, p.x, p.y)) continue;
+        if (!e.inside && !((l.alt || 0) > 2) && !hasLineOfFire(e.x, e.y, p.x, p.y, heightAt(e.x, e.y) + losEyeH(e), heightAt(p.x, p.y) + losEyeH(l))) continue;
         const h = 1e3 * f - 0.05 * d;
         h > s && (s = h, o = l);
       }
@@ -7502,8 +7510,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     };
     g.userData.kind = kind;
     if ("melee" === kind || !kind) {
-      mesh(new THREE.BoxGeometry(0.09, 0.08, 0.15), mat("#3a2420", 0.6, 0.25), 0.04, -0.05, -0.08, 0.1);
-      for (let i = 0; i < 3; i++) mesh(new THREE.ConeGeometry(0.011, 0.1, 6), mat("#d8d0c0", 0.35, 0.35), 0.04 + 0.022 * (i - 1), -0.03, -0.19, Math.PI / 2 * 1.06);
+      mesh(new THREE.CylinderGeometry(0.014, 0.017, 0.11, 8), mat("#3a2420", 0.7, 0.15), 0.05, -0.09, -0.05, 0, 0, 1.15);
+      mesh(new THREE.BoxGeometry(0.06, 0.012, 0.012), mat("#4a4a4a", 0.4, 0.7), 0.05, -0.045, -0.09, 0, 0, 1.15);
+      mesh(new THREE.BoxGeometry(0.028, 6e-3, 0.19), mat("#c8ccd0", 0.25, 0.85), 0.05, -0.03, -0.2, 0, 0, 1.15);
+      mesh(new THREE.ConeGeometry(0.014, 0.045, 8), mat("#c8ccd0", 0.25, 0.85), 0.05, -0.03, -0.31, -Math.PI / 2, 0, 1.15);
       return g.visible = false, g;
     }
     const dark = mat("#20262a", 0.5, 0.5), metal = mat("#626a70", 0.32, 0.78), grip = mat("#2c2318", 0.75, 0.12), accent = mat("#b8863c", 0.4, 0.6);
@@ -7557,17 +7567,22 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.14, 10), dark, 0, 0.058, -0.3);
       mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.02, 10), metal, 0, 0.058, -0.23, Math.PI / 2);
       mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.02, 10), metal, 0, 0.058, -0.37, Math.PI / 2);
+      const bolt = mesh(new THREE.CylinderGeometry(8e-3, 8e-3, 0.05, 8), metal, 0.032, 0.02, -0.16, 0, 0, Math.PI / 2);
+      g.userData.bolt = bolt;
       frontZ = -0.72, g.userData.magFamily = "sniper";
     } else if ("flak" === kind) {
       mesh(new THREE.CylinderGeometry(0.023, 0.023, 0.42, 8), metal, -0.032, 0, -0.35, Math.PI / 2);
       mesh(new THREE.CylinderGeometry(0.023, 0.023, 0.42, 8), metal, 0.032, 0, -0.35, Math.PI / 2);
       mesh(new THREE.BoxGeometry(0.1, 0.08, 0.1), dark, 0, -0.02, -0.06);
       mesh(new THREE.BoxGeometry(0.045, 0.17, 0.06), dark, 0, -0.14, -0.05, -0.2);
+      mesh(new THREE.BoxGeometry(0.03, 0.09, 0.05), dark, 0.07, -0.06, -0.14, 0, 0, -0.15);
       frontZ = -0.54, g.userData.magFamily = "flak";
-    } else if ("beam" === kind) {
+    } else if (0 === kind.indexOf("beam")) {
+      const beamCol = "beam_temporal" === kind ? "#eaf7ff" : "beam_drain" === kind ? "#c98cff" : "#7ff0ff", beamEmis = "beam_temporal" === kind ? "#bfe8ff" : "beam_drain" === kind ? "#9a4fe0" : "#3fd8ff";
       mesh(new THREE.CylinderGeometry(0.026, 0.03, 0.38, 8), mat("#3a4a52", 0.3, 0.8), 0, 0, -0.34, Math.PI / 2);
-      mesh(new THREE.OctahedronGeometry(0.045, 0), new THREE.MeshStandardMaterial({ color: "#7ff0ff", emissive: "#3fd8ff", emissiveIntensity: 1.5, roughness: 0.2 }), 0, 0, -0.55);
-      mesh(new THREE.TorusGeometry(0.034, 8e-3, 6, 10), accent, 0, 0, -0.4, Math.PI / 2);
+      mesh(new THREE.OctahedronGeometry(0.045, 0), new THREE.MeshStandardMaterial({ color: beamCol, emissive: beamEmis, emissiveIntensity: 1.5, roughness: 0.2 }), 0, 0, -0.55);
+      mesh(new THREE.TorusGeometry(0.034, 8e-3, 6, 10), "beam_temporal" === kind ? mat(beamEmis, 0.3, 0.6) : accent, 0, 0, -0.4, Math.PI / 2);
+      "beam_drain" === kind && mesh(new THREE.TorusGeometry(0.05, 6e-3, 6, 12), mat(beamEmis, 0.3, 0.4), 0, 0, -0.5, Math.PI / 2);
       frontZ = -0.55;
     } else {
       mesh(new THREE.CylinderGeometry(0.014, 0.016, 0.4, 8), metal, 0, 0.012, -0.34, Math.PI / 2);
@@ -7584,6 +7599,35 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function ensureViewmodel(kind) {
     return FPS.vm && FPS.vm.userData.kind === kind ? FPS.vm : (FPS.vm && FPS.cam.remove(FPS.vm), FPS.vm = buildViewmodel(kind), FPS.cam.add(FPS.vm), FPS.vm);
+  }
+  function buildVehicleViewmodel(e) {
+    const g = new THREE.Group(), dark = new THREE.MeshStandardMaterial({ color: 2371630, roughness: 0.55, metalness: 0.55 }), metal = new THREE.MeshStandardMaterial({ color: 5658466, roughness: 0.35, metalness: 0.75 }), scale = clamp((e.d.radius || 14) / 14, 0.75, 2.1), armed = e.d.dmg > 0 && "psi" !== e.d.proj;
+    g.userData.kind = e.key, g.userData.scale = scale;
+    const naval = !!e.d.naval, fly = !!e.d.fly;
+    const rimY = fly ? -0.5 : naval ? -0.46 : -0.42;
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.05, 0.5), dark)).position.set(0, rimY, -0.55);
+    const cowlL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.22, 0.4), dark);
+    cowlL.position.set(-0.62, rimY + 0.12, -0.55), g.add(cowlL);
+    const cowlR = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.22, 0.4), dark);
+    cowlR.position.set(0.62, rimY + 0.12, -0.55), g.add(cowlR);
+    let flash = null;
+    if (armed) {
+      const barrelLen = 0.55 * scale, barrelR = 0.045 * scale, ox = hasTurret(e.key) ? 0 : 0.14;
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(barrelR, barrelR * 1.15, barrelLen, 10), metal);
+      barrel.rotation.x = Math.PI / 2, barrel.position.set(ox, rimY + 0.16, -0.4 - barrelLen / 2);
+      g.add(barrel);
+      const collar = new THREE.Mesh(new THREE.CylinderGeometry(barrelR * 1.4, barrelR * 1.4, 0.08 * scale, 10), dark);
+      collar.rotation.x = Math.PI / 2, collar.position.set(ox, rimY + 0.16, -0.42), g.add(collar);
+      flash = new THREE.Mesh(new THREE.ConeGeometry(barrelR * 2.2, 0.24 * scale, 8), new THREE.MeshBasicMaterial({ color: "#ffe9a0", transparent: true, opacity: 0.95, depthWrite: false }));
+      flash.rotation.x = Math.PI / 2, flash.position.set(ox, rimY + 0.16, -0.4 - barrelLen - 0.05 * scale), flash.visible = false, g.add(flash);
+      const l = new THREE.PointLight(16755610, 0, 1.6, 2);
+      l.position.copy(flash.position), g.add(l), g.userData.muzzleLight = l;
+    }
+    g.userData.flash = flash;
+    return g;
+  }
+  function ensureVehicleViewmodel(e) {
+    return FPS.vvm && FPS.vvm.userData.kind === e.key ? FPS.vvm : (FPS.vvm && FPS.cam.remove(FPS.vvm), FPS.vvm = buildVehicleViewmodel(e), FPS.cam.add(FPS.vvm), FPS.vvm);
   }
   function spawnShell(vm) {
     const flash = vm.userData.akimbo && vm.userData.altFire ? vm.userData.flash2 : vm.userData.flash;
@@ -7603,7 +7647,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       s.position.set(s.userData.bx + s.userData.dx * dt, s.userData.by + s.userData.dy * dt - 2.4 * dt * dt, s.userData.bz + s.userData.dz * dt), s.rotation.x = 16 * dt, s.rotation.z = 11 * dt;
     }
   }
-  var VM_KEY = { marksman: "sniper", tanya: "pistol", reaper: "pistol", phantom: "pistol", engineer: "tool" };
+  var VM_KEY = { marksman: "sniper", tanya: "pistol", reaper: "pistol", phantom: "pistol", engineer: "tool", chrono: "beam_temporal", vindicator: "beam_plasma", leech: "beam_drain" };
   function unitViewmodelKind(e) {
     return VM_KEY[e.key] || e.d.proj || "rifle";
   }
@@ -7865,7 +7909,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       t.position.set(e.x + Math.cos(FPS.yaw) * n, r, e.y + Math.sin(FPS.yaw) * n), t.lookAt(t.position.x + Math.cos(FPS.yaw) * a * 100, t.position.y + 100 * Math.sin(kp), t.position.z + Math.sin(FPS.yaw) * a * 100), t.fov = FPS.aiming ? 46 : 74;
     }
     e.inside && (ensureInterior(e.inside), syncInteriorFigures(e.inside), syncBombProp(e.inside));
-    if (!FPS.thirdPerson && "inf" === e.d.kind && (e.d.dmg > 0 || "engineer" === e.d.role)) {
+    if (!FPS.thirdPerson && "inf" === e.d.kind && (e.d.dmg > 0 || "engineer" === e.d.role || "chrono" === e.d.role)) {
       const vm = ensureViewmodel(unitViewmodelKind(e));
       vm.visible = true;
       const aim = FPS.aiming, tx = aim ? 0 : 0.26, ty = aim ? -0.075 : -0.3, tz = aim ? -0.95 : -0.95, kick = e.muzzle > 0 ? 0.07 * (e.muzzle / 0.09) : 0, maxCool = Math.max(0.01, e.d.rof * vRof(e)), recoilP = e.cool > 0 ? Math.min(1, e.cool / maxCool) : 0, reloadT = vm.userData.reloadT || 0, reloading = reloadT > 0, reloadArc = reloading ? Math.sin(Math.PI * Math.min(1, 1 - reloadT / RELOAD_DUR)) : 0;
@@ -7883,8 +7927,21 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       fl2 && (fl2.visible = firing && useAlt, fl2.scale.setScalar(0.6 + 2.4 * (e.muzzle / 0.09)));
       ml && (ml.intensity = firing && !useAlt ? 2.2 * (e.muzzle / 0.09) : 0);
       ml2 && (ml2.intensity = firing && useAlt ? 2.2 * (e.muzzle / 0.09) : 0);
-      tickShells(vm);
-    } else FPS.vm && (FPS.vm.visible = false);
+      vm.userData.bolt && (vm.userData.bolt.position.x = 0.032 - 0.045 * Math.sin(Math.PI * Math.min(1, reloadArc * 1.3)));
+      tickShells(vm), FPS.vvm && (FPS.vvm.visible = false);
+    } else if (!FPS.thirdPerson && "inf" !== e.d.kind) {
+      FPS.vm && (FPS.vm.visible = false);
+      const vvm = ensureVehicleViewmodel(e);
+      vvm.visible = true;
+      const kick = e.muzzle > 0 ? 0.05 * (e.muzzle / 0.09) : 0;
+      vvm.position.set(0, -0.02 * kick, 0.15 * kick), vvm.rotation.x = -0.5 * kick;
+      const fl = vvm.userData.flash;
+      fl && (fl.visible = e.muzzle > 0, fl.scale.setScalar(0.6 + 2.4 * (e.muzzle / 0.09)));
+      const ml = vvm.userData.muzzleLight;
+      ml && (ml.intensity = e.muzzle > 0 ? 2.4 * (e.muzzle / 0.09) : 0);
+    } else {
+      FPS.vm && (FPS.vm.visible = false), FPS.vvm && (FPS.vvm.visible = false);
+    }
     return t.updateProjectionMatrix(), t;
   }
   Object.assign(window, {
@@ -7905,6 +7962,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     fpsAbility,
     buildViewmodel,
     ensureViewmodel,
+    buildVehicleViewmodel,
+    ensureVehicleViewmodel,
     unitViewmodelKind,
     interiorHalf,
     panelWall,

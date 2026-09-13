@@ -85,7 +85,8 @@ declare global {
 
   function setGameSpeed(v: number): void;
   function walkable(tx: number, ty: number): boolean;
-  function hasLineOfFire(x0: number, y0: number, x1: number, y1: number): boolean;
+  function hasLineOfFire(x0: number, y0: number, x1: number, y1: number, h0?: number, h1?: number): boolean;
+  function losEyeH(e: Unit | Building): number;
   function walkableW(tx: number, ty: number): boolean;
   function walkableTeam(team: number): AnyFn;
   function walkableWIgnore(...args: any[]): boolean;
@@ -540,6 +541,8 @@ declare global {
   function fpsAbility(): void;
   const buildViewmodel: AnyFn;
   const ensureViewmodel: AnyFn;
+  const buildVehicleViewmodel: AnyFn;
+  const ensureVehicleViewmodel: AnyFn;
   const unitViewmodelKind: AnyFn;
   function interiorHalf(b: Building): number;
   const panelWall: AnyFn;
@@ -570,6 +573,7 @@ declare global {
     look: any;
     stick: any;
     vm: any;
+    vvm: any;
     interact: Building | null;
     entering: any;
     viewKick: number;
