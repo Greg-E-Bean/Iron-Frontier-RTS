@@ -585,6 +585,10 @@ declare global {
     stamina: number;
     crouching: boolean;
     lastStepT: number;
+    damageFlashT: number;
+    damageDir: number;
+    killFlashT: number;
+    lastEngineSfxT: number;
     [k: string]: unknown;
   };
   const FLOOR_Z: number;

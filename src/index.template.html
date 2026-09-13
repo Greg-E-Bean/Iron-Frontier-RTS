@@ -237,7 +237,18 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #xhair.hit:before,#xhair.hit:after{background:#ff5a4a}
 #xhair.hit:before{box-shadow:0 35px 0 0 #ff5a4a}
 #xhair.hit:after{box-shadow:35px 0 0 0 #ff5a4a}
+#xhair.kill{border-color:#ffd75e;box-shadow:0 0 16px rgba(255,215,94,.9);transform:scale(1.5)!important}
+#xhair.kill:before,#xhair.kill:after{background:#ffd75e}
+#xhair.kill:before{box-shadow:0 35px 0 0 #ffd75e}
+#xhair.kill:after{box-shadow:35px 0 0 0 #ffd75e}
 #xhair.noaim{opacity:.35}
+#dmgvig{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse at center,rgba(200,20,20,0) 45%,rgba(200,20,20,.55) 100%);
+  transition:opacity .08s linear}
+#dmgdir{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;opacity:0;
+  transition:opacity .12s linear}
+#dmgdir:before{content:"";position:absolute;left:-14px;top:-150px;width:0;height:0;
+  border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:22px solid rgba(255,60,50,.9)}
 #fpsammo{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 154px);transform:translateX(-50%);
   font-size:13px;letter-spacing:1.5px;color:#d8e4ea;text-shadow:0 1px 3px rgba(0,0,0,.8);font-weight:700}
 #fpsammo.reload{color:#ff9a5a;animation:bombPulse 1.6s ease-in-out infinite}
@@ -425,6 +436,8 @@ body.fps #mmWrap{opacity:.55}
 </div>
 
 <div id="fpsui" class="hidden">
+  <div id="dmgvig"></div>
+  <div id="dmgdir"></div>
   <div id="xhair"></div>
   <div id="fpsammo" class="hidden"></div>
   <div id="fpsbar"><span id="fpsname">—</span><i id="fpshp"></i></div>
