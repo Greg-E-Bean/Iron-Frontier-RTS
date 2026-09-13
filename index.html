@@ -254,6 +254,24 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   background:rgba(10,16,22,.34);pointer-events:auto}
 #fpsstick i{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;
   background:rgba(200,220,240,.34);border:1px solid rgba(220,235,250,.5)}
+#fpsstamina{position:absolute;left:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 156px);
+  width:118px;height:6px;border-radius:3px;background:rgba(10,16,22,.5);border:1px solid rgba(200,215,230,.3);overflow:hidden}
+#fpsstamina i{display:block;height:100%;width:100%;background:#8fd8ff;transition:width .1s linear}
+#fpsstamina.low i{background:#e0473a}
+#fpsstamina.hidden{display:none}
+#fpscrouch{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 226px);
+  width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
+  justify-content:center;font-size:10px;letter-spacing:1px;color:#cfe0ff;
+  background:rgba(40,70,110,.34);border:2px solid rgba(140,190,255,.5)}
+#fpscrouch.on{background:rgba(70,120,190,.6);border-color:#bfe0ff}
+#fpscrouch.hidden{display:none}
+#fpssprint{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 300px);
+  width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
+  justify-content:center;font-size:10px;letter-spacing:1px;color:#d0ffd8;
+  background:rgba(40,110,60,.34);border:2px solid rgba(150,255,160,.5)}
+#fpssprint.on{background:rgba(60,160,80,.6);border-color:#bfffc8}
+#fpssprint.empty{opacity:.4}
+#fpssprint.hidden{display:none}
 #fpsfire{position:absolute;right:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);
   width:96px;height:96px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:14px;letter-spacing:2px;color:#ffd9c0;
@@ -412,6 +430,9 @@ body.fps #mmWrap{opacity:.55}
   <div id="fpsbar"><span id="fpsname">—</span><i id="fpshp"></i></div>
   <div id="fpsexit">EXIT</div>
   <div id="fpsstick"><i></i></div>
+  <div id="fpsstamina" class="hidden"><i></i></div>
+  <div id="fpscrouch" class="hidden">CROUCH</div>
+  <div id="fpssprint" class="hidden">SPRINT</div>
   <div id="fpsaim">AIM</div>
   <div id="fpsability" class="hidden">ABILITY</div>
   <div id="fpsfire">FIRE</div>
@@ -5873,6 +5894,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const vm = FPS.vm, magSize = !FPS.thirdPerson && vm && MAG_SIZE[vm.userData.magFamily];
       magSize ? (am.classList.remove("hidden"), vm.userData.reloadT > 0 ? (am.classList.add("reload"), am.textContent = "RELOADING") : (am.classList.remove("reload"), am.textContent = (vm.userData.mag ?? magSize) + " / " + magSize)) : am.classList.add("hidden");
     }
+    const isInf = "inf" === e.d.kind, crBtn = document.getElementById("fpscrouch"), spBtn = document.getElementById("fpssprint"), stam = document.getElementById("fpsstamina");
+    crBtn && crBtn.classList.toggle("hidden", !isInf), crBtn && crBtn.classList.toggle("on", FPS.crouching);
+    spBtn && spBtn.classList.toggle("hidden", !isInf), spBtn && spBtn.classList.toggle("on", FPS.sprinting), spBtn && spBtn.classList.toggle("empty", FPS.stamina <= 0.05);
+    stam && stam.classList.toggle("hidden", !isInf), stam && stam.classList.toggle("low", FPS.stamina < 0.3), stam && (stam.firstElementChild.style.width = 100 * FPS.stamina + "%");
     const t = document.getElementById("fpsname"), r = document.getElementById("fpshp");
     if (t && (t.textContent = e.d.name + (e.vet > 1 ? " \u2605" : e.vet ? " \u25B2" : "")), r) {
       const t2 = Math.max(0, e.hp / e.maxhp);
@@ -7321,14 +7346,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [], glowC = "allied" === fac ? "#8fe0ff" : "soviet" === fac ? "#ff9c4a" : "yuri" === fac ? "#c98cff" : "glow", bodyC = "soviet" === fac ? "#8a7a6a" : "allied" === fac ? "#d8e8ee" : "yuri" === fac ? "#7a5f8a" : "white", noseC = "soviet" === fac ? "#c0392b" : "allied" === fac ? "#3ba0c9" : "yuri" === fac ? "#8c3fc9" : "red", shellC = "soviet" === fac ? "#e8c04a" : "allied" === fac ? "#c9d8e0" : "yuri" === fac ? "#b98cd8" : "gold";
     return "bullet" === kind || "flak" === kind ? e.push(P_(CYL(0.5, 4.5, 6), 0, 0, 0, glowC, { ty: PI2, e: 1 })) : "flame" === kind ? e.push(P_(CYL(0.9, 3, 6), 0, 0, 0, "yuri" === fac ? "#8fe06a" : "tibGlit", { ty: PI2, e: 1 })) : "rocket" === kind || "missile" === kind || "aamissile" === kind ? (e.push(P_(CYL(0.7, 4.5, 7), 0, 0, 0, bodyC, { ty: PI2 })), e.push(P_(CONE(0.7, 0.2, 1.6, 7), 4.5, 0, 0, noseC, { ty: PI2 })), e.push(P_(CYL(0.95, 1.6, 6), -0.6, 0, 0, glowC, { ty: PI2, e: 1 }))) : "bomb" === kind ? e.push(P_(CYL(1.1, 3.5, 8), 0, 0, 0, "darkmetal", { ty: PI2 })) : "grenade" === kind ? (e.push(P_(CYL(1.3, 1.9, 8), 0, 0, 0, "olive", { ty: PI2 })), e.push(P_(CYL(0.35, 0.5, 6), 0, 1.1, 0, "darkmetal", { ty: PI2 }))) : e.push(P_(CYL(0.55, 3.4, 6), 0, 0, 0, shellC, { ty: PI2 })), e;
   }
-  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false };
+  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, sprinting: false, stamina: 1, crouching: false, lastStepT: 0 };
   var fpsPromptTarget = null;
   var rotateTarget = null;
   function fpsEyeH(e) {
-    return "inf" === e.d.kind ? 19 : "kirov" === e.key ? 44 : e.d.fly ? 22 : 34;
+    return ("inf" === e.d.kind ? 19 : "kirov" === e.key ? 44 : e.d.fly ? 22 : 34) - (FPS.crouching && "inf" === e.d.kind ? 6 : 0);
   }
   function enterFPS(e) {
-    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), true);
+    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.lastStepT = e.animT || 0, e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), true);
   }
   function exitFPS() {
     FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, S.autopilot = false, S.players[0] && (S.players[0].ai.mimicProfile = null), document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
@@ -7344,10 +7369,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     t.abilityCD > 0 && (t.abilityCD -= e);
     FPS.viewKick && (FPS.viewKick = Math.max(0, FPS.viewKick - 4 * e));
     FPS.hitFlashT > 0 && (FPS.hitFlashT -= e);
+    const sprintOk = "inf" === t.d.kind && FPS.sprinting && !FPS.aiming && !FPS.crouching;
+    sprintOk && t.moving ? (FPS.stamina = Math.max(0, (FPS.stamina ?? 1) - e / 3), 0 === FPS.stamina && (FPS.sprinting = false)) : FPS.stamina = Math.min(1, (FPS.stamina ?? 1) + e / 2.2);
     if (FPS.vm && FPS.vm.userData.reloadT > 0) {
       FPS.vm.userData.reloadT = Math.max(0, FPS.vm.userData.reloadT - e);
       const magSize = MAG_SIZE[FPS.vm.userData.magFamily];
-      0 === FPS.vm.userData.reloadT && magSize && (FPS.vm.userData.mag = magSize, sfx("place"));
+      0 === FPS.vm.userData.reloadT && magSize && (FPS.vm.userData.mag = magSize, sfx("reload"));
     }
     if (t.d.fly) {
       const _wa = t.d.alt || 0;
@@ -7357,7 +7384,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     t.ang += clamp(angDiff(t.ang, FPS.yaw), -r * e, r * e), t.d.turret ? t.tang = FPS.yaw : t.tang = t.ang;
     const n = FPS.mv.f, a = FPS.mv.s, o = Math.hypot(n, a);
     if (o > 0.06) {
-      const r2 = t.d.speed * ("inf" === t.d.kind ? 1.85 : 1) * (t.slowT > 0 ? 0.5 : 1) * Math.min(1, o);
+      const r2 = t.d.speed * ("inf" === t.d.kind ? 1.85 : 1) * (t.slowT > 0 ? 0.5 : 1) * Math.min(1, o) * ("inf" === t.d.kind ? FPS.crouching ? 0.55 : sprintOk && FPS.stamina > 0 ? 1.5 : 1 : 1);
       let s, i;
       if ("inf" === t.d.kind) {
         const e2 = FPS.yaw;
@@ -7389,7 +7416,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         }
       } else passableAt(l, c, t) ? (t.x = l, t.y = c) : passableAt(l, t.y, t) ? t.x = l : passableAt(t.x, c, t) && (t.y = c), t.x = clamp(t.x, 6, 2938), t.y = clamp(t.y, 6, 2298);
       const h = Math.hypot(t.x - d, t.y - f);
-      t.animT = (t.animT || 0) + h, t.moving = h > 0.05, t.moving && "inf" !== t.d.kind && (t.d.naval ? Math.random() < 0.18 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }) : (Math.random() < 0.06 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 2, s: 0.35, c: "#8a7f6a", t: 0, life: 0.55 }), (t.trackT = (t.trackT || 0) - e) <= 0 && (t.trackT = 0.16, S.fx.push({ kind: "track", x: t.x, y: t.y, ang: t.ang, w: 0.35 * t.d.radius, l: 0.9 * t.d.radius, t: 0, life: 6 }))));
+      t.animT = (t.animT || 0) + h, t.moving = h > 0.05, t.moving && "inf" === t.d.kind && !t.inside && (t.animT - (FPS.lastStepT || 0) >= (FPS.crouching ? 17 : sprintOk && FPS.stamina > 0 ? 30 : 22) && (FPS.lastStepT = t.animT, sfx("step"))), t.moving && "inf" !== t.d.kind && (t.d.naval ? Math.random() < 0.18 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }) : (Math.random() < 0.06 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 2, s: 0.35, c: "#8a7f6a", t: 0, life: 0.55 }), (t.trackT = (t.trackT || 0) - e) <= 0 && (t.trackT = 0.16, S.fx.push({ kind: "track", x: t.x, y: t.y, ang: t.ang, w: 0.35 * t.d.radius, l: 0.9 * t.d.radius, t: 0, life: 6 }))));
     } else t.moving = false;
     if ("inf" === t.d.kind) {
       if (t.inside) FPS.interact = t.inside;
@@ -7443,7 +7470,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     mesh.userData.blink.material.color.setRGB(1, 0.15 + 0.1 * pulse, 0.1), mesh.userData.light.intensity = 0.6 + 1.4 * pulse;
   }
   function fpsAimTarget(e) {
-    const t = e.d, aim = FPS.aiming, r = 1.05 * (t.range || 120) * (aim ? 1.2 : 1), coneMin = aim ? 0.975 : 0.945, n = Math.cos(FPS.yaw), a = Math.sin(FPS.yaw);
+    const t = e.d, aim = FPS.aiming, r = 1.05 * (t.range || 120) * (aim ? 1.2 : 1), coneMin = (aim ? 0.975 : 0.945) - (FPS.crouching ? 0.02 : 0), n = Math.cos(FPS.yaw), a = Math.sin(FPS.yaw);
     let o = null, s = -1;
     const i = (arr) => {
       for (const l of arr) {
@@ -8171,6 +8198,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
       case "place":
         tone(220, 0.12, "square", 0.05), setTimeout(() => tone(330, 0.16, "square", 0.05), 110);
+        break;
+      case "reload":
+        noise(0.05, 0.1, 1200), setTimeout(() => noise(0.04, 0.14, 2200), 140);
+        break;
+      case "step":
+        noise(0.045, 0.045, 260);
         break;
       case "ready":
         tone(660, 0.1, "square", 0.05), setTimeout(() => tone(880, 0.14, "square", 0.05), 100);
@@ -9784,6 +9817,16 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     bmb.addEventListener("pointerdown", (e2) => {
       e2.stopPropagation(), fpsPlantBomb();
     });
+    const crBtn = $("#fpscrouch");
+    crBtn.addEventListener("pointerdown", (e2) => {
+      e2.stopPropagation(), FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false);
+    });
+    const spBtn = $("#fpssprint");
+    spBtn.addEventListener("pointerdown", (e2) => {
+      e2.stopPropagation(), FPS.stamina > 0 && (FPS.sprinting = true, FPS.crouching = false);
+    });
+    const spOff = () => FPS.sprinting = false;
+    spBtn.addEventListener("pointerup", spOff), spBtn.addEventListener("pointercancel", spOff), spBtn.addEventListener("pointerleave", spOff);
   })(), cv.addEventListener("pointerdown", (e) => {
     FPS.on && (FPS.look = { id: e.pointerId, x: e.clientX, y: e.clientY });
   }, true), cv.addEventListener("pointermove", (e) => {
@@ -9806,11 +9849,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }), window.addEventListener("keydown", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
-    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? FPS.firing = true : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? fpsAbility() : "v" === t && (FPS.thirdPerson = !FPS.thirdPerson);
+    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? FPS.firing = true : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? fpsAbility() : "v" === t ? FPS.thirdPerson = !FPS.thirdPerson : "shift" === t ? FPS.sprinting = true : "c" === t && (FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false));
   }), window.addEventListener("keyup", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
-    "w" === t || "s" === t ? FPS.mv.f = 0 : "a" === t || "d" === t ? FPS.mv.s = 0 : " " === t && (FPS.firing = false);
+    "w" === t || "s" === t ? FPS.mv.f = 0 : "a" === t || "d" === t ? FPS.mv.s = 0 : " " === t ? FPS.firing = false : "shift" === t && (FPS.sprinting = false);
   });
   Object.assign(window, {
     showCampaign,

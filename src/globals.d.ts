@@ -581,6 +581,10 @@ declare global {
     aimTarget: GameEntity | null;
     aimLockT: number;
     thirdPerson: boolean;
+    sprinting: boolean;
+    stamina: number;
+    crouching: boolean;
+    lastStepT: number;
     [k: string]: unknown;
   };
   const FLOOR_Z: number;
