@@ -600,6 +600,9 @@ declare global {
     chargingGrenade: boolean;
     swimming: boolean;
     nextAmbientT: number;
+    shakeMag: number;
+    shakeX: number;
+    shakeY: number;
     [k: string]: unknown;
   };
   const FLOOR_Z: number;

@@ -1185,6 +1185,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var powerFactor = (e) => e.drain <= e.power ? 1 : Math.max(0.35, e.power / Math.max(1, e.drain));
   function boom(e, t, r, n, a) {
     S.fx.push({ x: e, y: t, s: r, c: n, t: -(a || 0), life: 0.45 + 0.18 * r, kind: "boom" });
+    if (FPS.on && FPS.u && !FPS.u.dead) {
+      const maxD = 90 + 50 * r, d = dist(e, t, FPS.u.x, FPS.u.y);
+      d < maxD && (FPS.shakeMag = Math.max(FPS.shakeMag || 0, (1 - d / maxD) * Math.min(1, 0.16 * r)));
+    }
   }
   function spark(e, t, r) {
     S.fx.push({ x: e, y: t, s: 0.35, c: r || "#ffd", t: 0, life: 0.18, kind: "spark" });
@@ -1365,7 +1369,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     alertCheck(e, r);
     if (n && n.d && n.d.drain && !n.dead && n.hp < n.maxhp && (n.hp = Math.min(n.maxhp, n.hp + 0.5 * t)), e === FPS.u && FPS.on && !e.dead && (FPS.damageFlashT = 0.5, FPS.damageDir = n ? Math.atan2(n.y - e.y, n.x - e.x) : FPS.damageDir, sfx("hurt")), !e.dead) {
       const fromPlayer = n === FPS.u && FPS.on;
-      if (e.hp -= t, e.hitT = 0.12, e.hp <= 0) {
+      if (e.hp -= t, e.hitT = 0.12, "u" === e.e && "inf" === e.d.kind && (e.slowT = Math.max(e.slowT || 0, 0.22)), e.hp <= 0) {
         const t2 = "u" === e.e ? e.d.cost : 0.5 * e.d.cost;
         n && "u" === n.e && !n.dead && addXp(n, t2), fromPlayer && (FPS.killFlashT = 0.35, FPS.hitFlashT = 0.2, sfx("killmark")), "u" === e.e ? killUnit(e, r) : killBld(e);
       } else fromPlayer && (FPS.hitFlashT = 0.15, sfx("hitmark"));
@@ -1428,7 +1432,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     let s = dmgMult(r, t);
     r.aaBonus && "u" === t.e && t.alt > 2 && (s *= r.aaBonus);
     const i = r.dmg * s * ("u" === e.e ? vDmg(e) : 1), l = "u" === e.e && "function" == typeof muzzleDist ? muzzleDist(e) : 12;
-    if ("melee" === r.proj) return damage(t, i, e.owner, e), spark(t.x, t.y, "#ffb37d"), e.muzzle = 0.1, void sfx("cannon");
+    if ("melee" === r.proj) return damage(t, i, e.owner, e), spark(t.x, t.y, "#ffb37d"), e.muzzle = 0.1, void sfx("melee");
     const c = r.proj || "shell";
     if (e.muzzle = 0.09, e.recoil = 1, "beam" === c || "prism" === c || "tesla" === c || "psi" === c) return S.fx.push({ kind: c, x: e.x + Math.cos(o) * l * 0.8, y: e.y + Math.sin(o) * l * 0.8, z: "u" === e.e && "inf" !== e.d.kind ? 16 : 10, x2: t.x, y2: t.y, t: 0, life: "tesla" === c ? 0.25 : 0.18, c: "prism" === c ? "#7ff0ff" : "tesla" === c ? "#bfe8ff" : "#e08cff" }), "psi" !== c && damage(t, i, e.owner, e), void sfx("tesla" === c ? "tesla" : "beam");
     if ("bullet" === c || "flak" === c || "flame" === c) {
@@ -1530,6 +1534,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function tickUnit(e, t) {
     if (e.dead || e.inside) return;
     if (e.fps) return;
+    e.slowT > 0 && (e.slowT -= t);
     const r = e.d;
     if ("inf" !== r.kind && e.hp < 0.3 * e.maxhp) {
       e.smokeT = (e.smokeT || 0) - t;
@@ -7329,8 +7334,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (FPS.on && !FPS.thirdPerson && e2 === FPS.u && "inf" === e2.d.kind) continue;
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f) continue;
       if (!seen(e2)) continue;
-      const t2 = palette(e2.owner), r2 = unitFrame(e2), gy = e2.d.naval ? 2.6 : heightAt(e2.x, e2.y), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
-      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang), hasTurret(e2.key) && c("UT" + e2.key + (e2.gunKey ? "_" + e2.gunKey : "") + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }), t2, e2.x, e2.y, gy + (e2.alt || 0) + turRise, e2.tang), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), c("UTR" + e2.key + "|" + e2.owner, "chinook" === e2.key ? heliRotor : heliTailRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + ("chinook" === e2.key ? 22 : 17), e2.rotorSpin || 0)), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
+      const hitFlash = e2.hitT > 0 && "inf" === e2.d.kind, t2 = hitFlash ? { body: "#ffffff", dark: "#ddb8b0", trim: "#ffffff" } : palette(e2.owner), r2 = unitFrame(e2), gy = e2.d.naval ? 2.6 : heightAt(e2.x, e2.y), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
+      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : "") + (hitFlash ? "|H" : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang), hasTurret(e2.key) && c("UT" + e2.key + (e2.gunKey ? "_" + e2.gunKey : "") + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }), t2, e2.x, e2.y, gy + (e2.alt || 0) + turRise, e2.tang), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), c("UTR" + e2.key + "|" + e2.owner, "chinook" === e2.key ? heliRotor : heliTailRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + ("chinook" === e2.key ? 22 : 17), e2.rotorSpin || 0)), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
     }
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
     if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind);
@@ -7398,15 +7403,16 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [], glowC = "allied" === fac ? "#8fe0ff" : "soviet" === fac ? "#ff9c4a" : "yuri" === fac ? "#c98cff" : "glow", bodyC = "soviet" === fac ? "#8a7a6a" : "allied" === fac ? "#d8e8ee" : "yuri" === fac ? "#7a5f8a" : "white", noseC = "soviet" === fac ? "#c0392b" : "allied" === fac ? "#3ba0c9" : "yuri" === fac ? "#8c3fc9" : "red", shellC = "soviet" === fac ? "#e8c04a" : "allied" === fac ? "#c9d8e0" : "yuri" === fac ? "#b98cd8" : "gold";
     return "bullet" === kind || "flak" === kind ? e.push(P_(CYL(0.5, 4.5, 6), 0, 0, 0, glowC, { ty: PI2, e: 1 })) : "flame" === kind ? e.push(P_(CYL(0.9, 3, 6), 0, 0, 0, "yuri" === fac ? "#8fe06a" : "tibGlit", { ty: PI2, e: 1 })) : "rocket" === kind || "missile" === kind || "aamissile" === kind ? (e.push(P_(CYL(0.7, 4.5, 7), 0, 0, 0, bodyC, { ty: PI2 })), e.push(P_(CONE(0.7, 0.2, 1.6, 7), 4.5, 0, 0, noseC, { ty: PI2 })), e.push(P_(CYL(0.95, 1.6, 6), -0.6, 0, 0, glowC, { ty: PI2, e: 1 }))) : "bomb" === kind ? e.push(P_(CYL(1.1, 3.5, 8), 0, 0, 0, "darkmetal", { ty: PI2 })) : "grenade" === kind ? (e.push(P_(CYL(1.3, 1.9, 8), 0, 0, 0, "olive", { ty: PI2 })), e.push(P_(CYL(0.35, 0.5, 6), 0, 1.1, 0, "darkmetal", { ty: PI2 }))) : e.push(P_(CYL(0.55, 3.4, 6), 0, 0, 0, shellC, { ty: PI2 })), e;
   }
-  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0, deathT: 0, jumpT: 0, jumpZ: 0, chargingGrenade: false, swimming: false, nextAmbientT: 0 };
+  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0, deathT: 0, jumpT: 0, jumpZ: 0, chargingGrenade: false, swimming: false, nextAmbientT: 0, shakeMag: 0, shakeX: 0, shakeY: 0 };
   var fpsPromptTarget = null;
   var rotateTarget = null;
   function fpsEyeH(e) {
     return ("inf" === e.d.kind ? 19 : "kirov" === e.key ? 44 : e.d.fly ? 22 : 34) - (FPS.crouching && "inf" === e.d.kind ? 6 : 0);
   }
   function enterFPS(e) {
-    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.lastStepT = e.animT || 0, FPS.lastEngineSfxT = e.animT || 0, FPS.damageFlashT = 0, FPS.killFlashT = 0, FPS.deathT = 0, FPS.jumpT = 0, FPS.jumpZ = 0, FPS.chargingGrenade = false, FPS.swimming = false, FPS.nextAmbientT = S.time + rnd(4, 10), startFpsAmbience(), e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), true);
+    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.lastStepT = e.animT || 0, FPS.lastEngineSfxT = e.animT || 0, FPS.damageFlashT = 0, FPS.killFlashT = 0, FPS.deathT = 0, FPS.jumpT = 0, FPS.jumpZ = 0, FPS.chargingGrenade = false, FPS.swimming = false, FPS.nextAmbientT = S.time + rnd(4, 10), startFpsAmbience(), e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), "inf" === e.d.kind && !fpsHintShown && (fpsHintShown = true, hint("SPACE to jump \xB7 hold ABILITY to aim & throw grenade")), true);
   }
+  var fpsHintShown = false;
   function exitFPS() {
     stopFpsAmbience(), FPS.cam && FPS.cam.up.set(0, 1, 0), grenadeArc && (grenadeArc.visible = false), FPS.chargingGrenade = false, FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.deathT = 0, S.autopilot = false, S.players[0] && (S.players[0].ai.mimicProfile = null), document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
   }
@@ -7458,6 +7464,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     FPS.killFlashT > 0 && (FPS.killFlashT = Math.max(0, FPS.killFlashT - e));
     FPS.damageFlashT > 0 && (FPS.damageFlashT = Math.max(0, FPS.damageFlashT - 1.4 * e));
     S.time >= (FPS.nextAmbientT || 0) && (FPS.nextAmbientT = S.time + rnd(5, 14), sfx(Math.random() < 0.55 ? "distant_gun" : "distant_boom"));
+    FPS.shakeMag > 0 ? (FPS.shakeMag = Math.max(0, FPS.shakeMag - 1.8 * e), FPS.shakeX += ((Math.random() - 0.5) * FPS.shakeMag - FPS.shakeX) * Math.min(1, 12 * e), FPS.shakeY += ((Math.random() - 0.5) * FPS.shakeMag - FPS.shakeY) * Math.min(1, 12 * e)) : (FPS.shakeX = 0, FPS.shakeY = 0);
     if (FPS.jumpT > 0) {
       FPS.jumpT += e;
       const p = Math.min(1, FPS.jumpT / JUMP_DUR);
@@ -8036,7 +8043,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const dt = Math.min(1, (FPS.deathT || 0) / 1.4), gy = heightAt(e.x, e.y) + (e.alt || 0), r = gy + fpsEyeH(e) * (1 - 0.85 * dt), fall = 1.25 * dt, roll = 0.5 * dt;
       return t.fov = 68, t.position.set(e.x, r, e.y), t.up.set(Math.sin(roll), Math.cos(roll), 0), t.lookAt(e.x + Math.cos(FPS.yaw) * Math.cos(fall) * 50, r - 50 * Math.sin(fall), e.y + Math.sin(FPS.yaw) * Math.cos(fall) * 50), FPS.vm && (FPS.vm.visible = false), FPS.vvm && (FPS.vvm.visible = false), void 0;
     }
-    const kp = FPS.pitch + (FPS.viewKick || 0), a = Math.cos(kp);
+    t.up.set(0.05 * (FPS.shakeX || 0), 1, 0), t.up.normalize();
+    const kp = FPS.pitch + (FPS.viewKick || 0) + 0.05 * (FPS.shakeY || 0), a = Math.cos(kp);
     if (FPS.thirdPerson) {
       const dist2 = tpCameraDist(e, 105), backH = 52, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e) + (FPS.jumpZ || 0);
       t.position.set(e.x - Math.cos(FPS.yaw) * dist2, eyeY + backH, e.y - Math.sin(FPS.yaw) * dist2), t.lookAt(e.x + Math.cos(FPS.yaw) * a * 120, eyeY + 140 * Math.sin(kp), e.y + Math.sin(FPS.yaw) * a * 120), t.fov = FPS.aiming ? 50 : 68;
@@ -8381,6 +8389,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
       case "land":
         noise(0.06, 0.05, 400);
+        break;
+      case "melee":
+        noise(0.08, 0.05, 2200), setTimeout(() => noise(0.05, 0.09, 500), 45);
         break;
       case "distant_gun":
         tone(600, 0.05, "square", 8e-3, 300);
