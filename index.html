@@ -538,6 +538,32 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const r = idx(e, t);
     return G.terr[r] < 2 && 0 === G.occ[r] && !G.blk[r];
   }
+  function hasLineOfFire(x0, y0, x1, y1) {
+    let x = Math.floor(x0 / 32), y = Math.floor(y0 / 32);
+    const tx = Math.floor(x1 / 32), ty = Math.floor(y1 / 32);
+    if (x === tx && y === ty) return true;
+    const dx = Math.abs(tx - x), dy = Math.abs(ty - y), sx = x < tx ? 1 : -1, sy = y < ty ? 1 : -1;
+    let err = dx - dy;
+    for (let guard = 0; guard < 160; guard++) {
+      if (x === tx && y === ty) return true;
+      const e2 = 2 * err;
+      if (e2 > -dy) {
+        err -= dy, x += sx;
+      }
+      if (e2 < dx) {
+        err += dx, y += sy;
+      }
+      if (x === tx && y === ty) return true;
+      if (inMap(x, y)) {
+        const occ = G.occ[idx(x, y)];
+        if (occ) {
+          const b = S.bldById.get(occ);
+          if (b && !b.dead && "wall" !== b.key && "gate" !== b.key) return false;
+        }
+      }
+    }
+    return true;
+  }
   function walkableW(e, t) {
     if (!inMap(e, t)) return false;
     const r = idx(e, t);
@@ -1933,6 +1959,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     walkableW,
     walkableTeam,
     walkableWIgnore,
+    hasLineOfFire,
     hash2,
     noise2,
     vnoise,
@@ -5984,6 +6011,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (airOnly && t.alt <= 2) return false;
       if (t.d && t.d.sub && !subRevealed(t)) return false;
     } else if (airOnly) return false;
+    if (!(e.d && e.d.fly) && !(t.alt > 2) && !hasLineOfFire(e.x, e.y, t.x, t.y)) return false;
     return true;
   }
   function spawnCivs() {
@@ -7420,6 +7448,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         if ("b" === l.e && t.noBld) continue;
         const f = (dx * n + dy * a) / d;
         if (f < coneMin) continue;
+        if (!e.inside && !((l.alt || 0) > 2) && !hasLineOfFire(e.x, e.y, p.x, p.y)) continue;
         const h = 1e3 * f - 0.05 * d;
         h > s && (s = h, o = l);
       }
@@ -7439,7 +7468,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (magSize && null == vm.userData.mag) vm.userData.mag = magSize;
     const t = e.d, n = Math.cos(FPS.yaw), a = Math.sin(FPS.yaw), r = 1.05 * (t.range || 120) * (FPS.aiming ? 1.2 : 1), o = fpsAimTarget(e);
     FPS.viewKick = Math.min(0.09, (FPS.viewKick || 0) + 0.028), o && (FPS.hitFlashT = 0.15), o ? (e.cool = t.rof * vRof(e), "mind" !== t.role ? fire(e, o, t) : mindTick(e, o)) : "mind" !== t.role && t.dmg > 0 && (e.cool = t.rof * vRof(e), fire(e, { x: e.x + n * r, y: e.y + a * r, e: "u", d: { armor: "veh" }, dead: false }, t));
-    magSize && (spawnShell(vm), vm.userData.mag--, vm.userData.mag <= 0 && (vm.userData.reloadT = RELOAD_DUR, vm.userData.mag = 0));
+    magSize && (vm.userData.akimbo && (vm.userData.altFire = !vm.userData.altFire), spawnShell(vm), vm.userData.mag--, vm.userData.mag <= 0 && (vm.userData.reloadT = RELOAD_DUR, vm.userData.mag = 0));
   }
   var FPS_ABILITIES = { bullet: { name: "FRAG\nGRENADE", cd: 9 }, flame: { name: "FLAME\nBURST", cd: 7 }, missile: { name: "DIG\nIN", cd: 1.5 }, rocket: { name: "DIG\nIN", cd: 1.5 } };
   function fpsAbilityInfo(e) {
@@ -7496,10 +7525,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if ("pistol" === kind) {
       mesh(new THREE.BoxGeometry(0.04, 0.065, 0.16), metal, 0.065, -0.03, -0.12);
       mesh(new THREE.BoxGeometry(0.032, 0.05, 0.1), grip, 0.065, -0.09, -0.02, 0.35);
-      mesh(new THREE.BoxGeometry(0.036, 0.06, 0.15), dark, -0.065, -0.02, -0.1);
-      mesh(new THREE.BoxGeometry(0.03, 0.045, 0.09), grip, -0.065, -0.075, 0, 0.35);
+      mesh(new THREE.BoxGeometry(0.04, 0.065, 0.16), metal, -0.065, -0.03, -0.12);
+      mesh(new THREE.BoxGeometry(0.032, 0.05, 0.1), grip, -0.065, -0.09, -0.02, 0.35);
       const flash2 = mesh(new THREE.ConeGeometry(0.03, 0.08, 6), new THREE.MeshBasicMaterial({ color: "#ffe9a0", transparent: true, opacity: 0.95, depthWrite: false }), 0.065, -0.03, -0.21, Math.PI / 2);
-      return flash2.visible = false, g.userData.flash = flash2, g.userData.magFamily = "pistol", addMuzzleLight(flash2), g.visible = false, g;
+      const flash22 = mesh(new THREE.ConeGeometry(0.03, 0.08, 6), new THREE.MeshBasicMaterial({ color: "#ffe9a0", transparent: true, opacity: 0.95, depthWrite: false }), -0.065, -0.03, -0.21, Math.PI / 2);
+      flash22.visible = false, g.userData.flash2 = flash22;
+      const l2 = new THREE.PointLight(16755610, 0, 1.3, 2);
+      l2.position.copy(flash22.position), g.add(l2), g.userData.muzzleLight2 = l2;
+      return flash2.visible = false, g.userData.flash = flash2, g.userData.magFamily = "pistol", g.userData.akimbo = true, addMuzzleLight(flash2), g.visible = false, g;
     }
     if ("tool" === kind) {
       mesh(new THREE.CylinderGeometry(0.03, 0.034, 0.22, 10), mat("#b8863c", 0.5, 0.65), 0, -0.03, -0.16, Math.PI / 2);
@@ -7553,22 +7586,21 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return FPS.vm && FPS.vm.userData.kind === kind ? FPS.vm : (FPS.vm && FPS.cam.remove(FPS.vm), FPS.vm = buildViewmodel(kind), FPS.cam.add(FPS.vm), FPS.vm);
   }
   function spawnShell(vm) {
-    const flash = vm.userData.flash;
+    const flash = vm.userData.akimbo && vm.userData.altFire ? vm.userData.flash2 : vm.userData.flash;
     if (!flash) return;
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(6e-3, 6e-3, 0.018, 6), new THREE.MeshStandardMaterial({ color: 14071847, roughness: 0.3, metalness: 0.8 }));
-    m.position.set(flash.position.x + 0.03, flash.position.y - 0.01, flash.position.z + 0.15), m.userData.t0 = S.time, m.userData.dx = 0.22 + 0.18 * Math.random(), m.userData.dy = 0.3 + 0.2 * Math.random(), m.userData.dz = 0.12 * (Math.random() - 0.5), vm.add(m), (vm.userData.shells = vm.userData.shells || []).push(m);
+    const bx = flash.position.x + 0.03, by = flash.position.y - 0.01, bz = flash.position.z + 0.15, m = new THREE.Mesh(new THREE.CylinderGeometry(6e-3, 6e-3, 0.018, 6), new THREE.MeshStandardMaterial({ color: 14071847, roughness: 0.3, metalness: 0.8 }));
+    m.position.set(bx, by, bz), m.userData.t0 = S.time, m.userData.bx = bx, m.userData.by = by, m.userData.bz = bz, m.userData.dx = 0.22 + 0.18 * Math.random(), m.userData.dy = 0.3 + 0.2 * Math.random(), m.userData.dz = 0.12 * (Math.random() - 0.5), vm.add(m), (vm.userData.shells = vm.userData.shells || []).push(m);
   }
   function tickShells(vm) {
     const shells = vm.userData.shells;
     if (!shells || !shells.length) return;
-    const flash = vm.userData.flash, bx = flash ? flash.position.x + 0.03 : 0, by = flash ? flash.position.y - 0.01 : 0, bz = flash ? flash.position.z + 0.15 : 0;
     for (let i = shells.length - 1; i >= 0; i--) {
       const s = shells[i], dt = S.time - s.userData.t0;
       if (dt > 0.45) {
         vm.remove(s), shells.splice(i, 1);
         continue;
       }
-      s.position.set(bx + s.userData.dx * dt, by + s.userData.dy * dt - 2.4 * dt * dt, bz + s.userData.dz * dt), s.rotation.x = 16 * dt, s.rotation.z = 11 * dt;
+      s.position.set(s.userData.bx + s.userData.dx * dt, s.userData.by + s.userData.dy * dt - 2.4 * dt * dt, s.userData.bz + s.userData.dz * dt), s.rotation.x = 16 * dt, s.rotation.z = 11 * dt;
     }
   }
   var VM_KEY = { marksman: "sniper", tanya: "pistol", reaper: "pistol", phantom: "pistol", engineer: "tool" };
@@ -7683,8 +7715,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         box(half * 2 - 24, 3, 20, 0, half - 9, floorZ, 3355443, im.trim);
         for (let i = 0; i < 4; i++) box(2, 1, 4, -half * 0.6 + i * half * 0.4, half - 9, floorZ + 20, 10123545);
       } else if ("reactor" === theme) {
-        cyl(11, rh - 8, 0, 0, floorZ, 3355443, im.trim);
-        cyl(7, rh - 4, 0, 0, floorZ, 16118491, emisMat(16118491));
+        cyl(7, rh - 4, 0, 0, floorZ, 6281471, emisMat(6281471));
+        for (let i = 0; i < 8; i++) {
+          const ang = i * 0.7854;
+          cyl(1.4, rh - 6, 11 * Math.cos(ang), 11 * Math.sin(ang), floorZ, 3355443, im.trim);
+        }
         for (let i = 0; i < 4; i++) {
           const ang = i * 1.5708;
           cyl(1.3, 10, 17 * Math.cos(ang), 17 * Math.sin(ang), floorZ, 4471129, im.trim);
@@ -7843,10 +7878,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         px += 6e-3 * Math.sin(0.9 * idleT), py += 35e-4 * Math.sin(1.4 * idleT + 1.1);
       }
       py -= 0.045 * recoilP + 0.24 * reloadArc, vm.position.set(px, py, tz + 0.22 * kick), vm.rotation.x = -1.15 * kick - 0.22 * recoilP - 0.65 * reloadArc, vm.rotation.z = (e.deployed ? 0.14 : 0) - 0.55 * reloadArc;
-      const fl = vm.userData.flash;
-      fl && (fl.visible = e.muzzle > 0 && !reloading, fl.scale.setScalar(0.6 + 2.4 * (e.muzzle / 0.09)));
-      const ml = vm.userData.muzzleLight;
-      ml && (ml.intensity = e.muzzle > 0 && !reloading ? 2.2 * (e.muzzle / 0.09) : 0);
+      const firing = e.muzzle > 0 && !reloading, useAlt = vm.userData.akimbo && vm.userData.altFire, fl = vm.userData.flash, fl2 = vm.userData.flash2, ml = vm.userData.muzzleLight, ml2 = vm.userData.muzzleLight2;
+      fl && (fl.visible = firing && !useAlt, fl.scale.setScalar(0.6 + 2.4 * (e.muzzle / 0.09)));
+      fl2 && (fl2.visible = firing && useAlt, fl2.scale.setScalar(0.6 + 2.4 * (e.muzzle / 0.09)));
+      ml && (ml.intensity = firing && !useAlt ? 2.2 * (e.muzzle / 0.09) : 0);
+      ml2 && (ml2.intensity = firing && useAlt ? 2.2 * (e.muzzle / 0.09) : 0);
       tickShells(vm);
     } else FPS.vm && (FPS.vm.visible = false);
     return t.updateProjectionMatrix(), t;

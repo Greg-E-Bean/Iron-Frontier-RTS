@@ -85,6 +85,7 @@ declare global {
 
   function setGameSpeed(v: number): void;
   function walkable(tx: number, ty: number): boolean;
+  function hasLineOfFire(x0: number, y0: number, x1: number, y1: number): boolean;
   function walkableW(tx: number, ty: number): boolean;
   function walkableTeam(team: number): AnyFn;
   function walkableWIgnore(...args: any[]): boolean;
