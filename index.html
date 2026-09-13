@@ -5765,6 +5765,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const aimS = FPS.aiming ? 0.6 : 1, fireS = 1 + 0.32 * (e.muzzle > 0 ? e.muzzle / 0.09 : 0);
       xh.style.transform = "scale(" + aimS * fireS + ")", xh.classList.toggle("hit", FPS.hitFlashT > 0), xh.classList.toggle("noaim", !(e.d.dmg > 0));
     }
+    if (fpsBeingTargeted(e)) {
+      const pulse = 0.4 + 0.3 * Math.sin(9 * S.time);
+      ctx.save(), ctx.strokeStyle = "rgba(255,50,40," + pulse + ")", ctx.lineWidth = 12, ctx.strokeRect(6, 6, CW - 12, CH - 12), ctx.shadowColor = "#ff2818", ctx.shadowBlur = 18, ctx.font = "bold 13px Tahoma", ctx.textAlign = "center", ctx.fillStyle = "rgba(255,90,80," + (0.6 + 0.4 * Math.sin(9 * S.time)) + ")", ctx.fillText("TARGETED", CW / 2, 34), ctx.restore();
+    }
     if (FPS.aimTarget && !FPS.aimTarget.dead) {
       const tgt = FPS.aimTarget, isB = "b" === tgt.e, hgt = isB ? 28 * tgt.size : 2.3 * tgt.d.radius, wid = isB ? 28 * tgt.size : 1.7 * tgt.d.radius, gy = heightAt(tgt.x, tgt.y), midZ = isB ? gy + 0.32 * hgt : gy + (tgt.alt || 0) + 0.55 * hgt;
       FPS.cam.updateMatrixWorld();
@@ -7107,7 +7111,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     for (const e2 of S.units) {
       if (e2.dead || e2.inside) continue;
-      if (FPS.on && e2 === FPS.u && "inf" === e2.d.kind) continue;
+      if (FPS.on && !FPS.thirdPerson && e2 === FPS.u && "inf" === e2.d.kind) continue;
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f) continue;
       if (!seen(e2)) continue;
       const t2 = palette(e2.owner), r2 = unitFrame(e2), gy = e2.d.naval ? 2.6 : heightAt(e2.x, e2.y), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
@@ -7179,7 +7183,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [], glowC = "allied" === fac ? "#8fe0ff" : "soviet" === fac ? "#ff9c4a" : "yuri" === fac ? "#c98cff" : "glow", bodyC = "soviet" === fac ? "#8a7a6a" : "allied" === fac ? "#d8e8ee" : "yuri" === fac ? "#7a5f8a" : "white", noseC = "soviet" === fac ? "#c0392b" : "allied" === fac ? "#3ba0c9" : "yuri" === fac ? "#8c3fc9" : "red", shellC = "soviet" === fac ? "#e8c04a" : "allied" === fac ? "#c9d8e0" : "yuri" === fac ? "#b98cd8" : "gold";
     return "bullet" === kind || "flak" === kind ? e.push(P_(CYL(0.5, 4.5, 6), 0, 0, 0, glowC, { ty: PI2, e: 1 })) : "flame" === kind ? e.push(P_(CYL(0.9, 3, 6), 0, 0, 0, "yuri" === fac ? "#8fe06a" : "tibGlit", { ty: PI2, e: 1 })) : "rocket" === kind || "missile" === kind || "aamissile" === kind ? (e.push(P_(CYL(0.7, 4.5, 7), 0, 0, 0, bodyC, { ty: PI2 })), e.push(P_(CONE(0.7, 0.2, 1.6, 7), 4.5, 0, 0, noseC, { ty: PI2 })), e.push(P_(CYL(0.95, 1.6, 6), -0.6, 0, 0, glowC, { ty: PI2, e: 1 }))) : "bomb" === kind ? e.push(P_(CYL(1.1, 3.5, 8), 0, 0, 0, "darkmetal", { ty: PI2 })) : "grenade" === kind ? (e.push(P_(CYL(1.3, 1.9, 8), 0, 0, 0, "olive", { ty: PI2 })), e.push(P_(CYL(0.35, 0.5, 6), 0, 1.1, 0, "darkmetal", { ty: PI2 }))) : e.push(P_(CYL(0.55, 3.4, 6), 0, 0, 0, shellC, { ty: PI2 })), e;
   }
-  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0 };
+  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false };
   var fpsPromptTarget = null;
   var rotateTarget = null;
   function fpsEyeH(e) {
@@ -7264,6 +7268,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     b.garrison = (b.garrison || []).filter((x) => x !== u), u.inside = null, u.alt = 0;
     const r = nearestFree(b.tx + irnd(0, b.size - 1), b.ty + irnd(0, b.size - 1), walkable);
     r ? (u.x = 32 * r[0] + 16, u.y = 32 * r[1] + 16) : (u.x = b.x, u.y = b.y + 16 * b.size + 14), u.order = "idle", b.garrison.length || (b.owner = NEUTRAL);
+  }
+  function fpsBeingTargeted(e) {
+    return S.units.some((u) => !u.dead && u.owner !== e.owner && teamOf(u.owner) !== teamOf(e.owner) && u.target === e && ("attack" === u.order || "amove" === u.order));
   }
   function fpsInteract() {
     const e = FPS.u;
@@ -7526,12 +7533,16 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function fpsRender() {
     const e = FPS.u, t = FPS.cam;
     t.aspect !== CW / CH && (t.aspect = CW / CH);
-    const r = fpsEyeH(e) + (e.alt || 0) + heightAt(e.x, e.y), n = 0.1 * -e.d.radius;
-    t.position.set(e.x + Math.cos(FPS.yaw) * n, r, e.y + Math.sin(FPS.yaw) * n);
     const kp = FPS.pitch + (FPS.viewKick || 0), a = Math.cos(kp);
-    t.lookAt(t.position.x + Math.cos(FPS.yaw) * a * 100, t.position.y + 100 * Math.sin(kp), t.position.z + Math.sin(FPS.yaw) * a * 100), t.fov = FPS.aiming ? 46 : 74;
+    if (FPS.thirdPerson) {
+      const dist2 = 105, backH = 52, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e);
+      t.position.set(e.x - Math.cos(FPS.yaw) * dist2, eyeY + backH, e.y - Math.sin(FPS.yaw) * dist2), t.lookAt(e.x + Math.cos(FPS.yaw) * a * 120, eyeY + 140 * Math.sin(kp), e.y + Math.sin(FPS.yaw) * a * 120), t.fov = FPS.aiming ? 50 : 68;
+    } else {
+      const r = fpsEyeH(e) + (e.alt || 0) + heightAt(e.x, e.y), n = 0.1 * -e.d.radius;
+      t.position.set(e.x + Math.cos(FPS.yaw) * n, r, e.y + Math.sin(FPS.yaw) * n), t.lookAt(t.position.x + Math.cos(FPS.yaw) * a * 100, t.position.y + 100 * Math.sin(kp), t.position.z + Math.sin(FPS.yaw) * a * 100), t.fov = FPS.aiming ? 46 : 74;
+    }
     e.inside && (ensureInterior(e.inside), syncInteriorFigures(e.inside));
-    if ("inf" === e.d.kind && (e.d.dmg > 0 || "engineer" === e.d.role)) {
+    if (!FPS.thirdPerson && "inf" === e.d.kind && (e.d.dmg > 0 || "engineer" === e.d.role)) {
       const vm = ensureViewmodel(unitViewmodelKind(e));
       vm.visible = true;
       const aim = FPS.aiming, tx = aim ? 0 : 0.26, ty = aim ? -0.075 : -0.3, tz = aim ? -0.95 : -0.95, kick = e.muzzle > 0 ? 0.07 * (e.muzzle / 0.09) : 0, maxCool = Math.max(0.01, e.d.rof * vRof(e)), reloadP = e.cool > 0 ? Math.min(1, e.cool / maxCool) : 0;
@@ -7554,6 +7565,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     fpsTick,
     leaveGarrison,
     fpsInteract,
+    fpsBeingTargeted,
     fpsAimTarget,
     fpsUpdateAim,
     fpsShoot,
@@ -8755,7 +8767,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const o = FACTIONS[S.players[t].fac];
       if (0 === t) {
         const wx = 32 * (r + 1.5), wy = 32 * (n + 1.5);
-        if (pendingMission && pendingMission.noBuild) {
+        if (pendingMission && pendingMission.hero) {
+          addUnit(t, o.hero, wx, wy);
+        } else if (pendingMission && pendingMission.noBuild) {
           addUnit(t, "engineer", wx, wy + 24), addUnit(t, o.main, wx - 26, wy), addUnit(t, o.main, wx + 26, wy), addUnit(t, o.anti, wx, wy - 20), addUnit(t, o.anti, wx - 13, wy + 13), S.tab = "veh", document.querySelectorAll(".tab").forEach((e) => e.classList.toggle("on", "veh" === e.dataset.t));
         } else {
           addUnit(t, "mcv", wx, wy);
@@ -8945,7 +8959,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     { name: "Hold the Line", map: "ring", briefing: "A Brutal-tier warlord is mustering an all-out assault on our forward position. Dig in and hold for ten minutes until reinforcements arrive.", diffs: ["hard"], objective: { type: "survive", duration: 600 } },
     { name: "Behind Enemy Lines", map: "dust", briefing: "No time to build a base on this one \u2014 command has dropped in a small strike team, and that is all you get. Cripple the enemy war effort by destroying or capturing their Barracks and War Factory before their defenses regroup.", diffs: ["normal"], objective: { type: "raid", targets: ["barracks", "factory"] }, noBuild: true },
     { name: "Liberation", map: "basin", briefing: "Two hostile factions occupy this territory, and a civilian block near the center is worth liberating. Send an engineer to capture it \u2014 that alone will break their hold on the region.", diffs: ["normal", "normal"], objective: { type: "capture" } },
-    { name: "Reclamation", map: "lakes", briefing: "Both remaining warlords have joined forces against the Vanguard. Break them completely \u2014 this is the final battle for the region.", diffs: ["hard", "hard"], objective: { type: "elim" } }
+    { name: "Reclamation", map: "lakes", briefing: "Both remaining warlords have joined forces against the Vanguard. Break them completely \u2014 this is the final battle for the region.", diffs: ["hard", "hard"], objective: { type: "elim" } },
+    { name: "Ghost Protocol", map: "dust", briefing: "No army this time \u2014 just Tanya, dropped alone behind enemy lines. Take down their Construction Yard before they know she's there and their war effort collapses on its own. First-person or third-person, her call \u2014 press V to switch views.", diffs: ["easy"], objective: { type: "destroyTarget", key: "conyard" }, hero: true }
   ] }, soviet: { title: "Iron Reclamation", missions: [
     { name: "Opening Barrage", map: "dust", briefing: "A weak outpost stands between Legion forces and this sector's resources. Crush it and claim the ground.", diffs: ["easy"], objective: { type: "elim" } },
     { name: "Silence the Signal", map: "high", briefing: "Their command center is coordinating resistance across the region. Level it and the resistance falls apart on its own \u2014 the rest of their base is not worth Legion blood.", diffs: ["normal"], objective: { type: "destroyTarget", key: "conyard" } },
@@ -8966,7 +8981,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const camp = CAMPAIGNS[fac], m = camp && camp.missions[idx];
     if (!m) return;
     const foes = otherFacs(fac);
-    cfg.fac = fac, cfg.map = m.map, cfg.fog = "on", cfg.slots = m.diffs.map((d, i) => ({ fac: foes[i % foes.length], team: 2 + i, color: "def", spawn: i + 1, diff: d })), pendingMission = { fac, idx, objective: JSON.parse(JSON.stringify(m.objective)), noBuild: !!m.noBuild }, startGame();
+    cfg.fac = fac, cfg.map = m.map, cfg.fog = "on", cfg.slots = m.diffs.map((d, i) => ({ fac: foes[i % foes.length], team: 2 + i, color: "def", spawn: i + 1, diff: d })), pendingMission = { fac, idx, objective: JSON.parse(JSON.stringify(m.objective)), noBuild: !!m.noBuild, hero: !!m.hero }, startGame();
   }
   var TUTORIAL_STEPS = [
     { text: "Select your Mobile HQ and tap DEPLOY to build your base.", done: () => hasBld(0, "conyard") },
@@ -8990,7 +9005,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function applyPendingMission() {
     if (!pendingMission) return void (S.mission = null);
     if (pendingMission.tutorial) return S.mission = { tutorial: true, curStep: 0, doneSteps: [] }, S.tutorialMoved = false, S.tutorialAmoved = false, void (pendingMission = null);
-    S.mission = { fac: pendingMission.fac, idx: pendingMission.idx, objective: pendingMission.objective, noBuild: pendingMission.noBuild };
+    S.mission = { fac: pendingMission.fac, idx: pendingMission.idx, objective: pendingMission.objective, noBuild: pendingMission.noBuild, hero: pendingMission.hero };
+    if (S.mission.hero) {
+      const hu = S.units.find((u) => 0 === u.owner && !u.dead);
+      hu && enterFPS(hu);
+    }
     if ("capture" === S.mission.objective.type) {
       const cx = 1472, cy = 1152;
       let best = null, bd = 1e18;
@@ -9294,7 +9313,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     for (const t of S.blds) tickBld(t, e);
     tickProjectiles(e), tickRads(e), tickTiberium(e), tickTraffic(e), tickRockets(e), tickGates(e);
     for (const t of S.fx) t.t += e;
-    if (S.fx = S.fx.filter((e2) => e2.t < e2.life), S.units = S.units.filter((e2) => !e2.dead), S.blds = S.blds.filter((e2) => !e2.dead), Math.floor(2 * S.time) % 4 == 0) for (let e2 = 0; e2 < NEUTRAL; e2++) S.blds.some((t) => t.owner === e2 && !t.d.civ) || S.units.some((t) => t.owner === e2 && "mcv" === t.key) || S.players[e2].defeated || (S.players[e2].defeated = true);
+    if (S.fx = S.fx.filter((e2) => e2.t < e2.life), S.units = S.units.filter((e2) => !e2.dead), S.blds = S.blds.filter((e2) => !e2.dead), Math.floor(2 * S.time) % 4 == 0) for (let e2 = 0; e2 < NEUTRAL; e2++) {
+      const noBase = 0 === e2 && S.mission && (S.mission.noBuild || S.mission.hero), alive = noBase ? S.units.some((t) => t.owner === e2) : S.blds.some((t) => t.owner === e2 && !t.d.civ) || S.units.some((t) => t.owner === e2 && "mcv" === t.key);
+      alive || S.players[e2].defeated || (S.players[e2].defeated = true);
+    }
     if (!S.over) {
       if (S.mission) {
         const r = checkMissionOutcome();
@@ -9369,7 +9391,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }), window.addEventListener("keydown", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
-    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? FPS.firing = true : "escape" === t ? exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t && fpsAbility();
+    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? FPS.firing = true : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? fpsAbility() : "v" === t && (FPS.thirdPerson = !FPS.thirdPerson);
   }), window.addEventListener("keyup", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();

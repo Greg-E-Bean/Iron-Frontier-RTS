@@ -528,6 +528,7 @@ declare global {
   function fpsTick(dt: number): void;
   function leaveGarrison(u: Unit): void;
   function fpsInteract(): void;
+  const fpsBeingTargeted: AnyFn;
   const fpsAimTarget: AnyFn;
   function fpsUpdateAim(u: Unit, dt: number): void;
   function fpsShoot(u: Unit): void;
@@ -565,6 +566,7 @@ declare global {
     hitFlashT: number;
     aimTarget: GameEntity | null;
     aimLockT: number;
+    thirdPerson: boolean;
     [k: string]: unknown;
   };
   const FLOOR_Z: number;
