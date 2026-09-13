@@ -6870,7 +6870,6 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const e2 = new THREE.BufferGeometry();
       e2.setAttribute("position", new THREE.Float32BufferAttribute(d, 3)), e2.setAttribute("uv", new THREE.Float32BufferAttribute(wuv, 2)), e2.computeVertexNormals();
       const t2 = new THREE.MeshStandardMaterial({ color: 16777215, map: glWaterTex(), bumpMap: glWaterBumpTex(), bumpScale: 1.1, roughness: 0.78, metalness: 0, transparent: true, opacity: 0.94 });
-      fogPatch(t2);
       const r2 = new THREE.Mesh(e2, t2);
       r2.receiveShadow = true, r2.frustumCulled = false, GL.scene.add(r2), GL.water = r2;
     } else GL.water = null;
@@ -7506,15 +7505,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     g.position.set(bld.x, 0, bld.y), g.frustumCulled = false, GL.interiorScene || (GL.interiorScene = new THREE.Scene()), GL.interiorScene.add(g), bld.interior = g;
     return g;
   }
-  function interiorSlotPos(bld, idx, total) {
-    const half = interiorHalf(bld), r = Math.min(half * 0.55, 70), ang = idx * (6.283 / Math.max(3, total)) + 0.5;
+  function interiorSlotPos(bld, idx2, total) {
+    const half = interiorHalf(bld), r = Math.min(half * 0.55, 70), ang = idx2 * (6.283 / Math.max(3, total)) + 0.5;
     return { x: bld.x + Math.cos(ang) * r, y: bld.y + Math.sin(ang) * r };
   }
   function interiorFigurePos(u) {
     const bld = u.inside;
     if (!bld) return { x: u.x, y: u.y };
-    const list = (bld.garrison || []).filter((x) => x !== FPS.u && !x.dead), idx = list.indexOf(u);
-    return idx < 0 ? { x: bld.x, y: bld.y } : interiorSlotPos(bld, idx, list.length);
+    const list = (bld.garrison || []).filter((x) => x !== FPS.u && !x.dead), idx2 = list.indexOf(u);
+    return idx2 < 0 ? { x: bld.x, y: bld.y } : interiorSlotPos(bld, idx2, list.length);
   }
   function humanFigure(color) {
     const g = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color, depthTest: true, fog: false }), ro = -9997;
@@ -7528,20 +7527,30 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function syncInteriorFigures(bld) {
     const figMap = bld.interior.userData.figMap || (bld.interior.userData.figMap = /* @__PURE__ */ new Map()), list = (bld.garrison || []).filter((u) => u !== FPS.u && !u.dead), floorZ = bld.d.roof ? FLOOR_Z : 0;
-    list.forEach((u, idx) => {
+    list.forEach((u, idx2) => {
       let f = figMap.get(u);
       f || (f = humanFigure(palette(u.owner).body || "#888"), bld.interior.add(f), figMap.set(u, f));
-      const pos = interiorSlotPos(bld, idx, list.length);
+      const pos = interiorSlotPos(bld, idx2, list.length);
       f.position.set(pos.x - bld.x, floorZ, pos.y - bld.y), f.rotation.y = -(u.ang || 0);
     });
     for (const [u, f] of figMap) list.includes(u) || (bld.interior.remove(f), figMap.delete(u));
+  }
+  function tpCameraDist(e, desired) {
+    const dx = -Math.cos(FPS.yaw), dy = -Math.sin(FPS.yaw), step = 6;
+    let safe = 0.5 * step;
+    for (let d = step; d <= desired; d += step) {
+      const wx = e.x + dx * d, wy = e.y + dy * d, tx = Math.floor(wx / 32), ty = Math.floor(wy / 32);
+      if (inMap(tx, ty) && G.occ[idx(tx, ty)]) return Math.max(0.5 * step, d - step);
+      safe = d;
+    }
+    return safe;
   }
   function fpsRender() {
     const e = FPS.u, t = FPS.cam;
     t.aspect !== CW / CH && (t.aspect = CW / CH);
     const kp = FPS.pitch + (FPS.viewKick || 0), a = Math.cos(kp);
     if (FPS.thirdPerson) {
-      const dist2 = 105, backH = 52, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e);
+      const dist2 = tpCameraDist(e, 105), backH = 52, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e);
       t.position.set(e.x - Math.cos(FPS.yaw) * dist2, eyeY + backH, e.y - Math.sin(FPS.yaw) * dist2), t.lookAt(e.x + Math.cos(FPS.yaw) * a * 120, eyeY + 140 * Math.sin(kp), e.y + Math.sin(FPS.yaw) * a * 120), t.fov = FPS.aiming ? 50 : 68;
     } else {
       const r = fpsEyeH(e) + (e.alt || 0) + heightAt(e.x, e.y), n = 0.1 * -e.d.radius;
@@ -9051,14 +9060,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const m = S.mission;
     if (m.tutorial) {
       if (S.players[0].defeated) return "lose";
-      let allDead = true;
+      let allDead = NEUTRAL > 1;
       for (let t = 1; t < NEUTRAL; t++) teamOf(t) !== teamOf(0) && !S.players[t].defeated && (allDead = false);
       return allDead ? "win" : null;
     }
     const obj = m.objective;
     if (S.players[0].defeated) return "lose";
     if ("elim" === obj.type) {
-      let allDead = true;
+      let allDead = NEUTRAL > 1;
       for (let t = 1; t < NEUTRAL; t++) teamOf(t) !== teamOf(0) && !S.players[t].defeated && (allDead = false);
       return allDead ? "win" : null;
     }
@@ -9343,7 +9352,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         r && gameOver("win" === r);
       } else if (S.players[0].defeated) gameOver(false);
       else {
-        let e2 = true;
+        let e2 = NEUTRAL > 1;
         for (let t = 1; t < NEUTRAL; t++) teamOf(t) !== teamOf(0) && !S.players[t].defeated && (e2 = false);
         e2 && gameOver(true);
       }
