@@ -212,6 +212,10 @@ export interface Building {
   interior?: unknown;
   cargo?: Unit[];
   pads?: (Unit | null)[] | null;
+  bombT?: number;
+  bombFuse?: number;
+  bombOwner?: number;
+  bombMesh?: unknown;
   [field: string]: unknown;
 }
 

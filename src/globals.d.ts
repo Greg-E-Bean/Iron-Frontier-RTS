@@ -549,6 +549,14 @@ declare global {
   const humanFigure: AnyFn;
   function syncInteriorFigures(b: Building): void;
   function fpsRender(): any;
+  function fpsCanPlantBomb(): boolean;
+  function fpsPlantBomb(): void;
+  const bombProp: AnyFn;
+  function syncBombProp(b: Building): void;
+  const spawnShell: AnyFn;
+  const tickShells: AnyFn;
+  const MAG_SIZE: Record<string, number>;
+  const RELOAD_DUR: number;
   var FPS: {
     on: boolean;
     u: Unit | null;
