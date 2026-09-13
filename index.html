@@ -7076,6 +7076,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const d = S.time, f = FPS.on ? 1700 : (CW + CH) / cam.z * 0.62 + 320;
     for (const e2 of S.blds) {
       if (e2.dead) continue;
+      if (FPS.on && FPS.u && FPS.u.inside === e2) continue;
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f + 220) continue;
       if (!seen(e2)) continue;
       const live = 2 === visAt(e2.x, e2.y);
@@ -7153,7 +7154,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const [e2, t2] of GL.groups) t2.touched || (t2.list.length = 0), glFlush(t2, e2);
     GL.renderer.render(GL.scene, e);
     if (FPS.on && FPS.u && FPS.u.inside && GL.interiorScene) {
-      GL.renderer.autoClear = false, GL.renderer.render(GL.interiorScene, e), GL.renderer.autoClear = true;
+      GL.renderer.autoClear = false, GL.renderer.clearDepth(), GL.renderer.render(GL.interiorScene, e), GL.renderer.autoClear = true;
     }
   }
   Object.assign(window, {
@@ -7188,7 +7189,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], true);
   }
   function exitFPS() {
-    FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
+    FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
   }
   function fpsTick(e) {
     const t = FPS.u;
@@ -7428,7 +7429,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return grp;
   }
   function furnishInterior(g, bld, half, floorZ, tall) {
-    const ro = -1e4, propMat = (c) => new THREE.MeshBasicMaterial({ color: c, depthTest: false, fog: false }), cols = [];
+    const ro = -1e4, propMat = (c) => new THREE.MeshBasicMaterial({ color: c, depthTest: true, fog: false }), cols = [];
     const box = (w, d, h, x, z, y, color) => {
       const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), propMat(color));
       m.position.set(x, (void 0 === y ? floorZ : y) + h / 2, z), m.renderOrder = ro + 1, g.add(m), cols.push({ x, z, r: 0.5 * Math.max(w, d) + 1 });
@@ -7449,34 +7450,36 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function ensureInterior(bld) {
     if (bld.interior) return bld.interior;
     const half = interiorHalf(bld), tall = !!bld.d.roof, roomH = tall ? ROOM_H : 50, floorZ = tall ? FLOOR_Z : 0, ceilZ = floorZ + roomH, g = new THREE.Group(), ro = -1e4;
-    const wallMat = new THREE.MeshBasicMaterial({ color: 4407619, side: THREE.DoubleSide, depthTest: false, fog: false });
+    const wallMat = new THREE.MeshBasicMaterial({ color: 4407619, side: THREE.DoubleSide, depthTest: true, fog: false });
     const winW = Math.min(half * 1.3, half * 2 - 8), winH = roomH * 0.45, winZ = roomH * 0.3, doorW = Math.min(22, half * 1.1), doorH = roomH * 0.62;
     const mkWall = (w, rotY, px, pz, isDoor) => {
       const wg = panelWall(w, roomH, isDoor ? Math.min(doorW, w - 6) : Math.min(winW, w - 6), isDoor ? doorH : winH, isDoor ? 0 : winZ, wallMat);
       wg.rotation.y = rotY, wg.position.set(px, floorZ, pz), wg.children.forEach((m) => m.renderOrder = ro), g.add(wg);
     };
     mkWall(half * 2, 0, 0, -half), mkWall(half * 2, 0, 0, half, true), mkWall(half * 2, Math.PI / 2, -half, 0), mkWall(half * 2, Math.PI / 2, half, 0);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, half * 2 - 2), new THREE.MeshBasicMaterial({ color: 2960939, depthTest: false, fog: false }));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, half * 2 - 2), new THREE.MeshBasicMaterial({ color: 2960939, depthTest: true, fog: false }));
     floor.rotation.x = -Math.PI / 2, floor.position.y = floorZ + 0.3, floor.renderOrder = ro + 1, g.add(floor);
     if (tall) {
       const hw = half - 8, gap = STAIR_GAP, zStart = hw - gap, cd = half - 2 + zStart;
-      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, cd), new THREE.MeshBasicMaterial({ color: 3618615, depthTest: false, fog: false, side: THREE.DoubleSide }));
+      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, cd), new THREE.MeshBasicMaterial({ color: 3618615, depthTest: true, fog: false, side: THREE.DoubleSide }));
       ceil.rotation.x = Math.PI / 2, ceil.position.set(0, ceilZ, (zStart - (half - 2)) / 2), ceil.renderOrder = ro + 1, g.add(ceil);
-      const steps = 10, stairMat = new THREE.MeshBasicMaterial({ color: 2500134, depthTest: false, fog: false });
+      const steps = 10, stairMat = new THREE.MeshBasicMaterial({ color: 2500134, depthTest: true, fog: false });
       for (let i = 0; i < steps; i++) {
         const t01 = (i + 0.5) / steps, sz = new THREE.Mesh(new THREE.BoxGeometry(14, 2, gap / steps + 0.4), stairMat);
         sz.position.set(0, floorZ + t01 * (ROOF_Z - floorZ), zStart + t01 * gap), sz.renderOrder = ro + 1, g.add(sz);
       }
-      const rf = hw, roof = new THREE.Mesh(new THREE.PlaneGeometry(rf * 2, rf * 2), new THREE.MeshBasicMaterial({ color: 3355443, depthTest: false, fog: false, side: THREE.DoubleSide }));
+      const rampAngle = Math.atan2(ROOF_Z - floorZ, gap), rampLen = Math.hypot(gap, ROOF_Z - floorZ), rampMat = new THREE.MeshBasicMaterial({ color: 2237216, depthTest: true, fog: false }), ramp = new THREE.Mesh(new THREE.BoxGeometry(15, 5, rampLen + 6), rampMat);
+      ramp.position.set(0, floorZ + 0.5 * (ROOF_Z - floorZ) - 3, zStart + 0.5 * gap), ramp.rotation.x = -rampAngle, ramp.renderOrder = ro + 1, g.add(ramp);
+      const rf = hw, roof = new THREE.Mesh(new THREE.PlaneGeometry(rf * 2, rf * 2), new THREE.MeshBasicMaterial({ color: 3355443, depthTest: true, fog: false, side: THREE.DoubleSide }));
       roof.rotation.x = -Math.PI / 2, roof.position.y = ROOF_Z, roof.renderOrder = ro + 1, g.add(roof);
-      const parMat = new THREE.MeshBasicMaterial({ color: 2500134, side: THREE.DoubleSide, depthTest: false, fog: false }), parH = 8;
+      const parMat = new THREE.MeshBasicMaterial({ color: 2500134, side: THREE.DoubleSide, depthTest: true, fog: false }), parH = 8;
       const mkPar = (w, rotY, px, pz) => {
         const m = new THREE.Mesh(new THREE.PlaneGeometry(w, parH), parMat);
         m.rotation.y = rotY, m.position.set(px, ROOF_Z + parH / 2, pz), m.renderOrder = ro + 1, g.add(m);
       };
       mkPar(rf * 2, 0, 0, -rf), mkPar(rf * 2, 0, 0, rf), mkPar(rf * 2, Math.PI / 2, -rf, 0), mkPar(rf * 2, Math.PI / 2, rf, 0);
     } else {
-      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, half * 2 - 2), new THREE.MeshBasicMaterial({ color: 3618615, depthTest: false, fog: false, side: THREE.DoubleSide }));
+      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, half * 2 - 2), new THREE.MeshBasicMaterial({ color: 3618615, depthTest: true, fog: false, side: THREE.DoubleSide }));
       ceil.rotation.x = Math.PI / 2, ceil.position.y = ceilZ, ceil.renderOrder = ro + 1, g.add(ceil);
     }
     bld.furnCols = furnishInterior(g, bld, half, floorZ, tall);
@@ -7484,7 +7487,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const bx of [-half * 0.35, half * 0.35]) {
       const bulb = new THREE.PointLight(bulbCol, 1.15, half * 3.2, 2);
       bulb.position.set(bx, ceilZ - 8, 0), g.add(bulb);
-      const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(2.4, 8, 6), new THREE.MeshBasicMaterial({ color: bulbCol, fog: false, depthTest: false }));
+      const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(2.4, 8, 6), new THREE.MeshBasicMaterial({ color: bulbCol, fog: false, depthTest: true }));
       bulbMesh.position.copy(bulb.position), bulbMesh.renderOrder = ro + 2, g.add(bulbMesh);
     }
     g.position.set(bld.x, 0, bld.y), g.frustumCulled = false, GL.interiorScene || (GL.interiorScene = new THREE.Scene()), GL.interiorScene.add(g), bld.interior = g;
@@ -7501,12 +7504,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return idx < 0 ? { x: bld.x, y: bld.y } : interiorSlotPos(bld, idx, list.length);
   }
   function humanFigure(color) {
-    const g = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color, depthTest: false, fog: false }), ro = -9997;
+    const g = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color, depthTest: true, fog: false }), ro = -9997;
     const legs = new THREE.Mesh(new THREE.BoxGeometry(5, 10, 3.5), mat);
     legs.position.y = 5, legs.renderOrder = ro, g.add(legs);
     const torso = new THREE.Mesh(new THREE.BoxGeometry(6, 11, 4), mat);
     torso.position.y = 15.5, torso.renderOrder = ro, g.add(torso);
-    const head = new THREE.Mesh(new THREE.SphereGeometry(2.6, 8, 6), new THREE.MeshBasicMaterial({ color: 14595744, depthTest: false, fog: false }));
+    const head = new THREE.Mesh(new THREE.SphereGeometry(2.6, 8, 6), new THREE.MeshBasicMaterial({ color: 14595744, depthTest: true, fog: false }));
     head.position.y = 23.5, head.renderOrder = ro, g.add(head);
     return g;
   }
@@ -9352,7 +9355,18 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     FPS.yaw += (e.clientX - FPS.look.x) * t, FPS.pitch = clamp(FPS.pitch - (e.clientY - FPS.look.y) * t * 0.85, -0.85, 0.62), FPS.look.x = e.clientX, FPS.look.y = e.clientY;
   }, true), cv.addEventListener("pointerup", (e) => {
     FPS.look && e.pointerId === FPS.look.id && (FPS.look = null);
-  }, true), window.addEventListener("keydown", (e) => {
+  }, true), cv.addEventListener("mousedown", (e) => {
+    if (!FPS.on) return;
+    document.pointerLockElement !== cv && cv.requestPointerLock && cv.requestPointerLock(), 0 === e.button ? FPS.firing = true : 2 === e.button && (FPS.aiming = true);
+  }), window.addEventListener("mouseup", (e) => {
+    FPS.on && (0 === e.button ? FPS.firing = false : 2 === e.button && (FPS.aiming = false));
+  }), window.addEventListener("mousemove", (e) => {
+    if (!FPS.on || document.pointerLockElement !== cv) return;
+    const t = 22e-4;
+    FPS.yaw += e.movementX * t, FPS.pitch = clamp(FPS.pitch - e.movementY * t, -0.85, 0.62);
+  }), document.addEventListener("pointerlockchange", () => {
+    document.pointerLockElement !== cv && (FPS.firing = false, FPS.aiming = false);
+  }), window.addEventListener("keydown", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
     "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? FPS.firing = true : "escape" === t ? exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t && fpsAbility();
