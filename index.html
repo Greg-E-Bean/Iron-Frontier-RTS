@@ -1715,6 +1715,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (S.spyReveals) for (const s of S.spyReveals) mark(r, 2, s.x, s.y, s.r);
     const teams = /* @__PURE__ */ new Set();
     for (const p of S.players) p && !p.neutral && p.isAI && !p.defeated && teams.add(teamOf(p.id));
+    S.autopilot && teams.add(teamOf(0));
     for (const team of teams) {
       let grid = S.aiVis.get(team);
       grid ? grid.fill(0) : (grid = new Uint8Array(6624), S.aiVis.set(team, grid));
@@ -1971,7 +1972,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     boom: { graceMul: 1.9, armyMul: 1.35, eliteChance: 0.55, defMul: 0.6, minerMul: 1.7, refMul: 1.6, retreatHp: 0.3 }
   };
   function aiPersonality(e) {
-    return AI_PERSONALITY[e.ai.personality] || AI_PERSONALITY.turtle;
+    return e.ai.mimicProfile || AI_PERSONALITY[e.ai.personality] || AI_PERSONALITY.turtle;
+  }
+  function inferPlayerProfile(p) {
+    const nBld = (b) => countBld(p.id, b), totalBld = Math.max(1, S.blds.filter((b) => b.owner === p.id && !b.dead).length), defShare = (nBld("def1") + nBld("def2") + nBld("triturret") + nBld("wall")) / totalBld, refShare = nBld("refinery") / totalBld, armySize = aiArmy(p).length, elapsedMin = Math.max(1, S.time / 60), armyRate = armySize / elapsedMin;
+    return { graceMul: clamp(1.6 - 0.15 * armyRate, 0.4, 2), armyMul: clamp(1.4 - 0.1 * armyRate, 0.5, 1.8), eliteChance: clamp(0.3 + 0.05 * armyRate, 0.15, 0.7), defMul: clamp(0.5 + 3 * defShare, 0.4, 2.2), minerMul: clamp(0.7 + 3 * refShare, 0.7, 1.8), refMul: clamp(0.7 + 3 * refShare, 0.7, 1.8), retreatHp: clamp(0.4 - 0.03 * armyRate, 0.15, 0.4) };
   }
   function aiUnitDps(u) {
     return (u.d.dmg || 0) / Math.max(0.1, u.d.rof || 1);
@@ -2019,7 +2024,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return S.units.some((t) => !t.dead && t.owner !== e.id && t.owner !== NEUTRAL && t.d.fly);
   }
   function aiArmy(e) {
-    return S.units.filter((t) => t.owner === e.id && !t.dead && "miner" !== t.d.role);
+    return S.units.filter((t) => t.owner === e.id && !t.dead && "miner" !== t.d.role && (!FPS.on || t !== FPS.u));
   }
   function aiCap(e) {
     return Math.round((DIFFS[e.diff].cap + Math.min(20, Math.floor(S.time / 60)) + Math.min(25, Math.floor(e.credits / 3e3))) * (e.ai.diffScale || 1));
@@ -2189,7 +2194,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     adaptDifficulty,
     aiNextBld,
     aiCap,
-    aiThreatScore
+    aiThreatScore,
+    inferPlayerProfile
   });
 })();
 
@@ -7190,10 +7196,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return "inf" === e.d.kind ? 19 : "kirov" === e.key ? 44 : e.d.fly ? 22 : 34;
   }
   function enterFPS(e) {
-    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], true);
+    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), true);
   }
   function exitFPS() {
-    FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
+    FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, S.autopilot = false, S.players[0] && (S.players[0].ai.mimicProfile = null), document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
   }
   function fpsTick(e) {
     const t = FPS.u;
@@ -8295,6 +8301,18 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     } catch (e) {
     }
   }
+  var autopilotEnabled = true;
+  try {
+    autopilotEnabled = "0" !== localStorage.getItem("ifr_autopilot");
+  } catch (e) {
+  }
+  function setAutopilot(v) {
+    autopilotEnabled = v;
+    try {
+      localStorage.setItem("ifr_autopilot", v ? "1" : "0");
+    } catch (e) {
+    }
+  }
   function tickEdgeScroll(dt) {
     if (!edgePanEnabled || null === edgeMouseX || null === edgeMouseY || FPS.on || !S.running || !$("#menu").classList.contains("hidden")) return;
     const EDGE = 18, SPEED = 640 / cam.z;
@@ -8670,7 +8688,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
         const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
         const kbRows = Object.keys(KEYBINDS).map((action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>").join("");
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked));
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
@@ -8819,12 +8837,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     resetKeybinds,
     keyLabel,
     tickEdgeScroll,
-    setEdgePan
+    setEdgePan,
+    setAutopilot
   });
   Object.defineProperties(window, {
     cfg: { get: () => cfg, set: (v) => {
       cfg = v;
     }, configurable: true },
+    autopilotEnabled: { get: () => autopilotEnabled, configurable: true },
     KEYBINDS: { get: () => KEYBINDS, configurable: true },
     edgePanEnabled: { get: () => edgePanEnabled, configurable: true }
   });
@@ -9308,7 +9328,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       (S.thunderT = (void 0 === S.thunderT ? 6 + 10 * Math.random() : S.thunderT) - e) <= 0 && (S.thunderT = 9 + 14 * Math.random(), sfx("thunder"), lightningT = 0.16 + 0.12 * Math.random());
     }
     S.spyReveals && S.spyReveals.length && (S.spyReveals.forEach((r) => r.t -= e), S.spyReveals = S.spyReveals.filter((r) => r.t > 0));
-    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), tickProduction(t, e), t.isAI && (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e)));
+    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), tickProduction(t, e), t.isAI ? (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e)) : 0 === t.id && S.autopilot && (tickAI(t, e), aiMicro(t, e)));
     for (const t of S.units) tickUnit(t, e);
     for (const t of S.blds) tickBld(t, e);
     tickProjectiles(e), tickRads(e), tickTiberium(e), tickTraffic(e), tickRockets(e), tickGates(e);

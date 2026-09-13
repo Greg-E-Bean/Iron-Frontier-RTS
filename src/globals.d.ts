@@ -213,6 +213,7 @@ declare global {
   const aiNextBld: AnyFn;
   const aiCap: AnyFn;
   const aiThreatScore: AnyFn;
+  const inferPlayerProfile: AnyFn;
 
   // === models.js (3D model library + shared camera/canvas state) ===
   const cv: HTMLCanvasElement;
@@ -625,6 +626,8 @@ declare global {
   function tickEdgeScroll(dt: number): void;
   function setEdgePan(enabled: boolean): void;
   var edgePanEnabled: boolean;
+  function setAutopilot(enabled: boolean): void;
+  var autopilotEnabled: boolean;
   var cfg: GameConfig;
 
   // === saveload.js ===

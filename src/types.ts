@@ -319,6 +319,7 @@ export interface GameState {
   traffic?: any[];
   history?: { t: number; p: { kills: number; lost: number; units: number; value: number }[] }[];
   histT?: number;
+  autopilot?: boolean;
   [field: string]: unknown;
 }
 
