@@ -242,6 +242,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #xhair.kill:before{box-shadow:0 35px 0 0 #ffd75e}
 #xhair.kill:after{box-shadow:35px 0 0 0 #ffd75e}
 #xhair.noaim{opacity:.35}
+#xhair.scoped{opacity:0}
 #dmgvig{position:absolute;inset:0;pointer-events:none;opacity:0;
   background:radial-gradient(ellipse at center,rgba(200,20,20,0) 45%,rgba(200,20,20,.55) 100%);
   transition:opacity .08s linear}
@@ -249,6 +250,19 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   transition:opacity .12s linear}
 #dmgdir:before{content:"";position:absolute;left:-14px;top:-150px;width:0;height:0;
   border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:22px solid rgba(255,60,50,.9)}
+#deathscreen{position:absolute;inset:0;pointer-events:none;opacity:0;background:#000;
+  display:flex;align-items:center;justify-content:center;transition:opacity .35s ease-in}
+#deathscreen.hidden{display:none}
+#deathtxt{color:#c62828;font:700 42px Tahoma,sans-serif;letter-spacing:6px;text-shadow:0 0 22px rgba(198,40,40,.8);
+  opacity:0;transition:opacity 1s ease-out .4s}
+#deathscreen.show{opacity:1}
+#deathscreen.show #deathtxt{opacity:1}
+#scope{position:absolute;inset:0;pointer-events:none;display:none;background:
+  radial-gradient(circle at center,transparent 0 19%,#000 30%);}
+#scope.on{display:block}
+#scope:before,#scope:after{content:"";position:absolute;left:50%;top:50%;background:rgba(10,14,10,.85)}
+#scope:before{width:1px;height:100%;transform:translate(-50%,-50%)}
+#scope:after{width:100%;height:1px;transform:translate(-50%,-50%)}
 #fpsammo{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 154px);transform:translateX(-50%);
   font-size:13px;letter-spacing:1.5px;color:#d8e4ea;text-shadow:0 1px 3px rgba(0,0,0,.8);font-weight:700}
 #fpsammo.reload{color:#ff9a5a;animation:bombPulse 1.6s ease-in-out infinite}
@@ -283,6 +297,11 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #fpssprint.on{background:rgba(60,160,80,.6);border-color:#bfffc8}
 #fpssprint.empty{opacity:.4}
 #fpssprint.hidden{display:none}
+#fpsjump{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 374px);
+  width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
+  justify-content:center;font-size:10px;letter-spacing:1px;color:#ffe8c0;
+  background:rgba(110,80,40,.34);border:2px solid rgba(255,210,150,.5)}
+#fpsjump.hidden{display:none}
 #fpsfire{position:absolute;right:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);
   width:96px;height:96px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:14px;letter-spacing:2px;color:#ffd9c0;
@@ -438,6 +457,8 @@ body.fps #mmWrap{opacity:.55}
 <div id="fpsui" class="hidden">
   <div id="dmgvig"></div>
   <div id="dmgdir"></div>
+  <div id="deathscreen" class="hidden"><div id="deathtxt">YOU DIED</div></div>
+  <div id="scope"></div>
   <div id="xhair"></div>
   <div id="fpsammo" class="hidden"></div>
   <div id="fpsbar"><span id="fpsname">—</span><i id="fpshp"></i></div>
@@ -446,6 +467,7 @@ body.fps #mmWrap{opacity:.55}
   <div id="fpsstamina" class="hidden"><i></i></div>
   <div id="fpscrouch" class="hidden">CROUCH</div>
   <div id="fpssprint" class="hidden">SPRINT</div>
+  <div id="fpsjump" class="hidden">JUMP</div>
   <div id="fpsaim">AIM</div>
   <div id="fpsability" class="hidden">ABILITY</div>
   <div id="fpsfire">FIRE</div>
@@ -5896,6 +5918,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function fpsHUD() {
     const e = FPS.u;
     if (!e) return;
+    const ds = document.getElementById("deathscreen");
+    if (e.dead) {
+      ds && (ds.classList.remove("hidden"), ds.classList.toggle("show", FPS.deathT > 0.15));
+      return;
+    }
+    ds && ds.classList.add("hidden");
     const en = document.getElementById("fpsenter");
     if (en) if (e.inside) en.classList.remove("hidden"), en.classList.add("on"), en.textContent = "LEAVE";
     else if (FPS.interact) en.classList.remove("hidden"), en.classList.remove("on"), en.textContent = "ENTER";
@@ -5910,7 +5938,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const vm = FPS.vm, magSize = !FPS.thirdPerson && vm && MAG_SIZE[vm.userData.magFamily];
       magSize ? (am.classList.remove("hidden"), vm.userData.reloadT > 0 ? (am.classList.add("reload"), am.textContent = "RELOADING") : (am.classList.remove("reload"), am.textContent = (vm.userData.mag ?? magSize) + " / " + magSize)) : am.classList.add("hidden");
     }
-    const isInf = "inf" === e.d.kind, crBtn = document.getElementById("fpscrouch"), spBtn = document.getElementById("fpssprint"), stam = document.getElementById("fpsstamina");
+    const scope = document.getElementById("scope");
+    scope && scope.classList.toggle("on", FPS.aiming && !FPS.thirdPerson && !!FPS.vm && "sniper" === FPS.vm.userData.magFamily && !e.dead);
+    const isInf = "inf" === e.d.kind, crBtn = document.getElementById("fpscrouch"), spBtn = document.getElementById("fpssprint"), stam = document.getElementById("fpsstamina"), jpBtn = document.getElementById("fpsjump");
+    jpBtn && jpBtn.classList.toggle("hidden", !isInf);
     crBtn && crBtn.classList.toggle("hidden", !isInf), crBtn && crBtn.classList.toggle("on", FPS.crouching);
     spBtn && spBtn.classList.toggle("hidden", !isInf), spBtn && spBtn.classList.toggle("on", FPS.sprinting), spBtn && spBtn.classList.toggle("empty", FPS.stamina <= 0.05);
     stam && stam.classList.toggle("hidden", !isInf), stam && stam.classList.toggle("low", FPS.stamina < 0.3), stam && (stam.firstElementChild.style.width = 100 * FPS.stamina + "%");
@@ -5939,9 +5970,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
     } else abBtn && abBtn.classList.add("hidden");
     const xh = document.getElementById("xhair");
+    const scoped = FPS.aiming && !FPS.thirdPerson && !!FPS.vm && "sniper" === FPS.vm.userData.magFamily;
     if (xh) {
       const aimS = FPS.aiming ? 0.6 : 1, fireS = 1 + 0.32 * (e.muzzle > 0 ? e.muzzle / 0.09 : 0);
-      xh.style.transform = "scale(" + aimS * fireS + ")", xh.classList.toggle("hit", FPS.hitFlashT > 0), xh.classList.toggle("kill", FPS.killFlashT > 0), xh.classList.toggle("noaim", !(e.d.dmg > 0));
+      xh.style.transform = "scale(" + aimS * fireS + ")", xh.classList.toggle("hit", FPS.hitFlashT > 0), xh.classList.toggle("kill", FPS.killFlashT > 0), xh.classList.toggle("noaim", !(e.d.dmg > 0)), xh.classList.toggle("scoped", scoped);
     }
     const dv = document.getElementById("dmgvig");
     dv && (dv.style.opacity = "" + Math.min(0.9, 2 * FPS.damageFlashT));
@@ -7366,21 +7398,55 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [], glowC = "allied" === fac ? "#8fe0ff" : "soviet" === fac ? "#ff9c4a" : "yuri" === fac ? "#c98cff" : "glow", bodyC = "soviet" === fac ? "#8a7a6a" : "allied" === fac ? "#d8e8ee" : "yuri" === fac ? "#7a5f8a" : "white", noseC = "soviet" === fac ? "#c0392b" : "allied" === fac ? "#3ba0c9" : "yuri" === fac ? "#8c3fc9" : "red", shellC = "soviet" === fac ? "#e8c04a" : "allied" === fac ? "#c9d8e0" : "yuri" === fac ? "#b98cd8" : "gold";
     return "bullet" === kind || "flak" === kind ? e.push(P_(CYL(0.5, 4.5, 6), 0, 0, 0, glowC, { ty: PI2, e: 1 })) : "flame" === kind ? e.push(P_(CYL(0.9, 3, 6), 0, 0, 0, "yuri" === fac ? "#8fe06a" : "tibGlit", { ty: PI2, e: 1 })) : "rocket" === kind || "missile" === kind || "aamissile" === kind ? (e.push(P_(CYL(0.7, 4.5, 7), 0, 0, 0, bodyC, { ty: PI2 })), e.push(P_(CONE(0.7, 0.2, 1.6, 7), 4.5, 0, 0, noseC, { ty: PI2 })), e.push(P_(CYL(0.95, 1.6, 6), -0.6, 0, 0, glowC, { ty: PI2, e: 1 }))) : "bomb" === kind ? e.push(P_(CYL(1.1, 3.5, 8), 0, 0, 0, "darkmetal", { ty: PI2 })) : "grenade" === kind ? (e.push(P_(CYL(1.3, 1.9, 8), 0, 0, 0, "olive", { ty: PI2 })), e.push(P_(CYL(0.35, 0.5, 6), 0, 1.1, 0, "darkmetal", { ty: PI2 }))) : e.push(P_(CYL(0.55, 3.4, 6), 0, 0, 0, shellC, { ty: PI2 })), e;
   }
-  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0 };
+  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0, deathT: 0, jumpT: 0, jumpZ: 0, chargingGrenade: false, swimming: false, nextAmbientT: 0 };
   var fpsPromptTarget = null;
   var rotateTarget = null;
   function fpsEyeH(e) {
     return ("inf" === e.d.kind ? 19 : "kirov" === e.key ? 44 : e.d.fly ? 22 : 34) - (FPS.crouching && "inf" === e.d.kind ? 6 : 0);
   }
   function enterFPS(e) {
-    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.lastStepT = e.animT || 0, FPS.lastEngineSfxT = e.animT || 0, FPS.damageFlashT = 0, FPS.killFlashT = 0, e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), true);
+    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.lastStepT = e.animT || 0, FPS.lastEngineSfxT = e.animT || 0, FPS.damageFlashT = 0, FPS.killFlashT = 0, FPS.deathT = 0, FPS.jumpT = 0, FPS.jumpZ = 0, FPS.chargingGrenade = false, FPS.swimming = false, FPS.nextAmbientT = S.time + rnd(4, 10), startFpsAmbience(), e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), true);
   }
   function exitFPS() {
-    FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, S.autopilot = false, S.players[0] && (S.players[0].ai.mimicProfile = null), document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
+    stopFpsAmbience(), FPS.cam && FPS.cam.up.set(0, 1, 0), grenadeArc && (grenadeArc.visible = false), FPS.chargingGrenade = false, FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.deathT = 0, S.autopilot = false, S.players[0] && (S.players[0].ai.mimicProfile = null), document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
+  }
+  var grenadeArc = null;
+  function ensureGrenadeArc() {
+    if (grenadeArc) return grenadeArc;
+    const N = 14, pos = new Float32Array(3 * N), geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    const mat = new THREE.LineDashedMaterial({ color: 16764778, dashSize: 4, gapSize: 3, transparent: true, opacity: 0.85, depthTest: false });
+    const line = new THREE.Line(geo, mat);
+    return line.frustumCulled = false, line.visible = false, line.renderOrder = 999, GL.scene.add(line), grenadeArc = line, line;
+  }
+  function fpsPassable(x, y, e) {
+    if (passableAt(x, y, e)) return true;
+    if ("inf" !== e.d.kind) return false;
+    const tx = Math.floor(x / 32), ty = Math.floor(y / 32);
+    if (!inMap(tx, ty)) return false;
+    const o = idx(tx, ty);
+    if (G.terr[o] < 2) return false;
+    const s = G.occ[o];
+    if (0 !== s) {
+      const b = S.blds.find((b2) => b2.id === s);
+      if (b && !b.dead) return false;
+    }
+    return true;
+  }
+  function fpsJump() {
+    const t = FPS.u;
+    t && !t.dead && "inf" === t.d.kind && !FPS.swimming && !(FPS.jumpT > 0) && (FPS.jumpT = 1e-4, sfx("jump"));
+  }
+  var JUMP_DUR = 0.62;
+  var JUMP_H = 13;
+  var DEATH_DUR = 2.6;
+  function fpsDeathTick(dt) {
+    FPS.deathT <= 0 && sfx("death"), FPS.firing = false, FPS.aiming = false, FPS.deathT = Math.min(DEATH_DUR, (FPS.deathT || 0) + dt), FPS.deathT >= DEATH_DUR && exitFPS();
   }
   function fpsTick(e) {
     const t = FPS.u;
-    if (!t || t.dead) return void exitFPS();
+    if (!t) return void exitFPS();
+    if (t.dead) return void fpsDeathTick(e);
     t.fps = 1, t.order = "idle", t.path = null, t.target = null;
     t.cool > 0 && (t.cool -= e);
     t.muzzle > 0 && (t.muzzle -= e);
@@ -7391,6 +7457,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     FPS.hitFlashT > 0 && (FPS.hitFlashT -= e);
     FPS.killFlashT > 0 && (FPS.killFlashT = Math.max(0, FPS.killFlashT - e));
     FPS.damageFlashT > 0 && (FPS.damageFlashT = Math.max(0, FPS.damageFlashT - 1.4 * e));
+    S.time >= (FPS.nextAmbientT || 0) && (FPS.nextAmbientT = S.time + rnd(5, 14), sfx(Math.random() < 0.55 ? "distant_gun" : "distant_boom"));
+    if (FPS.jumpT > 0) {
+      FPS.jumpT += e;
+      const p = Math.min(1, FPS.jumpT / JUMP_DUR);
+      FPS.jumpZ = JUMP_H * 4 * p * (1 - p), p >= 1 && (FPS.jumpT = 0, FPS.jumpZ = 0, sfx("land"));
+    }
     const sprintOk = "inf" === t.d.kind && FPS.sprinting && !FPS.aiming && !FPS.crouching;
     sprintOk && t.moving ? (FPS.stamina = Math.max(0, (FPS.stamina ?? 1) - e / 3), 0 === FPS.stamina && (FPS.sprinting = false)) : FPS.stamina = Math.min(1, (FPS.stamina ?? 1) + e / 2.2);
     if (FPS.vm && FPS.vm.userData.reloadT > 0) {
@@ -7406,7 +7478,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     t.ang += clamp(angDiff(t.ang, FPS.yaw), -r * e, r * e), t.d.turret ? t.tang = FPS.yaw : t.tang = t.ang;
     const n = FPS.mv.f, a = FPS.mv.s, o = Math.hypot(n, a);
     if (o > 0.06) {
-      const r2 = t.d.speed * ("inf" === t.d.kind ? 1.85 : 1) * (t.slowT > 0 ? 0.5 : 1) * Math.min(1, o) * ("inf" === t.d.kind ? FPS.crouching ? 0.55 : sprintOk && FPS.stamina > 0 ? 1.5 : 1 : 1);
+      const r2 = t.d.speed * ("inf" === t.d.kind ? 1.85 : 1) * (t.slowT > 0 ? 0.5 : 1) * Math.min(1, o) * ("inf" === t.d.kind ? FPS.crouching ? 0.55 : sprintOk && FPS.stamina > 0 ? 1.5 : 1 : 1) * (FPS.swimming ? 0.5 : 1);
       let s, i;
       if ("inf" === t.d.kind) {
         const e2 = FPS.yaw;
@@ -7436,9 +7508,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
             t.alt = FLOOR_Z + p * (ROOF_Z - FLOOR_Z);
           } else t.alt = (void 0 !== t.alt ? t.alt : FLOOR_Z) > (FLOOR_Z + ROOF_Z) / 2 ? ROOF_Z : FLOOR_Z;
         }
-      } else passableAt(l, c, t) ? (t.x = l, t.y = c) : passableAt(l, t.y, t) ? t.x = l : passableAt(t.x, c, t) && (t.y = c), t.x = clamp(t.x, 6, 2938), t.y = clamp(t.y, 6, 2298);
+      } else fpsPassable(l, c, t) ? (t.x = l, t.y = c) : fpsPassable(l, t.y, t) ? t.x = l : fpsPassable(t.x, c, t) && (t.y = c), t.x = clamp(t.x, 6, 2938), t.y = clamp(t.y, 6, 2298);
+      if ("inf" === t.d.kind && !t.inside) {
+        const wtx = Math.floor(t.x / 32), wty = Math.floor(t.y / 32);
+        FPS.swimming = inMap(wtx, wty) && G.terr[idx(wtx, wty)] >= 2;
+      } else FPS.swimming = false;
       const h = Math.hypot(t.x - d, t.y - f);
-      t.animT = (t.animT || 0) + h, t.moving = h > 0.05, t.moving && "inf" === t.d.kind && !t.inside && (t.animT - (FPS.lastStepT || 0) >= (FPS.crouching ? 17 : sprintOk && FPS.stamina > 0 ? 30 : 22) && (FPS.lastStepT = t.animT, sfx("step"))), t.moving && "inf" !== t.d.kind && (t.animT - (FPS.lastEngineSfxT || 0) >= (t.d.fly ? 26 : t.d.naval ? 40 : 18) && (FPS.lastEngineSfxT = t.animT, sfx(t.d.fly ? "engine_air" : t.d.naval ? "engine_sea" : "engine_gnd")), t.d.naval ? Math.random() < 0.18 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }) : (Math.random() < 0.06 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 2, s: 0.35, c: "#8a7f6a", t: 0, life: 0.55 }), (t.trackT = (t.trackT || 0) - e) <= 0 && (t.trackT = 0.16, S.fx.push({ kind: "track", x: t.x, y: t.y, ang: t.ang, w: 0.35 * t.d.radius, l: 0.9 * t.d.radius, t: 0, life: 6 }))));
+      t.animT = (t.animT || 0) + h, t.moving = h > 0.05, t.moving && "inf" === t.d.kind && !t.inside && !(FPS.jumpT > 0) && (t.animT - (FPS.lastStepT || 0) >= (FPS.crouching ? 17 : sprintOk && FPS.stamina > 0 ? 30 : 22) && (FPS.lastStepT = t.animT, sfx(FPS.swimming ? "splash" : "step"))), t.moving && "inf" !== t.d.kind && (t.animT - (FPS.lastEngineSfxT || 0) >= (t.d.fly ? 26 : t.d.naval ? 40 : 18) && (FPS.lastEngineSfxT = t.animT, sfx(t.d.fly ? "engine_air" : t.d.naval ? "engine_sea" : "engine_gnd")), t.d.naval ? Math.random() < 0.18 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }) : (Math.random() < 0.06 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 2, s: 0.35, c: "#8a7f6a", t: 0, life: 0.55 }), (t.trackT = (t.trackT || 0) - e) <= 0 && (t.trackT = 0.16, S.fx.push({ kind: "track", x: t.x, y: t.y, ang: t.ang, w: 0.35 * t.d.radius, l: 0.9 * t.d.radius, t: 0, life: 6 }))));
     } else t.moving = false;
     if ("inf" === t.d.kind) {
       if (t.inside) FPS.interact = t.inside;
@@ -7551,6 +7627,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (e.abilityCD > 0) return;
     const kind = e.d.proj;
     "bullet" === kind ? throwGrenade(e) : "flame" === kind ? flameNova(e) : ("missile" === kind || "rocket" === kind) && e.d.deploy && toggleDeploy(e), e.abilityCD = info.cd;
+  }
+  function fpsAbilityDown() {
+    const e = FPS.u, info = e && fpsAbilityInfo(e);
+    info && !(e.abilityCD > 0) && "bullet" === e.d.proj ? FPS.chargingGrenade = true : fpsAbility();
+  }
+  function fpsAbilityUp() {
+    FPS.chargingGrenade && (FPS.chargingGrenade = false, fpsAbility());
   }
   function buildViewmodel(kind) {
     const g = new THREE.Group(), mat = (c, r, mm) => new THREE.MeshStandardMaterial({ color: c, roughness: null == r ? 0.55 : r, metalness: null == mm ? 0.4 : mm }), mesh = (geo, m, x, y, z, rx, ry, rz) => {
@@ -7949,25 +8032,41 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function fpsRender() {
     const e = FPS.u, t = FPS.cam;
     t.aspect !== CW / CH && (t.aspect = CW / CH);
+    if (e.dead) {
+      const dt = Math.min(1, (FPS.deathT || 0) / 1.4), gy = heightAt(e.x, e.y) + (e.alt || 0), r = gy + fpsEyeH(e) * (1 - 0.85 * dt), fall = 1.25 * dt, roll = 0.5 * dt;
+      return t.fov = 68, t.position.set(e.x, r, e.y), t.up.set(Math.sin(roll), Math.cos(roll), 0), t.lookAt(e.x + Math.cos(FPS.yaw) * Math.cos(fall) * 50, r - 50 * Math.sin(fall), e.y + Math.sin(FPS.yaw) * Math.cos(fall) * 50), FPS.vm && (FPS.vm.visible = false), FPS.vvm && (FPS.vvm.visible = false), void 0;
+    }
     const kp = FPS.pitch + (FPS.viewKick || 0), a = Math.cos(kp);
     if (FPS.thirdPerson) {
-      const dist2 = tpCameraDist(e, 105), backH = 52, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e);
+      const dist2 = tpCameraDist(e, 105), backH = 52, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e) + (FPS.jumpZ || 0);
       t.position.set(e.x - Math.cos(FPS.yaw) * dist2, eyeY + backH, e.y - Math.sin(FPS.yaw) * dist2), t.lookAt(e.x + Math.cos(FPS.yaw) * a * 120, eyeY + 140 * Math.sin(kp), e.y + Math.sin(FPS.yaw) * a * 120), t.fov = FPS.aiming ? 50 : 68;
     } else {
-      const r = fpsEyeH(e) + (e.alt || 0) + heightAt(e.x, e.y), n = 0.1 * -e.d.radius;
+      const r = fpsEyeH(e) + (e.alt || 0) + heightAt(e.x, e.y) + (FPS.jumpZ || 0) - (FPS.swimming ? 10 : 0), n = 0.1 * -e.d.radius;
       t.position.set(e.x + Math.cos(FPS.yaw) * n, r, e.y + Math.sin(FPS.yaw) * n), t.lookAt(t.position.x + Math.cos(FPS.yaw) * a * 100, t.position.y + 100 * Math.sin(kp), t.position.z + Math.sin(FPS.yaw) * a * 100), t.fov = FPS.aiming ? 46 : 74;
     }
+    if (FPS.chargingGrenade && "inf" === e.d.kind && !e.inside) {
+      const line = ensureGrenadeArc(), n = Math.cos(FPS.yaw), a2 = Math.sin(FPS.yaw), range = 150, N = 14, arr = line.geometry.attributes.position.array;
+      for (let i = 0; i < N; i++) {
+        const s = i / (N - 1), wx = e.x + n * range * s, wy = e.y + a2 * range * s, wz = 9 + 42 * Math.sin(Math.PI * s) + heightAt(wx, wy);
+        arr[3 * i] = wx, arr[3 * i + 1] = wz, arr[3 * i + 2] = wy;
+      }
+      line.geometry.attributes.position.needsUpdate = true, line.computeLineDistances(), line.visible = true;
+    } else grenadeArc && (grenadeArc.visible = false);
     e.inside && (ensureInterior(e.inside), syncInteriorFigures(e.inside), syncBombProp(e.inside));
     if (!FPS.thirdPerson && "inf" === e.d.kind && (e.d.dmg > 0 || "engineer" === e.d.role || "chrono" === e.d.role)) {
       const vm = ensureViewmodel(unitViewmodelKind(e));
       vm.visible = true;
       const aim = FPS.aiming, tx = aim ? 0 : 0.26, ty = aim ? -0.075 : -0.3, tz = aim ? -0.95 : -0.95, kick = e.muzzle > 0 ? 0.07 * (e.muzzle / 0.09) : 0, maxCool = Math.max(0.01, e.d.rof * vRof(e)), recoilP = e.cool > 0 ? Math.min(1, e.cool / maxCool) : 0, reloadT = vm.userData.reloadT || 0, reloading = reloadT > 0, reloadArc = reloading ? Math.sin(Math.PI * Math.min(1, 1 - reloadT / RELOAD_DUR)) : 0;
       let px = tx, py = ty;
+      const idleT = S.time + 37 * (e.id || 0);
+      if (aim) {
+        const breathAmp = "sniper" === vm.userData.magFamily ? 0.017 : 9e-3, sway = e.moving ? 1.7 : 1;
+        px += breathAmp * sway * Math.sin(0.6 * idleT), py += 0.55 * breathAmp * sway * Math.sin(0.83 * idleT + 1.3);
+      }
       if (!aim && e.moving) {
         const bobT = 0.14 * (e.animT || 0);
         px += 0.01 * Math.sin(bobT), py += 8e-3 * Math.abs(Math.cos(bobT));
-      } else if (!e.moving && !reloading) {
-        const idleT = S.time + 37 * (e.id || 0);
+      } else if (!aim && !e.moving && !reloading) {
         px += 6e-3 * Math.sin(0.9 * idleT), py += 35e-4 * Math.sin(1.4 * idleT + 1.1);
       }
       py -= 0.045 * recoilP + 0.24 * reloadArc, vm.position.set(px, py, tz + 0.22 * kick), vm.rotation.x = -1.15 * kick - 0.22 * recoilP - 0.65 * reloadArc, vm.rotation.z = (e.deployed ? 0.14 : 0) - 0.55 * reloadArc;
@@ -8009,6 +8108,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     throwGrenade,
     flameNova,
     fpsAbility,
+    fpsAbilityDown,
+    fpsAbilityUp,
+    fpsJump,
+    fpsPassable,
+    fpsDeathTick,
     buildViewmodel,
     ensureViewmodel,
     buildVehicleViewmodel,
@@ -8040,7 +8144,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }, configurable: true },
     rotateTarget: { get: () => rotateTarget, set: (v) => {
       rotateTarget = v;
-    }, configurable: true }
+    }, configurable: true },
+    grenadeArc: { get: () => grenadeArc, configurable: true }
   });
 })();
 
@@ -8148,6 +8253,35 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var rainSrc = null;
   var rainGain = null;
+  var windSrc = null;
+  var windGain = null;
+  function startFpsAmbience() {
+    const ac = audio();
+    if (!ac || windSrc) return;
+    const len = 2 * ac.sampleRate, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = 2 * Math.random() - 1;
+    const src = ac.createBufferSource();
+    src.buffer = buf, src.loop = true;
+    const lp = ac.createBiquadFilter();
+    lp.type = "lowpass", lp.frequency.value = 340;
+    const g = ac.createGain();
+    g.gain.value = 0, src.connect(lp), lp.connect(g), g.connect(sfxBus), src.start(), g.gain.setTargetAtTime(0.1, ac.currentTime, 2), windSrc = src, windGain = g;
+  }
+  function stopFpsAmbience() {
+    if (!windSrc) return;
+    const ac = audio();
+    if (ac) {
+      const t0 = ac.currentTime;
+      windGain.gain.cancelScheduledValues(t0), windGain.gain.setTargetAtTime(0, t0, 0.8);
+    }
+    const s = windSrc;
+    setTimeout(() => {
+      try {
+        s.stop();
+      } catch (e) {
+      }
+    }, 1500), windSrc = null, windGain = null;
+  }
   function setRainAmbience(on) {
     const ac = audio();
     if (!ac) return;
@@ -8235,6 +8369,24 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
       case "hurt":
         noise(0.12, 0.09, 900), tone(160, 0.16, "sawtooth", 0.06, 220);
+        break;
+      case "death":
+        noise(0.3, 0.07, 500), tone(160, 0.5, "sawtooth", 0.07, 140), setTimeout(() => tone(90, 0.6, "sawtooth", 0.05, 80), 160);
+        break;
+      case "splash":
+        noise(0.18, 0.06, 1400), setTimeout(() => noise(0.12, 0.03, 900), 90);
+        break;
+      case "jump":
+        tone(300, 0.06, "square", 0.03, 1200);
+        break;
+      case "land":
+        noise(0.06, 0.05, 400);
+        break;
+      case "distant_gun":
+        tone(600, 0.05, "square", 8e-3, 300);
+        break;
+      case "distant_boom":
+        noise(0.5, 0.035, 220), tone(60, 0.7, "sawtooth", 0.02, 30);
         break;
       case "engine_gnd":
         tone(70, 0.09, "sawtooth", 0.02, 220);
@@ -8507,6 +8659,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     setMusicVol,
     setTrackSel,
     setRainAmbience,
+    startFpsAmbience,
+    stopFpsAmbience,
     startMusic,
     MUSIC_TRACKS
   });
@@ -9847,7 +10001,13 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     });
     const abb = $("#fpsability");
     abb.addEventListener("pointerdown", (e2) => {
-      e2.stopPropagation(), fpsAbility();
+      e2.stopPropagation(), fpsAbilityDown();
+    });
+    const abOff = () => fpsAbilityUp();
+    abb.addEventListener("pointerup", abOff), abb.addEventListener("pointercancel", abOff), abb.addEventListener("pointerleave", abOff);
+    const jpb = $("#fpsjump");
+    jpb.addEventListener("pointerdown", (e2) => {
+      e2.stopPropagation(), fpsJump();
     });
     const ent = $("#fpsenter");
     ent.addEventListener("pointerdown", (e2) => {
@@ -9889,11 +10049,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }), window.addEventListener("keydown", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
-    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? FPS.firing = true : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? fpsAbility() : "v" === t ? FPS.thirdPerson = !FPS.thirdPerson : "shift" === t ? FPS.sprinting = true : "c" === t && (FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false));
+    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? (e.preventDefault(), fpsJump()) : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? e.repeat || fpsAbilityDown() : "v" === t ? FPS.thirdPerson = !FPS.thirdPerson : "shift" === t ? FPS.sprinting = true : "c" === t && (FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false));
   }), window.addEventListener("keyup", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
-    "w" === t || "s" === t ? FPS.mv.f = 0 : "a" === t || "d" === t ? FPS.mv.s = 0 : " " === t ? FPS.firing = false : "shift" === t && (FPS.sprinting = false);
+    "w" === t || "s" === t ? FPS.mv.f = 0 : "a" === t || "d" === t ? FPS.mv.s = 0 : "q" === t ? fpsAbilityUp() : "shift" === t && (FPS.sprinting = false);
   });
   Object.assign(window, {
     showCampaign,

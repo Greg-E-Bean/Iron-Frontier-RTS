@@ -539,6 +539,11 @@ declare global {
   function throwGrenade(u: Unit): void;
   function flameNova(u: Unit): void;
   function fpsAbility(): void;
+  function fpsAbilityDown(): void;
+  function fpsAbilityUp(): void;
+  function fpsJump(): void;
+  function fpsPassable(x: number, y: number, self: Unit): boolean;
+  function fpsDeathTick(dt: number): void;
   const buildViewmodel: AnyFn;
   const ensureViewmodel: AnyFn;
   const buildVehicleViewmodel: AnyFn;
@@ -589,6 +594,12 @@ declare global {
     damageDir: number;
     killFlashT: number;
     lastEngineSfxT: number;
+    deathT: number;
+    jumpT: number;
+    jumpZ: number;
+    chargingGrenade: boolean;
+    swimming: boolean;
+    nextAmbientT: number;
     [k: string]: unknown;
   };
   const FLOOR_Z: number;
@@ -605,6 +616,8 @@ declare global {
   function setMusicVol(v: number): void;
   function setTrackSel(v: number): void;
   function setRainAmbience(on: boolean): void;
+  function startFpsAmbience(): void;
+  function stopFpsAmbience(): void;
   function startMusic(): void;
   const MUSIC_TRACKS: { name: string; step: number; [k: string]: unknown }[];
   var lightningT: number;

@@ -242,6 +242,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #xhair.kill:before{box-shadow:0 35px 0 0 #ffd75e}
 #xhair.kill:after{box-shadow:35px 0 0 0 #ffd75e}
 #xhair.noaim{opacity:.35}
+#xhair.scoped{opacity:0}
 #dmgvig{position:absolute;inset:0;pointer-events:none;opacity:0;
   background:radial-gradient(ellipse at center,rgba(200,20,20,0) 45%,rgba(200,20,20,.55) 100%);
   transition:opacity .08s linear}
@@ -249,6 +250,19 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   transition:opacity .12s linear}
 #dmgdir:before{content:"";position:absolute;left:-14px;top:-150px;width:0;height:0;
   border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:22px solid rgba(255,60,50,.9)}
+#deathscreen{position:absolute;inset:0;pointer-events:none;opacity:0;background:#000;
+  display:flex;align-items:center;justify-content:center;transition:opacity .35s ease-in}
+#deathscreen.hidden{display:none}
+#deathtxt{color:#c62828;font:700 42px Tahoma,sans-serif;letter-spacing:6px;text-shadow:0 0 22px rgba(198,40,40,.8);
+  opacity:0;transition:opacity 1s ease-out .4s}
+#deathscreen.show{opacity:1}
+#deathscreen.show #deathtxt{opacity:1}
+#scope{position:absolute;inset:0;pointer-events:none;display:none;background:
+  radial-gradient(circle at center,transparent 0 19%,#000 30%);}
+#scope.on{display:block}
+#scope:before,#scope:after{content:"";position:absolute;left:50%;top:50%;background:rgba(10,14,10,.85)}
+#scope:before{width:1px;height:100%;transform:translate(-50%,-50%)}
+#scope:after{width:100%;height:1px;transform:translate(-50%,-50%)}
 #fpsammo{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 154px);transform:translateX(-50%);
   font-size:13px;letter-spacing:1.5px;color:#d8e4ea;text-shadow:0 1px 3px rgba(0,0,0,.8);font-weight:700}
 #fpsammo.reload{color:#ff9a5a;animation:bombPulse 1.6s ease-in-out infinite}
@@ -283,6 +297,11 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #fpssprint.on{background:rgba(60,160,80,.6);border-color:#bfffc8}
 #fpssprint.empty{opacity:.4}
 #fpssprint.hidden{display:none}
+#fpsjump{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 374px);
+  width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
+  justify-content:center;font-size:10px;letter-spacing:1px;color:#ffe8c0;
+  background:rgba(110,80,40,.34);border:2px solid rgba(255,210,150,.5)}
+#fpsjump.hidden{display:none}
 #fpsfire{position:absolute;right:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);
   width:96px;height:96px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:14px;letter-spacing:2px;color:#ffd9c0;
@@ -438,6 +457,8 @@ body.fps #mmWrap{opacity:.55}
 <div id="fpsui" class="hidden">
   <div id="dmgvig"></div>
   <div id="dmgdir"></div>
+  <div id="deathscreen" class="hidden"><div id="deathtxt">YOU DIED</div></div>
+  <div id="scope"></div>
   <div id="xhair"></div>
   <div id="fpsammo" class="hidden"></div>
   <div id="fpsbar"><span id="fpsname">—</span><i id="fpshp"></i></div>
@@ -446,6 +467,7 @@ body.fps #mmWrap{opacity:.55}
   <div id="fpsstamina" class="hidden"><i></i></div>
   <div id="fpscrouch" class="hidden">CROUCH</div>
   <div id="fpssprint" class="hidden">SPRINT</div>
+  <div id="fpsjump" class="hidden">JUMP</div>
   <div id="fpsaim">AIM</div>
   <div id="fpsability" class="hidden">ABILITY</div>
   <div id="fpsfire">FIRE</div>
