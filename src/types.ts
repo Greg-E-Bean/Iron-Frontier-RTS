@@ -161,6 +161,14 @@ export interface Unit {
   aiRetargetT?: number;
   gunner?: { key: string } | null;
   gunKey?: string | null;
+  lastTgtX?: number;
+  lastTgtY?: number;
+  holdT?: number;
+  coverT?: number;
+  coverX?: number | null;
+  coverY?: number | null;
+  flankT?: number;
+  flankAng?: number;
   [field: string]: unknown;
 }
 
