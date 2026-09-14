@@ -1421,14 +1421,19 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (arr) for (const u of arr) cb(u);
     }
   }
+  function aaShouldRecheck(e, dt, wpn) {
+    if (!e.target || e.target.dead) return true;
+    if (!wpn || !wpn.aa || wpn.airOnly || (e.target.alt || 0) > 2) return false;
+    return (e.aaCheckT = (e.aaCheckT || 0) - dt) <= 0 && (e.aaCheckT = 1, true);
+  }
   function acquire(e) {
-    const t = 1.25 * effRange(e) + 40;
+    const wpn = heroWpn(e), t = 1.25 * effRange(e) + 40;
     let r = null, n = 1e9;
     gridNear(e.x, e.y, t, (a) => {
       if (a.dead || a.owner === e.owner || a.owner === NEUTRAL || teamOf(a.owner) === teamOf(e.owner)) return;
       if (!canTarget(e, a)) return;
-      const o = dist2(e.x, e.y, a.x, a.y);
-      o < n && o < t * t && (n = o, r = a);
+      let o = dist2(e.x, e.y, a.x, a.y);
+      wpn.aa && a.alt > 2 && (o *= 0.35), o < n && o < t * t && (n = o, r = a);
     });
     if (!r && e.d.vsBldg > 0.15 && "mind" !== e.d.role) for (const a of S.blds) {
       if (a.dead || a.owner === e.owner || a.owner === NEUTRAL || teamOf(a.owner) === teamOf(e.owner)) continue;
@@ -1569,9 +1574,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if ("capture" === e.order || "engineer" === r.role && "attack" === e.order) return e.order = "capture", void tickEngineer(e, t);
       if ("load" === e.order) return void tickLoadMove(e, t);
       if ("garrison" !== e.order) if (e.deployed && ("rad" === r.deploy && (!e.rad || e.rad.life <= 0 ? (e.rad = { x: e.x, y: e.y, r: 80, life: 0.5, owner: e.owner }, S.rads.push(e.rad)) : (e.rad.life = 0.5, e.rad.x = e.x, e.rad.y = e.y)), e.moving = false, e.path = null), e.hitT > 0 && (e.hitT -= t), e.muzzle > 0 && (e.muzzle -= t), e.recoil > 0 && (e.recoil = Math.max(0, e.recoil - 6 * t)), e.cool > 0 && (e.cool -= t), e.revealT > 0 && (e.revealT -= t), e.reloadT > 0 && (e.reloadT -= t) <= 0 && (e.ammo = r.ammo, e.reloadT = 0), "miner" !== r.role) {
-        if (("idle" === e.order || "amove" === e.order || "guard" === e.order) && (!e.target || e.target.dead)) {
-          const t2 = acquire(e);
-          t2 && (e.target = t2, "idle" === e.order && (e.order = "attack"));
+        if (("idle" === e.order || "amove" === e.order || "guard" === e.order) && aaShouldRecheck(e, t, heroWpn(e))) {
+          const g = acquire(e);
+          g && (!e.target || e.target.dead || (g.alt || 0) > 2) && (e.target = g, "idle" === e.order && (e.order = "attack"));
         }
         "inf" === r.kind && "idle" === e.order && !e.target && e.holdT > 0 && (e.holdT -= t, infSuppress(e, t));
         "inf" === r.kind && e.target && !e.target.dead && (e.lastTgtX = e.target.x, e.lastTgtY = e.target.y, e.holdT = 1.5);
@@ -1706,13 +1711,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function tickMiner(e, t) {
     const st = t * S.speed;
     if (e.d.dmg > 0) {
-      if (!e.target || e.target.dead || !canTarget(e, e.target)) {
+      const wasValid = e.target && !e.target.dead && canTarget(e, e.target);
+      if (!wasValid) {
         e.target = null, e.acqT = (e.acqT || 0) - t;
         if (e.acqT <= 0) {
           e.acqT = 0.6;
           const g = acquire(e);
           g && (e.target = g);
         }
+      } else if (aaShouldRecheck(e, t, heroWpn(e))) {
+        const g = acquire(e);
+        g && (g.alt || 0) > 2 && (e.target = g);
       }
       e.target && inRange(e, e.target) && faceAndShoot(e, e.target, t);
     }
@@ -2012,7 +2021,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (!e.w || e.owner === NEUTRAL) return;
     const r = S.players[e.owner], n = powerFactor(r);
     if (!(n < 1)) {
-      if (e.cool > 0 && (e.cool -= t * n), e.target && (!canTarget(e, e.target) || dist2(e.x, e.y, e.target.x, e.target.y) > e.w.range * e.w.range * 1.2) && (e.target = null), !e.target) {
+      if (e.cool > 0 && (e.cool -= t * n), e.target && (!canTarget(e, e.target) || dist2(e.x, e.y, e.target.x, e.target.y) > e.w.range * e.w.range * 1.2) && (e.target = null), aaShouldRecheck(e, t * n, e.w)) {
+        let bestAir = null, bestAirD = 1e9;
+        for (const n2 of S.units) {
+          if (n2.dead || n2.owner === e.owner || n2.owner === NEUTRAL || teamOf(n2.owner) === teamOf(e.owner)) continue;
+          if (!(n2.alt > 2)) continue;
+          if (!canTarget(e, n2)) continue;
+          const d = dist2(e.x, e.y, n2.x, n2.y);
+          d < bestAirD && d < e.w.range * e.w.range && (bestAirD = d, bestAir = n2);
+        }
+        bestAir && (e.target = bestAir);
+      }
+      if (!e.target) {
         let t2 = null, r2 = 1e9;
         for (const n2 of S.units) {
           if (n2.dead || n2.owner === e.owner || n2.owner === NEUTRAL || teamOf(n2.owner) === teamOf(e.owner)) continue;
