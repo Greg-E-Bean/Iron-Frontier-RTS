@@ -599,14 +599,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/sim.ts
-  var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), fall: [] };
+  var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), bridge: new Uint8Array(6624), fall: [] };
   var FOG_ON = true;
   var idx = (e, t) => 92 * t + e;
   var inMap = (e, t) => e >= 0 && t >= 0 && e < 92 && t < 72;
   function walkable(e, t) {
     if (!inMap(e, t)) return false;
     const r = idx(e, t);
-    return G.terr[r] < 2 && 0 === G.occ[r] && !G.blk[r];
+    return (G.terr[r] < 2 || G.bridge[r]) && 0 === G.occ[r] && !G.blk[r];
   }
   function losEyeH(e) {
     return "b" === e.e ? 18 + 6 * (e.size || 1) : (e.alt || 0) + fpsEyeH(e);
@@ -649,7 +649,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function walkableTeam(e, t, team, ignore) {
     if (!inMap(e, t)) return false;
     const r = idx(e, t);
-    if (G.terr[r] >= 2 || G.blk[r]) return false;
+    if (G.terr[r] >= 2 && !G.bridge[r] || G.blk[r]) return false;
     const o = G.occ[r];
     if (0 === o || o === ignore) return true;
     const b = S.bldById.get(o);
@@ -679,7 +679,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function baseTerrain(e, t) {
     for (let r = 0; r < 72; r++) for (let n = 0; n < 92; n++) {
       const a = idx(n, r), o = fbm(0.085 * n + e, 0.085 * r - e, e);
-      G.terr[a] = o > (void 0 === t ? 0.5 : t) ? 1 : 0, G.tint[a] = Math.floor(7.999 * fbm(0.16 * n + 3 * e, 0.16 * r, e + 5)), G.ore[a] = 0, G.occ[a] = 0, G.tib[a] = 0, G.blk[a] = 0, G.pave[a] = 0, G.vis[a] = 0;
+      G.terr[a] = o > (void 0 === t ? 0.5 : t) ? 1 : 0, G.tint[a] = Math.floor(7.999 * fbm(0.16 * n + 3 * e, 0.16 * r, e + 5)), G.ore[a] = 0, G.occ[a] = 0, G.tib[a] = 0, G.blk[a] = 0, G.pave[a] = 0, G.vis[a] = 0, G.bridge[a] = 0;
     }
     for (let e2 = 0; e2 < 3; e2++) {
       const e3 = Uint8Array.from(G.terr);
@@ -699,6 +699,93 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function bridge(e, t, r, n) {
     for (let a = Math.round(t - n / 2); a <= t + n / 2; a++) for (let t2 = Math.round(e - r / 2); t2 <= e + r / 2; t2++) inMap(t2, a) && G.terr[idx(t2, a)] >= 2 && (G.terr[idx(t2, a)] = 1);
+  }
+  function balanceSpawnRock(spots) {
+    if (!spots || spots.length < 2) return;
+    const R = 14, measure = (sx, sy) => {
+      let r = 0, n = 0;
+      for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+        if (dx * dx + dy * dy > R * R) continue;
+        const tx = sx + dx, ty = sy + dy;
+        if (!inMap(tx, ty)) continue;
+        n++;
+        3 === G.terr[idx(tx, ty)] && r++;
+      }
+      return n ? r / n : 0;
+    }, avail = (cx, cy, rad) => {
+      let free = 0;
+      for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) {
+        if (dx * dx + dy * dy > rad * rad) continue;
+        const tx = Math.round(cx) + dx, ty = Math.round(cy) + dy;
+        if (!inMap(tx, ty)) continue;
+        const v = G.terr[idx(tx, ty)];
+        0 === v || 1 === v ? free++ : 0;
+      }
+      return free;
+    }, dens = spots.map(([sx, sy]) => measure(sx, sy)), avg = dens.reduce((a, b) => a + b, 0) / dens.length;
+    if (avg < 0.015) return;
+    spots.forEach(([sx, sy], i) => {
+      for (let tries = 0; tries < 4 && dens[i] < avg - 0.035; tries++) {
+        const rad = Math.round(4 + 2 * noise2(7 * sx, 7 * sy, 19 + tries)), d0 = 8 + 3 * noise2(5 * sx, 5 * sy, 17 + tries);
+        let best = null, bestFree = -1;
+        for (let k = 0; k < 8; k++) {
+          const ang = k / 8 * 2 * Math.PI + noise2(3 * sx + k, 3 * sy + k, 13 + tries);
+          const bx = sx + Math.cos(ang) * d0, by = sy + Math.sin(ang) * d0;
+          if (spots.some(([ox, oy]) => Math.hypot(bx - ox, by - oy) < 7)) continue;
+          const bt = Math.round(bx), byt = Math.round(by);
+          if (!inMap(bt, byt) || 2 === G.terr[idx(bt, byt)]) continue;
+          const free = avail(bx, by, rad);
+          free > bestFree && (bestFree = free, best = { bx, by });
+        }
+        if (best && bestFree > 4) blob(best.bx, best.by, rad, 3);
+        dens[i] = measure(sx, sy);
+      }
+    });
+  }
+  function scatterBridges(spawns) {
+    const cands = [];
+    for (let ty = 0; ty < 72; ty++) {
+      let run = 0;
+      for (let tx = 0; tx <= 92; tx++) {
+        const water = tx < 92 && 2 === G.terr[idx(tx, ty)];
+        if (water) run++;
+        else {
+          if (run >= 1 && run <= 3) {
+            const x0 = tx - run;
+            if (x0 > 0 && tx < 92 && G.terr[idx(x0 - 1, ty)] < 2 && G.terr[idx(tx, ty)] < 2 && !G.blk[idx(x0 - 1, ty)] && !G.blk[idx(tx, ty)]) cands.push({ tx: x0, ty, len: run, horiz: true });
+          }
+          run = 0;
+        }
+      }
+    }
+    for (let tx = 0; tx < 92; tx++) {
+      let run = 0;
+      for (let ty = 0; ty <= 72; ty++) {
+        const water = ty < 72 && 2 === G.terr[idx(tx, ty)];
+        if (water) run++;
+        else {
+          if (run >= 1 && run <= 3) {
+            const y0 = ty - run;
+            if (y0 > 0 && ty < 72 && G.terr[idx(tx, y0 - 1)] < 2 && G.terr[idx(tx, ty)] < 2 && !G.blk[idx(tx, y0 - 1)] && !G.blk[idx(tx, ty)]) cands.push({ tx, ty: y0, len: run, horiz: false });
+          }
+          run = 0;
+        }
+      }
+    }
+    if (!cands.length) return;
+    const cx = 46, cy = 36;
+    cands.sort((a, b) => Math.abs(a.tx - cx) + Math.abs(a.ty - cy) - (Math.abs(b.tx - cx) + Math.abs(b.ty - cy)));
+    const chosen = [], minSep = 18;
+    for (const c of cands) {
+      if (chosen.length >= 2) break;
+      if (spawns && spawns.some((s) => Math.hypot(c.tx - s[0], c.ty - s[1]) < 10)) continue;
+      if (chosen.some((o) => Math.abs(o.tx - c.tx) + Math.abs(o.ty - c.ty) < minSep)) continue;
+      chosen.push(c);
+    }
+    for (const c of chosen) for (let i = 0; i < c.len; i++) {
+      const tx = c.horiz ? c.tx + i : c.tx, ty = c.horiz ? c.ty : c.ty + i, id = idx(tx, ty);
+      G.bridge[id] = 1, G.props.push({ tx, ty, kind: "bridge", x: 32 * tx + 16, y: 32 * ty + 16, r: c.horiz ? 0 : Math.PI / 2, v: 0, s: 1 });
+    }
   }
   function clearArea(e, t, r) {
     for (let n = Math.round(t - r); n <= t + r; n++) for (let a = Math.round(e - r); a <= e + r; a++) inMap(a, n) && dist(a, n, e, t) <= r && G.terr[idx(a, n)] >= 2 && (G.terr[idx(a, n)] = 1);
@@ -770,6 +857,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }), o.forEach((e2) => {
       oreField(e2[0], e2[1], 5, 1600, 2);
     }), "city" === r ? buildCityscape(n) : (scatterScenery(r, n), buildCities(r, n));
+    balanceSpawnRock(n), scatterBridges(n);
     for (let e2 = 0; e2 < 8; e2++) {
       const e3 = irnd(6, 84), t2 = irnd(6, 64);
       let r2 = true;
@@ -817,7 +905,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     let mB = new Float32Array(6624);
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) mB[idx(x, y)] = 3 === G.terr[idx(x, y)] ? 1 : 0;
-    for (let pass = 0; pass < 2; pass++) {
+    for (let pass = 0; pass < 4; pass++) {
       const mN = new Float32Array(6624);
       for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
         let sum = 0, cnt = 0;
@@ -830,6 +918,21 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       mB = mN;
     }
     G.mtn = mB;
+    let wB = new Float32Array(6624);
+    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) wB[idx(x, y)] = 2 === G.terr[idx(x, y)] ? 1 : 0;
+    for (let pass = 0; pass < 3; pass++) {
+      const wN = new Float32Array(6624);
+      for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
+        let sum = 0, cnt = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const xx = x + dx, yy = y + dy;
+          xx >= 0 && yy >= 0 && xx < 92 && yy < 72 && (sum += wB[idx(xx, yy)], cnt++);
+        }
+        wN[idx(x, y)] = sum / cnt;
+      }
+      wB = wN;
+    }
+    G.shore = wB;
     G.fall = [];
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
       const i = idx(x, y);
@@ -1663,7 +1766,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const n = Math.floor(e / 32), a = Math.floor(t / 32);
     if (!inMap(n, a)) return false;
     const o = idx(n, a);
-    if (r && r.d.naval ? 2 !== G.terr[o] : G.terr[o] >= 2) return false;
+    if (r && r.d.naval ? 2 !== G.terr[o] : G.terr[o] >= 2 && !G.bridge[o]) return false;
     const s = G.occ[o];
     if (0 !== s) {
       const e2 = S.blds.find((e3) => e3.id === s);
@@ -4023,7 +4126,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function PROPMODEL(e, t) {
     const _a = getAssetModel(e);
     if (_a) return _a;
-    return "tree" === e ? treeModel(t) : "rock" === e ? rockModel(t) : "scrub" === e ? scrubModel(t) : "lamp" === e ? lampModel() : "fall" === e ? fallModel(t) : "tower" === e ? towerModel(t) : "crater" === e ? craterModel(t) : "wreck" === e ? wreckModel(t) : "rubble" === e ? rubbleModel(t) : stoneModel(t);
+    return "tree" === e ? treeModel(t) : "rock" === e ? rockModel(t) : "scrub" === e ? scrubModel(t) : "lamp" === e ? lampModel() : "fall" === e ? fallModel(t) : "tower" === e ? towerModel(t) : "crater" === e ? craterModel(t) : "wreck" === e ? wreckModel(t) : "rubble" === e ? rubbleModel(t) : "bridge" === e ? bridgeModel(t) : stoneModel(t);
+  }
+  function bridgeModel(v) {
+    const e = [], L = 32, W = 14 + 2 * (v % 2);
+    e.push(P_(BOXM(L, W, 1.6, 0.25), 0, 0, 0, "wood"));
+    e.push(P_(BOXM(L, 0.7, 2, 0.15), 0, -W / 2 - 0.1, 1.6, "rust"));
+    e.push(P_(BOXM(L, 0.7, 2, 0.15), 0, W / 2 + 0.1, 1.6, "rust"));
+    for (const dx of [-L / 2 + 2.5, L / 2 - 2.5]) for (const dy of [-W / 2 + 1.5, W / 2 - 1.5]) e.push(P_(CYL(0.85, 12, 7), dx, dy, -12, "darkmetal"));
+    return e;
   }
   function craterModel(v) {
     const t = [], R = 7 + 3 * (v % 3);
@@ -6699,6 +6810,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/render.ts
+  var BRIDGE_DECK_H = 8;
   var GL = null;
   var GL_F = [0.6118, 0.50143, 0.6118];
   var GL_U = [-0.35463, 0.86524, -0.35463];
@@ -7048,17 +7160,16 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let r2 = -1; r2 <= 0; r2++) for (let n = -1; n <= 0; n++) {
       const a = e + n, o = t + r2;
       if (a < 0 || o < 0 || a >= 92 || o >= 72) return 0;
-      if (2 === G.terr[idx(a, o)]) return 0;
     }
     const r = G.seed || 0;
-    let mtn = 0, cnt = 0;
+    let mtn = 0, shore = 0, cnt = 0;
     for (let n = -1; n <= 0; n++) for (let a = -1; a <= 0; a++) {
       const o = e + a, s = t + n;
-      o >= 0 && s >= 0 && o < 92 && s < 72 && (mtn += G.mtn[idx(o, s)], cnt++);
+      o >= 0 && s >= 0 && o < 92 && s < 72 && (mtn += G.mtn[idx(o, s)], shore += G.shore ? G.shore[idx(o, s)] : 0, cnt++);
     }
-    mtn = cnt ? mtn / cnt : 0;
-    const peak = fbm(0.24 * e + r + 70, 0.24 * t - r + 70, r + 70);
-    return (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * 40 + Math.pow(mtn, 0.6) * (190 + 80 * peak);
+    mtn = cnt ? mtn / cnt : 0, shore = cnt ? shore / cnt : 0;
+    const peak = fbm(0.24 * e + r + 70, 0.24 * t - r + 70, r + 70), hills = (fbm(0.045 * e + r + 130, 0.045 * t - r + 130, r + 130) - 0.5) * 55, base = (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * 14 + hills + Math.pow(mtn, 0.55) * (230 + 90 * peak), land = Math.max(0, 1 - 1.15 * shore);
+    return base * land * land;
   }
   function cornerNormal(e, t) {
     const r = cornerBump(e - 1, t), n = cornerBump(e + 1, t), a = cornerBump(e, t - 1), o = cornerBump(e, t + 1), s = (n - r) / 64, i = (o - a) / 64;
@@ -7071,6 +7182,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     let p = h + (u - h) * i;
     const m = Math.max(0, Math.min(91, a)), g = Math.max(0, Math.min(71, o));
     if (inMap(m, g)) {
+      if (G.bridge && G.bridge[idx(m, g)]) return BRIDGE_DECK_H;
       const e2 = G.terr[idx(m, g)];
       p += 3 === e2 ? 11 : 2 === e2 ? -5 : 0;
     }
