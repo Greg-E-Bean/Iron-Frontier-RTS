@@ -697,6 +697,38 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       for (let e2 = Math.floor(u - p); e2 <= u + p; e2++) for (let t2 = Math.floor(h - p); t2 <= h + p; t2++) inMap(t2, e2) && dist(t2, e2, h, u) <= p && (G.terr[idx(t2, e2)] = o);
     }
   }
+  function computeMtnShore() {
+    let mB = new Float32Array(6624);
+    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) mB[idx(x, y)] = 3 === G.terr[idx(x, y)] ? 1 : 0;
+    for (let pass = 0; pass < 4; pass++) {
+      const mN = new Float32Array(6624);
+      for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
+        let sum = 0, cnt = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const xx = x + dx, yy = y + dy;
+          xx >= 0 && yy >= 0 && xx < 92 && yy < 72 && (sum += mB[idx(xx, yy)], cnt++);
+        }
+        mN[idx(x, y)] = sum / cnt;
+      }
+      mB = mN;
+    }
+    G.mtn = mB;
+    let wB = new Float32Array(6624);
+    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) wB[idx(x, y)] = 2 === G.terr[idx(x, y)] ? 1 : 0;
+    for (let pass = 0; pass < 3; pass++) {
+      const wN = new Float32Array(6624);
+      for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
+        let sum = 0, cnt = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const xx = x + dx, yy = y + dy;
+          xx >= 0 && yy >= 0 && xx < 92 && yy < 72 && (sum += wB[idx(xx, yy)], cnt++);
+        }
+        wN[idx(x, y)] = sum / cnt;
+      }
+      wB = wN;
+    }
+    G.shore = wB;
+  }
   function bridge(e, t, r, n) {
     for (let a = Math.round(t - n / 2); a <= t + n / 2; a++) for (let t2 = Math.round(e - r / 2); t2 <= e + r / 2; t2++) inMap(t2, a) && G.terr[idx(t2, a)] >= 2 && (G.terr[idx(t2, a)] = 1);
   }
@@ -826,10 +858,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     else if ("islands" === r) baseTerrain(e, 0.5), G.terr.fill(2), n = [[14, 14], [78, 58]], blob(14, 14, 13, 0), blob(78, 58, 13, 0), blob(68, 4, 11, 0), blob(24, 68, 11, 0), blob(46, 20, 8, 0), blob(46, 52, 8, 0), blob(20, 40, 6, 0), blob(72, 32, 6, 0), a = [[14, 14], [78, 58], [68, 4], [24, 68]], o = [[46, 20], [46, 52], [20, 40], [72, 32]];
     else if ("atoll" === r) {
       baseTerrain(e, 0.5), G.terr.fill(2), n = [[14, 14], [78, 58]], blob(14, 14, 15, 0), blob(78, 58, 15, 0), blob(46, 8, 9, 0), blob(46, 64, 9, 0), blob(10, 60, 8, 0), blob(82, 12, 8, 0), blob(46, 36, 7, 0), a = [[46, 8], [46, 64], [10, 60], [82, 12]], o = [[46, 36]];
+      computeMtnShore();
       for (const [ix, iy] of [[46, 8], [46, 64], [10, 60], [82, 12], [46, 36]]) for (let tries = 0; tries < 15; tries++) {
         const cx = ix + irnd(-4, 4), cy = iy + irnd(-4, 4);
         let ok = true;
-        for (let yy = cy; yy < cy + 2 && ok; yy++) for (let xx = cx; xx < cx + 2 && ok; xx++) (!inMap(xx, yy) || G.terr[idx(xx, yy)] >= 2 || G.ore[idx(xx, yy)] > 0 || G.blk[idx(xx, yy)]) && (ok = false);
+        for (let yy = cy; yy < cy + 2 && ok; yy++) for (let xx = cx; xx < cx + 2 && ok; xx++) (!inMap(xx, yy) || G.terr[idx(xx, yy)] >= 2 || G.ore[idx(xx, yy)] > 0 || G.blk[idx(xx, yy)] || G.mtn[idx(xx, yy)] > 0.12 || G.shore[idx(xx, yy)] > 0.08) && (ok = false);
         if (ok) {
           G.civ.push([cx, cy, pick(["civ1", "civ2", "civ4"])]);
           break;
@@ -852,16 +885,16 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const cx = 46, cy = 36, rot = (e2) => [clamp(Math.round(cx - (e2[1] - cy)), 6, 85), clamp(Math.round(cy + (e2[0] - cx)), 6, 65)];
       n = n.concat([rot(n[0]), rot(n[1])]);
     }
-    n.forEach((e2) => clearArea(e2[0] + 3, e2[1] + 3, 9)), G.spots = n, a.forEach((e2) => {
+    n.forEach((e2) => clearArea(e2[0] + 3, e2[1] + 3, 9)), G.spots = n, computeMtnShore(), a.forEach((e2) => {
       oreField(e2[0], e2[1], 7, 2400, 1);
     }), o.forEach((e2) => {
       oreField(e2[0], e2[1], 5, 1600, 2);
     }), "city" === r ? buildCityscape(n) : (scatterScenery(r, n), buildCities(r, n));
-    balanceSpawnRock(n), scatterBridges(n);
+    balanceSpawnRock(n), scatterBridges(n), computeMtnShore();
     for (let e2 = 0; e2 < 8; e2++) {
       const e3 = irnd(6, 84), t2 = irnd(6, 64);
       let r2 = true;
-      for (let n2 = t2 - 1; n2 < t2 + 3 && r2; n2++) for (let t3 = e3 - 1; t3 < e3 + 3 && r2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.blk[idx(t3, n2)]) && (r2 = false);
+      for (let n2 = t2 - 1; n2 < t2 + 3 && r2; n2++) for (let t3 = e3 - 1; t3 < e3 + 3 && r2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.blk[idx(t3, n2)] || G.mtn[idx(t3, n2)] > 0.12 || G.shore[idx(t3, n2)] > 0.08) && (r2 = false);
       for (const a2 of n) dist(e3, t2, a2[0], a2[1]) < 14 && (r2 = false);
       r2 && G.civ.push([e3, t2, pick(["civ1", "civ2", "civ4"])]);
     }
@@ -871,7 +904,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       for (let tries = 0; tries < 70; tries++) {
         const e2 = irnd(6, 84), t2 = irnd(6, 64);
         let r2 = true;
-        for (let n2 = t2 - 1; n2 < t2 + 3 && r2; n2++) for (let t3 = e2 - 1; t3 < e2 + 3 && r2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.blk[idx(t3, n2)]) && (r2 = false);
+        for (let n2 = t2 - 1; n2 < t2 + 3 && r2; n2++) for (let t3 = e2 - 1; t3 < e2 + 3 && r2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.blk[idx(t3, n2)] || G.mtn[idx(t3, n2)] > 0.12 || G.shore[idx(t3, n2)] > 0.08) && (r2 = false);
         for (const a2 of n) dist(e2, t2, a2[0], a2[1]) < 12 && (r2 = false);
         for (const c of G.civ) dist(e2, t2, c[0], c[1]) < 6 && (r2 = false);
         for (const c of G.special) dist(e2, t2, c[0], c[1]) < 10 && (r2 = false);
@@ -892,7 +925,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           for (let tries = 0; tries < 10 && !placed; tries++) {
             const cx = ix + irnd(-5, 5), cy = iy + irnd(-5, 5);
             let ok = true;
-            for (let yy = cy; yy < cy + 2 && ok; yy++) for (let xx = cx; xx < cx + 2 && ok; xx++) (!inMap(xx, yy) || G.terr[idx(xx, yy)] >= 2 || G.ore[idx(xx, yy)] > 0 || G.blk[idx(xx, yy)]) && (ok = false);
+            for (let yy = cy; yy < cy + 2 && ok; yy++) for (let xx = cx; xx < cx + 2 && ok; xx++) (!inMap(xx, yy) || G.terr[idx(xx, yy)] >= 2 || G.ore[idx(xx, yy)] > 0 || G.blk[idx(xx, yy)] || G.mtn[idx(xx, yy)] > 0.12 || G.shore[idx(xx, yy)] > 0.08) && (ok = false);
             if (ok) {
               let tooClose = false;
               for (const c of G.civ) dist(cx, cy, c[0], c[1]) < 6 && (tooClose = true);
@@ -903,36 +936,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         }
       }
     }
-    let mB = new Float32Array(6624);
-    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) mB[idx(x, y)] = 3 === G.terr[idx(x, y)] ? 1 : 0;
-    for (let pass = 0; pass < 4; pass++) {
-      const mN = new Float32Array(6624);
-      for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
-        let sum = 0, cnt = 0;
-        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-          const xx = x + dx, yy = y + dy;
-          xx >= 0 && yy >= 0 && xx < 92 && yy < 72 && (sum += mB[idx(xx, yy)], cnt++);
-        }
-        mN[idx(x, y)] = sum / cnt;
-      }
-      mB = mN;
-    }
-    G.mtn = mB;
-    let wB = new Float32Array(6624);
-    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) wB[idx(x, y)] = 2 === G.terr[idx(x, y)] ? 1 : 0;
-    for (let pass = 0; pass < 3; pass++) {
-      const wN = new Float32Array(6624);
-      for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
-        let sum = 0, cnt = 0;
-        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-          const xx = x + dx, yy = y + dy;
-          xx >= 0 && yy >= 0 && xx < 92 && yy < 72 && (sum += wB[idx(xx, yy)], cnt++);
-        }
-        wN[idx(x, y)] = sum / cnt;
-      }
-      wB = wN;
-    }
-    G.shore = wB;
+    computeMtnShore();
     G.fall = [];
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
       const i = idx(x, y);
@@ -956,7 +960,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function freeTile(e, t) {
     if (!inMap(e, t)) return false;
     const r = idx(e, t);
-    return G.terr[r] < 2 && !G.blk[r] && !G.pave[r] && 0 === G.ore[r];
+    return G.terr[r] < 2 && !G.blk[r] && !G.pave[r] && 0 === G.ore[r] && G.mtn[r] < 0.12;
   }
   function addDeathProp(e, t, r, n) {
     G.props.push({ tx: Math.floor(t / 32), ty: Math.floor(r / 32), kind: e, x: t, y: r, r: 6.283 * Math.random(), s: 1, v: n, dyn: true });
@@ -1030,12 +1034,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       n.push([e3, r2]);
       const o = irnd(5, 7), s = irnd(4, 6);
       for (let t2 = r2 - s; t2 <= r2 + s; t2++) for (let n2 = e3 - o; n2 <= e3 + o; n2++) {
-        if (!inMap(n2, t2) || G.terr[idx(n2, t2)] >= 2 || G.ore[idx(n2, t2)] > 0 || G.mtn[idx(n2, t2)] > 0.12) continue;
+        if (!inMap(n2, t2) || G.terr[idx(n2, t2)] >= 2 || G.ore[idx(n2, t2)] > 0 || G.mtn[idx(n2, t2)] > 0.12 || G.shore[idx(n2, t2)] > 0.08) continue;
         0 !== (n2 - e3 + o) % 4 && 0 !== (t2 - r2 + s) % 4 || (G.pave[idx(n2, t2)] = 1, G.blk[idx(n2, t2)] = 0);
       }
       for (let t2 = r2 - s + 1; t2 < r2 + s - 1; t2 += 4) for (let r3 = e3 - o + 1; r3 < e3 + o - 1; r3 += 4) {
         let e4 = true;
-        for (let n2 = t2; n2 < t2 + 2; n2++) for (let t3 = r3; t3 < r3 + 2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.mtn[idx(t3, n2)] > 0.12) && (e4 = false);
+        for (let n2 = t2; n2 < t2 + 2; n2++) for (let t3 = r3; t3 < r3 + 2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.mtn[idx(t3, n2)] > 0.12 || G.shore[idx(t3, n2)] > 0.08) && (e4 = false);
         if (e4) {
           for (let e5 = t2; e5 < t2 + 2; e5++) for (let t3 = r3; t3 < r3 + 2; t3++) G.blk[idx(t3, e5)] = 0;
           G.civ.push([r3, t2, pick(["civ1", "civ2", "civ4"])]), G.pave[idx(r3, t2)] = 1;
@@ -1250,6 +1254,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return false;
   }
+  var DEPLOY_RANGE = 128;
   function canDeploy(e, t, r, n) {
     const a = BLD[e].size;
     for (let e2 = r; e2 < r + a; e2++) for (let r2 = t; r2 < t + a; r2++) {
@@ -1258,6 +1263,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (G.terr[t2] >= 2 || 0 !== G.occ[t2] || G.ore[t2] > 0) return false;
     }
     const o = 32 * (t + a / 2), s = 32 * (r + a / 2), i = 32 * a / 2;
+    if (n && dist(o, s, n.x, n.y) > DEPLOY_RANGE) return false;
     for (const e2 of S.units) if (!e2.dead && e2 !== n && Math.abs(e2.x - o) < i + 0.5 * e2.d.radius && Math.abs(e2.y - s) < i + 0.5 * e2.d.radius) return false;
     return true;
   }
