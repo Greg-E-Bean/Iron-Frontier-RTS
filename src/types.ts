@@ -57,6 +57,7 @@ export interface EntityDef {
   weapon2?: EntityDef | null;
   weapon?: EntityDef | null;
   weapons?: Record<string, EntityDef>;
+  modes?: Record<string, EntityDef>;
   limit?: number;
   garrison?: number | boolean;
   mobileRefine?: boolean | number;
@@ -153,6 +154,7 @@ export interface Unit {
   hitFlashT?: number;
   slowT?: number;
   abilityCD?: number;
+  heroMode?: string;
   w?: EntityDef | null;
   w2?: EntityDef | null;
   cool_?: number;

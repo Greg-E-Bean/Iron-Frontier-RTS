@@ -172,6 +172,8 @@ declare global {
   const targetsOf: AnyFn;
   const effRange: AnyFn;
   const acquire: AnyFn;
+  function heroWpn(u: Unit): EntityDef;
+  function toggleHeroWeapon(u: Unit): void;
   function buildUnitGrid(): void;
   const gridNear: AnyFn;
   const inRange: AnyFn;
@@ -541,6 +543,7 @@ declare global {
   function fpsAbility(): void;
   function fpsAbilityDown(): void;
   function fpsAbilityUp(): void;
+  function fpsToggleWeapon(): void;
   function fpsJump(): void;
   function fpsPassable(x: number, y: number, self: Unit): boolean;
   function fpsDeathTick(dt: number): void;

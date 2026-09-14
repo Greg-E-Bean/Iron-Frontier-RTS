@@ -302,6 +302,11 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   justify-content:center;font-size:10px;letter-spacing:1px;color:#ffe8c0;
   background:rgba(110,80,40,.34);border:2px solid rgba(255,210,150,.5)}
 #fpsjump.hidden{display:none}
+#fpsweapon{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 448px);
+  width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
+  justify-content:center;font-size:9px;letter-spacing:.5px;text-align:center;color:#f0d08f;
+  background:rgba(110,80,20,.34);border:2px solid rgba(240,208,143,.5)}
+#fpsweapon.hidden{display:none}
 #fpsfire{position:absolute;right:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);
   width:96px;height:96px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:14px;letter-spacing:2px;color:#ffd9c0;
@@ -366,15 +371,21 @@ body.fps #mmWrap{opacity:.55}
   font-family:inherit;letter-spacing:.3px;
   background:linear-gradient(#123048,#0c1e30);border:1px solid #4fb0dc;color:#8fd4f0;white-space:nowrap;
   clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+#weaponPrompt{position:fixed;z-index:12;right:calc(env(safe-area-inset-right,0px) + 10px);
+  top:50%;transform:translateY(-50%) translateY(-108px);font-size:12px;font-weight:bold;padding:8px 12px;
+  font-family:inherit;letter-spacing:.3px;
+  background:linear-gradient(#3a2a10,#241a0a);border:1px solid #dc9f4f;color:#f0d08f;white-space:nowrap;
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
 #cancelPlace{position:fixed;z-index:12;left:calc(env(safe-area-inset-left,0px) + 10px);
   top:50%;transform:translateY(-50%);font-size:12px;font-weight:bold;padding:8px 12px;
   font-family:inherit;letter-spacing:.3px;
   background:linear-gradient(#3a1414,#240c0c);border:1px solid #e0473a;color:#ff9c92;white-space:nowrap;
   clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
-#fpsPrompt,#deployPrompt,#rotatePrompt,#cancelPlace{transition:transform .12s var(--ease),filter .15s}
+#fpsPrompt,#weaponPrompt,#deployPrompt,#rotatePrompt,#cancelPlace{transition:transform .12s var(--ease),filter .15s}
 #fpsPrompt:active,#cancelPlace:active{transform:translateY(-50%) scale(.93);filter:brightness(1.25)}
 #deployPrompt:active{transform:translateY(-50%) translateY(-52px) scale(.93);filter:brightness(1.25)}
 #rotatePrompt:active{transform:translateY(-50%) translateY(4px) scale(.93);filter:brightness(1.25)}
+#weaponPrompt:active{transform:translateY(-50%) translateY(-108px) scale(.93);filter:brightness(1.25)}
 #fpsPrompt::after{content:'';position:absolute;inset:-4px;border:1px solid var(--amber);border-radius:6px;
   animation:fpsLead 1.4s ease-out infinite;pointer-events:none}
 @keyframes fpsLead{0%{opacity:.9;transform:scale(.94)}100%{opacity:0;transform:scale(1.35)}}
@@ -439,6 +450,7 @@ body.fps #mmWrap{opacity:.55}
   </div>
   <div id="selbar"></div>
   <button id="fpsPrompt" class="hidden">◎ FIRST PERSON</button>
+  <button id="weaponPrompt" class="hidden">⌖ SNIPER</button>
   <button id="deployPrompt" class="hidden">⌂ DEPLOY</button>
   <button id="rotatePrompt" class="hidden">⟳ ROTATE</button>
   <button id="cancelPlace" class="hidden">✕ CANCEL</button>
@@ -468,6 +480,7 @@ body.fps #mmWrap{opacity:.55}
   <div id="fpscrouch" class="hidden">CROUCH</div>
   <div id="fpssprint" class="hidden">SPRINT</div>
   <div id="fpsjump" class="hidden">JUMP</div>
+  <div id="fpsweapon" class="hidden">SNIPER</div>
   <div id="fpsaim">AIM</div>
   <div id="fpsability" class="hidden">ABILITY</div>
   <div id="fpsfire">FIRE</div>

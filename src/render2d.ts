@@ -7,6 +7,7 @@ const am=document.getElementById("fpsammo");if(am){const vm=FPS.vm,magSize=!FPS.
 const scope=document.getElementById("scope");scope&&scope.classList.toggle("on",FPS.aiming&&!FPS.thirdPerson&&!!FPS.vm&&"sniper"===FPS.vm.userData.magFamily&&!e.dead);
 const isInf="inf"===e.d.kind,crBtn=document.getElementById("fpscrouch"),spBtn=document.getElementById("fpssprint"),stam=document.getElementById("fpsstamina"),jpBtn=document.getElementById("fpsjump");
 jpBtn&&jpBtn.classList.toggle("hidden",!isInf);
+const wpBtn=document.getElementById("fpsweapon");if(wpBtn){const isHero=!!e.d.modes;wpBtn.classList.toggle("hidden",!isHero),isHero&&(wpBtn.textContent="sniper"===e.heroMode?"SNIPER":"MACHINE GUN")}
 crBtn&&crBtn.classList.toggle("hidden",!isInf),crBtn&&crBtn.classList.toggle("on",FPS.crouching);
 spBtn&&spBtn.classList.toggle("hidden",!isInf),spBtn&&spBtn.classList.toggle("on",FPS.sprinting),spBtn&&spBtn.classList.toggle("empty",FPS.stamina<=.05);
 stam&&stam.classList.toggle("hidden",!isInf),stam&&stam.classList.toggle("low",FPS.stamina<.3),stam&&((stam.firstElementChild as HTMLElement).style.width=100*FPS.stamina+"%");const t=document.getElementById("fpsname"),r=document.getElementById("fpshp");if(t&&(t.textContent=e.d.name+(e.vet>1?" ★":e.vet?" ▲":"")),r){const t=Math.max(0,e.hp/e.maxhp);r.style.width=100*t+"%",r.style.background=t>.6?"#41d94f":t>.3?"#e8c53a":"#e0473a"}
