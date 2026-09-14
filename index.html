@@ -817,7 +817,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     let mB = new Float32Array(6624);
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) mB[idx(x, y)] = 3 === G.terr[idx(x, y)] ? 1 : 0;
-    for (let pass = 0; pass < 4; pass++) {
+    for (let pass = 0; pass < 2; pass++) {
       const mN = new Float32Array(6624);
       for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
         let sum = 0, cnt = 0;
@@ -3996,9 +3996,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return t;
   }
   function fallModel(e) {
-    const t = [], h = 20 + 7 * (e % 3);
-    for (let r = 0; r < 3; r++) t.push(P_(CYL(1.6 - 0.3 * r, h - 3 * r, 9), 1.2 * Math.cos(2.1 * r + e) - 1.2, 1.2 * Math.sin(2.1 * r + e), 0, "crystal", { r: 0.35 * r, e: 1 }));
-    return t.push(P_(DOME(5.5, 3.2, 10), 0, 0, 0, "white")), t.push(P_(DOME(3.2, 4, 9), 0, 0, h - 3, "tibBlit", { e: 1 })), t;
+    const t = [], h = 26 + 10 * (e % 3);
+    for (let r = 0; r < 3; r++) t.push(P_(CYL(2 - 0.22 * r, h - 3 * r, 9), 0.9 * (r - 1), 0, 0, "glass", { r: 0.08 * r, e: 1 }));
+    return t.push(P_(DOME(6.8, 2.6, 12), 0, 0, 0, "white")), t.push(P_(DOME(3.8, 3, 9), 0, 0, 2.2, "tesla", { e: 1 })), t;
   }
   function lampModel() {
     const e = [];
@@ -7058,7 +7058,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     mtn = cnt ? mtn / cnt : 0;
     const peak = fbm(0.24 * e + r + 70, 0.24 * t - r + 70, r + 70);
-    return (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * 24 + Math.pow(mtn, 0.8) * (60 + 25 * peak);
+    return (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * 40 + Math.pow(mtn, 0.6) * (190 + 80 * peak);
   }
   function cornerNormal(e, t) {
     const r = cornerBump(e - 1, t), n = cornerBump(e + 1, t), a = cornerBump(e, t - 1), o = cornerBump(e, t + 1), s = (n - r) / 64, i = (o - a) / 64;
@@ -7381,7 +7381,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (FPS.on && !FPS.thirdPerson && e2 === FPS.u && "inf" === e2.d.kind) continue;
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f) continue;
       if (!seen(e2)) continue;
-      const hitFlash = e2.hitT > 0 && "inf" === e2.d.kind, t2 = hitFlash ? { body: "#ffffff", dark: "#ddb8b0", trim: "#ffffff" } : palette(e2.owner), r2 = unitFrame(e2), gy = e2.d.naval ? 2.6 : heightAt(e2.x, e2.y), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
+      const hitFlash = e2.hitT > 0 && "inf" === e2.d.kind, t2 = hitFlash ? { body: "#ffffff", dark: "#ddb8b0", trim: "#ffffff" } : palette(e2.owner), r2 = unitFrame(e2), gy = e2.d.naval ? 0.8 : heightAt(e2.x, e2.y), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
       c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : "") + (hitFlash ? "|H" : "") + (e2.heroMode ? "|" + e2.heroMode : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac, heroMode: e2.heroMode }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang), hasTurret(e2.key) && c("UT" + e2.key + (e2.gunKey ? "_" + e2.gunKey : "") + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }), t2, e2.x, e2.y, gy + (e2.alt || 0) + turRise, e2.tang), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), c("UTR" + e2.key + "|" + e2.owner, "chinook" === e2.key ? heliRotor : heliTailRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + ("chinook" === e2.key ? 22 : 17), e2.rotorSpin || 0)), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
     }
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
