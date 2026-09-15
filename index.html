@@ -1247,6 +1247,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let yy = r - m; yy < r + a + m; yy++) for (let xx = t - m; xx < t + a + m; xx++) if (inMap(xx, yy) && 2 === G.terr[idx(xx, yy)]) return true;
     return false;
   }
+  function isFlatFooting(tx, ty, size) {
+    let min = 1 / 0, max = -1 / 0;
+    for (let dy = 0; dy <= size; dy++) for (let dx = 0; dx <= size; dx++) {
+      const h = heightAt(32 * (tx + dx), 32 * (ty + dy));
+      h < min && (min = h), h > max && (max = h);
+    }
+    return max - min <= 24 + 26 * size;
+  }
   function canPlace(e, t, r, n) {
     const a = BLD[e].size, isNaval = BLD[e].naval;
     for (let e2 = r; e2 < r + a; e2++) for (let r2 = t; r2 < t + a; r2++) {
@@ -1255,6 +1263,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (G.terr[t2] >= 2 || 0 !== G.occ[t2] || G.ore[t2] > 0) return false;
     }
     if (isNaval && !nearWater(t, r, a, 2)) return false;
+    if (!isFlatFooting(t, r, a)) return false;
     const o = 32 * (t + a / 2), s = 32 * (r + a / 2), i = 32 * a / 2;
     for (const e2 of S.units) if (!e2.dead && Math.abs(e2.x - o) < i + 0.5 * e2.d.radius && Math.abs(e2.y - s) < i + 0.5 * e2.d.radius) return false;
     for (const e2 of S.blds) if (e2.owner === n && !e2.dead && !BLD[e2.key].noAnchor) {
@@ -1271,6 +1280,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const t2 = idx(r2, e2);
       if (G.terr[t2] >= 2 || 0 !== G.occ[t2] || G.ore[t2] > 0) return false;
     }
+    if (!isFlatFooting(t, r, a)) return false;
     const o = 32 * (t + a / 2), s = 32 * (r + a / 2), i = 32 * a / 2;
     if (n && dist(o, s, n.x, n.y) > DEPLOY_RANGE) return false;
     for (const e2 of S.units) if (!e2.dead && e2 !== n && Math.abs(e2.x - o) < i + 0.5 * e2.d.radius && Math.abs(e2.y - s) < i + 0.5 * e2.d.radius) return false;
@@ -2183,6 +2193,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    DEPLOY_RANGE,
     setGameSpeed,
     walkable,
     walkableW,
@@ -5935,10 +5946,26 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       ctx.stroke(), ctx.globalAlpha = 0.35 * (1 - r), ctx.lineWidth *= 2.4, ctx.stroke(), ctx.globalAlpha = 1;
     }
   }
+  function strokeWorldCircle(cx, cy, rad) {
+    ctx.beginPath();
+    const N = 40;
+    for (let i = 0; i <= N; i++) {
+      const ang = i / N * 6.283, sx = w2sx(cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad), sy = w2sy(cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad);
+      i ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy);
+    }
+    ctx.stroke();
+  }
+  function drawPlaceRadii(size, isNaval) {
+    ctx.save(), ctx.setLineDash([7, 6]), ctx.lineWidth = 1.5, ctx.strokeStyle = "rgba(150,210,255,.6)";
+    if (S.deployUnit) {
+      S.deployUnit.dead || strokeWorldCircle(S.deployUnit.x, S.deployUnit.y, DEPLOY_RANGE);
+    } else for (const b of S.blds) b.owner === 0 && !b.dead && !BLD[b.key].noAnchor && strokeWorldCircle(b.x, b.y, 32 * b.size / 2 + 240 + 32 * size / 2 + (isNaval ? 150 : 0));
+    ctx.restore();
+  }
   function drawGhost() {
     if (!S.placing || !S.ghost) return;
     const e = S.placing, t = BLD[e].size, r = S.ghost.tx, n = S.ghost.ty, a = S.deployUnit ? canDeploy(e, r, n, S.deployUnit) : canPlace(e, r, n, 0), o = palette(0), s = 32 * (r + t / 2), i = 32 * (n + t / 2);
-    blit(sprite("B" + e + "|" + S.players[0].fac + "|g", BMODEL(e, S.players[0].fac, 1), 0, o), w2sx(s, i), w2sy(s, i), cam.z, 0.55), ctx.fillStyle = a ? "rgba(90,230,110,.28)" : "rgba(230,70,60,.30)", footprintPath(r, n, t), ctx.fill(), ctx.strokeStyle = a ? "#9dffab" : "#ff9c92", ctx.lineWidth = 2, ctx.stroke();
+    drawPlaceRadii(t, BLD[e].naval), blit(sprite("B" + e + "|" + S.players[0].fac + "|g", BMODEL(e, S.players[0].fac, 1), 0, o), w2sx(s, i), w2sy(s, i), cam.z, 0.55), ctx.fillStyle = a ? "rgba(90,230,110,.28)" : "rgba(230,70,60,.30)", footprintPath(r, n, t), ctx.fill(), ctx.strokeStyle = a ? "#9dffab" : "#ff9c92", ctx.lineWidth = 2, ctx.stroke();
     for (let e2 = 1; e2 < t; e2++) {
       ctx.globalAlpha = 0.35, ctx.beginPath();
       let a2 = w2sx(32 * (r + e2), 32 * n), o2 = w2sy(32 * (r + e2), 32 * n);

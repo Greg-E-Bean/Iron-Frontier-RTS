@@ -137,6 +137,7 @@ declare global {
   function nearWater(tx: number, ty: number, size: number, margin: number): boolean;
   function canPlace(key: string, tx: number, ty: number, owner: number): boolean;
   function canDeploy(key: string, tx: number, ty: number, unit: Unit): boolean;
+  const DEPLOY_RANGE: number;
   function addUnit(owner: number, key: string, x: number, y: number): Unit | null;
   function killUnit(u: Unit, ...args: any[]): void;
   function killBld(b: Building): void;
