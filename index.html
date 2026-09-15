@@ -675,7 +675,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function fbm(e, t, r) {
     return 0.6 * vnoise(e, t, r) + 0.3 * vnoise(2.3 * e, 2.3 * t, r + 9) + 0.1 * vnoise(5.1 * e, 5.1 * t, r + 17);
   }
-  var MAPS = [{ k: "basin", n: "IRON BASIN", s: "Twin lakes, corner bases", mp: 4 }, { k: "divide", n: "THE DIVIDE", s: "River, two crossings", mp: 4 }, { k: "high", n: "HIGHLANDS", s: "Rock chokepoints", mp: 4 }, { k: "dust", n: "DUSTBOWL", s: "Open ground, rich centre", mp: 4 }, { k: "lakes", n: "BROKEN LAKES", s: "Winding water", mp: 4 }, { k: "line", n: "FIRING LINE", s: "One pass, mirrored flanks", mp: 4 }, { k: "ring", n: "IRON RING", s: "Crater wall, rich core", mp: 4 }, { k: "city", n: "METRO SPRAWL", s: "Dense skyline, tight corners \u2014 only 2 ore deposits", mp: 2 }, { k: "islands", n: "ARCHIPELAGO", s: "Scattered islands, no land bridges \u2014 naval & air only", mp: 4 }, { k: "atoll", n: "URBAN ATOLL", s: "Island townships linked by sea", mp: 4 }, { k: "harbor", n: "HARBOR SPRAWL", s: "River city, two bridge crossings", mp: 4 }, { k: "grand", n: "GRAND CROSSING", s: "Cross-river metropolis, four bridges, hill forts, capturable cannons", mp: 4 }, { k: "random", n: "RANDOM", s: "Surprise me", mp: 4 }];
+  var MAPS = [{ k: "basin", n: "IRON BASIN", s: "Twin lakes, corner bases", mp: 4 }, { k: "divide", n: "THE DIVIDE", s: "River, two crossings", mp: 4 }, { k: "high", n: "HIGHLANDS", s: "Rock chokepoints", mp: 4 }, { k: "dust", n: "DUSTBOWL", s: "Open ground, rich centre", mp: 4 }, { k: "lakes", n: "BROKEN LAKES", s: "Winding water", mp: 4 }, { k: "line", n: "FIRING LINE", s: "One pass, mirrored flanks", mp: 4 }, { k: "ring", n: "IRON RING", s: "Crater wall, rich core", mp: 4 }, { k: "city", n: "METRO SPRAWL", s: "Dense skyline, tight corners \u2014 only 2 ore deposits", mp: 2 }, { k: "islands", n: "ARCHIPELAGO", s: "Scattered islands, no land bridges \u2014 naval & air only", mp: 4 }, { k: "atoll", n: "URBAN ATOLL", s: "Island townships linked by sea", mp: 4 }, { k: "harbor", n: "HARBOR SPRAWL", s: "River city, two bridge crossings", mp: 4 }, { k: "grand", n: "GRAND CROSSING", s: "Cross-river metropolis, four bridges, hill forts, capturable cannons", mp: 4 }, { k: "octagon", n: "OCTAGON FRONT", s: "Eight-way scramble, open lanes, contested high ground", mp: 8 }, { k: "bastion", n: "THE BASTION", s: "Highland forts, ramps to the peaks, one gate per base", mp: 6 }, { k: "boomtown", n: "BOOMTOWN", s: "Ore-choked plains, abundant deposits, fast economy", mp: 6 }, { k: "random", n: "RANDOM", s: "Surprise me", mp: 4 }];
   function baseTerrain(e, t) {
     for (let r = 0; r < 72; r++) for (let n = 0; n < 92; n++) {
       const a = idx(n, r), o = fbm(0.085 * n + e, 0.085 * r - e, e);
@@ -880,6 +880,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
       n = [[15, 15], [77, 57]], a = [[22, 17], [70, 55], [70, 10], [20, 60]], o = [[36, 26], [56, 46]], G.civ.push([33, 24, "cannon"], [57, 46, "cannon"], [53, 16, "cannon"], [37, 54, "cannon"]);
     } else if ("harbor" === r) baseTerrain(e, 0.42), ridge(46, -4, 46, 76, 5.6, 2, 16, e), bridge(46, 18.72, 20, 10), bridge(46, 53.28, 20, 10), blob(46, 36, 5, 0), blob(92 * 0.22, 72 * 0.2, 4, 3), blob(92 * 0.78, 72 * 0.6, 4, 3), n = [[10, Math.round(36) - 6], [80, Math.round(36) - 6]], a = [[12, 14], [12, 56], [80, 14], [80, 56], [46, 16], [46, 56]], o = [[46, 18.72], [46, 53.28]];
+    else if ("octagon" === r) {
+      baseTerrain(e, 0.5), blob(46, 36, 7, 3);
+      n = [[76, 36], [67, 54], [46, 61], [25, 54], [16, 36], [25, 18], [46, 11], [67, 18]], a = [[68, 36], [60, 49], [46, 54], [32, 49], [24, 36], [32, 23], [46, 18], [60, 23]], o = [[46, 44], [46, 28]];
+    } else if ("bastion" === r) {
+      baseTerrain(e, 0.56);
+      const walls = [[57.5, 20.4], [69, 36], [57.5, 51.6], [34.5, 51.6], [23, 36], [34.5, 20.4]];
+      for (const [wx, wy] of walls) blob(wx, wy, 7, 3);
+      blob(46, 36, 4, 1), n = [[46, 12], [72, 24], [72, 48], [46, 60], [20, 48], [20, 24]], a = [[46, 19], [65, 27], [65, 44], [46, 53], [27, 44], [27, 27]], o = [[46, 36]];
+    } else if ("boomtown" === r) baseTerrain(e, 0.32), n = [[46, 9], [75, 23], [75, 50], [46, 63], [17, 50], [17, 23]], a = [[46, 16], [68, 26], [68, 46], [46, 56], [24, 46], [24, 26]], o = [[53, 27], [60, 36], [53, 46], [39, 46], [32, 36], [39, 27]], oreField(46, 36, 7, 2200, 1), oreField(60, 20, 4, 1800, 2), oreField(32, 52, 4, 1800, 2), oreField(20, 36, 4, 1600, 1), oreField(72, 36, 4, 1600, 1), oreField(46, 58, 4, 1600, 2), oreField(46, 14, 4, 1600, 2);
     else baseTerrain(e, 0.5), blob(46, 15.84, 7, 2), blob(46, 72 * 0.78, 7, 2), blob(25.76, 44.64, 6, 3), blob(66.24, 27.36, 6, 3), blob(12.88, 14.4, 3, 3), blob(79.12, 57.6, 3, 3), ridge(62, 44, 70, 56, 2.2, 3, 7, e + 11), ridge(30, 16, 22, 28, 2.2, 3, 7, e + 13), n = [[13, 13], [76, 56]], a = [[14, 14], [78, 58], [20, 52], [72, 20], [30, 36], [62, 36]], o = [[46, 36], [46, 22], [46, 50]];
     if (2 === n.length) {
       const cx = 46, cy = 36, rot = (e2) => [clamp(Math.round(cx - (e2[1] - cy)), 6, 85), clamp(Math.round(cy + (e2[0] - cx)), 6, 65)];
@@ -9392,10 +9401,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   function nextDefaultTeam() {
     const e = [cfg.team, ...cfg.slots.map((e2) => e2.team)];
-    for (let t = 1; t <= 4; t++) if (!e.includes(t)) return t;
+    for (let t = 1; t <= 8; t++) if (!e.includes(t)) return t;
     return 1;
   }
-  var MAP_SPAWNS = { divide: [[10, 30], [78, 30]], high: [[14, 52], [74, 14]], dust: [[40, 10], [40, 56]], lakes: [[13, 13], [76, 56]], line: [[16, 58], [76, 14]], ring: [[46, 8], [46, 66]], city: [[12, 12], [80, 60]] };
+  var MAP_SPAWNS = { divide: [[10, 30], [78, 30]], high: [[14, 52], [74, 14]], dust: [[40, 10], [40, 56]], lakes: [[13, 13], [76, 56]], line: [[16, 58], [76, 14]], ring: [[46, 8], [46, 66]], city: [[12, 12], [80, 60]], octagon: [[76, 36], [67, 54], [46, 61], [25, 54], [16, 36], [25, 18], [46, 11], [67, 18]], bastion: [[46, 12], [72, 24], [72, 48], [46, 60], [20, 48], [20, 24]], boomtown: [[46, 9], [75, 23], [75, 50], [46, 63], [17, 50], [17, 23]] };
   function mapSpots(key) {
     const e = MAP_SPAWNS[key] || [[13, 13], [76, 56]], cx = 46, cy = 36, rot = (e2) => [clamp(Math.round(cx - (e2[1] - cy)), 6, 85), clamp(Math.round(cy + (e2[0] - cx)), 6, 65)];
     return e.concat([rot(e[0]), rot(e[1])]);
@@ -9438,7 +9447,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
       usedSpawns.add(rec.spawn);
     });
-    const facList = [{ k: "allied", n: "Vanguard" }, { k: "soviet", n: "Legion" }, { k: "yuri", n: "Syndicate" }], teamList = [1, 2, 3, 4].map((e, t) => ({ k: e, n: String.fromCharCode(65 + t) })), colorList = COLORSETS.map((e) => ({ k: e.k, n: e.n })), diffList = [{ k: "easy", n: "Easy" }, { k: "normal", n: "Normal" }, { k: "hard", n: "Brutal" }], n = 1 + cfg.slots.length, spawnList = Array.from({ length: mp }, (e, t) => ({ k: t, n: String.fromCharCode(65 + t) }));
+    const facList = [{ k: "allied", n: "Vanguard" }, { k: "soviet", n: "Legion" }, { k: "yuri", n: "Syndicate" }], teamList = [1, 2, 3, 4, 5, 6, 7, 8].map((e, t) => ({ k: e, n: String.fromCharCode(65 + t) })), colorList = COLORSETS.map((e) => ({ k: e.k, n: e.n })), diffList = [{ k: "easy", n: "Easy" }, { k: "normal", n: "Normal" }, { k: "hard", n: "Brutal" }], n = 1 + cfg.slots.length, spawnList = Array.from({ length: mp }, (e, t) => ({ k: t, n: String.fromCharCode(65 + t) }));
     $("#playerRows").innerHTML = Array.from({ length: n }, (e, t) => {
       const you = 0 === t;
       return '<div class="pRow"><div class="pName">' + (you ? "YOU" : "AI " + t) + '</div><select class="cFac" id="rFac' + t + '"></select><select class="cTeam" id="rTeam' + t + '"></select><select class="cColor" id="rColor' + t + '"></select><select class="cSpawn" id="rSpawn' + t + '"></select>' + (you ? '<div class="cDiff"></div>' : '<select class="cDiff" id="rDiff' + t + '"></select><button class="rm" data-i="' + t + '">\u2715</button>') + "</div>";
