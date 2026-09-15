@@ -45,13 +45,22 @@ mesh(new THREE.ConeGeometry(tr+.008,.13,10),warhead,ox,oy,capZ-.09,-Math.PI/2);
 mesh(new THREE.TorusGeometry(tr+.006,.01,6,12),accent,ox,oy,-.18-tl*.15,Math.PI/2);
 mesh(new THREE.CylinderGeometry(tr+.02,tr+.02,.05,12),dark2,ox,oy,-.18+tl/2+.02,Math.PI/2);
 mesh(new THREE.BoxGeometry(.06,.09,.16),grip,ox-.03,oy-.12,.05,.14);
+mesh(new THREE.BoxGeometry(.08,.1,.22),dark,ox-.02,oy-.02,.32,.06);
+mesh(new THREE.CylinderGeometry(.02,.023,.22,8),dark,ox,oy+tr+.03,-.1,Math.PI/2);
+mesh(new THREE.CylinderGeometry(.017,.017,.015,10),metal,ox,oy+tr+.03,-.19);
 const flash=mesh(new THREE.ConeGeometry(.05,.13,6),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}),ox,oy,capZ-.14,Math.PI/2);
 return flash.visible=!1,g.userData.flash=flash,addMuzzleLight(flash),g.visible=!1,g}
 if("pistol"===kind){
 mesh(new THREE.BoxGeometry(.04,.065,.16),metal,.065,-.03,-.12);
 mesh(new THREE.BoxGeometry(.032,.05,.1),grip,.065,-.09,-.02,.35);
+mesh(new THREE.BoxGeometry(.043,.02,.05),dark,.065,.005,-.05);
+mesh(new THREE.TorusGeometry(.017,.004,6,10),metal,.065,-.058,-.04,Math.PI/2);
+mesh(new THREE.BoxGeometry(.03,.006,.03),dark,.065,-.09,-.055);
 mesh(new THREE.BoxGeometry(.04,.065,.16),metal,-.065,-.03,-.12);
 mesh(new THREE.BoxGeometry(.032,.05,.1),grip,-.065,-.09,-.02,.35);
+mesh(new THREE.BoxGeometry(.043,.02,.05),dark,-.065,.005,-.05);
+mesh(new THREE.TorusGeometry(.017,.004,6,10),metal,-.065,-.058,-.04,Math.PI/2);
+mesh(new THREE.BoxGeometry(.03,.006,.03),dark,-.065,-.09,-.055);
 const flash=mesh(new THREE.ConeGeometry(.03,.08,6),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}),.065,-.03,-.21,Math.PI/2);
 const flash2=mesh(new THREE.ConeGeometry(.03,.08,6),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}),-.065,-.03,-.21,Math.PI/2);
 flash2.visible=!1,g.userData.flash2=flash2;
@@ -68,11 +77,18 @@ mesh(new THREE.BoxGeometry(.022,.03,.055),metal,0,.052,-.09);
 mesh(new THREE.BoxGeometry(.012,.05,.012),metal,0,.078,-.09);
 mesh(new THREE.BoxGeometry(.05,.03,.16),dark,0,.05,-.2);
 mesh(new THREE.BoxGeometry(.01,.028,.07),metal,.037,.015,-.1);
+mesh(new THREE.BoxGeometry(.05,.052,.15),dark,0,-.008,.14,.045);
+mesh(new THREE.BoxGeometry(.052,.02,.045),mat("#141414",.6,.2),0,-.045,.21,.045);
+mesh(new THREE.TorusGeometry(.024,.005,6,10),metal,0,-.096,.05,Math.PI/2);
+mesh(new THREE.BoxGeometry(.007,.024,.01),metal,0,-.086,.048);
 let frontZ=-.32;
 if("flame"===kind){
 mesh(new THREE.CylinderGeometry(.05,.06,.32,10),metal,0,-.02,-.34,Math.PI/2);
 mesh(new THREE.ConeGeometry(.048,.1,10),accent,0,-.02,-.53,Math.PI/2);
 mesh(new THREE.CylinderGeometry(.045,.045,.24,10),mat("#7a3a1c",.6,.3),.08,-.05,.03,0,0,.15);
+mesh(new THREE.TorusGeometry(.046,.006,6,12),dark,.055,-.05,-.06,0,.15,Math.PI/2);
+mesh(new THREE.TorusGeometry(.046,.006,6,12),dark,.1,-.05,.11,0,.15,Math.PI/2);
+mesh(new THREE.CylinderGeometry(.012,.012,.05,8),mat("#8a8f94",.4,.6),.08,-.02,-.09);
 frontZ=-.5
 }else if("sniper"===kind){
 mesh(new THREE.CylinderGeometry(.013,.015,.58,8),metal,0,.014,-.42,Math.PI/2);
@@ -81,6 +97,8 @@ mesh(new THREE.CylinderGeometry(.019,.019,.02,10),metal,0,.058,-.23,Math.PI/2);
 mesh(new THREE.CylinderGeometry(.019,.019,.02,10),metal,0,.058,-.37,Math.PI/2);
 const bolt=mesh(new THREE.CylinderGeometry(.008,.008,.05,8),metal,.032,.02,-.16,0,0,Math.PI/2);
 g.userData.bolt=bolt;
+mesh(new THREE.CylinderGeometry(.006,.006,.13,6),dark,-.03,-.06,-.5,0,0,.5);
+mesh(new THREE.CylinderGeometry(.006,.006,.13,6),dark,.03,-.06,-.5,0,0,-.5);
 frontZ=-.72,g.userData.magFamily="sniper"
 }else if("flak"===kind){
 mesh(new THREE.CylinderGeometry(.023,.023,.42,8),metal,-.032,0,-.35,Math.PI/2);
@@ -88,6 +106,9 @@ mesh(new THREE.CylinderGeometry(.023,.023,.42,8),metal,.032,0,-.35,Math.PI/2);
 mesh(new THREE.BoxGeometry(.1,.08,.1),dark,0,-.02,-.06);
 mesh(new THREE.BoxGeometry(.045,.17,.06),dark,0,-.14,-.05,-.2);
 mesh(new THREE.BoxGeometry(.03,.09,.05),dark,.07,-.06,-.14,0,0,-.15);
+mesh(new THREE.BoxGeometry(.09,.02,.05),metal,0,.05,-.08);
+mesh(new THREE.BoxGeometry(.015,.03,.015),accent,-.032,.07,-.12);
+mesh(new THREE.BoxGeometry(.015,.03,.015),accent,.032,.07,-.12);
 frontZ=-.54,g.userData.magFamily="flak"
 }else if(0===kind.indexOf("beam")){
 const beamCol="beam_temporal"===kind?"#eaf7ff":"beam_drain"===kind?"#c98cff":"#7ff0ff",
@@ -96,6 +117,8 @@ mesh(new THREE.CylinderGeometry(.026,.03,.38,8),mat("#3a4a52",.3,.8),0,0,-.34,Ma
 mesh(new THREE.OctahedronGeometry(.045,0),new THREE.MeshStandardMaterial({color:beamCol,emissive:beamEmis,emissiveIntensity:1.5,roughness:.2}),0,0,-.55);
 mesh(new THREE.TorusGeometry(.034,.008,6,10),"beam_temporal"===kind?mat(beamEmis,.3,.6):accent,0,0,-.4,Math.PI/2);
 "beam_drain"===kind&&mesh(new THREE.TorusGeometry(.05,.006,6,12),mat(beamEmis,.3,.4),0,0,-.5,Math.PI/2);
+mesh(new THREE.CylinderGeometry(.03,.03,.1,8),new THREE.MeshStandardMaterial({color:beamCol,emissive:beamEmis,emissiveIntensity:.9,roughness:.3}),0,-.09,-.04);
+mesh(new THREE.BoxGeometry(.05,.014,.16),mat("#3a4a52",.3,.8),0,.06,-.2);
 frontZ=-.55
 }else{
 mesh(new THREE.CylinderGeometry(.014,.016,.4,8),metal,0,.012,-.34,Math.PI/2);
@@ -106,6 +129,8 @@ frontZ=-.53,g.userData.magFamily="rifle"
 }
 mesh(new THREE.BoxGeometry(.012,.05,.012),metal,0,.05,frontZ+.02);
 mesh(new THREE.BoxGeometry(.026,.045,.075),grip,0,-.058,frontZ*.5,.08);
+"rifle"===g.userData.magFamily&&mesh(new THREE.BoxGeometry(.028,.1,.05),dark,0,-.115,-.06,.16);
+"sniper"===g.userData.magFamily&&mesh(new THREE.BoxGeometry(.022,.05,.035),dark,0,-.09,-.15,.1);
 const flash=mesh(new THREE.ConeGeometry(.038,.1,6),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}),0,.012,frontZ-.02,Math.PI/2);
 flash.visible=!1,g.userData.flash=flash,addMuzzleLight(flash);
 return g.visible=!1,g}

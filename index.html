@@ -3611,7 +3611,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function weaponRig(e, t, r, n, a) {
     const o = 7.4 + r, s = -2.1;
-    return "none" === t ? (e.push(P_(BOXM(3.2, 2, 2.4, 0.6), 2, s, 5.6 + r, "gold")), void e.push(P_(CYL(0.4, 2.2, 6), 2, s, 8 + r, "darkmetal"))) : "launcher" === t ? (e.push(P_(CYL(1.05, 8.4, 9), 0.4, s, o + 1.5, "gunmetal", { ty: PI2 })), e.push(P_(CYL(1.35, 1.6, 9), 8.2, s, o + 1.5, "darkmetal", { ty: PI2 })), void e.push(P_(BOXM(1.6, 1.1, 1.2, 0.3), 3, s - 0.8, o + 2.9, "steel"))) : "rocket" === t ? (e.push(P_(CYL(1.15, 9.4, 9), 1.8, s - 0.2, o + 5.4, "gunmetal", { ty: PI2 })), e.push(P_(CYL(1.5, 1.7, 9), 10.2, s - 0.2, o + 5.4, "darkmetal", { ty: PI2 })), e.push(P_(CYL(1, 1.1, 8), -5.2, s - 0.2, o + 5.4, "steel", { ty: PI2 })), void e.push(P_(BOXM(1.8, 1.6, 1.3, 0.3), -1, s + 0.7, o + 3.6, "steel"))) : "long" === t ? (e.push(P_(CYL(0.42, 8, 7), 1.4, s, o, "gunmetal", { ty: PI2 })), e.push(P_(BOXM(2.4, 1.2, 1.4, 0.35), 0.1, s, o - 0.3, "wood")), e.push(P_(CYL(0.34, 2.2, 6), 3.2, s, o + 1.1, "darkmetal", { ty: PI2 })), void e.push(P_(BOXM(0.9, 0.9, 1.5, 0.25), 2.4, s, o - 1.2, "darkmetal"))) : "flamer" === t ? (e.push(P_(CYL(0.52, 5.2, 7), 1.5, s, o, "gunmetal", { ty: PI2 })), e.push(P_(CONE(0.95, 0.45, 1.6, 7), 6.5, s, o, "rust", { ty: PI2 })), void e.push(P_(CYL(0.3, 3, 5), 0.4, s - 1, o - 1.2, "darkmetal"))) : (e.push(P_(CYL(0.38, 5.8, 7), 1.5, s, o, "gunmetal", { ty: PI2 })), e.push(P_(BOXM(2.2, 1.2, 1.4, 0.35), 0.5, s, o - 0.4, "dark2")), e.push(P_(BOXM(0.85, 0.85, 1.6, 0.25), 2.3, s, o - 1.3, "darkmetal")), void e.push(P_(BOXM(1.2, 0.9, 0.7, 0.25), 0.8, s, o + 1, "darkmetal")));
+    return "none" === t ? (e.push(P_(BOXM(3.2, 2, 2.4, 0.6), 2, s, 5.6 + r, "gold")), void e.push(P_(CYL(0.4, 2.2, 6), 2, s, 8 + r, "darkmetal"))) : "launcher" === t ? (e.push(P_(CYL(1.05, 8.4, 9), 0.4, s, o + 1.5, "gunmetal", { ty: PI2 })), e.push(P_(CYL(1.35, 1.6, 9), 8.2, s, o + 1.5, "darkmetal", { ty: PI2 })), e.push(P_(BOXM(1.6, 1.1, 1.2, 0.3), 3, s - 0.8, o + 2.9, "steel")), e.push(P_(BOXM(0.5, 0.5, 0.9, 0.15), 0.6, s - 1.3, o + 0.6, "darkmetal")), void e.push(P_(CYL(0.32, 1.4, 7), -1.6, s - 0.6, o - 2.4, "dark2", { ty: PI2 }))) : "rocket" === t ? (e.push(P_(CYL(1.15, 9.4, 9), 1.8, s - 0.2, o + 5.4, "gunmetal", { ty: PI2 })), e.push(P_(CYL(1.5, 1.7, 9), 10.2, s - 0.2, o + 5.4, "darkmetal", { ty: PI2 })), e.push(P_(CYL(1, 1.1, 8), -5.2, s - 0.2, o + 5.4, "steel", { ty: PI2 })), e.push(P_(BOXM(1.8, 1.6, 1.3, 0.3), -1, s + 0.7, o + 3.6, "steel")), e.push(P_(BOXM(0.7, 0.7, 1.1, 0.2), 0.8, s - 1.5, o + 1, "darkmetal")), void e.push(P_(BOXM(1.7, 1.9, 1.6, 0.3), -4.2, s + 0.9, o + 4.6, "dark2"))) : "long" === t ? (e.push(P_(CYL(0.42, 8, 7), 1.4, s, o, "gunmetal", { ty: PI2 })), e.push(P_(BOXM(2.4, 1.2, 1.4, 0.35), 0.1, s, o - 0.3, "wood")), e.push(P_(CYL(0.34, 2.2, 6), 3.2, s, o + 1.1, "darkmetal", { ty: PI2 })), e.push(P_(BOXM(0.9, 0.9, 1.5, 0.25), 2.4, s, o - 1.2, "darkmetal")), e.push(P_(CYL(0.24, 4.4, 8), 1.9, s - 1.3, o + 1.2, "dark2", { ty: PI2 })), void e.push(P_(BOXM(0.55, 0.9, 1, 0.2), 1.4, s, o - 1.9, "dark2"))) : "flamer" === t ? (e.push(P_(CYL(0.52, 5.2, 7), 1.5, s, o, "gunmetal", { ty: PI2 })), e.push(P_(CONE(0.95, 0.45, 1.6, 7), 6.5, s, o, "rust", { ty: PI2 })), e.push(P_(CYL(0.3, 3, 5), 0.4, s - 1, o - 1.2, "darkmetal")), e.push(P_(CYL(0.35, 0.35, 5), 0.4, s - 1, o - 2.4, "steel", { ty: PI2 })), void e.push(P_(CYL(0.35, 0.35, 5), 0.4, s - 1, o, "steel", { ty: PI2 }))) : (e.push(P_(CYL(0.38, 5.8, 7), 1.5, s, o, "gunmetal", { ty: PI2 })), e.push(P_(BOXM(2.2, 1.2, 1.4, 0.35), 0.5, s, o - 0.4, "dark2")), e.push(P_(BOXM(0.85, 0.85, 1.6, 0.25), 2.3, s, o - 1.3, "darkmetal")), e.push(P_(BOXM(1.2, 0.9, 0.7, 0.25), 0.8, s, o + 1, "darkmetal")), void e.push(P_(BOXM(0.6, 0.55, 1.4, 0.2), 1, s + 0.35, o - 0.7, "dark2", { tx: -0.15 })));
   }
   function infantry(e, t) {
     const r = 1.26, n = [], a = (t = t || {}).cloth || "body", o = t.gear || "dark", s = [0, 1, 0, -1][3 & e], i = 1 & e ? 0.34 : 0, l = 0.55 * s;
@@ -7873,14 +7873,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       mesh(new THREE.TorusGeometry(tr + 6e-3, 0.01, 6, 12), accent, ox, oy, -0.18 - tl * 0.15, Math.PI / 2);
       mesh(new THREE.CylinderGeometry(tr + 0.02, tr + 0.02, 0.05, 12), dark2, ox, oy, -0.18 + tl / 2 + 0.02, Math.PI / 2);
       mesh(new THREE.BoxGeometry(0.06, 0.09, 0.16), grip, ox - 0.03, oy - 0.12, 0.05, 0.14);
+      mesh(new THREE.BoxGeometry(0.08, 0.1, 0.22), dark, ox - 0.02, oy - 0.02, 0.32, 0.06);
+      mesh(new THREE.CylinderGeometry(0.02, 0.023, 0.22, 8), dark, ox, oy + tr + 0.03, -0.1, Math.PI / 2);
+      mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.015, 10), metal, ox, oy + tr + 0.03, -0.19);
       const flash2 = mesh(new THREE.ConeGeometry(0.05, 0.13, 6), new THREE.MeshBasicMaterial({ color: "#ffe9a0", transparent: true, opacity: 0.95, depthWrite: false }), ox, oy, capZ - 0.14, Math.PI / 2);
       return flash2.visible = false, g.userData.flash = flash2, addMuzzleLight(flash2), g.visible = false, g;
     }
     if ("pistol" === kind) {
       mesh(new THREE.BoxGeometry(0.04, 0.065, 0.16), metal, 0.065, -0.03, -0.12);
       mesh(new THREE.BoxGeometry(0.032, 0.05, 0.1), grip, 0.065, -0.09, -0.02, 0.35);
+      mesh(new THREE.BoxGeometry(0.043, 0.02, 0.05), dark, 0.065, 5e-3, -0.05);
+      mesh(new THREE.TorusGeometry(0.017, 4e-3, 6, 10), metal, 0.065, -0.058, -0.04, Math.PI / 2);
+      mesh(new THREE.BoxGeometry(0.03, 6e-3, 0.03), dark, 0.065, -0.09, -0.055);
       mesh(new THREE.BoxGeometry(0.04, 0.065, 0.16), metal, -0.065, -0.03, -0.12);
       mesh(new THREE.BoxGeometry(0.032, 0.05, 0.1), grip, -0.065, -0.09, -0.02, 0.35);
+      mesh(new THREE.BoxGeometry(0.043, 0.02, 0.05), dark, -0.065, 5e-3, -0.05);
+      mesh(new THREE.TorusGeometry(0.017, 4e-3, 6, 10), metal, -0.065, -0.058, -0.04, Math.PI / 2);
+      mesh(new THREE.BoxGeometry(0.03, 6e-3, 0.03), dark, -0.065, -0.09, -0.055);
       const flash2 = mesh(new THREE.ConeGeometry(0.03, 0.08, 6), new THREE.MeshBasicMaterial({ color: "#ffe9a0", transparent: true, opacity: 0.95, depthWrite: false }), 0.065, -0.03, -0.21, Math.PI / 2);
       const flash22 = mesh(new THREE.ConeGeometry(0.03, 0.08, 6), new THREE.MeshBasicMaterial({ color: "#ffe9a0", transparent: true, opacity: 0.95, depthWrite: false }), -0.065, -0.03, -0.21, Math.PI / 2);
       flash22.visible = false, g.userData.flash2 = flash22;
@@ -7900,11 +7909,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     mesh(new THREE.BoxGeometry(0.012, 0.05, 0.012), metal, 0, 0.078, -0.09);
     mesh(new THREE.BoxGeometry(0.05, 0.03, 0.16), dark, 0, 0.05, -0.2);
     mesh(new THREE.BoxGeometry(0.01, 0.028, 0.07), metal, 0.037, 0.015, -0.1);
+    mesh(new THREE.BoxGeometry(0.05, 0.052, 0.15), dark, 0, -8e-3, 0.14, 0.045);
+    mesh(new THREE.BoxGeometry(0.052, 0.02, 0.045), mat("#141414", 0.6, 0.2), 0, -0.045, 0.21, 0.045);
+    mesh(new THREE.TorusGeometry(0.024, 5e-3, 6, 10), metal, 0, -0.096, 0.05, Math.PI / 2);
+    mesh(new THREE.BoxGeometry(7e-3, 0.024, 0.01), metal, 0, -0.086, 0.048);
     let frontZ = -0.32;
     if ("flame" === kind) {
       mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.32, 10), metal, 0, -0.02, -0.34, Math.PI / 2);
       mesh(new THREE.ConeGeometry(0.048, 0.1, 10), accent, 0, -0.02, -0.53, Math.PI / 2);
       mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.24, 10), mat("#7a3a1c", 0.6, 0.3), 0.08, -0.05, 0.03, 0, 0, 0.15);
+      mesh(new THREE.TorusGeometry(0.046, 6e-3, 6, 12), dark, 0.055, -0.05, -0.06, 0, 0.15, Math.PI / 2);
+      mesh(new THREE.TorusGeometry(0.046, 6e-3, 6, 12), dark, 0.1, -0.05, 0.11, 0, 0.15, Math.PI / 2);
+      mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.05, 8), mat("#8a8f94", 0.4, 0.6), 0.08, -0.02, -0.09);
       frontZ = -0.5;
     } else if ("sniper" === kind) {
       mesh(new THREE.CylinderGeometry(0.013, 0.015, 0.58, 8), metal, 0, 0.014, -0.42, Math.PI / 2);
@@ -7913,6 +7929,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.02, 10), metal, 0, 0.058, -0.37, Math.PI / 2);
       const bolt = mesh(new THREE.CylinderGeometry(8e-3, 8e-3, 0.05, 8), metal, 0.032, 0.02, -0.16, 0, 0, Math.PI / 2);
       g.userData.bolt = bolt;
+      mesh(new THREE.CylinderGeometry(6e-3, 6e-3, 0.13, 6), dark, -0.03, -0.06, -0.5, 0, 0, 0.5);
+      mesh(new THREE.CylinderGeometry(6e-3, 6e-3, 0.13, 6), dark, 0.03, -0.06, -0.5, 0, 0, -0.5);
       frontZ = -0.72, g.userData.magFamily = "sniper";
     } else if ("flak" === kind) {
       mesh(new THREE.CylinderGeometry(0.023, 0.023, 0.42, 8), metal, -0.032, 0, -0.35, Math.PI / 2);
@@ -7920,6 +7938,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       mesh(new THREE.BoxGeometry(0.1, 0.08, 0.1), dark, 0, -0.02, -0.06);
       mesh(new THREE.BoxGeometry(0.045, 0.17, 0.06), dark, 0, -0.14, -0.05, -0.2);
       mesh(new THREE.BoxGeometry(0.03, 0.09, 0.05), dark, 0.07, -0.06, -0.14, 0, 0, -0.15);
+      mesh(new THREE.BoxGeometry(0.09, 0.02, 0.05), metal, 0, 0.05, -0.08);
+      mesh(new THREE.BoxGeometry(0.015, 0.03, 0.015), accent, -0.032, 0.07, -0.12);
+      mesh(new THREE.BoxGeometry(0.015, 0.03, 0.015), accent, 0.032, 0.07, -0.12);
       frontZ = -0.54, g.userData.magFamily = "flak";
     } else if (0 === kind.indexOf("beam")) {
       const beamCol = "beam_temporal" === kind ? "#eaf7ff" : "beam_drain" === kind ? "#c98cff" : "#7ff0ff", beamEmis = "beam_temporal" === kind ? "#bfe8ff" : "beam_drain" === kind ? "#9a4fe0" : "#3fd8ff";
@@ -7927,6 +7948,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       mesh(new THREE.OctahedronGeometry(0.045, 0), new THREE.MeshStandardMaterial({ color: beamCol, emissive: beamEmis, emissiveIntensity: 1.5, roughness: 0.2 }), 0, 0, -0.55);
       mesh(new THREE.TorusGeometry(0.034, 8e-3, 6, 10), "beam_temporal" === kind ? mat(beamEmis, 0.3, 0.6) : accent, 0, 0, -0.4, Math.PI / 2);
       "beam_drain" === kind && mesh(new THREE.TorusGeometry(0.05, 6e-3, 6, 12), mat(beamEmis, 0.3, 0.4), 0, 0, -0.5, Math.PI / 2);
+      mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.1, 8), new THREE.MeshStandardMaterial({ color: beamCol, emissive: beamEmis, emissiveIntensity: 0.9, roughness: 0.3 }), 0, -0.09, -0.04);
+      mesh(new THREE.BoxGeometry(0.05, 0.014, 0.16), mat("#3a4a52", 0.3, 0.8), 0, 0.06, -0.2);
       frontZ = -0.55;
     } else {
       mesh(new THREE.CylinderGeometry(0.014, 0.016, 0.4, 8), metal, 0, 0.012, -0.34, Math.PI / 2);
@@ -7937,6 +7960,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     mesh(new THREE.BoxGeometry(0.012, 0.05, 0.012), metal, 0, 0.05, frontZ + 0.02);
     mesh(new THREE.BoxGeometry(0.026, 0.045, 0.075), grip, 0, -0.058, frontZ * 0.5, 0.08);
+    "rifle" === g.userData.magFamily && mesh(new THREE.BoxGeometry(0.028, 0.1, 0.05), dark, 0, -0.115, -0.06, 0.16);
+    "sniper" === g.userData.magFamily && mesh(new THREE.BoxGeometry(0.022, 0.05, 0.035), dark, 0, -0.09, -0.15, 0.1);
     const flash = mesh(new THREE.ConeGeometry(0.038, 0.1, 6), new THREE.MeshBasicMaterial({ color: "#ffe9a0", transparent: true, opacity: 0.95, depthWrite: false }), 0, 0.012, frontZ - 0.02, Math.PI / 2);
     flash.visible = false, g.userData.flash = flash, addMuzzleLight(flash);
     return g.visible = false, g;
