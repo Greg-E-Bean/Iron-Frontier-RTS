@@ -2671,7 +2671,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         continue;
       }
       const engaged = ("attack" === u.order || "amove" === u.order) && u.target && !u.target.dead;
-      if (engaged && !u.deployed && u.hp < (pz.retreatHp || 0.3) * u.maxhp) {
+      if (engaged && !u.deployed && "b" !== u.target.e && u.hp < (pz.retreatHp || 0.3) * u.maxhp) {
         const b = !u.d.fly && repairBld || aiBaseCenter(e);
         u.order = "move", u.tx = clamp(b.x + rnd(-60, 60), 8, 2936), u.ty = clamp(b.y + rnd(-60, 60), 8, 2296), u.target = null, u.ore = null, u.retreatT = 8, u.d.fly ? (u.path = null, u.state = null) : repath(u);
         continue;
@@ -6479,15 +6479,16 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function canTarget(e, t) {
     if (!t || t.dead) return false;
     if (t.owner === e.owner || teamOf(t.owner) === teamOf(e.owner)) return false;
-    const airOnly = e.d && e.d.airOnly || e.w && e.w.airOnly;
+    const airOnly = e.d && e.d.airOnly || e.w && e.w.airOnly, eInside = "b" === e.e ? e : e.inside;
     if ("u" === t.e) {
-      if (t.inside || t.attached) return false;
+      if (t.attached) return false;
+      if (t.inside && t.inside !== eInside) return false;
       const r = e.d && e.d.aa || e.w && e.w.aa;
-      if (t.alt > 2 && !r) return false;
+      if (t.alt > 2 && !r && !t.inside) return false;
       if (airOnly && t.alt <= 2) return false;
       if (t.d && t.d.sub && !subRevealed(t)) return false;
     } else if (airOnly) return false;
-    if (!(e.d && e.d.fly) && !(t.alt > 2) && !hasLineOfFire(e.x, e.y, t.x, t.y, heightAt(e.x, e.y) + losEyeH(e), heightAt(t.x, t.y) + losEyeH(t))) return false;
+    if (!(e.d && e.d.fly) && !(t.alt > 2) && !eInside && !hasLineOfFire(e.x, e.y, t.x, t.y, heightAt(e.x, e.y) + losEyeH(e), heightAt(t.x, t.y) + losEyeH(t))) return false;
     return true;
   }
   function spawnCivs() {
@@ -7797,11 +7798,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return ("inf" === e.d.kind ? 19 : "kirov" === e.key ? 44 : e.d.fly ? 22 : 34) - (FPS.crouching && "inf" === e.d.kind ? 6 : 0);
   }
   function enterFPS(e) {
-    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.tpDist = null, FPS.lastStepT = e.animT || 0, FPS.lastEngineSfxT = e.animT || 0, FPS.damageFlashT = 0, FPS.killFlashT = 0, FPS.deathT = 0, FPS.jumpT = 0, FPS.jumpZ = 0, FPS.chargingGrenade = false, FPS.swimming = false, FPS.nextAmbientT = S.time + rnd(4, 10), startFpsAmbience(), e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), "inf" === e.d.kind && !fpsHintShown && (fpsHintShown = true, hint("SPACE to jump \xB7 hold ABILITY to aim & throw grenade")), true);
+    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.tpDist = null, FPS.lastStepT = e.animT || 0, FPS.lastEngineSfxT = e.animT || 0, FPS.damageFlashT = 0, FPS.killFlashT = 0, FPS.deathT = 0, FPS.jumpT = 0, FPS.jumpZ = 0, FPS.chargingGrenade = false, FPS.swimming = false, FPS.nextAmbientT = S.time + rnd(4, 10), startFpsAmbience(), e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), preFpsSel = S.sel, S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), "inf" === e.d.kind && !fpsHintShown && (fpsHintShown = true, hint("SPACE to jump \xB7 hold ABILITY to aim & throw grenade")), true);
   }
   var fpsHintShown = false;
+  var preFpsSel = [];
   function exitFPS() {
-    stopFpsAmbience(), FPS.cam && FPS.cam.up.set(0, 1, 0), grenadeArc && (grenadeArc.visible = false), FPS.chargingGrenade = false, FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.deathT = 0, S.autopilot = false, S.players[0] && (S.players[0].ai.mimicProfile = null), document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
+    stopFpsAmbience(), FPS.cam && FPS.cam.up.set(0, 1, 0), grenadeArc && (grenadeArc.visible = false), FPS.chargingGrenade = false, FPS.u && (FPS.u.fps = 0, FPS.u.order = "idle", FPS.u.path = null), FPS.on = false, FPS.u = null, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.deathT = 0, S.sel = preFpsSel.filter((u) => !u.dead), preFpsSel = [], S.autopilot = false, S.players[0] && (S.players[0].ai.mimicProfile = null), document.exitPointerLock && document.pointerLockElement && document.exitPointerLock(), document.body.classList.remove("fps"), document.getElementById("fpsui").classList.add("hidden");
   }
   var grenadeArc = null;
   function ensureGrenadeArc() {
@@ -7971,7 +7973,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const p = "u" === l.e && l.inside ? interiorFigurePos(l) : { x: l.x, y: l.y };
         const dx = p.x - e.x, dy = p.y - e.y, d = Math.hypot(dx, dy);
         if (d > r || d < 1) continue;
-        if ("u" === l.e && (l.alt || 0) > 2 && !t.aa) continue;
+        if ("u" === l.e && (l.alt || 0) > 2 && !t.aa && !l.inside) continue;
         if ("b" === l.e && t.noBld) continue;
         const f = (dx * n + dy * a) / d;
         if (f < coneMin) continue;
