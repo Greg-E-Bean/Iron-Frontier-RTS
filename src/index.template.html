@@ -284,25 +284,25 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #fpsstamina i{display:block;height:100%;width:100%;background:#8fd8ff;transition:width .1s linear}
 #fpsstamina.low i{background:#e0473a}
 #fpsstamina.hidden{display:none}
-#fpscrouch{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 226px);
+#fpscrouch{position:absolute;left:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 180px);
   width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:10px;letter-spacing:1px;color:#cfe0ff;
   background:rgba(40,70,110,.34);border:2px solid rgba(140,190,255,.5)}
 #fpscrouch.on{background:rgba(70,120,190,.6);border-color:#bfe0ff}
 #fpscrouch.hidden{display:none}
-#fpssprint{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 300px);
+#fpssprint{position:absolute;left:98px;bottom:calc(env(safe-area-inset-bottom,0px) + 180px);
   width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:10px;letter-spacing:1px;color:#d0ffd8;
   background:rgba(40,110,60,.34);border:2px solid rgba(150,255,160,.5)}
 #fpssprint.on{background:rgba(60,160,80,.6);border-color:#bfffc8}
 #fpssprint.empty{opacity:.4}
 #fpssprint.hidden{display:none}
-#fpsjump{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 374px);
+#fpsjump{position:absolute;left:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 250px);
   width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:10px;letter-spacing:1px;color:#ffe8c0;
   background:rgba(110,80,40,.34);border:2px solid rgba(255,210,150,.5)}
 #fpsjump.hidden{display:none}
-#fpsweapon{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 448px);
+#fpsweapon{position:absolute;left:98px;bottom:calc(env(safe-area-inset-bottom,0px) + 250px);
   width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:9px;letter-spacing:.5px;text-align:center;color:#f0d08f;
   background:rgba(110,80,20,.34);border:2px solid rgba(240,208,143,.5)}
@@ -324,6 +324,11 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #fpsability.ready{background:rgba(190,105,30,.6);border-color:#ffcf8a;box-shadow:0 0 14px rgba(255,170,80,.55)}
 #fpsability.cd{opacity:.45}
 #fpsability.hidden{display:none}
+#fpsview{position:absolute;right:110px;bottom:calc(env(safe-area-inset-bottom,0px) + 226px);
+  width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
+  justify-content:center;font-size:9.5px;letter-spacing:.5px;text-align:center;line-height:1.15;color:#d8e8ff;
+  background:rgba(50,60,90,.4);border:2px solid rgba(160,190,255,.5)}
+#fpsview.on{background:rgba(80,100,160,.6);border-color:#c4d8ff}
 #fpsenter{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 74px);transform:translateX(-50%);
   padding:9px 22px;border-radius:20px;pointer-events:auto;font-size:12px;letter-spacing:1.5px;color:#e8ffe0;
   background:rgba(40,110,60,.5);border:2px solid rgba(150,255,160,.6)}
@@ -482,6 +487,7 @@ body.fps #mmWrap{opacity:.55}
   <div id="fpsjump" class="hidden">JUMP</div>
   <div id="fpsweapon" class="hidden">SNIPER</div>
   <div id="fpsaim">AIM</div>
+  <div id="fpsview">VIEW</div>
   <div id="fpsability" class="hidden">ABILITY</div>
   <div id="fpsfire">FIRE</div>
   <div id="fpsenter" class="hidden">ENTER</div>

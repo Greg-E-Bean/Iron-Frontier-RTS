@@ -284,25 +284,25 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #fpsstamina i{display:block;height:100%;width:100%;background:#8fd8ff;transition:width .1s linear}
 #fpsstamina.low i{background:#e0473a}
 #fpsstamina.hidden{display:none}
-#fpscrouch{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 226px);
+#fpscrouch{position:absolute;left:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 180px);
   width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:10px;letter-spacing:1px;color:#cfe0ff;
   background:rgba(40,70,110,.34);border:2px solid rgba(140,190,255,.5)}
 #fpscrouch.on{background:rgba(70,120,190,.6);border-color:#bfe0ff}
 #fpscrouch.hidden{display:none}
-#fpssprint{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 300px);
+#fpssprint{position:absolute;left:98px;bottom:calc(env(safe-area-inset-bottom,0px) + 180px);
   width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:10px;letter-spacing:1px;color:#d0ffd8;
   background:rgba(40,110,60,.34);border:2px solid rgba(150,255,160,.5)}
 #fpssprint.on{background:rgba(60,160,80,.6);border-color:#bfffc8}
 #fpssprint.empty{opacity:.4}
 #fpssprint.hidden{display:none}
-#fpsjump{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 374px);
+#fpsjump{position:absolute;left:26px;bottom:calc(env(safe-area-inset-bottom,0px) + 250px);
   width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:10px;letter-spacing:1px;color:#ffe8c0;
   background:rgba(110,80,40,.34);border:2px solid rgba(255,210,150,.5)}
 #fpsjump.hidden{display:none}
-#fpsweapon{position:absolute;left:38px;bottom:calc(env(safe-area-inset-bottom,0px) + 448px);
+#fpsweapon{position:absolute;left:98px;bottom:calc(env(safe-area-inset-bottom,0px) + 250px);
   width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
   justify-content:center;font-size:9px;letter-spacing:.5px;text-align:center;color:#f0d08f;
   background:rgba(110,80,20,.34);border:2px solid rgba(240,208,143,.5)}
@@ -324,6 +324,11 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #fpsability.ready{background:rgba(190,105,30,.6);border-color:#ffcf8a;box-shadow:0 0 14px rgba(255,170,80,.55)}
 #fpsability.cd{opacity:.45}
 #fpsability.hidden{display:none}
+#fpsview{position:absolute;right:110px;bottom:calc(env(safe-area-inset-bottom,0px) + 226px);
+  width:60px;height:60px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;
+  justify-content:center;font-size:9.5px;letter-spacing:.5px;text-align:center;line-height:1.15;color:#d8e8ff;
+  background:rgba(50,60,90,.4);border:2px solid rgba(160,190,255,.5)}
+#fpsview.on{background:rgba(80,100,160,.6);border-color:#c4d8ff}
 #fpsenter{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 74px);transform:translateX(-50%);
   padding:9px 22px;border-radius:20px;pointer-events:auto;font-size:12px;letter-spacing:1.5px;color:#e8ffe0;
   background:rgba(40,110,60,.5);border:2px solid rgba(150,255,160,.6)}
@@ -482,6 +487,7 @@ body.fps #mmWrap{opacity:.55}
   <div id="fpsjump" class="hidden">JUMP</div>
   <div id="fpsweapon" class="hidden">SNIPER</div>
   <div id="fpsaim">AIM</div>
+  <div id="fpsview">VIEW</div>
   <div id="fpsability" class="hidden">ABILITY</div>
   <div id="fpsfire">FIRE</div>
   <div id="fpsenter" class="hidden">ENTER</div>
@@ -7604,14 +7610,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [], glowC = "allied" === fac ? "#8fe0ff" : "soviet" === fac ? "#ff9c4a" : "yuri" === fac ? "#c98cff" : "glow", bodyC = "soviet" === fac ? "#8a7a6a" : "allied" === fac ? "#d8e8ee" : "yuri" === fac ? "#7a5f8a" : "white", noseC = "soviet" === fac ? "#c0392b" : "allied" === fac ? "#3ba0c9" : "yuri" === fac ? "#8c3fc9" : "red", shellC = "soviet" === fac ? "#e8c04a" : "allied" === fac ? "#c9d8e0" : "yuri" === fac ? "#b98cd8" : "gold";
     return "bullet" === kind || "flak" === kind ? e.push(P_(CYL(0.5, 4.5, 6), 0, 0, 0, glowC, { ty: PI2, e: 1 })) : "flame" === kind ? e.push(P_(CYL(0.9, 3, 6), 0, 0, 0, "yuri" === fac ? "#8fe06a" : "tibGlit", { ty: PI2, e: 1 })) : "rocket" === kind || "missile" === kind || "aamissile" === kind ? (e.push(P_(CYL(0.7, 4.5, 7), 0, 0, 0, bodyC, { ty: PI2 })), e.push(P_(CONE(0.7, 0.2, 1.6, 7), 4.5, 0, 0, noseC, { ty: PI2 })), e.push(P_(CYL(0.95, 1.6, 6), -0.6, 0, 0, glowC, { ty: PI2, e: 1 }))) : "bomb" === kind ? e.push(P_(CYL(1.1, 3.5, 8), 0, 0, 0, "darkmetal", { ty: PI2 })) : "grenade" === kind ? (e.push(P_(CYL(1.3, 1.9, 8), 0, 0, 0, "olive", { ty: PI2 })), e.push(P_(CYL(0.35, 0.5, 6), 0, 1.1, 0, "darkmetal", { ty: PI2 }))) : e.push(P_(CYL(0.55, 3.4, 6), 0, 0, 0, shellC, { ty: PI2 })), e;
   }
-  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0, deathT: 0, jumpT: 0, jumpZ: 0, chargingGrenade: false, swimming: false, nextAmbientT: 0, shakeMag: 0, shakeX: 0, shakeY: 0 };
+  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, tpDist: null, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0, deathT: 0, jumpT: 0, jumpZ: 0, chargingGrenade: false, swimming: false, nextAmbientT: 0, shakeMag: 0, shakeX: 0, shakeY: 0 };
   var fpsPromptTarget = null;
   var rotateTarget = null;
   function fpsEyeH(e) {
     return ("inf" === e.d.kind ? 19 : "kirov" === e.key ? 44 : e.d.fly ? 22 : 34) - (FPS.crouching && "inf" === e.d.kind ? 6 : 0);
   }
   function enterFPS(e) {
-    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.lastStepT = e.animT || 0, FPS.lastEngineSfxT = e.animT || 0, FPS.damageFlashT = 0, FPS.killFlashT = 0, FPS.deathT = 0, FPS.jumpT = 0, FPS.jumpZ = 0, FPS.chargingGrenade = false, FPS.swimming = false, FPS.nextAmbientT = S.time + rnd(4, 10), startFpsAmbience(), e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), "inf" === e.d.kind && !fpsHintShown && (fpsHintShown = true, hint("SPACE to jump \xB7 hold ABILITY to aim & throw grenade")), true);
+    return !(!GL || !e || e.dead) && (FPS.cam || (FPS.cam = new THREE.PerspectiveCamera(74, CW / CH, 0.6, 5200), FPS.cam.up.set(0, 1, 0), GL.scene.add(FPS.cam)), FPS.on = true, FPS.u = e, FPS.yaw = e.ang, FPS.pitch = -0.04, FPS.mv.f = 0, FPS.mv.s = 0, FPS.firing = false, FPS.aiming = false, FPS.interact = null, FPS.sprinting = false, FPS.stamina = 1, FPS.crouching = false, FPS.tpDist = null, FPS.lastStepT = e.animT || 0, FPS.lastEngineSfxT = e.animT || 0, FPS.damageFlashT = 0, FPS.killFlashT = 0, FPS.deathT = 0, FPS.jumpT = 0, FPS.jumpZ = 0, FPS.chargingGrenade = false, FPS.swimming = false, FPS.nextAmbientT = S.time + rnd(4, 10), startFpsAmbience(), e.fps = 1, e.order = "idle", e.path = null, e.target = null, document.body.classList.add("fps"), document.getElementById("fpsui").classList.remove("hidden"), S.sel = [e], S.autopilot = autopilotEnabled && 0 === e.owner && !(S.mission && S.mission.hero) && S.blds.some((b) => b.owner === 0 && !b.dead), S.autopilot && (S.players[0].ai.mimicProfile = inferPlayerProfile(S.players[0])), "inf" === e.d.kind && !fpsHintShown && (fpsHintShown = true, hint("SPACE to jump \xB7 hold ABILITY to aim & throw grenade")), true);
   }
   var fpsHintShown = false;
   function exitFPS() {
@@ -8256,15 +8262,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     });
     for (const [u, f] of figMap) list.includes(u) || (bld.interior.remove(f), figMap.delete(u));
   }
-  function tpCameraDist(e, desired) {
-    const dx = -Math.cos(FPS.yaw), dy = -Math.sin(FPS.yaw), step = 6;
-    let safe = 0.5 * step;
+  function tpCameraDist(e, desired, camY) {
+    const dx = -Math.cos(FPS.yaw), dy = -Math.sin(FPS.yaw), step = 5, MIN = 22;
     for (let d = step; d <= desired; d += step) {
-      const wx = e.x + dx * d, wy = e.y + dy * d, tx = Math.floor(wx / 32), ty = Math.floor(wy / 32);
-      if (inMap(tx, ty) && G.occ[idx(tx, ty)]) return Math.max(0.5 * step, d - step);
-      safe = d;
+      const wx = e.x + dx * d, wy = e.y + dy * d, tx = Math.floor(wx / 32), ty = Math.floor(wy / 32), blocked = inMap(tx, ty) && (G.occ[idx(tx, ty)] || G.blk[idx(tx, ty)]);
+      if (blocked || heightAt(wx, wy) > camY - 8) return Math.max(MIN, d - step);
     }
-    return safe;
+    return desired;
   }
   function fpsRender() {
     const e = FPS.u, t = FPS.cam;
@@ -8276,8 +8280,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     t.up.set(0.05 * (FPS.shakeX || 0), 1, 0), t.up.normalize();
     const kp = FPS.pitch + (FPS.viewKick || 0) + 0.05 * (FPS.shakeY || 0), a = Math.cos(kp);
     if (FPS.thirdPerson) {
-      const dist2 = tpCameraDist(e, 105), backH = 52, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e) + (FPS.jumpZ || 0);
-      t.position.set(e.x - Math.cos(FPS.yaw) * dist2, eyeY + backH, e.y - Math.sin(FPS.yaw) * dist2), t.lookAt(e.x + Math.cos(FPS.yaw) * a * 120, eyeY + 140 * Math.sin(kp), e.y + Math.sin(FPS.yaw) * a * 120), t.fov = FPS.aiming ? 50 : 68;
+      const backH = 52, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e) + (FPS.jumpZ || 0), camY = eyeY + backH, rawDist = tpCameraDist(e, 105, camY);
+      FPS.tpDist = null == FPS.tpDist ? rawDist : FPS.tpDist + (rawDist - FPS.tpDist) * 0.25;
+      const dist2 = FPS.tpDist, camWx = e.x - Math.cos(FPS.yaw) * dist2, camWy = e.y - Math.sin(FPS.yaw) * dist2, finalY = Math.max(camY, heightAt(camWx, camWy) + 8);
+      t.position.set(camWx, finalY, camWy), t.lookAt(e.x + Math.cos(FPS.yaw) * a * 120, eyeY + 140 * Math.sin(kp), e.y + Math.sin(FPS.yaw) * a * 120), t.fov = FPS.aiming ? 50 : 68;
     } else {
       const r = fpsEyeH(e) + (e.alt || 0) + heightAt(e.x, e.y) + (FPS.jumpZ || 0) - (FPS.swimming ? 10 : 0), n = 0.1 * -e.d.radius;
       t.position.set(e.x + Math.cos(FPS.yaw) * n, r, e.y + Math.sin(FPS.yaw) * n), t.lookAt(t.position.x + Math.cos(FPS.yaw) * a * 100, t.position.y + 100 * Math.sin(kp), t.position.z + Math.sin(FPS.yaw) * a * 100), t.fov = FPS.aiming ? 46 : 74;
@@ -10247,6 +10253,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     am.addEventListener("pointerdown", (e2) => {
       e2.stopPropagation(), FPS.aiming = !FPS.aiming, am.classList.toggle("on", FPS.aiming);
     });
+    const vwb = $("#fpsview");
+    vwb.addEventListener("pointerdown", (e2) => {
+      e2.stopPropagation(), FPS.thirdPerson = !FPS.thirdPerson, vwb.classList.toggle("on", FPS.thirdPerson);
+    });
     const abb = $("#fpsability");
     abb.addEventListener("pointerdown", (e2) => {
       e2.stopPropagation(), fpsAbilityDown();
@@ -10301,7 +10311,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }), window.addEventListener("keydown", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
-    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? (e.preventDefault(), fpsJump()) : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? e.repeat || fpsAbilityDown() : "r" === t ? e.repeat || fpsToggleWeapon() : "v" === t ? FPS.thirdPerson = !FPS.thirdPerson : "shift" === t ? FPS.sprinting = true : "c" === t && (FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false));
+    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? (e.preventDefault(), fpsJump()) : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? e.repeat || fpsAbilityDown() : "r" === t ? e.repeat || fpsToggleWeapon() : "v" === t ? (FPS.thirdPerson = !FPS.thirdPerson, $("#fpsview").classList.toggle("on", FPS.thirdPerson)) : "shift" === t ? FPS.sprinting = true : "c" === t && (FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false));
   }), window.addEventListener("keyup", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
