@@ -534,7 +534,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/gamedata.ts
-  var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { allied: "Command Spire", soviet: "Fortress HQ", yuri: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { allied: "Solar Array", soviet: "Thermal Plant", yuri: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { allied: "Ore Processor", soviet: "Smelting Works", yuri: "Digester", neutral: "Ore Processor" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { allied: "Spawning Hive", soviet: "Spawning Hive", yuri: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { allied: "Training Hall", soviet: "Muster Bunker", yuri: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { allied: "Assembly Bay", soviet: "Foundry", yuri: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { allied: "Research Spire", soviet: "War Institute", yuri: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { allied: "Auto Turret", soviet: "Gun Bunker", yuri: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { allied: "Airstrip", soviet: "Landing Pad", yuri: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { allied: "Shipwright", soviet: "Drydock", yuri: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { allied: "Interceptor Battery", soviet: "Flak Cannon", yuri: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 1500, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { allied: "Sentinel Line", soviet: "Iron Rampart", yuri: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 280, dmg: 65, rof: 0.85, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true, aaBonus: 2.4 } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Outpost", soviet: "Outpost", yuri: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Storehouse", soviet: "Storehouse", yuri: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "High-Rise", soviet: "High-Rise", yuri: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Chapel", soviet: "Chapel", yuri: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Tenement", soviet: "Tenement", yuri: "Tenement", neutral: "Tenement" } }, bridgehut: { key: "bridgehut", size: 1, hp: 220, cost: 0, power: 0, build: 1, tab: null, prereq: [], noAnchor: true, names: { allied: "Bridge Watch", soviet: "Bridge Watch", yuri: "Bridge Watch", neutral: "Bridge Watch" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Garrison Cannon", soviet: "Garrison Cannon", yuri: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { allied: "Ore Vault", soviet: "Stockpile", yuri: "Gullet", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { allied: "Service Bay", soviet: "Field Works", yuri: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { allied: "Photon Lance", soviet: "Missile Silo", yuri: "Psychic Amplifier", neutral: "Photon Lance" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { allied: "Photon Tower", soviet: "Arc Tower", yuri: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { allied: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "prism" }, soviet: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "tesla" }, yuri: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { allied: "Barrier Wall", soviet: "Iron Wall", yuri: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { allied: "Checkpoint Gate", soviet: "Blast Gate", yuri: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Oil Derrick", soviet: "Oil Derrick", yuri: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Paradrop Hangar", soviet: "Paradrop Hangar", yuri: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "EMP Spire", soviet: "EMP Spire", yuri: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Rogue Den", soviet: "Rogue Den", yuri: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 } };
+  var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { allied: "Command Spire", soviet: "Fortress HQ", yuri: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { allied: "Solar Array", soviet: "Thermal Plant", yuri: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { allied: "Ore Processor", soviet: "Smelting Works", yuri: "Digester", neutral: "Ore Processor" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { allied: "Spawning Hive", soviet: "Spawning Hive", yuri: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { allied: "Training Hall", soviet: "Muster Bunker", yuri: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { allied: "Assembly Bay", soviet: "Foundry", yuri: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { allied: "Research Spire", soviet: "War Institute", yuri: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { allied: "Auto Turret", soviet: "Gun Bunker", yuri: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { allied: "Airstrip", soviet: "Landing Pad", yuri: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { allied: "Shipwright", soviet: "Drydock", yuri: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { allied: "Interceptor Battery", soviet: "Flak Cannon", yuri: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 1500, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { allied: "Sentinel Line", soviet: "Iron Rampart", yuri: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 280, dmg: 65, rof: 0.85, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true, aaBonus: 2.4 } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Outpost", soviet: "Outpost", yuri: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Storehouse", soviet: "Storehouse", yuri: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "High-Rise", soviet: "High-Rise", yuri: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Chapel", soviet: "Chapel", yuri: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Tenement", soviet: "Tenement", yuri: "Tenement", neutral: "Tenement" } }, civ6: { key: "civ6", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Market Row", soviet: "Market Row", yuri: "Market Row", neutral: "Market Row" } }, civ7: { key: "civ7", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Workshop", soviet: "Workshop", yuri: "Workshop", neutral: "Workshop" } }, civ8: { key: "civ8", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Tavern", soviet: "Tavern", yuri: "Tavern", neutral: "Tavern" } }, civ9: { key: "civ9", size: 3, hp: 1100, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Terrace Flats", soviet: "Terrace Flats", yuri: "Terrace Flats", neutral: "Terrace Flats" } }, bridgehut: { key: "bridgehut", size: 1, hp: 220, cost: 0, power: 0, build: 1, tab: null, prereq: [], noAnchor: true, indestructible: true, names: { allied: "Bridge Watch", soviet: "Bridge Watch", yuri: "Bridge Watch", neutral: "Bridge Watch" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Garrison Cannon", soviet: "Garrison Cannon", yuri: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { allied: "Ore Vault", soviet: "Stockpile", yuri: "Gullet", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { allied: "Service Bay", soviet: "Field Works", yuri: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { allied: "Photon Lance", soviet: "Missile Silo", yuri: "Psychic Amplifier", neutral: "Photon Lance" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { allied: "Photon Tower", soviet: "Arc Tower", yuri: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { allied: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "prism" }, soviet: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "tesla" }, yuri: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { allied: "Barrier Wall", soviet: "Iron Wall", yuri: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { allied: "Checkpoint Gate", soviet: "Blast Gate", yuri: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Oil Derrick", soviet: "Oil Derrick", yuri: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Paradrop Hangar", soviet: "Paradrop Hangar", yuri: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "EMP Spire", soviet: "EMP Spire", yuri: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Rogue Den", soviet: "Rogue Den", yuri: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 } };
   function U(e) {
     return Object.assign({ kind: "veh", armor: "veh", radius: 11, speed: 44, sight: 260, vsInf: 1, vsVeh: 1, vsBldg: 1, proj: "shell", rof: 1, dmg: 10, range: 130, from: "factory", tab: "veh" }, e);
   }
@@ -605,7 +605,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/sim.ts
-  var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), bridge: new Uint8Array(6624), bridgeHp: new Float32Array(6624), fall: [] };
+  var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), bridge: new Uint8Array(6624), bridgeHp: new Float32Array(6624), bridgeSite: new Uint8Array(6624), bridgeHoriz: new Uint8Array(6624), fall: [] };
   var FOG_ON = true;
   var idx = (e, t) => 92 * t + e;
   var inMap = (e, t) => e >= 0 && t >= 0 && e < 92 && t < 72;
@@ -681,11 +681,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function fbm(e, t, r) {
     return 0.6 * vnoise(e, t, r) + 0.3 * vnoise(2.3 * e, 2.3 * t, r + 9) + 0.1 * vnoise(5.1 * e, 5.1 * t, r + 17);
   }
-  var MAPS = [{ k: "basin", n: "IRON BASIN", s: "Twin lakes, corner bases", mp: 4 }, { k: "divide", n: "THE DIVIDE", s: "River, two crossings", mp: 4 }, { k: "high", n: "HIGHLANDS", s: "Rock chokepoints", mp: 4 }, { k: "dust", n: "DUSTBOWL", s: "Open ground, rich centre", mp: 4 }, { k: "lakes", n: "BROKEN LAKES", s: "Winding water", mp: 4 }, { k: "line", n: "FIRING LINE", s: "One pass, mirrored flanks", mp: 4 }, { k: "ring", n: "IRON RING", s: "Crater wall, rich core", mp: 4 }, { k: "city", n: "METRO SPRAWL", s: "Dense skyline, tight corners \u2014 only 2 ore deposits", mp: 2 }, { k: "islands", n: "ARCHIPELAGO", s: "Scattered islands, no land bridges \u2014 naval & air only", mp: 4 }, { k: "atoll", n: "URBAN ATOLL", s: "Island townships linked by sea", mp: 4 }, { k: "harbor", n: "HARBOR SPRAWL", s: "River city, two bridge crossings", mp: 4 }, { k: "grand", n: "GRAND CROSSING", s: "Cross-river metropolis, four bridges, hill forts, capturable cannons", mp: 4 }, { k: "octagon", n: "OCTAGON FRONT", s: "Eight-way scramble, open lanes, contested high ground", mp: 8 }, { k: "bastion", n: "THE BASTION", s: "Highland forts, ramps to the peaks, one gate per base", mp: 6 }, { k: "boomtown", n: "BOOMTOWN", s: "Ore-choked plains, abundant deposits, fast economy", mp: 6 }, { k: "random", n: "RANDOM", s: "Surprise me", mp: 4 }];
+  var MAPS = [{ k: "basin", n: "IRON BASIN", s: "Twin lakes, corner bases", mp: 4 }, { k: "divide", n: "THE DIVIDE", s: "River, two crossings", mp: 4 }, { k: "high", n: "HIGHLANDS", s: "Rock chokepoints", mp: 4 }, { k: "dust", n: "DUSTBOWL", s: "Open ground, rich centre", mp: 4 }, { k: "lakes", n: "BROKEN LAKES", s: "Winding water", mp: 4 }, { k: "line", n: "FIRING LINE", s: "One pass, mirrored flanks", mp: 4 }, { k: "ring", n: "IRON RING", s: "Crater wall, rich core", mp: 4 }, { k: "city", n: "METRO SPRAWL", s: "8-way river metropolis \u2014 plazas, alleys, hill districts, tight ore", mp: 8 }, { k: "islands", n: "ARCHIPELAGO", s: "Scattered islands, no land bridges \u2014 naval & air only", mp: 4 }, { k: "atoll", n: "URBAN ATOLL", s: "Island townships linked by sea", mp: 4 }, { k: "harbor", n: "HARBOR SPRAWL", s: "River city, two bridge crossings", mp: 4 }, { k: "grand", n: "GRAND CROSSING", s: "Cross-river metropolis, four bridges, hill forts, capturable cannons", mp: 4 }, { k: "octagon", n: "OCTAGON FRONT", s: "Eight-way scramble, open lanes, contested high ground", mp: 8 }, { k: "bastion", n: "THE BASTION", s: "Highland forts, ramps to the peaks, one gate per base", mp: 6 }, { k: "boomtown", n: "BOOMTOWN", s: "Ore-choked plains, abundant deposits, fast economy", mp: 6 }, { k: "random", n: "RANDOM", s: "Surprise me", mp: 4 }];
   function baseTerrain(e, t) {
     for (let r = 0; r < 72; r++) for (let n = 0; n < 92; n++) {
       const a = idx(n, r), o = fbm(0.085 * n + e, 0.085 * r - e, e);
-      G.terr[a] = o > (void 0 === t ? 0.5 : t) ? 1 : 0, G.tint[a] = Math.floor(7.999 * fbm(0.16 * n + 3 * e, 0.16 * r, e + 5)), G.ore[a] = 0, G.occ[a] = 0, G.tib[a] = 0, G.blk[a] = 0, G.pave[a] = 0, G.vis[a] = 0, G.bridge[a] = 0, G.bridgeHp[a] = 0;
+      G.terr[a] = o > (void 0 === t ? 0.5 : t) ? 1 : 0, G.tint[a] = Math.floor(7.999 * fbm(0.16 * n + 3 * e, 0.16 * r, e + 5)), G.ore[a] = 0, G.occ[a] = 0, G.tib[a] = 0, G.blk[a] = 0, G.pave[a] = 0, G.vis[a] = 0, G.bridge[a] = 0, G.bridgeHp[a] = 0, G.bridgeSite[a] = 0, G.bridgeHoriz[a] = 0;
     }
     for (let e2 = 0; e2 < 3; e2++) {
       const e3 = Uint8Array.from(G.terr);
@@ -823,7 +823,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const c of chosen) {
       for (let i = 0; i < c.len; i++) {
         const tx = c.horiz ? c.tx + i : c.tx, ty = c.horiz ? c.ty : c.ty + i, id = idx(tx, ty);
-        G.bridge[id] = 1, G.bridgeHp[id] = BRIDGE_MAX_HP, G.props.push({ tx, ty, kind: "bridge", x: 32 * tx + 16, y: 32 * ty + 16, r: c.horiz ? 0 : Math.PI / 2, v: 0, s: 1 });
+        G.bridge[id] = 1, G.bridgeHp[id] = BRIDGE_MAX_HP, G.bridgeSite[id] = 1, G.bridgeHoriz[id] = c.horiz ? 1 : 0, G.props.push({ tx, ty, kind: "bridge", x: 32 * tx + 16, y: 32 * ty + 16, r: c.horiz ? 0 : Math.PI / 2, v: 0, s: 1 });
       }
       placeBridgeHuts(c);
     }
@@ -859,8 +859,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const tx0 = Math.max(0, Math.floor((e.x - BRIDGE_REPAIR_RANGE) / 32)), tx1 = Math.min(91, Math.ceil((e.x + BRIDGE_REPAIR_RANGE) / 32)), ty0 = Math.max(0, Math.floor((e.y - BRIDGE_REPAIR_RANGE) / 32)), ty1 = Math.min(71, Math.ceil((e.y + BRIDGE_REPAIR_RANGE) / 32));
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
       const i = idx(tx, ty);
-      if (!G.bridge[i] || G.bridgeHp[i] >= BRIDGE_MAX_HP) continue;
-      dist(32 * tx + 16, 32 * ty + 16, e.x, e.y) <= BRIDGE_REPAIR_RANGE && (G.bridgeHp[i] = Math.min(BRIDGE_MAX_HP, G.bridgeHp[i] + BRIDGE_REPAIR_RATE * t));
+      if (!G.bridgeSite[i] || G.bridgeHp[i] >= BRIDGE_MAX_HP) continue;
+      if (dist(32 * tx + 16, 32 * ty + 16, e.x, e.y) > BRIDGE_REPAIR_RANGE) continue;
+      const wasDown = !G.bridge[i];
+      G.bridgeHp[i] = Math.min(BRIDGE_MAX_HP, G.bridgeHp[i] + BRIDGE_REPAIR_RATE * t), wasDown && G.bridgeHp[i] > 0 && (G.bridge[i] = 1, G.props.push({ tx, ty, kind: "bridge", x: 32 * tx + 16, y: 32 * ty + 16, r: G.bridgeHoriz[i] ? 0 : Math.PI / 2, v: 0, s: 1 }));
     }
   }
   function placeBridgeHuts(c) {
@@ -955,7 +957,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         blob(46 + Math.cos(a2) * 26, 36 + Math.sin(a2) * 20, 5, 3);
       }
       bridge(46, 16, 16, 14), bridge(46, 56, 16, 14), blob(46, 36, 12, 1), n = [[46, 8], [46, 66]], a = [[36, 30], [56, 30], [36, 42], [56, 42]], o = [[46, 36]];
-    } else if ("city" === r) baseTerrain(e, 0.5), n = [[12, 12], [80, 60]], a = [], o = [], oreField(12, 12, 4, 1200, 1), oreField(80, 60, 4, 1200, 1);
+    } else if ("city" === r) baseTerrain(e, 0.5), ridge(46, -6, 46, 78, 5, 2, 14, e), n = [[76, 36], [67, 54], [46, 61], [25, 54], [16, 36], [25, 18], [46, 11], [67, 18]], a = [], o = [], oreField(46, 36, 5, 1400, 1), oreField(30, 50, 4, 1200, 2), oreField(62, 22, 4, 1200, 2), oreField(34, 20, 4, 1200, 1), oreField(58, 52, 4, 1200, 1);
     else if ("islands" === r) baseTerrain(e, 0.5), G.terr.fill(2), n = [[14, 14], [78, 58]], blob(14, 14, 13, 0), blob(78, 58, 13, 0), blob(68, 4, 11, 0), blob(24, 68, 11, 0), blob(46, 20, 8, 0), blob(46, 52, 8, 0), blob(20, 40, 6, 0), blob(72, 32, 6, 0), a = [[14, 14], [78, 58], [68, 4], [24, 68]], o = [[46, 20], [46, 52], [20, 40], [72, 32]];
     else if ("atoll" === r) {
       baseTerrain(e, 0.5), G.terr.fill(2), n = [[14, 14], [78, 58]], blob(14, 14, 15, 0), blob(78, 58, 15, 0), blob(46, 8, 9, 0), blob(46, 64, 9, 0), blob(10, 60, 8, 0), blob(82, 12, 8, 0), blob(46, 36, 7, 0), a = [[46, 8], [46, 64], [10, 60], [82, 12]], o = [[46, 36]];
@@ -965,7 +967,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         let ok = true;
         for (let yy = cy; yy < cy + 2 && ok; yy++) for (let xx = cx; xx < cx + 2 && ok; xx++) (!inMap(xx, yy) || G.terr[idx(xx, yy)] >= 2 || G.ore[idx(xx, yy)] > 0 || G.blk[idx(xx, yy)] || G.mtn[idx(xx, yy)] > 0.12 || G.shore[idx(xx, yy)] > 0.08) && (ok = false);
         if (ok) {
-          G.civ.push([cx, cy, pick(["civ1", "civ2", "civ4"])]);
+          G.civ.push([cx, cy, pick(["civ1", "civ2", "civ4", "civ6", "civ7", "civ8"])]);
           break;
         }
       }
@@ -1006,7 +1008,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       let r2 = true;
       for (let n2 = t2 - 1; n2 < t2 + 3 && r2; n2++) for (let t3 = e3 - 1; t3 < e3 + 3 && r2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.blk[idx(t3, n2)] || G.mtn[idx(t3, n2)] > 0.12 || G.shore[idx(t3, n2)] > 0.08) && (r2 = false);
       for (const a2 of n) dist(e3, t2, a2[0], a2[1]) < 14 && (r2 = false);
-      r2 && G.civ.push([e3, t2, pick(["civ1", "civ2", "civ4"])]);
+      r2 && G.civ.push([e3, t2, pick(["civ1", "civ2", "civ4", "civ6", "civ7", "civ8"])]);
     }
     G.special = [];
     const SPECIAL_KEYS = ["oilDerek", "paradropHangar", "empTower", "rogueDen"];
@@ -1152,7 +1154,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         for (let n2 = t2; n2 < t2 + 2; n2++) for (let t3 = r3; t3 < r3 + 2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.mtn[idx(t3, n2)] > 0.12 || G.shore[idx(t3, n2)] > 0.08) && (e4 = false);
         if (e4) {
           for (let e5 = t2; e5 < t2 + 2; e5++) for (let t3 = r3; t3 < r3 + 2; t3++) G.blk[idx(t3, e5)] = 0;
-          G.civ.push([r3, t2, pick(["civ1", "civ2", "civ4"])]), G.pave[idx(r3, t2)] = 1;
+          G.civ.push([r3, t2, pick(["civ1", "civ2", "civ4", "civ6", "civ7", "civ8"])]), G.pave[idx(r3, t2)] = 1;
         }
       }
       for (let t2 = 0; t2 < 8; t2++) {
@@ -1171,8 +1173,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       t.t += t.dir * t.speed * e / r, t.t > 1 ? (t.t = 1, t.dir = -1) : t.t < 0 && (t.t = 0, t.dir = 1), t.x = t.x0 + (t.x1 - t.x0) * t.t, t.y = t.y0 + (t.y1 - t.y0) * t.t, t.ang = Math.atan2((t.y1 - t.y0) * t.dir, (t.x1 - t.x0) * t.dir);
     }
   }
+  function hillRoad(hx, hy, r) {
+    const steps = 14;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps, ang = t * 3.4 * Math.PI, rad = r * (1 - 0.9 * t), px = hx + Math.cos(ang) * rad, py = hy + Math.sin(ang) * rad * 0.7;
+      bridge(px, py, 2.6, 2.6);
+      const rx = Math.round(px), ry = Math.round(py);
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        if (Math.abs(dx) + Math.abs(dy) > 1) continue;
+        const xx = rx + dx, yy = ry + dy;
+        inMap(xx, yy) && G.terr[idx(xx, yy)] < 2 && (G.pave[idx(xx, yy)] = 1);
+      }
+    }
+    addProp("monument", hx, hy, true);
+  }
   function buildCityscape(e) {
     S.traffic = [], G.props = [];
+    for (const [hx, hy] of [[8, 8], [84, 64]]) blob(hx, hy, 7, 3), hillRoad(hx, hy, 7);
     const t = 5, r = [], n = [];
     for (let e2 = 4; e2 < 90; e2 += t) r.push(e2);
     for (let e2 = 4; e2 < 70; e2 += t) n.push(e2);
@@ -1181,9 +1198,38 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const e2 of r) o(e2) || 1 & irnd(0, 1) || spawnTrafficLane(e2, 4, e2, 68);
     for (const e2 of n) for (let t2 = 1; t2 < 91; t2++) s(t2, e2) || !inMap(t2, e2) || G.terr[idx(t2, e2)] >= 2 || (G.pave[idx(t2, e2)] = 1);
     for (const e2 of r) for (let t2 = 1; t2 < 71; t2++) s(e2, t2) || !inMap(e2, t2) || G.terr[idx(e2, t2)] >= 2 || (G.pave[idx(e2, t2)] = 1);
+    for (let bi = 0; bi < n.length - 1; bi++) {
+      const ay = Math.round((n[bi] + n[bi + 1]) / 2);
+      for (let t2 = 1; t2 < 91; t2++) s(t2, ay) || !inMap(t2, ay) || G.terr[idx(t2, ay)] >= 2 || Math.random() < 0.5 || (G.pave[idx(t2, ay)] = 1);
+    }
+    for (let bi = 0; bi < r.length - 1; bi++) {
+      const ax = Math.round((r[bi] + r[bi + 1]) / 2);
+      for (let t2 = 1; t2 < 71; t2++) s(ax, t2) || !inMap(ax, t2) || G.terr[idx(ax, t2)] >= 2 || Math.random() < 0.5 || (G.pave[idx(ax, t2)] = 1);
+    }
+    const bldPool = ["civ3", "civ5", "civ6", "civ7", "civ8", "civ9"];
+    let plazaBudget = Math.max(2, Math.round(r.length * n.length / 26));
     for (let e2 = 0; e2 < r.length - 1; e2++) for (let t2 = 0; t2 < n.length - 1; t2++) {
       const a2 = r[e2] + 2, o2 = n[t2] + 2;
-      s(a2, o2) || Math.random() < 0.15 || !inMap(a2, o2) || G.terr[idx(a2, o2)] >= 2 || G.ore[idx(a2, o2)] > 0 || (Math.random() < 0.35 ? G.civ.push([a2, o2, Math.random() < 0.5 ? "civ3" : "civ5"]) : addProp("tower", a2, o2, true));
+      if (s(a2, o2) || !inMap(a2, o2) || G.terr[idx(a2, o2)] >= 2 || G.ore[idx(a2, o2)] > 0) continue;
+      if (plazaBudget > 0 && Math.random() < 0.08) {
+        plazaBudget--;
+        for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+          const px = a2 + dx, py = o2 + dy;
+          inMap(px, py) && G.terr[idx(px, py)] < 2 && (G.pave[idx(px, py)] = 1, G.blk[idx(px, py)] = 0);
+        }
+        addProp("monument", a2, o2, true);
+        for (const [sx, sy] of [[-3, -2], [3, -2], [-3, 2], [3, 2]]) {
+          const px = a2 + sx, py = o2 + sy;
+          inMap(px, py) && G.terr[idx(px, py)] < 2 && addProp("stall", px, py, true);
+        }
+        for (const [lx, ly] of [[-2, 0], [2, 0]]) {
+          const px = a2 + lx, py = o2 + ly;
+          inMap(px, py) && G.terr[idx(px, py)] < 2 && addProp("lamp", px, py, false);
+        }
+        continue;
+      }
+      if (Math.random() < 0.15) continue;
+      Math.random() < 0.4 ? G.civ.push([a2, o2, pick(bldPool)]) : addProp("tower", a2, o2, true);
     }
   }
   function blob(e, t, r, n) {
@@ -1609,6 +1655,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.dead || null == r || teamOf(e.owner) !== teamOf(0) || teamOf(r) === teamOf(0) || S.time - lastAlertT < 6 || (lastAlertT = S.time, mmPings.push({ x: e.x, y: e.y, spawnTime: S.time }), hint("UNDER ATTACK"), sfx("alert"));
   }
   function damage(e, t, r, n) {
+    if (e.d && e.d.indestructible) return;
     alertCheck(e, r);
     if (n && n.d && n.d.drain && !n.dead && n.hp < n.maxhp && (n.hp = Math.min(n.maxhp, n.hp + 0.5 * t)), e === FPS.u && FPS.on && !e.dead && (FPS.damageFlashT = 0.5, FPS.damageDir = n ? Math.atan2(n.y - e.y, n.x - e.x) : FPS.damageDir, sfx("hurt")), !e.dead) {
       const fromPlayer = n === FPS.u && FPS.on;
@@ -4254,10 +4301,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const sx of [-5.2, 5.2]) for (const sy of [-3.4, 3.4]) e.push(P_(CYL(1.9, 1.9, 8), sx, sy, 1.9, "dark2", { tx: PI2 }));
     return e.push(P_(BOXM(1.2, 6.8, 0.7, 0.2), 7.6, 0, 3.6, "lightY", { e: 1 })), e;
   }
+  function monumentModel(v) {
+    const e = [];
+    return e.push(P_(BOXM(9, 9, 2, 0.3), 0, 0, 0, "concrete2")), e.push(P_(BOXM(6, 6, 3, 0.4), 0, 0, 2, "concrete2")), e.push(P_(CYL(1.6, 16, 8), 0, 0, 5, v % 2 ? "rock2" : "gold")), e.push(P_(CONE(1.6, 0.2, 2, 8), 0, 0, 21, v % 2 ? "rock2" : "gold")), e;
+  }
+  function stallModel(v) {
+    const e = [], col = v % 3 == 0 ? "red" : v % 3 == 1 ? "green" : "gold";
+    return e.push(P_(BOXM(10, 7, 3, 0.3), 0, 0, 0, "wood")), [[-4.2, -2.8], [-4.2, 2.8], [4.2, -2.8], [4.2, 2.8]].forEach(([dx, dy]) => e.push(P_(CYL(0.25, 5, 6), dx, dy, 3, "darkmetal"))), e.push(P_(BOXM(11, 8, 0.4, 0.2), 0, 0, 8, col)), e.push(P_(BOXM(9, 6, 1.6, 0.2), 0, 0, 1.8, "wood")), e;
+  }
   function PROPMODEL(e, t) {
     const _a = getAssetModel(e);
     if (_a) return _a;
-    return "tree" === e ? treeModel(t) : "rock" === e ? rockModel(t) : "scrub" === e ? scrubModel(t) : "lamp" === e ? lampModel() : "fall" === e ? fallModel(t) : "tower" === e ? towerModel(t) : "crater" === e ? craterModel(t) : "wreck" === e ? wreckModel(t) : "rubble" === e ? rubbleModel(t) : "bridge" === e ? bridgeModel(t) : stoneModel(t);
+    return "tree" === e ? treeModel(t) : "rock" === e ? rockModel(t) : "scrub" === e ? scrubModel(t) : "lamp" === e ? lampModel() : "fall" === e ? fallModel(t) : "tower" === e ? towerModel(t) : "crater" === e ? craterModel(t) : "wreck" === e ? wreckModel(t) : "rubble" === e ? rubbleModel(t) : "bridge" === e ? bridgeModel(t) : "monument" === e ? monumentModel(t) : "stall" === e ? stallModel(t) : stoneModel(t);
   }
   function bridgeModel(v) {
     const e = [], L = 32, W = 14 + 2 * (v % 2);
@@ -4485,7 +4540,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.push(P_(CYL(2.1, 5.4, 14), t, r, n, a || "rust")), e.push(P_(CYL(2.3, 0.7, 14), t, r, n + 1.4, "darkmetal")), e.push(P_(CYL(2.3, 0.7, 14), t, r, n + 3.6, "darkmetal")), e.push(P_(CYL(1.9, 0.4, 12), t, r, n + 5.4, "darkmetal"));
   }
   function detailPass(e, t, r, n) {
-    if ("civ1" === t || "civ2" === t || "civ3" === t || "civ4" === t || "civ5" === t || "bridgehut" === t || "hive" === t || "wall" === t || "gate" === t || "triturret" === t) return;
+    if ("civ1" === t || "civ2" === t || "civ3" === t || "civ4" === t || "civ5" === t || "civ6" === t || "civ7" === t || "civ8" === t || "civ9" === t || "bridgehut" === t || "hive" === t || "wall" === t || "gate" === t || "triturret" === t) return;
     const a = "allied" === r, o = "soviet" === r, s = 0.5 * n - 2.4, i = a ? "armor3" : o ? "concrete2" : "carapace2";
     for (const t2 of [-1, 1]) e.push(P_(BOXM(1.9, n - 4.6, 1.5, 0.4), t2 * s, 0, 3, i)), e.push(P_(BOXM(n - 4.6, 1.9, 1.5, 0.4), 0, t2 * s, 3, i));
     for (const t2 of [-1, 1]) for (const r2 of [-1, 1]) e.push(P_(CYL(1.5, 3.4, 10), t2 * (s - 1.2), r2 * (s - 1.2), 3.2, i)), e.push(P_(CYL(1, 0.6, 10), t2 * (s - 1.2), r2 * (s - 1.2), 6.6, "gold", { e: 1 }));
@@ -5345,6 +5400,29 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           }
         }
         n.push(P_(CYL(0.07 * r, 0.24 * r, 10), 0.3 * -r, 0.22 * -r, l, o ? "rust" : "steel")), n.push(P_(CYL(0.07 * r, 0.24 * r, 10), 0.3 * -r, 0.22 * r, l, o ? "rust" : "steel")), n.push(P_(BOXM(0.24 * r, 0.9 * r, 0.05 * r, 0.3), 0.02 * r, 0.02 * r, l + 0.02 * r, "wood"));
+        break;
+      }
+      case "civ6": {
+        const w = 0.86 * r, d2 = 0.6 * r, h = 0.3 * r;
+        n.push(P_(BOXM(w, d2, h, 0.5), 0, 0, l, "cv1")), n.push(P_(BOXM(w + 4, 0.14 * r, 0.05 * r, 0.3), 0, -d2 / 2 - 0.05 * r, l + h, "rust")), n.push(P_(BOXM(w + 2, 0.16 * r, 0.03 * r, 0.2), 0, -d2 / 2 - 0.08 * r, l + h - 0.06 * r, "red")), windows(n, w * 0.86, d2 * 0.86, l + 0.12 * r, 0.1 * r, 3, "glass"), n.push(P_(BOXM(0.12 * r, 0.02 * r, 0.14 * r, 0.2), -0.28 * r, -d2 / 2 - 0.02 * r, l + h + 0.02 * r, "gold"));
+        break;
+      }
+      case "civ7": {
+        const w = 0.9 * r, d2 = 0.7 * r, h = 0.34 * r;
+        n.push(P_(BOXM(w, d2, h, 0.4), 0, 0, l, "concrete2")), n.push(P_(BOXM(w * 0.96, d2 * 0.5, 0.06 * r, 0.2), 0, -d2 * 0.2, l + h, "darkmetal")), n.push(P_(CYL(0.05 * r, 0.36 * r, 8), 0.32 * r, 0.2 * r, l + h, "rust")), n.push(P_(BOXM(0.3 * r, 0.04 * r, 0.2 * r, 0.1), -0.2 * r, -d2 / 2 - 0.01 * r, l + 0.06 * r, "darkmetal")), n.push(P_(BOXM(0.3 * r, 0.04 * r, 0.2 * r, 0.1), 0.05 * r, -d2 / 2 - 0.01 * r, l + 0.06 * r, "darkmetal"));
+        break;
+      }
+      case "civ8": {
+        const w = 0.7 * r, d2 = 0.62 * r, h = 0.4 * r;
+        n.push(P_(BOXM(w, d2, h, 0.6), 0, 0, l, "wood")), n.push(P_(TSLAB(roundRectProfile(w + 6, d2 + 6, 3, 3), 0.22 * r, 0.15, "tvrf"), 0, 0, l + h, "rust")), windows(n, w * 0.8, d2 * 0.8, l + 0.14 * r, 0.08 * r, 2, "lightY"), n.push(P_(BOXM(0.05 * r, 0.05 * r, 0.3 * r, 0.1), 0.28 * r, 0.2 * r, l + h, "rock2"));
+        break;
+      }
+      case "civ9": {
+        const w = 0.86 * r;
+        for (let tier2 = 0; tier2 < 3; tier2++) {
+          const tw = w * (1 - 0.22 * tier2), th = 0.32 * r, tz = l + tier2 * th;
+          n.push(P_(BOXM(tw, 0.82 * tw, th, 0.6), 0, -0.06 * r * tier2, tz, tier2 % 2 ? "cv2" : "cv1")), windows(n, tw * 0.85, 0.7 * tw, tz + 0.5 * th, 0.09 * r, 2 + tier2 % 2, "glassdark");
+        }
         break;
       }
       case "bridgehut":
@@ -9564,7 +9642,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     for (let t = 1; t <= 8; t++) if (!e.includes(t)) return t;
     return 1;
   }
-  var MAP_SPAWNS = { divide: [[10, 30], [78, 30]], high: [[14, 52], [74, 14]], dust: [[40, 10], [40, 56]], lakes: [[13, 13], [76, 56]], line: [[16, 58], [76, 14]], ring: [[46, 8], [46, 66]], city: [[12, 12], [80, 60]], octagon: [[76, 36], [67, 54], [46, 61], [25, 54], [16, 36], [25, 18], [46, 11], [67, 18]], bastion: [[46, 12], [72, 24], [72, 48], [46, 60], [20, 48], [20, 24]], boomtown: [[46, 9], [75, 23], [75, 50], [46, 63], [17, 50], [17, 23]] };
+  var MAP_SPAWNS = { divide: [[10, 30], [78, 30]], high: [[14, 52], [74, 14]], dust: [[40, 10], [40, 56]], lakes: [[13, 13], [76, 56]], line: [[16, 58], [76, 14]], ring: [[46, 8], [46, 66]], city: [[76, 36], [67, 54], [46, 61], [25, 54], [16, 36], [25, 18], [46, 11], [67, 18]], octagon: [[76, 36], [67, 54], [46, 61], [25, 54], [16, 36], [25, 18], [46, 11], [67, 18]], bastion: [[46, 12], [72, 24], [72, 48], [46, 60], [20, 48], [20, 24]], boomtown: [[46, 9], [75, 23], [75, 50], [46, 63], [17, 50], [17, 23]] };
   function mapSpots(key) {
     const e = MAP_SPAWNS[key] || [[13, 13], [76, 56]], cx = 46, cy = 36, rot = (e2) => [clamp(Math.round(cx - (e2[1] - cy)), 6, 85), clamp(Math.round(cy + (e2[0] - cx)), 6, 65)];
     return e.concat([rot(e[0]), rot(e[1])]);
@@ -9887,10 +9965,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return p.credits = rec.credits, p.power = rec.power, p.drain = rec.drain, p.queues = rec.queues || { bld: null, def: null, inf: null, veh: null, air: null }, p.ready = rec.ready || { bld: null, def: null }, p.kills = rec.kills || 0, p.lost = rec.lost || 0, p.defeated = !!rec.defeated, p.spawnX = rec.spawnX, p.spawnY = rec.spawnY, p.spyCD = rec.spyCD || 0, p.paradropCD = rec.paradropCD || 0, p.empCD = rec.empCD || 0, p.isAI && rec.ai && (p.ai.t = rec.ai.t, p.ai.wave = rec.ai.wave || 0, p.ai.expand = rec.ai.expand || 0, rec.ai.personality && (p.ai.personality = rec.ai.personality), p.ai.diffScale = rec.ai.diffScale || 1, p.ai.adaptT = rec.ai.adaptT || 0), p;
   }
   function serializeMap() {
-    return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), bridge: packArr(G.bridge), bridgeHp: packArr(G.bridgeHp), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
+    return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), bridge: packArr(G.bridge), bridgeHp: packArr(G.bridgeHp), bridgeSite: packArr(G.bridgeSite), bridgeHoriz: packArr(G.bridgeHoriz), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
   }
   function restoreMap(rec) {
-    G.map = rec.map, G.seed = rec.seed, G.terr = unpackArr(rec.terr, Uint8Array, 6624), G.ore = unpackArr(rec.ore, Float32Array, 6624), G.tib = unpackArr(rec.tib, Uint8Array, 6624), G.blk = unpackArr(rec.blk, Uint8Array, 6624), G.pave = unpackArr(rec.pave, Uint8Array, 6624), G.vis = unpackArr(rec.vis, Uint8Array, 6624), G.elev = unpackArr(rec.elev, Float32Array, 6624), G.mtn = unpackArr(rec.mtn, Float32Array, 6624), G.tint = unpackArr(rec.tint, Uint8Array, 6624), G.bridge = rec.bridge ? unpackArr(rec.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = rec.bridgeHp ? unpackArr(rec.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.occ = new Int32Array(6624), G.civ = rec.civ || [], G.special = rec.special || [], G.props = rec.props || [], G.oreSpots = rec.oreSpots || [], G.fall = rec.fall || [], G.spots = rec.spots || [], G.trees = [];
+    G.map = rec.map, G.seed = rec.seed, G.terr = unpackArr(rec.terr, Uint8Array, 6624), G.ore = unpackArr(rec.ore, Float32Array, 6624), G.tib = unpackArr(rec.tib, Uint8Array, 6624), G.blk = unpackArr(rec.blk, Uint8Array, 6624), G.pave = unpackArr(rec.pave, Uint8Array, 6624), G.vis = unpackArr(rec.vis, Uint8Array, 6624), G.elev = unpackArr(rec.elev, Float32Array, 6624), G.mtn = unpackArr(rec.mtn, Float32Array, 6624), G.tint = unpackArr(rec.tint, Uint8Array, 6624), G.bridge = rec.bridge ? unpackArr(rec.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = rec.bridgeHp ? unpackArr(rec.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = rec.bridgeSite ? unpackArr(rec.bridgeSite, Uint8Array, 6624) : new Uint8Array(G.bridge), G.bridgeHoriz = rec.bridgeHoriz ? unpackArr(rec.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624), G.occ = new Int32Array(6624), G.civ = rec.civ || [], G.special = rec.special || [], G.props = rec.props || [], G.oreSpots = rec.oreSpots || [], G.fall = rec.fall || [], G.spots = rec.spots || [], G.trees = [];
   }
   function serializeGame() {
     return { v: 1, time: S.time, fogOn: FOG_ON, neutral: NEUTRAL, cfg: JSON.parse(JSON.stringify(cfg)), cam: { x: cam.x, y: cam.y, z: cam.z }, nextId: S.nextId, mission: S.mission, players: S.players.map(playerToObj), units: S.units.filter((u) => !u.dead).map(unitToObj), blds: S.blds.filter((b) => !b.dead).map(bldToObj), rads: (S.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), weather: S.weather, map: serializeMap() };

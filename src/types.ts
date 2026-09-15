@@ -281,6 +281,8 @@ export interface MapData {
   shore?: Float32Array;
   bridge: Uint8Array;
   bridgeHp: Float32Array;
+  bridgeSite: Uint8Array;
+  bridgeHoriz: Uint8Array;
   // Per-map decoration/spawn records (props, trees, ore-drill spots, ...)
   // are built as ad-hoc object literals by genMap(), not through a shared
   // constructor - `any[]` here for the same reason as GameState's
