@@ -165,6 +165,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #tutorialPanel .tSkip:active{background:var(--amber);color:#1a140a}
 #menu{position:fixed;inset:0;z-index:30;background:
   radial-gradient(120% 80% at 50% 0%,#14201c 0%,#070a0b 60%),#070a0b;display:flex;align-items:center;
+  align-items:safe center;
   justify-content:center;padding:16px;overflow:auto}
 .panel{width:100%;max-width:420px;background:linear-gradient(165deg,#182228 0%,#101a1e 45%,#080c0e 100%);
   border:1px solid var(--edge);padding:20px;box-shadow:0 14px 50px #000c, inset 0 1px 0 #ffffff14, inset 0 0 60px #0006;
@@ -177,13 +178,29 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 .adminRow input[type=file]{font-size:10px;color:#8fa3bb;max-width:130px}
 .adminTag{font-size:9px;padding:2px 5px;border-radius:8px;background:#22334a;color:#9fc4f0;white-space:nowrap}
 .adminTag button{background:none;border:none;color:#e0473a;cursor:pointer;font-size:10px;margin-left:3px;padding:0}
+.assetThumb{width:40px;height:40px;flex:0 0 auto;background:#0d1317;border:1px solid var(--edge);border-radius:4px;object-fit:contain;image-rendering:pixelated}
 .tabBtn{flex:1;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#182430;color:#8fa3bb;font-size:12px;letter-spacing:1px}
 .tabBtn.on{background:#22334a;color:#cfe0f5;border-color:#7ea0d8}
-#editorCanvas{border:1px solid var(--edge);cursor:crosshair;touch-action:none;image-rendering:pixelated;max-width:100%}
-.editorToolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;font-size:11px;color:#c8d4de}
-.editorToolbar select,.editorToolbar input{background:#0d1317;color:#c8d4de;border:1px solid var(--edge);border-radius:3px;padding:4px;font-size:11px}
-.editorToolbar button{padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:11px}
-.editorToolbar button.on{background:#3d3012;border-color:var(--amber);color:var(--amber2)}
+.catBtn{flex:0 0 auto;padding:5px 9px;border-radius:6px;border:1px solid #5b74a0;background:#182430;color:#8fa3bb;font-size:11px}
+.catBtn.on{background:#22334a;color:#cfe0f5;border-color:#7ea0d8}
+#mapEditorUI{position:fixed;inset:0;z-index:25}
+#mapEditorUI.hidden{display:none}
+.editorInputLayer{position:absolute;inset:0;touch-action:none;cursor:crosshair}
+.editorTopBar{position:absolute;top:0;left:0;right:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  padding:8px 10px;background:linear-gradient(180deg,#0d1317f0,#0d131700 100%);font-size:11px;color:#c8d4de}
+.editorTitle{font-weight:bold;color:#e8f0f4;letter-spacing:.5px;margin-right:4px;white-space:nowrap}
+.editorTopBar select,.editorTopBar input[type=number]{background:#0d1317;color:#c8d4de;border:1px solid var(--edge);border-radius:3px;padding:4px;font-size:11px}
+.editorPalette{position:absolute;left:0;right:0;bottom:0;padding:8px 10px 10px;
+  background:linear-gradient(0deg,#0d1317f0,#0d131700 100%);max-height:38vh;display:flex;flex-direction:column;gap:6px}
+.editorPalette.hidden{display:none}
+.editorPaletteRow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.editorPaletteRow input[type=text]{flex:1;min-width:140px;background:#0d1317;color:#c8d4de;border:1px solid var(--edge);border-radius:4px;padding:6px 8px;font-size:12px}
+.editorPaletteGrid{display:flex;flex-wrap:wrap;gap:6px;overflow:auto;padding-top:2px}
+.editorPaletteCard{width:60px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border-radius:6px;
+  border:1px solid #2a3a44;background:#101a1eee;cursor:pointer;font-size:9px;color:#9db4cc;text-align:center}
+.editorPaletteCard:active{transform:scale(.96)}
+.editorPaletteCard.sel{border-color:var(--amber);background:#1e1608ee;color:var(--amber2)}
+.editorPaletteCard .assetThumb{width:36px;height:36px}
 @keyframes panelIn{0%{opacity:0;transform:translateY(14px) scale(.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
 .panel h1{margin:0 0 2px;font-size:23px;color:#e8f0f4;letter-spacing:3px;text-align:center;
   text-shadow:0 0 20px #5ad04455}
@@ -429,6 +446,7 @@ body.fps #mmWrap{opacity:.55}
 <body>
 <canvas id="gl"></canvas>
 <canvas id="game"></canvas>
+<div id="mapEditorUI" class="hidden"></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 <defs>

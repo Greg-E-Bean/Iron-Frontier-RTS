@@ -20,7 +20,6 @@ const FACTION_LIST = [
   { k: "soviet", n: "Legion" },
   { k: "yuri", n: "Syndicate" },
 ];
-const EDITOR_TILE = 8;
 
 function loadAdminAssets() {
   try { return JSON.parse(localStorage.getItem(ADMIN_ASSETS_KEY) || "[]"); }
@@ -109,9 +108,42 @@ function renderAdminPanel() {
 
 // ---------- Assets tab ----------
 
+const ASSET_CATEGORIES = [
+  { k: "", n: "All" },
+  { k: "inf", n: "Infantry" },
+  { k: "veh", n: "Vehicles" },
+  { k: "air", n: "Air" },
+  { k: "sea", n: "Navy" },
+  { k: "bld", n: "Structures" },
+  { k: "def", n: "Defense" },
+  { k: "other", n: "Other" },
+];
+let assetCategoryFilter = "";
+let assetSearchFilter = "";
+
 function assetDisplayName(key, kind) {
   if (kind === "unit") return (UNITS[key] && UNITS[key].name) || key;
   return (BLD[key] && BLD[key].names && (BLD[key].names.neutral || BLD[key].names.allied)) || key;
+}
+function assetCategory(key, kind) {
+  const d = kind === "unit" ? UNITS[key] : BLD[key];
+  const t = d && d.tab;
+  return ASSET_CATEGORIES.some(c => c.k === t) ? t : "other";
+}
+function assetFactionMembership(key, kind) {
+  if (kind === "unit") {
+    const facs = ["allied", "soviet", "yuri"].filter(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
+    if (!facs.length) return "None";
+    return facs.map(f => FACTIONS[f].name).join(", ");
+  }
+  return (BLD[key] && BLD[key].civ) ? "Neutral" : "All factions";
+}
+function assetPrimaryFaction(key, kind) {
+  if (kind === "unit") {
+    const f = ["allied", "soviet", "yuri"].find(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
+    return f || "allied";
+  }
+  return (BLD[key] && BLD[key].civ) ? "neutral" : "allied";
 }
 function assetRow(key, kind) {
   const entries = loadAdminAssets().filter(a => a.key === key);
@@ -121,7 +153,10 @@ function assetRow(key, kind) {
   ).join("");
   return (
     '<div class="adminRow" data-key="' + key + '" data-kind="' + kind + '">' +
-      '<div class="rowName">' + assetDisplayName(key, kind) + '</div>' +
+      '<img class="assetThumb" data-thumb-key="' + key + '" data-thumb-kind="' + kind + '" width="40" height="40">' +
+      '<div class="rowName">' + assetDisplayName(key, kind) +
+        '<div class="small" style="opacity:.75">' + assetFactionMembership(key, kind) + '</div>' +
+      '</div>' +
       '<select class="facSel">' + FACTION_LIST.map(f => '<option value="' + f.k + '">' + f.n + '</option>').join("") + '</select>' +
       '<input type="file" class="fileSel" accept=".glb,.gltf">' +
       '<input type="number" class="scaleSel" value="1" min="0.05" step="0.05" style="width:52px">' +
@@ -130,13 +165,38 @@ function assetRow(key, kind) {
   );
 }
 function renderAssetsTab() {
-  const unitRows = Object.keys(UNITS).map(k => assetRow(k, "unit")).join("");
-  const bldRows = Object.keys(BLD).map(k => assetRow(k, "building")).join("");
+  const unitKeys = Object.keys(UNITS).filter(k =>
+    (!assetCategoryFilter || assetCategory(k, "unit") === assetCategoryFilter) &&
+    (!assetSearchFilter || assetDisplayName(k, "unit").toLowerCase().includes(assetSearchFilter))
+  );
+  const bldKeys = Object.keys(BLD).filter(k =>
+    (!assetCategoryFilter || assetCategory(k, "building") === assetCategoryFilter) &&
+    (!assetSearchFilter || assetDisplayName(k, "building").toLowerCase().includes(assetSearchFilter))
+  );
+  const unitRows = unitKeys.map(k => assetRow(k, "unit")).join("") || '<div class="small">No units match.</div>';
+  const bldRows = bldKeys.map(k => assetRow(k, "building")).join("") || '<div class="small">No buildings match.</div>';
   $("#adminBody").innerHTML =
     '<div class="small" style="margin-bottom:8px">Upload a .glb/.gltf to replace a unit or building\'s model. ' +
     'Pick a faction to override just that faction\'s look, or leave "All factions" to replace it everywhere it appears.</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">' +
+      ASSET_CATEGORIES.map(c => '<button data-cat="' + c.k + '" class="catBtn' + (assetCategoryFilter === c.k ? " on" : "") + '">' + c.n + '</button>').join("") +
+      '<input type="text" id="assetSearch" placeholder="Search by name…" value="' + assetSearchFilter.replace(/"/g, "&quot;") + '" style="margin-left:8px;flex:1;min-width:140px">' +
+    '</div>' +
     '<div class="lbl">UNITS</div><div id="unitAssetRows">' + unitRows + '</div>' +
     '<div class="lbl">BUILDINGS</div><div id="bldAssetRows">' + bldRows + '</div>';
+  $("#adminBody").querySelectorAll("[data-cat]").forEach(btn => {
+    btn.onclick = () => { assetCategoryFilter = btn.dataset.cat; renderAssetsTab(); };
+  });
+  const searchEl = $("#assetSearch") as HTMLInputElement;
+  if (searchEl) {
+    searchEl.oninput = () => { assetSearchFilter = searchEl.value.trim().toLowerCase(); };
+    searchEl.onchange = () => renderAssetsTab();
+    searchEl.addEventListener("keydown", (e: KeyboardEvent) => { if (e.key === "Enter") renderAssetsTab(); });
+  }
+  $("#adminBody").querySelectorAll(".assetThumb").forEach((img: HTMLImageElement) => {
+    const key = img.dataset.thumbKey, kind = img.dataset.thumbKind === "unit" ? "u" : "b";
+    renderThumbInto(img, key, kind, assetPrimaryFaction(key, img.dataset.thumbKind), 40);
+  });
   $("#adminBody").querySelectorAll(".adminRow").forEach(row => {
     const key = row.dataset.key, kind = row.dataset.kind;
     row.querySelector(".fileSel").addEventListener("change", async (e) => {
@@ -238,6 +298,31 @@ function renderMapsTab() {
 }
 
 // ---------- Map editor ----------
+//
+// Renders the actual in-game isometric view: the shared #game canvas's 2D
+// fallback pipeline (drawTerrain/drawBld, see src/render2d.ts) works fine
+// stand-alone before any match starts, since it only reads G (terrain) and
+// takes plain {owner:-1,...} fake entities for buildings - no dependency on
+// a live S.players. A transparent full-screen input layer sits above the
+// canvas (inside #mapEditorUI, itself above #game but below nothing else)
+// so our pan/paint pointer handling never fights the game's own permanent
+// listeners on the #game canvas.
+
+const EDITOR_TOOLS = [
+  { k: "pan", n: "✥ Pan" },
+  { k: "terrain", n: "Terrain" },
+  { k: "elev", n: "Elevation" },
+  { k: "ore", n: "Ore" },
+  { k: "bld", n: "Building" },
+  { k: "spawn", n: "Spawn" },
+  { k: "erase", n: "Erase" },
+];
+const BUILDING_CATEGORIES = [
+  { k: "", n: "All" },
+  { k: "bld", n: "Structures" },
+  { k: "def", n: "Defense" },
+  { k: "other", n: "Decor / Neutral" },
+];
 
 let editorMapKey = null;
 let editorTool = "terrain";
@@ -246,8 +331,12 @@ let editorElevSign = 1;
 let editorOreType = 1;
 let editorOreAmount = 1200;
 let editorBuildingKey = "civ1";
+let editorBuildingCategory = "";
+let editorBuildingSearch = "";
 let editorBrush = 1;
-let editorPainting = false;
+let editorDrag = null;
+let editorHover = null;
+let editorRAF = null;
 
 function openMapEditor(key) {
   const store = loadAdminMapStore();
@@ -256,99 +345,183 @@ function openMapEditor(key) {
   loadStaticMap(entry.data, key);
   editorMapKey = key;
   editorTool = "terrain";
+  editorDrag = null;
+  editorHover = null;
   adminTab = "maps";
-  $("#panelMain").innerHTML =
-    '<div class="sub" style="text-align:left;margin-bottom:6px">Editing: ' + entry.name + '</div>' +
-    '<div class="editorToolbar" id="editorToolbar"></div>' +
-    '<div style="overflow:auto;max-width:100%"><canvas id="editorCanvas" width="' + (92 * EDITOR_TILE) + '" height="' + (72 * EDITOR_TILE) + '"></canvas></div>' +
-    '<div style="display:flex;gap:8px;margin-top:10px">' +
-      '<button id="editorSave" ' + SECBTN + '>SAVE</button>' +
-      '<button id="editorTestPlay" ' + SECBTN + '>SAVE &amp; TEST PLAY</button>' +
-    '</div>' +
-    '<button id="editorBack" ' + SECBTN + '>BACK TO MAP LIST</button>';
+  cam.x = 1472; cam.y = 1152; cam.z = camZTarget = 0.62;
+  clampCam();
+  $("#menu").classList.add("hidden");
+  const ui = $("#mapEditorUI");
+  ui.classList.remove("hidden");
+  ui.innerHTML =
+    '<div class="editorInputLayer" id="editorInputLayer"></div>' +
+    '<div class="editorTopBar" id="editorTopBar"></div>' +
+    '<div class="editorPalette hidden" id="editorPalette"></div>';
   renderEditorToolbar();
+  renderEditorPalette();
   wireEditorCanvas();
-  drawEditorCanvas();
-  $("#editorSave").onclick = () => { saveEditorMap(); hint("Map saved"); };
-  $("#editorTestPlay").onclick = () => {
-    saveEditorMap();
-    cfg.map = editorMapKey;
-    $("#panelMain").classList.remove("wide");
-    startGame();
+  startEditorRender();
+}
+
+function closeMapEditor() {
+  stopEditorRender();
+  editorMapKey = null;
+  editorDrag = null;
+  const ui = $("#mapEditorUI");
+  ui.classList.add("hidden");
+  ui.innerHTML = "";
+  $("#menu").classList.remove("hidden");
+}
+
+function startEditorRender() {
+  const step = () => {
+    if (editorMapKey === null) return;
+    drawEditorFrame();
+    editorRAF = requestAnimationFrame(step);
   };
-  $("#editorBack").onclick = () => { renderAdminPanel(); };
+  editorRAF = requestAnimationFrame(step);
+}
+function stopEditorRender() {
+  if (editorRAF) cancelAnimationFrame(editorRAF);
+  editorRAF = null;
 }
 
 function renderEditorToolbar() {
-  const tools = [
-    { k: "terrain", n: "Terrain" },
-    { k: "elev", n: "Elevation" },
-    { k: "ore", n: "Ore" },
-    { k: "bld", n: "Building" },
-    { k: "spawn", n: "Spawn" },
-    { k: "erase", n: "Erase" },
-  ];
+  const store = loadAdminMapStore();
+  const name = (store[editorMapKey] && store[editorMapKey].name) || "";
   let extra = "";
   if (editorTool === "terrain") {
     extra = '<select id="terrainType"><option value="0">Grass</option><option value="1">Dirt</option><option value="2">Water</option><option value="3">Rock</option></select>';
   } else if (editorTool === "elev") {
     extra =
-      '<button id="elevUp" class="' + (editorElevSign > 0 ? "on" : "") + '">▲ Raise</button>' +
-      '<button id="elevDown" class="' + (editorElevSign < 0 ? "on" : "") + '">▼ Lower</button>';
+      '<button id="elevUp" class="catBtn' + (editorElevSign > 0 ? " on" : "") + '">▲ Raise</button>' +
+      '<button id="elevDown" class="catBtn' + (editorElevSign < 0 ? " on" : "") + '">▼ Lower</button>';
   } else if (editorTool === "ore") {
     extra =
       '<select id="oreType"><option value="1">Ore (amber)</option><option value="2">Gems (pale)</option></select>' +
       '<select id="oreAmount"><option value="600">Light</option><option value="1200" selected>Medium</option><option value="2000">Rich</option></select>';
-  } else if (editorTool === "bld") {
-    extra = '<select id="bldKey">' + Object.keys(BLD).map(k => '<option value="' + k + '">' + assetDisplayName(k, "building") + '</option>').join("") + '</select>';
   }
-  const toolbar = $("#editorToolbar");
+  const brushExtra = (editorTool === "terrain" || editorTool === "elev" || editorTool === "ore" || editorTool === "erase")
+    ? '<span class="small">Brush <input type="number" id="brushSize" min="1" max="6" value="' + editorBrush + '" style="width:40px"></span>'
+    : "";
+  const toolbar = $("#editorTopBar");
   toolbar.innerHTML =
-    tools.map(t => '<button data-tool="' + t.k + '" class="' + (editorTool === t.k ? "on" : "") + '">' + t.n + '</button>').join("") +
-    '<span>Brush <input type="number" id="brushSize" min="1" max="6" value="' + editorBrush + '" style="width:42px"></span>' +
-    extra;
-  toolbar.querySelectorAll("[data-tool]").forEach(b => b.onclick = () => { editorTool = b.dataset.tool; renderEditorToolbar(); });
-  const bs = $("#brushSize"); if (bs) bs.onchange = () => { editorBrush = Math.max(1, Math.min(6, parseInt(bs.value) || 1)); };
-  const tt = $("#terrainType"); if (tt) { tt.value = String(editorTerrainType); tt.onchange = () => editorTerrainType = parseInt(tt.value); }
+    '<div class="editorTitle">' + name + '</div>' +
+    EDITOR_TOOLS.map(t => '<button data-tool="' + t.k + '" class="catBtn' + (editorTool === t.k ? " on" : "") + '">' + t.n + '</button>').join("") +
+    brushExtra + extra +
+    '<span style="flex:1"></span>' +
+    '<button id="editorSave" ' + MINIBTN + '>SAVE</button>' +
+    '<button id="editorTestPlay" ' + MINIBTN + '>SAVE &amp; TEST PLAY</button>' +
+    '<button id="editorBack" ' + MINIBTN_DANGER + '>BACK</button>';
+  toolbar.querySelectorAll("[data-tool]").forEach(b => b.onclick = () => {
+    editorTool = b.dataset.tool;
+    editorDrag = null;
+    renderEditorToolbar();
+    renderEditorPalette();
+  });
+  const bs = $("#brushSize") as HTMLInputElement; if (bs) bs.onchange = () => { editorBrush = Math.max(1, Math.min(6, parseInt(bs.value) || 1)); };
+  const tt = $("#terrainType") as HTMLSelectElement; if (tt) { tt.value = String(editorTerrainType); tt.onchange = () => editorTerrainType = parseInt(tt.value); }
   const eu = $("#elevUp"); if (eu) eu.onclick = () => { editorElevSign = 1; renderEditorToolbar(); };
   const ed = $("#elevDown"); if (ed) ed.onclick = () => { editorElevSign = -1; renderEditorToolbar(); };
-  const ot = $("#oreType"); if (ot) { ot.value = String(editorOreType); ot.onchange = () => editorOreType = parseInt(ot.value); }
-  const oa = $("#oreAmount"); if (oa) oa.onchange = () => editorOreAmount = parseInt(oa.value);
-  const bk = $("#bldKey"); if (bk) { bk.value = editorBuildingKey; bk.onchange = () => editorBuildingKey = bk.value; }
+  const ot = $("#oreType") as HTMLSelectElement; if (ot) { ot.value = String(editorOreType); ot.onchange = () => editorOreType = parseInt(ot.value); }
+  const oa = $("#oreAmount") as HTMLSelectElement; if (oa) oa.onchange = () => editorOreAmount = parseInt(oa.value);
+  $("#editorSave").onclick = () => { saveEditorMap(); hint("Map saved"); };
+  $("#editorTestPlay").onclick = () => {
+    saveEditorMap();
+    cfg.map = editorMapKey;
+    closeMapEditor();
+    startGame();
+  };
+  $("#editorBack").onclick = () => { closeMapEditor(); renderAdminPanel(); };
 }
 
-function drawEditorCanvas() {
-  const cv = document.getElementById("editorCanvas") as HTMLCanvasElement;
-  if (!cv) return;
-  const ctx = cv.getContext("2d");
-  const TERR_COLORS = ["#3c6b35", "#7a5f3a", "#2f6fa8", "#5a5650"];
-  for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
-    const i = idx(x, y);
-    ctx.fillStyle = TERR_COLORS[G.terr[i]] || "#888";
-    ctx.fillRect(x * EDITOR_TILE, y * EDITOR_TILE, EDITOR_TILE, EDITOR_TILE);
-    const ev = G.elevOverride[i];
-    if (ev) {
-      ctx.fillStyle = ev > 0 ? "rgba(255,255,255," + Math.min(0.6, 0.12 * Math.abs(ev)) + ")" : "rgba(0,0,0," + Math.min(0.6, 0.12 * Math.abs(ev)) + ")";
-      ctx.fillRect(x * EDITOR_TILE, y * EDITOR_TILE, EDITOR_TILE, EDITOR_TILE);
-    }
-    if (G.ore[i] > 0) {
-      ctx.fillStyle = 2 === G.tib[i] ? "#8ee8ff" : "#f0c93a";
-      const r = Math.max(1, EDITOR_TILE * 0.18 * Math.min(1, G.ore[i] / 1600));
-      ctx.beginPath(); ctx.arc(x * EDITOR_TILE + EDITOR_TILE / 2, y * EDITOR_TILE + EDITOR_TILE / 2, r, 0, 6.284); ctx.fill();
-    }
-  }
-  for (const c of (G.civ || [])) {
-    const sz = (BLD[c[2]] && BLD[c[2]].size) || 1;
-    ctx.fillStyle = "#e0473a";
-    ctx.fillRect(c[0] * EDITOR_TILE, c[1] * EDITOR_TILE, EDITOR_TILE * sz, EDITOR_TILE * sz);
-    ctx.strokeStyle = "#1a1206"; ctx.strokeRect(c[0] * EDITOR_TILE + 0.5, c[1] * EDITOR_TILE + 0.5, EDITOR_TILE * sz - 1, EDITOR_TILE * sz - 1);
-  }
-  (G.spots || []).forEach((s, i) => {
-    ctx.fillStyle = "#f0a72c";
-    ctx.beginPath(); ctx.arc(s[0] * EDITOR_TILE, s[1] * EDITOR_TILE, EDITOR_TILE * 0.9, 0, 6.284); ctx.fill();
-    ctx.fillStyle = "#1a1206"; ctx.font = EDITOR_TILE + "px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(String.fromCharCode(65 + i), s[0] * EDITOR_TILE, s[1] * EDITOR_TILE);
+function renderEditorPalette() {
+  const panel = $("#editorPalette");
+  if (editorTool !== "bld") { panel.classList.add("hidden"); panel.innerHTML = ""; return; }
+  panel.classList.remove("hidden");
+  panel.innerHTML =
+    '<div class="editorPaletteRow">' +
+      '<input type="text" id="editorBldSearch" placeholder="Search buildings…">' +
+      BUILDING_CATEGORIES.map(c => '<button data-bcat="' + c.k + '" class="catBtn' + (editorBuildingCategory === c.k ? " on" : "") + '">' + c.n + '</button>').join("") +
+    '</div>' +
+    '<div class="editorPaletteGrid" id="editorPaletteGrid"></div>';
+  const search = $("#editorBldSearch") as HTMLInputElement;
+  search.value = editorBuildingSearch;
+  search.oninput = () => { editorBuildingSearch = search.value.trim().toLowerCase(); renderEditorPaletteGrid(); };
+  panel.querySelectorAll("[data-bcat]").forEach(b => b.onclick = () => { editorBuildingCategory = b.dataset.bcat; renderEditorPalette(); });
+  renderEditorPaletteGrid();
+}
+function renderEditorPaletteGrid() {
+  const grid = $("#editorPaletteGrid");
+  if (!grid) return;
+  const keys = Object.keys(BLD).filter(k =>
+    (!editorBuildingCategory || assetCategory(k, "building") === editorBuildingCategory) &&
+    (!editorBuildingSearch || assetDisplayName(k, "building").toLowerCase().includes(editorBuildingSearch))
+  );
+  grid.innerHTML = keys.map(k =>
+    '<div class="editorPaletteCard' + (k === editorBuildingKey ? " sel" : "") + '" data-bkey="' + k + '">' +
+      '<img class="assetThumb" data-thumb-key="' + k + '" width="36" height="36">' +
+      '<div>' + assetDisplayName(k, "building") + '</div>' +
+    '</div>'
+  ).join("") || '<div class="small">No buildings match.</div>';
+  grid.querySelectorAll(".assetThumb").forEach((img: HTMLImageElement) => {
+    const key = img.dataset.thumbKey;
+    renderThumbInto(img, key, "b", (BLD[key] && BLD[key].civ) ? "neutral" : "allied", 36);
   });
+  grid.querySelectorAll("[data-bkey]").forEach(card => card.addEventListener("click", () => {
+    editorBuildingKey = (card as HTMLElement).dataset.bkey;
+    grid.querySelectorAll(".editorPaletteCard").forEach(c => c.classList.toggle("sel", c === card));
+  }));
+}
+
+// ---------- Editor rendering (reuses the real game's isometric renderer) ----------
+
+function fakeCivBuilding(c): any {
+  const key = c[2], sz = (BLD[key] && BLD[key].size) || 1;
+  return {
+    e: "b", key, owner: -1, tx: c[0], ty: c[1], size: sz,
+    x: 32 * (c[0] + sz / 2), y: 32 * (c[1] + sz / 2),
+    hp: 1, maxhp: 1, tang: 0, target: null, garrison: null, repair: false, rot: 0, name: "",
+  };
+}
+function drawEditorFrame() {
+  ctx.fillStyle = "#0b141f";
+  ctx.fillRect(0, 0, CW, CH);
+  drawTerrain();
+  for (const c of (G.civ || [])) { try { drawBld(fakeCivBuilding(c)); } catch (e) {} }
+  for (const c of (G.special || [])) { try { drawBld(fakeCivBuilding(c)); } catch (e) {} }
+  (G.spots || []).forEach((s, i) => {
+    const sx = w2sx(32 * s[0] + 16, 32 * s[1] + 16), sy = w2sy(32 * s[0] + 16, 32 * s[1] + 16);
+    ctx.fillStyle = "#f0a72c";
+    ctx.beginPath(); ctx.ellipse(sx, sy, 9 * cam.z, 5 * cam.z, 0, 0, 6.284); ctx.fill();
+    ctx.strokeStyle = "#1a1206"; ctx.lineWidth = 1.4; ctx.stroke();
+    ctx.fillStyle = "#1a1206"; ctx.font = "bold " + Math.max(9, Math.round(11 * cam.z)) + "px sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(String.fromCharCode(65 + i), sx, sy);
+  });
+  drawEditorHoverHighlight();
+}
+function drawTileOutline(tx, ty, w, h, color) {
+  ctx.beginPath();
+  [[tx, ty], [tx + w, ty], [tx + w, ty + h], [tx, ty + h]].forEach((p, i) => {
+    const sx = w2sx(32 * p[0], 32 * p[1]), sy = w2sy(32 * p[0], 32 * p[1]);
+    i ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy);
+  });
+  ctx.closePath();
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+}
+function drawEditorHoverHighlight() {
+  if (!editorHover || editorTool === "pan") return;
+  const { tx, ty } = editorHover;
+  if (editorTool === "bld") {
+    const sz = (BLD[editorBuildingKey] && BLD[editorBuildingKey].size) || 1;
+    drawTileOutline(tx, ty, sz, sz, "#7dff8a");
+  } else if (editorTool === "spawn") {
+    drawTileOutline(tx, ty, 1, 1, "#f0a72c");
+  } else {
+    const r = editorBrush - 1;
+    drawTileOutline(tx - r, ty - r, editorBrush, editorBrush, "#8fd8ff");
+  }
 }
 
 function applyEditorTool(x, y) {
@@ -376,37 +549,55 @@ function placeBuilding(tx, ty) {
   G.civ.push([tx, ty, editorBuildingKey]);
 }
 
+function editorTileAt(e) {
+  const w = s2w(e.clientX, e.clientY);
+  return { tx: Math.floor(w.x / 32), ty: Math.floor(w.y / 32) };
+}
+function editorPaintBrush(tx, ty) {
+  const r = editorBrush - 1;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+    const x = tx + dx, y = ty + dy;
+    if (inMap(x, y)) applyEditorTool(x, y);
+  }
+}
 function wireEditorCanvas() {
-  const cv = document.getElementById("editorCanvas") as HTMLCanvasElement;
-  if (!cv) return;
-  const tileAt = (e) => {
-    const rect = cv.getBoundingClientRect();
-    const sx = cv.width / rect.width, sy = cv.height / rect.height;
-    return [Math.floor((e.clientX - rect.left) * sx / EDITOR_TILE), Math.floor((e.clientY - rect.top) * sy / EDITOR_TILE)];
-  };
-  const paintAt = (tx, ty) => {
-    const r = editorBrush - 1;
-    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
-      const x = tx + dx, y = ty + dy;
-      if (inMap(x, y)) applyEditorTool(x, y);
+  const layer = $("#editorInputLayer") as HTMLElement;
+  if (!layer) return;
+  layer.onpointerdown = (e) => {
+    layer.setPointerCapture(e.pointerId);
+    const { tx, ty } = editorTileAt(e);
+    if (editorTool === "pan") {
+      editorDrag = { mode: "pan", x: e.clientX, y: e.clientY, camX: cam.x, camY: cam.y };
+      return;
     }
-    drawEditorCanvas();
-  };
-  cv.onpointerdown = (e) => {
-    e.preventDefault();
-    const [tx, ty] = tileAt(e);
     if (!inMap(tx, ty)) return;
-    if (editorTool === "spawn") { toggleSpawn(tx, ty); drawEditorCanvas(); return; }
-    if (editorTool === "bld") { placeBuilding(tx, ty); drawEditorCanvas(); return; }
-    editorPainting = true;
-    paintAt(tx, ty);
+    if (editorTool === "spawn") { toggleSpawn(tx, ty); return; }
+    if (editorTool === "bld") { placeBuilding(tx, ty); return; }
+    editorDrag = { mode: "paint" };
+    editorPaintBrush(tx, ty);
   };
-  cv.onpointermove = (e) => {
-    if (!editorPainting) return;
-    const [tx, ty] = tileAt(e);
-    if (inMap(tx, ty)) paintAt(tx, ty);
+  layer.onpointermove = (e) => {
+    const { tx, ty } = editorTileAt(e);
+    editorHover = inMap(tx, ty) ? { tx, ty } : null;
+    if (!editorDrag) return;
+    if (editorDrag.mode === "pan") {
+      const t = -(e.clientX - editorDrag.x) / cam.z, r = -(e.clientY - editorDrag.y) / cam.z;
+      cam.x = editorDrag.camX + (r / .5 / 2 + t / 2);
+      cam.y = editorDrag.camY + (r / .5 / 2 - t / 2);
+      clampCam();
+    } else if (editorDrag.mode === "paint" && inMap(tx, ty)) {
+      editorPaintBrush(tx, ty);
+    }
   };
-  window.addEventListener("pointerup", () => editorPainting = false);
+  const endDrag = () => { editorDrag = null; };
+  layer.onpointerup = endDrag;
+  layer.onpointercancel = endDrag;
+  layer.onpointerleave = () => { editorHover = null; };
+  layer.onwheel = (e) => {
+    e.preventDefault();
+    camZTarget = clamp(camZTarget * (e.deltaY > 0 ? .9 : 1.1), .3, 2.3);
+    zoomPivot = { sx: e.clientX, sy: e.clientY };
+  };
 }
 
 function saveEditorMap() {

@@ -407,6 +407,8 @@ declare global {
   function unregisterModelAsset(key: string, faction?: string): void;
   function getAssetModel(key: string, faction?: string): any[] | null;
   const MODEL_ASSETS: Record<string, string>;
+  function thumbCanvas(key: string, kind: string, faction?: string, size?: number): HTMLCanvasElement | null;
+  function renderThumbInto(imgEl: HTMLImageElement, key: string, kind: string, faction?: string, size?: number): void;
   var camZTarget: number;
   var zoomPivot: { sx: number; sy: number } | null;
   var QUALITY: number;

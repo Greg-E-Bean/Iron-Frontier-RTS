@@ -849,7 +849,7 @@ n.push(P_(DOME(.055*r,.05*r,10),-.16*r,-.06*r,l+.4*r+.16*r,"psi",{e:1,a:{spin:.6
 }
 }
 n.push(P_(CYL(.07*r,.24*r,10),.3*-r,.22*-r,l,o?"rust":"steel")),n.push(P_(CYL(.07*r,.24*r,10),.3*-r,.22*r,l,o?"rust":"steel")),n.push(P_(BOXM(.24*r,.9*r,.05*r,.3),.02*r,.02*r,l+.02*r,"wood"));
-break;}case"civ6":{const w=.86*r,d=.6*r,h=.3*r;n.push(P_(BOXM(w,d,h,.5),0,0,l,"cv1")),n.push(P_(BOXM(w+4,.14*r,.05*r,.3),0,-d/2-.05*r,l+h,"rust")),n.push(P_(BOXM(w+2,.16*r,.03*r,.2),0,-d/2-.08*r,l+h-.06*r,"red")),windows(n,w*.86,d*.86,l+.12*r,.1*r,3,"glass"),n.push(P_(BOXM(.12*r,.02*r,.14*r,.2),-.28*r,-d/2-.02*r,l+h+.02*r,"gold"));break}case"civ7":{const w=.9*r,d=.7*r,h=.34*r;n.push(P_(BOXM(w,d,h,.4),0,0,l,"concrete2")),n.push(P_(BOXM(w*.96,d*.5,.06*r,.2),0,-d*.2,l+h,"darkmetal")),n.push(P_(CYL(.05*r,.36*r,8),.32*r,.2*r,l+h,"rust")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),-.2*r,-d/2-.01*r,l+.06*r,"darkmetal")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),.05*r,-d/2-.01*r,l+.06*r,"darkmetal"));break}case"civ8":{const w=.7*r,d=.62*r,h=.4*r;n.push(P_(BOXM(w,d,h,.6),0,0,l,"wood")),n.push(P_(TSLAB(roundRectProfile(w+6,d+6,3,3),.22*r,.15,"tvrf"),0,0,l+h,"rust")),windows(n,w*.8,d*.8,l+.14*r,.08*r,2,"lightY"),n.push(P_(BOXM(.05*r,.05*r,.3*r,.1),.28*r,.2*r,l+h,"rock2"));break}case"civ9":{const w=.86*r;for(let tier=0;tier<3;tier++){const tw=w*(1-.22*tier),th=.32*r,tz=l+tier*th;n.push(P_(BOXM(tw,.82*tw,th,.6),0,-.06*r*tier,tz,tier%2?"cv2":"cv1")),windows(n,tw*.85,.7*tw,tz+.5*th,.09*r,2+tier%2,"glassdark")}break}case"bridgehut":tier(n,.7*r,.66*r,.36*r,0,0,l,"neutral","cv2",.94),n.push(P_(SLAB(roundRectProfile(.78*r,.74*r,3,3),2.4,.7,"cv2r"),0,0,l+.36*r,"rust")),windows(n,.56*r,.5*r,l+.12*r,.09*r,1,"glassdark"),n.push(P_(CYL(1.4,.14*r,10),.2*r,-.18*r,l+.36*r+2.4,"darkmetal"));break;case"civ4":for(const p of towerModel(1))n.push(p);break;case"civ5":for(const p of towerModel(2))n.push(p);break;case"civ3":for(const p of towerModel(3))n.push(p)}return detailPass(n,e,t,r),n}function BTURRET_(e,t,r){const n="allied"===t,a="soviet"===t;if("def1"===e){const e=[];return n?(e.push(P_(CYL(5.6,4.5,12),0,0,14.6,"armor")),e.push(P_(SLAB(hexProfile(11,9),5,1.6,"d1vt"),0,0,19.1,"body")),e.push(P_(CYL(1.5,15,9),5,0,21.6,"gunmetal",{ty:PI2})),e.push(P_(CYL(2,3.5,9),17,0,21.6,"steel",{ty:PI2}))):a?(e.push(P_(CYL(6.4,5,10),0,0,11.6,"armor2")),e.push(P_(SLAB(roundRectProfile(12,10,2,2),5.5,1.5,"d1lt"),0,0,16.6,"body")),e.push(P_(CYL(1.8,13,8),5,-2.2,19.1,"gunmetal",{ty:PI2})),e.push(P_(CYL(1.8,13,8),5,2.2,19.1,"gunmetal",{ty:PI2}))):(e.push(P_(DOME(6.5,5,12),0,0,9.6,"carapace")),e.push(P_(CONE(4,1.6,9,9),4,0,12.6,"body",{ty:PI2})),e.push(P_(CYL(1.2,4,7),13,0,12.6,"psi",{ty:PI2,e:1}))),e}if("aa"===e){const e=[],t=n?15.6:a?14.6:13.6;if(e.push(P_(CYL(5.2,4,12),0,0,t-4,"armor3")),n){e.push(P_(SLAB(hexProfile(10,9),4.5,1.4,"aavt"),0,0,t,"body"));for(const r of[-3.2,3.2])e.push(P_(BOXM(11,3.6,3.6,1),4,r,t+3.4,"steel")),e.push(P_(CONE(1.4,.4,2.6,7),10,r,t+3.4,"red",{ty:PI2}))}else if(a){e.push(P_(SLAB(roundRectProfile(11,10,2,2),5,1.4,"aalt"),0,0,t,"body"));for(const r of[-2.6,2.6])e.push(P_(CYL(1.5,14,8),4,r,t+4,"gunmetal",{ty:PI2,tx:0}));e.push(P_(BOXM(5,7,3,1),-4,0,t+4,"darkmetal"))}else{e.push(P_(CONE(5.5,2.5,7,10),0,0,t,"carapace"));for(let r=0;r<3;r++){const n=2.09*r;e.push(P_(CYL(.9,12,6),2,2.4*Math.cos(n),t+4+2.4*Math.sin(n),"psi",{ty:PI2,e:1}))}}return e}if("def2"===e&&"yuri"===t){const e=[P_(DOME(5.5,4.5,12),0,0,31.6,"psi",{e:1})];for(let t=0;t<3;t++){const n=2.09*t+(r?.5:0);e.push(P_(CYL(1,10,6),4*Math.cos(n),4*Math.sin(n),34,"crystal",{e:1}))}return e}return null}function UMODEL(e,t,extra){const _a=getAssetModel(e,t);return _a||UMODEL_(e,t||0,extra)}function UTURRET(e,t,extra?){return UTURRET_(e,t||0,extra)}function BMODEL(e,t,d,cn,rot){const _a=getAssetModel(e,t);return _a||BMODEL_(e,t,d,cn,rot)}function BTURRET(e,t,r){return BTURRET_(e,t,r||0)}
+break;}case"civ6":{const w=.86*r,d=.6*r,h=.3*r;n.push(P_(BOXM(w,d,h,.5),0,0,l,"cv1")),n.push(P_(BOXM(w+4,.14*r,.05*r,.3),0,-d/2-.05*r,l+h,"rust")),n.push(P_(BOXM(w+2,.16*r,.03*r,.2),0,-d/2-.08*r,l+h-.06*r,"red")),windows(n,w*.86,d*.86,l+.12*r,.1*r,3,"glass"),n.push(P_(BOXM(.12*r,.02*r,.14*r,.2),-.28*r,-d/2-.02*r,l+h+.02*r,"gold"));break}case"civ7":{const w=.9*r,d=.7*r,h=.34*r;n.push(P_(BOXM(w,d,h,.4),0,0,l,"concrete2")),n.push(P_(BOXM(w*.96,d*.5,.06*r,.2),0,-d*.2,l+h,"darkmetal")),n.push(P_(CYL(.05*r,.36*r,8),.32*r,.2*r,l+h,"rust")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),-.2*r,-d/2-.01*r,l+.06*r,"darkmetal")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),.05*r,-d/2-.01*r,l+.06*r,"darkmetal"));break}case"civ8":{const w=.7*r,d=.62*r,h=.4*r;n.push(P_(BOXM(w,d,h,.6),0,0,l,"wood")),n.push(P_(TSLAB(roundRectProfile(w+6,d+6,3,3),.22*r,.15,"tvrf"),0,0,l+h,"rust")),windows(n,w*.8,d*.8,l+.14*r,.08*r,2,"lightY"),n.push(P_(BOXM(.05*r,.05*r,.3*r,.1),.28*r,.2*r,l+h,"rock2"));break}case"civ9":{const w=.86*r;for(let tier=0;tier<3;tier++){const tw=w*(1-.22*tier),th=.32*r,tz=l+tier*th;n.push(P_(BOXM(tw,.82*tw,th,.6),0,-.06*r*tier,tz,tier%2?"cv2":"cv1")),windows(n,tw*.85,.7*tw,tz+.5*th,.09*r,2+tier%2,"glassdark")}break}case"bridgehut":tier(n,.7*r,.66*r,.36*r,0,0,l,"neutral","cv2",.94),n.push(P_(SLAB(roundRectProfile(.78*r,.74*r,3,3),2.4,.7,"cv2r"),0,0,l+.36*r,"rust")),windows(n,.56*r,.5*r,l+.12*r,.09*r,1,"glassdark"),n.push(P_(CYL(1.4,.14*r,10),.2*r,-.18*r,l+.36*r+2.4,"darkmetal"));break;case"civ4":for(const p of towerModel(1))n.push(p);break;case"civ5":for(const p of towerModel(2))n.push(p);break;case"civ3":for(const p of towerModel(3))n.push(p)}return detailPass(n,e,t,r),n}function BTURRET_(e,t,r){const n="allied"===t,a="soviet"===t;if("def1"===e){const e=[];return n?(e.push(P_(CYL(5.6,4.5,12),0,0,14.6,"armor")),e.push(P_(SLAB(hexProfile(11,9),5,1.6,"d1vt"),0,0,19.1,"body")),e.push(P_(CYL(1.5,15,9),5,0,21.6,"gunmetal",{ty:PI2})),e.push(P_(CYL(2,3.5,9),17,0,21.6,"steel",{ty:PI2}))):a?(e.push(P_(CYL(6.4,5,10),0,0,11.6,"armor2")),e.push(P_(SLAB(roundRectProfile(12,10,2,2),5.5,1.5,"d1lt"),0,0,16.6,"body")),e.push(P_(CYL(1.8,13,8),5,-2.2,19.1,"gunmetal",{ty:PI2})),e.push(P_(CYL(1.8,13,8),5,2.2,19.1,"gunmetal",{ty:PI2}))):(e.push(P_(DOME(6.5,5,12),0,0,9.6,"carapace")),e.push(P_(CONE(4,1.6,9,9),4,0,12.6,"body",{ty:PI2})),e.push(P_(CYL(1.2,4,7),13,0,12.6,"psi",{ty:PI2,e:1}))),e}if("aa"===e){const e=[],t=n?15.6:a?14.6:13.6;if(e.push(P_(CYL(5.2,4,12),0,0,t-4,"armor3")),n){e.push(P_(SLAB(hexProfile(10,9),4.5,1.4,"aavt"),0,0,t,"body"));for(const r of[-3.2,3.2])e.push(P_(BOXM(11,3.6,3.6,1),4,r,t+3.4,"steel")),e.push(P_(CONE(1.4,.4,2.6,7),10,r,t+3.4,"red",{ty:PI2}))}else if(a){e.push(P_(SLAB(roundRectProfile(11,10,2,2),5,1.4,"aalt"),0,0,t,"body"));for(const r of[-2.6,2.6])e.push(P_(CYL(1.5,14,8),4,r,t+4,"gunmetal",{ty:PI2,tx:0}));e.push(P_(BOXM(5,7,3,1),-4,0,t+4,"darkmetal"))}else{e.push(P_(CONE(5.5,2.5,7,10),0,0,t,"carapace"));for(let r=0;r<3;r++){const n=2.09*r;e.push(P_(CYL(.9,12,6),2,2.4*Math.cos(n),t+4+2.4*Math.sin(n),"psi",{ty:PI2,e:1}))}}return e}if("def2"===e&&"yuri"===t){const e=[P_(DOME(5.5,4.5,12),0,0,31.6,"psi",{e:1})];for(let t=0;t<3;t++){const n=2.09*t+(r?.5:0);e.push(P_(CYL(1,10,6),4*Math.cos(n),4*Math.sin(n),34,"crystal",{e:1}))}return e}return null}function UMODEL(e,t,extra){const fac=extra&&"object"==typeof extra?extra.fac:void 0,_a=getAssetModel(e,fac);return _a||UMODEL_(e,t||0,extra)}function UTURRET(e,t,extra?){return UTURRET_(e,t||0,extra)}function BMODEL(e,t,d,cn,rot){const _a=getAssetModel(e,t);return _a||BMODEL_(e,t,d,cn,rot)}function BTURRET(e,t,r){return BTURRET_(e,t,r||0)}
 /*
  * Optional external 3D asset loading (GLTF/GLB), with graceful fallback.
  *
@@ -964,6 +964,74 @@ function getAssetModel(key, faction?) {
   return null;
 }
 
+/*
+ * Admin-panel thumbnail previews.
+ *
+ * Bakes the same procedural-or-uploaded-asset model the game itself would
+ * render into a small standalone canvas, via the existing sprite rasterizer
+ * (buildTris/triRasterG behind makeSprite) - no GL/game-session needed.
+ * getAssetModel() resolves asynchronously for uploaded GLTF/GLB assets, so
+ * a fresh upload draws the procedural fallback first and renderThumbInto()
+ * polls briefly to swap in the real asset once it finishes loading.
+ */
+function assetPending(key, faction) {
+  const fkey = faction ? key + ":" + faction : null;
+  const rkey = fkey && MODEL_ASSETS[fkey] ? fkey : key;
+  if (!MODEL_ASSETS[rkey]) return false;
+  const cached = _assetCache.get(rkey);
+  return cached === "loading" || cached === undefined;
+}
+
+function thumbCanvas(key, kind, faction, size?) {
+  size = size || 48;
+  const isB = "b" === kind;
+  const def = isB ? BLD[key] : UNITS[key];
+  if (!def) return null;
+  const fac = faction || "neutral";
+  const fdef = FACTIONS[fac];
+  const pal = fdef ? { body: fdef.color, dark: fdef.dark, trim: fdef.tint } : { body: MAT.neutral, dark: "#6a6252", trim: "#aaa" };
+  let parts;
+  try {
+    parts = isB ? BMODEL(key, fac, undefined, undefined, undefined) : UMODEL(key, 0, { fac: fdef ? fac : undefined });
+  } catch (err) {
+    return null;
+  }
+  if (!parts || !parts.length) return null;
+  let spr;
+  try {
+    spr = makeSprite(parts, 0, pal, isB ? 1.4 : 2);
+  } catch (err) {
+    return null;
+  }
+  const cnv = document.createElement("canvas");
+  cnv.width = size;
+  cnv.height = size;
+  const cx = cnv.getContext("2d") as CanvasRenderingContext2D;
+  const iw = spr.c.width, ih = spr.c.height;
+  const fit = Math.min(size / iw, size / ih) * 0.92;
+  const dw = iw * fit, dh = ih * fit;
+  cx.drawImage(spr.c, (size - dw) / 2, (size - dh) / 2, dw, dh);
+  return cnv;
+}
+
+function renderThumbInto(imgEl, key, kind, faction, size?) {
+  if (!imgEl) return;
+  const draw = () => {
+    const cnv = thumbCanvas(key, kind, faction, size);
+    if (cnv) imgEl.src = cnv.toDataURL();
+  };
+  draw();
+  if (assetPending(key, faction)) {
+    let tries = 0;
+    const retry = () => {
+      tries++;
+      draw();
+      if (assetPending(key, faction) && tries < 12) setTimeout(retry, 350);
+    };
+    setTimeout(retry, 350);
+  }
+}
+
 Object.assign(window, {
   cv, mm, cam, ctx, mctx, CYL, CONE, isoX, isoY, faceAng, PI2, ZH, MINE_TOOL, MINE_DEFAULT,
   roundRectProfile, circleProfile, polyProfile, triN, pushTri, fanCap, nrm3, wallMeshSG, wallMesh,
@@ -988,6 +1056,7 @@ Object.assign(window, {
   SPRITES, SHADOWS, MAT,
   registerModelAsset, unregisterModelAsset, getAssetModel, MODEL_ASSETS,
   PILLAR_H, TURRET_RISE,
+  thumbCanvas, renderThumbInto,
 });
 
 Object.defineProperties(window, {
