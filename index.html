@@ -641,10 +641,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var FOG_ON = true;
   var idx = (e, t) => 92 * t + e;
   var inMap = (e, t) => e >= 0 && t >= 0 && e < 92 && t < 72;
+  var MTN_WALK_LIMIT = 180;
   function walkable(e, t) {
     if (!inMap(e, t)) return false;
     const r = idx(e, t);
-    return (G.terr[r] < 2 || G.bridge[r]) && 0 === G.occ[r] && !G.blk[r];
+    return (G.terr[r] < 2 || G.bridge[r]) && 0 === G.occ[r] && !G.blk[r] && (G.bridge[r] || G.elev[r] <= MTN_WALK_LIMIT);
   }
   function losEyeH(e) {
     return "b" === e.e ? 18 + 6 * (e.size || 1) : (e.alt || 0) + fpsEyeH(e);
@@ -688,6 +689,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (!inMap(e, t)) return false;
     const r = idx(e, t);
     if (G.terr[r] >= 2 && !G.bridge[r] || G.blk[r]) return false;
+    if (!G.bridge[r] && G.elev[r] > MTN_WALK_LIMIT) return false;
     const o = G.occ[r];
     if (0 === o || o === ignore) return true;
     const b = S.bldById.get(o);
@@ -6197,7 +6199,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       blit(c2, r + (f - h) * t, n + 0.5 * (f + h) * t, t);
     }
     const c = n - (0.55 * a + ("conyard" === e.key ? 34 : 20)) * t;
-    S.sel.includes(e) && (ctx.strokeStyle = "#7dff8a", ctx.lineWidth = 1.8, footprintPath(e.tx, e.ty, e.size), ctx.stroke()), (e.hp < 0.995 * e.maxhp || S.sel.includes(e)) && hpBar(r, c, 0.9 * a * t, e.hp / e.maxhp), S.sel.includes(e) && namePlate(r, c - 7 * t, e.name, "#e8f0f4", t), e.garrison && e.garrison.length && (ctx.fillStyle = "#ffd75e", ctx.font = "bold " + 10 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("\u25B2".repeat(Math.min(5, e.garrison.length)), r, c - 4 * t)), e.repair && (ctx.fillStyle = "#6fe36f", ctx.font = "bold " + 12 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("+", r, c - 6 * t)), e.hp < 0.5 * e.maxhp && Math.random() < 0.22 && S.fx.push({ kind: "smoke", x: e.x + rnd(-a / 3, a / 3), y: e.y + rnd(-a / 3, a / 3), z: 14, s: 1.2, c: "#4a4a4a", t: 0, life: 1.4 });
+    e.bombT > 0 && (drawBombGlow(r, n, 0.7 * a, t, e.bombT, e.bombFuse), drawBombCountdown(r, c - 14 * t, e.bombT)), S.sel.includes(e) && (ctx.strokeStyle = "#7dff8a", ctx.lineWidth = 1.8, footprintPath(e.tx, e.ty, e.size), ctx.stroke()), (e.hp < 0.995 * e.maxhp || S.sel.includes(e)) && hpBar(r, c, 0.9 * a * t, e.hp / e.maxhp), S.sel.includes(e) && namePlate(r, c - 7 * t, e.name, "#e8f0f4", t), e.garrison && e.garrison.length && (ctx.fillStyle = "#ffd75e", ctx.font = "bold " + 10 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("\u25B2".repeat(Math.min(5, e.garrison.length)), r, c - 4 * t)), e.repair && (ctx.fillStyle = "#6fe36f", ctx.font = "bold " + 12 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("+", r, c - 6 * t)), e.hp < 0.5 * e.maxhp && Math.random() < 0.22 && S.fx.push({ kind: "smoke", x: e.x + rnd(-a / 3, a / 3), y: e.y + rnd(-a / 3, a / 3), z: 14, s: 1.2, c: "#4a4a4a", t: 0, life: 1.4 });
   }
   function footprintPath(e, t, r) {
     ctx.beginPath();
@@ -6549,11 +6551,22 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     (s || e.hp < 0.995 * e.maxhp) && hpBar(n, o, 2.2 * e.d.radius * t, e.hp / e.maxhp), s && S.sel.length <= 8 && namePlate(n, o - 7 * t, e.d.name + (e.vet > 1 ? " \u2605" : e.vet ? " \u25B2" : ""), e.vet ? "#ffd75e" : "#e8f0f4", t), e.vet >= 1 && drawRank(n, o - 6 * t, e.vet, t), e.ctrl > 0 && (ctx.fillStyle = "#d98cff", ctx.fillRect(n - 12 * t, o - 5 * t, 24 * t * e.ctrl, 2.5 * t)), e.erase > 0 && (ctx.fillStyle = "#9fe8ff", ctx.fillRect(n - 12 * t, o - 5 * t, 24 * t * Math.min(1, e.erase), 2.5 * t)), "miner" === e.d.role && e.cargo > 0 && (ctx.fillStyle = "#ffd75e", ctx.fillRect(n - 10 * t, o - 5 * t, 20 * t * (e.cargo / 700), 2.5 * t)), void 0 !== e.ammo && e.d.ammo && (s || e.ammo < e.d.ammo) && (ctx.fillStyle = "rgba(0,0,0,.65)", ctx.fillRect(n - 10 * t - 1, o - 9 * t - 1, 20 * t + 2, 2 * t + 2), ctx.fillStyle = e.ammo > 0 ? "#8fd8ff" : "#e0473a", ctx.fillRect(n - 10 * t, o - 9 * t, 20 * t * Math.max(0, e.ammo / e.d.ammo), 2 * t));
   }
+  function bombPulse(bombT, bombFuse) {
+    const p = 1 - Math.max(0, bombT) / Math.max(0.01, bombFuse || 8);
+    return 0.5 + 0.5 * Math.sin(S.time * (6 + 10 * p) * Math.PI);
+  }
+  function drawBombGlow(cx, cy, radius, t, bombT, bombFuse) {
+    const pulse = bombPulse(bombT, bombFuse), g = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * t);
+    g.addColorStop(0, "rgba(255,40,20," + (0.45 + 0.25 * pulse) + ")"), g.addColorStop(1, "rgba(255,40,20,0)"), ctx.fillStyle = g, ctx.beginPath(), ctx.arc(cx, cy, radius * t, 0, 6.284), ctx.fill();
+  }
+  function drawBombCountdown(cx, topY, bombT) {
+    ctx.fillStyle = "#ff3a2a", ctx.font = "bold 13px Tahoma", ctx.textAlign = "center", ctx.shadowColor = "#000", ctx.shadowBlur = 4, ctx.fillText("\u{1F4A3} " + Math.max(0, Math.ceil(bombT)) + "s", cx, topY), ctx.shadowBlur = 0;
+  }
   function bldHUD(e) {
     const t = cam.z, r = 32 * e.size, n = w2sx(e.x, e.y), a = w2sy(e.x, e.y);
     if (n < 2 * -r * t || n > CW + 2 * r * t || a < 3 * -r * t || a > CH + 2 * r * t) return;
     const o = a - (0.55 * r + ("conyard" === e.key ? 34 : 20)) * t, s = S.sel.includes(e);
-    s && (ctx.strokeStyle = "#7dff8a", ctx.lineWidth = 1.8, footprintPath(e.tx, e.ty, e.size), ctx.stroke()), (e.hp < 0.995 * e.maxhp || s) && hpBar(n, o, 0.9 * r * t, e.hp / e.maxhp), s && namePlate(n, o - 7 * t, e.name, "#e8f0f4", t), e.garrison && e.garrison.length && (ctx.fillStyle = "#ffd75e", ctx.font = "bold " + 10 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("\u25B2".repeat(Math.min(8, e.garrison.length)), n, o - 4 * t)), e.repair && (ctx.fillStyle = "#6fe36f", ctx.font = "bold " + 12 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("+", n, o - 6 * t));
+    e.bombT > 0 && (drawBombGlow(n, a, 0.7 * r, t, e.bombT, e.bombFuse), drawBombCountdown(n, o - 14 * t, e.bombT)), s && (ctx.strokeStyle = "#7dff8a", ctx.lineWidth = 1.8, footprintPath(e.tx, e.ty, e.size), ctx.stroke()), (e.hp < 0.995 * e.maxhp || s) && hpBar(n, o, 0.9 * r * t, e.hp / e.maxhp), s && namePlate(n, o - 7 * t, e.name, "#e8f0f4", t), e.garrison && e.garrison.length && (ctx.fillStyle = "#ffd75e", ctx.font = "bold " + 10 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("\u25B2".repeat(Math.min(8, e.garrison.length)), n, o - 4 * t)), e.repair && (ctx.fillStyle = "#6fe36f", ctx.font = "bold " + 12 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("+", n, o - 6 * t));
   }
   function render2D() {
     voidGrad && voidH === CH || (voidH = CH, voidGrad = ctx.createLinearGradient(0, 0, 0, CH), voidGrad.addColorStop(0, "#0b141f"), voidGrad.addColorStop(1, "#060a10")), ctx.fillStyle = voidGrad, ctx.fillRect(0, 0, CW, CH), drawTerrain(), drawRads();
@@ -9596,7 +9609,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, hint(o.repair ? "Repairing" : "Repair off"))));
     if (o) {
       if (0 === o.owner) {
-        if ("u" === o.e && o.d.transport) {
+        if ("u" === o.e && (o.d.transport || o.d.gunnerSlot)) {
           const loadable = S.sel.filter((u) => "u" === u.e && u !== o && 0 === u.owner && !u.d.transport && !u.d.fly);
           if (loadable.length) return loadable.forEach((u) => {
             u.order = "load", u.target = o, u.path = null;
@@ -9652,7 +9665,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const r = s2w(e, t), n = r.x, a = r.y, o = entAt(n, a, e, t);
     if (o) {
       if (0 === o.owner) {
-        if ("u" === o.e && o.d.transport) {
+        if ("u" === o.e && (o.d.transport || o.d.gunnerSlot)) {
           const loadable = S.sel.filter((u) => "u" === u.e && u !== o && 0 === u.owner && !u.d.transport && !u.d.fly);
           if (loadable.length) return loadable.forEach((u) => {
             u.order = "load", u.target = o, u.path = null;
