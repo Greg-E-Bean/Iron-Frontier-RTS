@@ -11,7 +11,18 @@
 //    skirmish map dropdown (see CUSTOM_MAPS/loadStaticMap in src/sim.ts).
 
 const ADMIN_ASSETS_KEY = "ifr_admin_assets";
+const ADMIN_STATS_KEY = "ifr_admin_stats";
 const ADMIN_MAPS_KEY = "ifr_admin_maps";
+const CATEGORY_OPTIONS = [
+  { k: "", n: "(default)" },
+  { k: "inf", n: "Infantry" },
+  { k: "veh", n: "Vehicles" },
+  { k: "air", n: "Air" },
+  { k: "sea", n: "Navy" },
+  { k: "bld", n: "Structures" },
+  { k: "def", n: "Defense" },
+  { k: "none", n: "Hidden" },
+];
 const MINIBTN = 'style="padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:11px;margin:2px 4px 2px 0"';
 const MINIBTN_DANGER = 'style="padding:6px 10px;border-radius:6px;border:1px solid #a04040;background:#2a1c1c;color:#f0a0a0;font-size:11px;margin:2px 4px 2px 0"';
 const FACTION_LIST = [
@@ -27,6 +38,14 @@ function loadAdminAssets() {
 }
 function saveAdminAssets(list) {
   try { localStorage.setItem(ADMIN_ASSETS_KEY, JSON.stringify(list)); }
+  catch (e) { hint("Could not save — browser storage full?"); }
+}
+function loadAdminStats() {
+  try { return JSON.parse(localStorage.getItem(ADMIN_STATS_KEY) || "{}"); }
+  catch (e) { return {}; }
+}
+function saveAdminStats(map) {
+  try { localStorage.setItem(ADMIN_STATS_KEY, JSON.stringify(map)); }
   catch (e) { hint("Could not save — browser storage full?"); }
 }
 function loadAdminMapStore() {
@@ -49,6 +68,23 @@ function fileToDataUrl(file) {
 function applyAdminAssets() {
   for (const a of loadAdminAssets()) registerModelAsset(a.key, a.dataUrl, a.scale, a.faction || undefined);
 }
+function applyAdminStat(key, ov) {
+  const d = ov.kind === "unit" ? UNITS[key] : BLD[key];
+  if (!d) return;
+  if (ov.cost != null) d.cost = ov.cost;
+  if (ov.tab !== undefined) d.tab = ov.tab || null;
+  const target = ov.kind === "unit" ? d : d.weapon;
+  if (target) {
+    if (ov.vsInf != null) target.vsInf = ov.vsInf;
+    if (ov.vsVeh != null) target.vsVeh = ov.vsVeh;
+    if (ov.vsBldg != null) target.vsBldg = ov.vsBldg;
+    if (ov.aa !== undefined) target.aa = !!ov.aa;
+  }
+}
+function applyAdminStats() {
+  const stats = loadAdminStats();
+  for (const key of Object.keys(stats)) applyAdminStat(key, stats[key]);
+}
 function syncCustomMaps() {
   for (let i = MAPS.length - 1; i >= 0; i--) if (MAPS[i].custom) MAPS.splice(i, 1);
   for (const k of Object.keys(CUSTOM_MAPS)) delete CUSTOM_MAPS[k];
@@ -60,6 +96,7 @@ function syncCustomMaps() {
   }
 }
 applyAdminAssets();
+applyAdminStats();
 syncCustomMaps();
 
 function blankMapData() {
@@ -145,12 +182,26 @@ function assetPrimaryFaction(key, kind) {
   }
   return (BLD[key] && BLD[key].civ) ? "neutral" : "allied";
 }
+function assetStatTarget(key, kind) {
+  const d = kind === "unit" ? UNITS[key] : BLD[key];
+  if (!d) return null;
+  return kind === "unit" ? d : (d.weapon || null);
+}
 function assetRow(key, kind) {
   const entries = loadAdminAssets().filter(a => a.key === key);
   const tags = entries.map(a =>
     '<span class="adminTag">' + (a.faction || "all") +
     '<button data-key="' + key + '" data-fac="' + (a.faction || "") + '">✕</button></span>'
   ).join("");
+  const d = kind === "unit" ? UNITS[key] : BLD[key];
+  const stat = loadAdminStats()[key] || {};
+  const target = assetStatTarget(key, kind);
+  const combatInputs = target ? (
+    '<input type="number" step="0.05" class="vsInfOv" value="' + (stat.vsInf ?? "") + '" placeholder="vsInf ' + (target.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier">' +
+    '<input type="number" step="0.05" class="vsVehOv" value="' + (stat.vsVeh ?? "") + '" placeholder="vsVeh ' + (target.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier">' +
+    '<input type="number" step="0.05" class="vsBldgOv" value="' + (stat.vsBldg ?? "") + '" placeholder="vsBldg ' + (target.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier">' +
+    '<label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (stat.aa != null ? stat.aa ? " checked" : "" : target.aa ? " checked" : "") + '> Anti-Air</label>'
+  ) : "";
   return (
     '<div class="adminRow" data-key="' + key + '" data-kind="' + kind + '">' +
       '<img class="assetThumb" data-thumb-key="' + key + '" data-thumb-kind="' + kind + '" width="40" height="40">' +
@@ -161,6 +212,11 @@ function assetRow(key, kind) {
       '<input type="file" class="fileSel" accept=".glb,.gltf">' +
       '<input type="number" class="scaleSel" value="1" min="0.05" step="0.05" style="width:52px">' +
       tags +
+      '<div class="statRow" data-key="' + key + '" data-kind="' + kind + '" style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px">' +
+        '<input type="number" class="costOv" value="' + (stat.cost ?? "") + '" placeholder="Cost ' + (d.cost || 0) + '" style="width:80px" title="Cost override">' +
+        '<select class="tabOv" title="Category override">' + CATEGORY_OPTIONS.map(c => '<option value="' + c.k + '"' + (stat.tab === c.k ? " selected" : "") + '>' + c.n + '</option>').join("") + '</select>' +
+        combatInputs +
+      '</div>' +
     '</div>'
   );
 }
@@ -176,14 +232,44 @@ function renderAssetsTab() {
   const unitRows = unitKeys.map(k => assetRow(k, "unit")).join("") || '<div class="small">No units match.</div>';
   const bldRows = bldKeys.map(k => assetRow(k, "building")).join("") || '<div class="small">No buildings match.</div>';
   $("#adminBody").innerHTML =
-    '<div class="small" style="margin-bottom:8px">Upload a .glb/.gltf to replace a unit or building\'s model. ' +
-    'Pick a faction to override just that faction\'s look, or leave "All factions" to replace it everywhere it appears.</div>' +
+    '<div class="small" style="margin-bottom:8px">Upload a .glb/.gltf to replace a unit or building\'s model, and optionally override its cost, category, and combat role. ' +
+    'Pick a faction to scope a model to just that faction\'s look, or leave "All factions" to replace it everywhere it appears.</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:10px">' +
+      '<button id="exportAssetsBtn" ' + MINIBTN + '>EXPORT ASSETS (.json)</button>' +
+      '<button id="importAssetsBtn" ' + MINIBTN + '>IMPORT ASSETS (.json)</button>' +
+      '<input type="file" id="importAssetsFile" accept=".json" style="display:none">' +
+    '</div>' +
     '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">' +
       ASSET_CATEGORIES.map(c => '<button data-cat="' + c.k + '" class="catBtn' + (assetCategoryFilter === c.k ? " on" : "") + '">' + c.n + '</button>').join("") +
       '<input type="text" id="assetSearch" placeholder="Search by name…" value="' + assetSearchFilter.replace(/"/g, "&quot;") + '" style="margin-left:8px;flex:1;min-width:140px">' +
     '</div>' +
     '<div class="lbl">UNITS</div><div id="unitAssetRows">' + unitRows + '</div>' +
     '<div class="lbl">BUILDINGS</div><div id="bldAssetRows">' + bldRows + '</div>';
+  $("#exportAssetsBtn").onclick = () => {
+    const blob = new Blob([JSON.stringify({ assets: loadAdminAssets(), stats: loadAdminStats() }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "ifr_assets.json"; a.click();
+  };
+  $("#importAssetsBtn").onclick = () => $("#importAssetsFile").click();
+  ($("#importAssetsFile") as HTMLInputElement).onchange = (e: Event) => {
+    const file = (e.target as HTMLInputElement).files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        const assets = Array.isArray(parsed.assets) ? parsed.assets : (Array.isArray(parsed) ? parsed : []);
+        const stats = parsed.stats && "object" == typeof parsed.stats ? parsed.stats : {};
+        saveAdminAssets(assets);
+        saveAdminStats(stats);
+        applyAdminAssets();
+        applyAdminStats();
+        renderAssetsTab();
+        hint("Assets imported");
+      } catch (err) { hint("That file couldn't be read as an asset export"); }
+    };
+    reader.readAsText(file);
+  };
   $("#adminBody").querySelectorAll("[data-cat]").forEach(btn => {
     btn.onclick = () => { assetCategoryFilter = btn.dataset.cat; renderAssetsTab(); };
   });
@@ -221,6 +307,29 @@ function renderAssetsTab() {
       unregisterModelAsset(key, faction || undefined);
       renderAssetsTab();
     };
+  });
+  $("#adminBody").querySelectorAll(".statRow").forEach((row: HTMLElement) => {
+    const key = row.dataset.key, kind = row.dataset.kind;
+    const readStat = () => {
+      const stats = loadAdminStats();
+      const ov: any = { kind };
+      const cost = (row.querySelector(".costOv") as HTMLInputElement).value;
+      if (cost !== "") ov.cost = parseFloat(cost);
+      const tab = (row.querySelector(".tabOv") as HTMLSelectElement).value;
+      if (tab) ov.tab = tab;
+      const vsInfEl = row.querySelector(".vsInfOv") as HTMLInputElement;
+      if (vsInfEl && vsInfEl.value !== "") ov.vsInf = parseFloat(vsInfEl.value);
+      const vsVehEl = row.querySelector(".vsVehOv") as HTMLInputElement;
+      if (vsVehEl && vsVehEl.value !== "") ov.vsVeh = parseFloat(vsVehEl.value);
+      const vsBldgEl = row.querySelector(".vsBldgOv") as HTMLInputElement;
+      if (vsBldgEl && vsBldgEl.value !== "") ov.vsBldg = parseFloat(vsBldgEl.value);
+      const aaEl = row.querySelector(".aaOv") as HTMLInputElement;
+      if (aaEl) ov.aa = aaEl.checked;
+      if (Object.keys(ov).length <= 1) delete stats[key]; else stats[key] = ov;
+      saveAdminStats(stats);
+      if (stats[key]) applyAdminStat(key, stats[key]);
+    };
+    row.querySelectorAll("input,select").forEach(el => el.addEventListener("change", readStat));
   });
 }
 
