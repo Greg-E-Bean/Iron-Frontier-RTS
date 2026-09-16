@@ -68,19 +68,28 @@ function fileToDataUrl(file) {
 function applyAdminAssets() {
   for (const a of loadAdminAssets()) registerModelAsset(a.key, a.dataUrl, a.scale, a.faction || undefined);
 }
+function finiteNum(v) {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
 function applyAdminStat(key, ov) {
   const d = ov.kind === "unit" ? UNITS[key] : BLD[key];
   if (!d) return;
-  if (ov.cost != null) d.cost = ov.cost;
-  if (ov.hp != null) d.hp = ov.hp;
+  const cost = finiteNum(ov.cost);
+  if (cost != null && cost >= 0) d.cost = cost;
+  const hp = finiteNum(ov.hp);
+  if (hp != null && hp > 0) d.hp = hp;
   if (ov.tab !== undefined) d.tab = ov.tab || null;
   const target = ov.kind === "unit" ? d : d.weapon;
   if (target) {
-    if (ov.vsInf != null) target.vsInf = ov.vsInf;
-    if (ov.vsVeh != null) target.vsVeh = ov.vsVeh;
-    if (ov.vsBldg != null) target.vsBldg = ov.vsBldg;
+    const vsInf = finiteNum(ov.vsInf);
+    if (vsInf != null) target.vsInf = vsInf;
+    const vsVeh = finiteNum(ov.vsVeh);
+    if (vsVeh != null) target.vsVeh = vsVeh;
+    const vsBldg = finiteNum(ov.vsBldg);
+    if (vsBldg != null) target.vsBldg = vsBldg;
     if (ov.aa !== undefined) target.aa = !!ov.aa;
-    if (ov.dps != null) target.dmg = ov.dps * (target.rof || 1);
+    const dps = finiteNum(ov.dps);
+    if (dps != null && dps >= 0 && target.rof) target.dmg = dps * target.rof;
   }
 }
 function applyAdminStats() {
@@ -205,7 +214,7 @@ function assetRow(key, kind) {
     '<input type="number" step="0.05" class="vsInfOv" value="' + (stat.vsInf ?? "") + '" placeholder="vsInf ' + (target.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier">' +
     '<input type="number" step="0.05" class="vsVehOv" value="' + (stat.vsVeh ?? "") + '" placeholder="vsVeh ' + (target.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier">' +
     '<input type="number" step="0.05" class="vsBldgOv" value="' + (stat.vsBldg ?? "") + '" placeholder="vsBldg ' + (target.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier">' +
-    '<input type="number" step="1" class="dpsOv" value="' + (stat.dps ?? "") + '" placeholder="DPS ' + curDps + '" style="width:64px" title="Damage per second — recalculates the underlying damage from the current rate of fire">' +
+    '<input type="number" step="1" class="dpsOv" value="' + (stat.dps ?? "") + '" placeholder="DPS ' + curDps + '" style="width:64px"' + (target.rof ? "" : " disabled") + ' title="' + (target.rof ? "Damage per second — recalculates the underlying damage from the current rate of fire" : "This unit has no rate of fire (unarmed/support) — DPS does not apply") + '">' +
     '<label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (stat.aa != null ? stat.aa ? " checked" : "" : target.aa ? " checked" : "") + '> Anti-Air</label>'
   ) : "";
   return (
@@ -487,7 +496,9 @@ function renderMusicTab() {
       } else if (act === "del") {
         if (!confirm('Remove "' + t.name + '"?')) return;
         list.splice(idx, 1);
-        saveAdminMusic(list); refreshCustomMusic(); renderMusicTab();
+        saveAdminMusic(list); refreshCustomMusic();
+        if (trackSel >= MUSIC_TRACKS.length) setTrackSel(-1);
+        renderMusicTab();
       }
     };
   });

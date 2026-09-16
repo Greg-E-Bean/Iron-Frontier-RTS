@@ -2009,7 +2009,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (r && r.d.naval ? 2 !== G.terr[o] : G.terr[o] >= 2 && !G.bridge[o]) return false;
     const s = G.occ[o];
     if (0 !== s) {
-      const e2 = S.blds.find((e3) => e3.id === s);
+      const e2 = S.bldById.get(s);
       if (e2 && !e2.dead) return false;
     }
     return true;
@@ -2367,24 +2367,22 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (!(n < 1)) {
       if (e.cool > 0 && (e.cool -= t * n), e.target && (!canTarget(e, e.target) || dist2(e.x, e.y, e.target.x, e.target.y) > e.w.range * e.w.range * 1.2) && (e.target = null), aaShouldRecheck(e, t * n, e.w)) {
         let bestAir = null, bestAirD = 1e9;
-        for (const n2 of S.units) {
-          if (n2.dead || n2.owner === e.owner || n2.owner === NEUTRAL || teamOf(n2.owner) === teamOf(e.owner)) continue;
-          if (!(n2.alt > 2)) continue;
-          if (!canTarget(e, n2)) continue;
+        gridNear(e.x, e.y, e.w.range, (n2) => {
+          if (n2.dead || n2.owner === e.owner || n2.owner === NEUTRAL || teamOf(n2.owner) === teamOf(e.owner)) return;
+          if (!(n2.alt > 2)) return;
+          if (!canTarget(e, n2)) return;
           const d = dist2(e.x, e.y, n2.x, n2.y);
           d < bestAirD && d < e.w.range * e.w.range && (bestAirD = d, bestAir = n2);
-        }
-        bestAir && (e.target = bestAir);
+        }), bestAir && (e.target = bestAir);
       }
       if (!e.target) {
         let t2 = null, r2 = 1e9;
-        for (const n2 of S.units) {
-          if (n2.dead || n2.owner === e.owner || n2.owner === NEUTRAL || teamOf(n2.owner) === teamOf(e.owner)) continue;
-          if (!canTarget(e, n2)) continue;
+        gridNear(e.x, e.y, e.w.range, (n2) => {
+          if (n2.dead || n2.owner === e.owner || n2.owner === NEUTRAL || teamOf(n2.owner) === teamOf(e.owner)) return;
+          if (!canTarget(e, n2)) return;
           let a = dist2(e.x, e.y, n2.x, n2.y);
           e.w.aa && n2.alt > 2 && (a *= 0.35), a < r2 && a < e.w.range * e.w.range && (r2 = a, t2 = n2);
-        }
-        e.target = t2;
+        }), e.target = t2;
       }
       if (e.target) {
         const r2 = Math.atan2(e.target.y - e.y, e.target.x - e.x);
@@ -2393,13 +2391,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (e.w2) {
         if (e.cool2 > 0 && (e.cool2 -= t * n), e.target2 && (!canTarget(e, e.target2) || dist2(e.x, e.y, e.target2.x, e.target2.y) > e.w2.range * e.w2.range * 1.2) && (e.target2 = null), !e.target2) {
           let t2 = null, r2 = 1e9;
-          for (const n2 of S.units) {
-            if (n2.dead || n2.owner === e.owner || n2.owner === NEUTRAL || teamOf(n2.owner) === teamOf(e.owner) || n2.alt <= 2) continue;
-            if (n2.inside || n2.attached || n2.d && n2.d.sub && !subRevealed(n2)) continue;
+          gridNear(e.x, e.y, e.w2.range, (n2) => {
+            if (n2.dead || n2.owner === e.owner || n2.owner === NEUTRAL || teamOf(n2.owner) === teamOf(e.owner) || n2.alt <= 2) return;
+            if (n2.inside || n2.attached || n2.d && n2.d.sub && !subRevealed(n2)) return;
             const a = dist2(e.x, e.y, n2.x, n2.y);
             a < r2 && a < e.w2.range * e.w2.range && (r2 = a, t2 = n2);
-          }
-          e.target2 = t2;
+          }), e.target2 = t2;
         }
         if (e.target2) {
           const r2 = Math.atan2(e.target2.y - e.y, e.target2.x - e.x);
@@ -2643,8 +2640,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return r[n < 0.45 ? 0 : n < 0.75 ? Math.min(1, r.length - 1) : Math.random() * r.length | 0];
   }
   function tickAI(e, t) {
-    const r = DIFFS[e.diff], as = aiArmy(e).length, pz = aiPersonality(e);
+    const r = DIFFS[e.diff];
     if (e.ai.t -= t, e.ai.t > 0) return;
+    const s = aiArmy(e), as = s.length, pz = aiPersonality(e);
     adaptDifficulty(e, r.tick);
     if (e.ai.t = r.tick, e.ready.bld) {
       const t2 = aiFindSpot(e, e.ready.bld);
@@ -2701,7 +2699,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         });
       }
     }
-    const team = teamOf(e.id), s = aiArmy(e), i = nearestEnemy(e), l = aiBaseCenter(e), c = S.units.filter((t2) => t2.owner !== e.id && t2.owner !== NEUTRAL && teamOf(t2.owner) !== team && !t2.dead && dist2(t2.x, t2.y, l.x, l.y) < 230400 && visibleToTeam(t2.x, t2.y, team));
+    const team = teamOf(e.id), i = nearestEnemy(e), l = aiBaseCenter(e), c = S.units.filter((t2) => t2.owner !== e.id && t2.owner !== NEUTRAL && teamOf(t2.owner) !== team && !t2.dead && dist2(t2.x, t2.y, l.x, l.y) < 230400 && visibleToTeam(t2.x, t2.y, team));
     c.length > 1 && c.sort((a2, b) => aiThreatScore(b) - aiThreatScore(a2));
     if (c.length) {
       const e2 = s.filter((e3) => "idle" === e3.order || "guard" === e3.order);
@@ -2733,7 +2731,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
     }
   }
-  function aiMicro(e, t) {
+  function aiMicro(e, t0) {
+    const acc = e.ai.microAcc = (e.ai.microAcc || 0) + t0;
+    if (acc < 0.15) return;
+    e.ai.microAcc = 0;
+    const t = acc;
     const repairBld = S.blds.find((bl) => bl.owner === e.id && !bl.dead && "repair" === bl.key), pz = aiPersonality(e);
     for (const u of aiArmy(e)) {
       if (u.retreatT > 0) {
@@ -6929,11 +6931,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (!("idle" !== e.order && "amove" !== e.order || e.target && canTarget(e, e.target) && e.target.owner !== e.owner)) {
       let t2 = null, n2 = 1e9;
       const a = r.range + 300;
-      for (const r2 of S.units) {
-        if (r2.dead || r2.owner === e.owner || r2.owner === NEUTRAL || teamOf(r2.owner) === teamOf(e.owner) || !canTarget(e, r2)) continue;
+      gridNear(e.x, e.y, a, (r2) => {
+        if (r2.dead || r2.owner === e.owner || r2.owner === NEUTRAL || teamOf(r2.owner) === teamOf(e.owner) || !canTarget(e, r2)) return;
         const o = dist2(e.x, e.y, r2.x, r2.y);
         o < n2 && o < a * a && (n2 = o, t2 = r2);
-      }
+      });
       if (!t2 && r.vsBldg > 0.5) for (const r2 of S.blds) {
         if (r2.dead || r2.owner === e.owner || r2.owner === NEUTRAL || teamOf(r2.owner) === teamOf(e.owner)) continue;
         const o = dist2(e.x, e.y, r2.x, r2.y);
@@ -7829,7 +7831,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       wm.map && (wm.map.offset.x = 0.015 * S.time, wm.map.offset.y = 6e-3 * S.time), wm.bumpMap && (wm.bumpMap.offset.x = -0.03 * S.time, wm.bumpMap.offset.y = 0.012 * S.time);
     }
     let e, t, r;
-    if (FPS.on && FPS.u && !FPS.u.dead) cam.x = FPS.u.x, cam.y = FPS.u.y, e = fpsRender(), t = r = 620;
+    if (FPS.on && FPS.u) cam.x = FPS.u.x, cam.y = FPS.u.y, e = fpsRender(), t = r = 620;
     else {
       e = GL.camera, t = CW / (GL_SX * cam.z) / 2, r = CH / (GL_SY * cam.z) / 2, e.left = -t, e.right = t, e.top = r, e.bottom = -r;
       const n2 = cam.x, a2 = cam.y;
@@ -9098,7 +9100,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function playCustomTrack(i) {
     const t = CUSTOM_MUSIC[i];
-    if (!t) return;
+    if (!t) {
+      trackSel = -1;
+      try {
+        localStorage.setItem("ifr_track", "-1");
+      } catch (e) {
+      }
+      const total = totalTrackCount();
+      return void (total > 0 && playAnyTrack(Math.floor(Math.random() * total)));
+    }
     stopCustomTrack(), musicOn = true;
     const el = new Audio(t.dataUrl);
     el.volume = muted ? 0 : masterVol * musicVol, customTrackEl = el, customTrackIdx = i, el.onended = () => {
@@ -9486,9 +9496,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       e2.stopPropagation(), S.sel = [], sfx("go");
     }), e.appendChild(a);
   }
+  var _tabEls = null;
   function updateCards() {
     const e = P();
-    const tabsEl = document.querySelectorAll(".tab");
+    const tabsEl = _tabEls || (_tabEls = document.querySelectorAll(".tab"));
     let curLocked = false;
     tabsEl.forEach((el) => {
       const req = TAB_REQ[el.dataset.t];
@@ -10351,19 +10362,28 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function applyAdminAssets() {
     for (const a of loadAdminAssets()) registerModelAsset(a.key, a.dataUrl, a.scale, a.faction || void 0);
   }
+  function finiteNum(v) {
+    return typeof v === "number" && Number.isFinite(v) ? v : null;
+  }
   function applyAdminStat(key, ov) {
     const d = ov.kind === "unit" ? UNITS[key] : BLD[key];
     if (!d) return;
-    if (ov.cost != null) d.cost = ov.cost;
-    if (ov.hp != null) d.hp = ov.hp;
+    const cost = finiteNum(ov.cost);
+    if (cost != null && cost >= 0) d.cost = cost;
+    const hp = finiteNum(ov.hp);
+    if (hp != null && hp > 0) d.hp = hp;
     if (ov.tab !== void 0) d.tab = ov.tab || null;
     const target = ov.kind === "unit" ? d : d.weapon;
     if (target) {
-      if (ov.vsInf != null) target.vsInf = ov.vsInf;
-      if (ov.vsVeh != null) target.vsVeh = ov.vsVeh;
-      if (ov.vsBldg != null) target.vsBldg = ov.vsBldg;
+      const vsInf = finiteNum(ov.vsInf);
+      if (vsInf != null) target.vsInf = vsInf;
+      const vsVeh = finiteNum(ov.vsVeh);
+      if (vsVeh != null) target.vsVeh = vsVeh;
+      const vsBldg = finiteNum(ov.vsBldg);
+      if (vsBldg != null) target.vsBldg = vsBldg;
       if (ov.aa !== void 0) target.aa = !!ov.aa;
-      if (ov.dps != null) target.dmg = ov.dps * (target.rof || 1);
+      const dps = finiteNum(ov.dps);
+      if (dps != null && dps >= 0 && target.rof) target.dmg = dps * target.rof;
     }
   }
   function applyAdminStats() {
@@ -10480,7 +10500,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const stat = loadAdminStats()[key] || {};
     const target = assetStatTarget(key, kind);
     const curDps = target && target.rof ? +(target.dmg / target.rof).toFixed(2) : 0;
-    const combatInputs = target ? '<input type="number" step="0.05" class="vsInfOv" value="' + (stat.vsInf ?? "") + '" placeholder="vsInf ' + (target.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier"><input type="number" step="0.05" class="vsVehOv" value="' + (stat.vsVeh ?? "") + '" placeholder="vsVeh ' + (target.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier"><input type="number" step="0.05" class="vsBldgOv" value="' + (stat.vsBldg ?? "") + '" placeholder="vsBldg ' + (target.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier"><input type="number" step="1" class="dpsOv" value="' + (stat.dps ?? "") + '" placeholder="DPS ' + curDps + '" style="width:64px" title="Damage per second \u2014 recalculates the underlying damage from the current rate of fire"><label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (stat.aa != null ? stat.aa ? " checked" : "" : target.aa ? " checked" : "") + "> Anti-Air</label>" : "";
+    const combatInputs = target ? '<input type="number" step="0.05" class="vsInfOv" value="' + (stat.vsInf ?? "") + '" placeholder="vsInf ' + (target.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier"><input type="number" step="0.05" class="vsVehOv" value="' + (stat.vsVeh ?? "") + '" placeholder="vsVeh ' + (target.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier"><input type="number" step="0.05" class="vsBldgOv" value="' + (stat.vsBldg ?? "") + '" placeholder="vsBldg ' + (target.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier"><input type="number" step="1" class="dpsOv" value="' + (stat.dps ?? "") + '" placeholder="DPS ' + curDps + '" style="width:64px"' + (target.rof ? "" : " disabled") + ' title="' + (target.rof ? "Damage per second \u2014 recalculates the underlying damage from the current rate of fire" : "This unit has no rate of fire (unarmed/support) \u2014 DPS does not apply") + '"><label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (stat.aa != null ? stat.aa ? " checked" : "" : target.aa ? " checked" : "") + "> Anti-Air</label>" : "";
     return '<div class="adminRow" data-key="' + key + '" data-kind="' + kind + '"><img class="assetThumb" data-thumb-key="' + key + '" data-thumb-kind="' + kind + '" width="40" height="40"><div class="rowName">' + assetDisplayName(key, kind) + '<div class="small" style="opacity:.75">' + assetFactionMembership(key, kind) + '</div></div><select class="facSel">' + FACTION_LIST.map((f) => '<option value="' + f.k + '">' + f.n + "</option>").join("") + '</select><input type="file" class="fileSel" accept=".glb,.gltf"><input type="number" class="scaleSel" value="1" min="0.05" step="0.05" style="width:52px">' + tags + '<div class="statRow" data-key="' + key + '" data-kind="' + kind + '" style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px"><input type="number" class="costOv" value="' + (stat.cost ?? "") + '" placeholder="Cost ' + (d.cost || 0) + '" style="width:80px" title="Cost override"><input type="number" class="hpOv" value="' + (stat.hp ?? "") + '" placeholder="HP ' + (d.hp || 0) + '" style="width:70px" title="Hit points override"><select class="tabOv" title="Category override">' + CATEGORY_OPTIONS.map((c) => '<option value="' + c.k + '"' + (stat.tab === c.k ? " selected" : "") + ">" + c.n + "</option>").join("") + "</select>" + combatInputs + "</div></div>";
   }
   function renderAssetsTab() {
@@ -10729,6 +10749,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           list.splice(idx2, 1);
           saveAdminMusic(list);
           refreshCustomMusic();
+          if (trackSel >= MUSIC_TRACKS.length) setTrackSel(-1);
           renderMusicTab();
         }
       };
@@ -11486,7 +11507,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
     }
   }
-  resize(), refreshMenu(), wireSetup(), requestAnimationFrame(frame), $("#fpsPrompt").addEventListener("click", (ev) => {
+  resize(), showSetup(), requestAnimationFrame(frame), $("#fpsPrompt").addEventListener("click", (ev) => {
     ev.stopPropagation(), fpsPromptTarget && !FPS.on && !FPS.entering && (GL ? beginFpsEntry(fpsPromptTarget) : hint("First person needs 3D graphics support"));
   }), $("#fpsexit").addEventListener("click", (e) => {
     e.stopPropagation(), exitFPS();
