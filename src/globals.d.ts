@@ -524,6 +524,7 @@ declare global {
   const heightAt: AnyFn;
   function rebuildTerrainGL(): void;
   function renderGL(): void;
+  function flattenFootprint(tx: number, ty: number, size: number): void;
   var GL: any;
 
   // === fps.js (first-person mode) ===

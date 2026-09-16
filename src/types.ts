@@ -284,6 +284,13 @@ export interface MapData {
   // unconditionally without special-casing procedural maps, which never
   // touch it and so see no visual change.
   elevOverride: Float32Array;
+  // Per-corner (93x73) exact flattened height, set by flattenFootprint()
+  // whenever a real building is placed so its footprint sits flush on the
+  // ground instead of on whatever slope was underneath. flatCornerSet
+  // marks which corners are overridden; cornerBump() returns flatCorner
+  // directly for those, bypassing the usual noise-based height formula.
+  flatCorner: Float32Array;
+  flatCornerSet: Uint8Array;
   shore?: Float32Array;
   bridge: Uint8Array;
   bridgeHp: Float32Array;
