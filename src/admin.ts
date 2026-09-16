@@ -72,6 +72,7 @@ function applyAdminStat(key, ov) {
   const d = ov.kind === "unit" ? UNITS[key] : BLD[key];
   if (!d) return;
   if (ov.cost != null) d.cost = ov.cost;
+  if (ov.hp != null) d.hp = ov.hp;
   if (ov.tab !== undefined) d.tab = ov.tab || null;
   const target = ov.kind === "unit" ? d : d.weapon;
   if (target) {
@@ -79,6 +80,7 @@ function applyAdminStat(key, ov) {
     if (ov.vsVeh != null) target.vsVeh = ov.vsVeh;
     if (ov.vsBldg != null) target.vsBldg = ov.vsBldg;
     if (ov.aa !== undefined) target.aa = !!ov.aa;
+    if (ov.dps != null) target.dmg = ov.dps * (target.rof || 1);
   }
 }
 function applyAdminStats() {
@@ -132,15 +134,17 @@ function renderAdminPanel() {
     '<div style="display:flex;gap:6px;margin:10px 0;position:sticky;top:0;z-index:5;background:#101a1e;padding:4px 0">' +
       '<button id="tabAssets" class="tabBtn' + (adminTab === "assets" ? " on" : "") + '">ASSETS</button>' +
       '<button id="tabMaps" class="tabBtn' + (adminTab === "maps" ? " on" : "") + '">MAPS</button>' +
+      '<button id="tabMusic" class="tabBtn' + (adminTab === "music" ? " on" : "") + '">MUSIC</button>' +
       '<button id="backAdminTop" ' + MINIBTN + '>BACK</button>' +
     '</div>' +
     '<div id="adminBody"></div>' +
     '<button id="backAdmin" ' + SECBTN + '>BACK</button>';
   $("#tabAssets").onclick = () => { adminTab = "assets"; renderAdminPanel(); };
   $("#tabMaps").onclick = () => { adminTab = "maps"; renderAdminPanel(); };
+  $("#tabMusic").onclick = () => { adminTab = "music"; renderAdminPanel(); };
   $("#backAdmin").onclick = closeAdmin;
   $("#backAdminTop").onclick = closeAdmin;
-  if (adminTab === "assets") renderAssetsTab(); else renderMapsTab();
+  if (adminTab === "assets") renderAssetsTab(); else if (adminTab === "maps") renderMapsTab(); else renderMusicTab();
 }
 
 // ---------- Assets tab ----------
@@ -196,10 +200,12 @@ function assetRow(key, kind) {
   const d = kind === "unit" ? UNITS[key] : BLD[key];
   const stat = loadAdminStats()[key] || {};
   const target = assetStatTarget(key, kind);
+  const curDps = target && target.rof ? +(target.dmg / target.rof).toFixed(2) : 0;
   const combatInputs = target ? (
     '<input type="number" step="0.05" class="vsInfOv" value="' + (stat.vsInf ?? "") + '" placeholder="vsInf ' + (target.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier">' +
     '<input type="number" step="0.05" class="vsVehOv" value="' + (stat.vsVeh ?? "") + '" placeholder="vsVeh ' + (target.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier">' +
     '<input type="number" step="0.05" class="vsBldgOv" value="' + (stat.vsBldg ?? "") + '" placeholder="vsBldg ' + (target.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier">' +
+    '<input type="number" step="1" class="dpsOv" value="' + (stat.dps ?? "") + '" placeholder="DPS ' + curDps + '" style="width:64px" title="Damage per second — recalculates the underlying damage from the current rate of fire">' +
     '<label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (stat.aa != null ? stat.aa ? " checked" : "" : target.aa ? " checked" : "") + '> Anti-Air</label>'
   ) : "";
   return (
@@ -214,6 +220,7 @@ function assetRow(key, kind) {
       tags +
       '<div class="statRow" data-key="' + key + '" data-kind="' + kind + '" style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px">' +
         '<input type="number" class="costOv" value="' + (stat.cost ?? "") + '" placeholder="Cost ' + (d.cost || 0) + '" style="width:80px" title="Cost override">' +
+        '<input type="number" class="hpOv" value="' + (stat.hp ?? "") + '" placeholder="HP ' + (d.hp || 0) + '" style="width:70px" title="Hit points override">' +
         '<select class="tabOv" title="Category override">' + CATEGORY_OPTIONS.map(c => '<option value="' + c.k + '"' + (stat.tab === c.k ? " selected" : "") + '>' + c.n + '</option>').join("") + '</select>' +
         combatInputs +
       '</div>' +
@@ -315,6 +322,8 @@ function renderAssetsTab() {
       const ov: any = { kind };
       const cost = (row.querySelector(".costOv") as HTMLInputElement).value;
       if (cost !== "") ov.cost = parseFloat(cost);
+      const hp = (row.querySelector(".hpOv") as HTMLInputElement).value;
+      if (hp !== "") ov.hp = parseFloat(hp);
       const tab = (row.querySelector(".tabOv") as HTMLSelectElement).value;
       if (tab) ov.tab = tab;
       const vsInfEl = row.querySelector(".vsInfOv") as HTMLInputElement;
@@ -323,6 +332,8 @@ function renderAssetsTab() {
       if (vsVehEl && vsVehEl.value !== "") ov.vsVeh = parseFloat(vsVehEl.value);
       const vsBldgEl = row.querySelector(".vsBldgOv") as HTMLInputElement;
       if (vsBldgEl && vsBldgEl.value !== "") ov.vsBldg = parseFloat(vsBldgEl.value);
+      const dpsEl = row.querySelector(".dpsOv") as HTMLInputElement;
+      if (dpsEl && dpsEl.value !== "") ov.dps = parseFloat(dpsEl.value);
       const aaEl = row.querySelector(".aaOv") as HTMLInputElement;
       if (aaEl) ov.aa = aaEl.checked;
       if (Object.keys(ov).length <= 1) delete stats[key]; else stats[key] = ov;
@@ -401,6 +412,82 @@ function renderMapsTab() {
       } else if (act === "del") {
         if (!confirm('Delete "' + store2[key].name + '"? This cannot be undone.')) return;
         delete store2[key]; saveAdminMapStore(store2); syncCustomMaps(); renderMapsTab();
+      }
+    };
+  });
+}
+
+// ---------- Music tab ----------
+
+function musicFileExt(mime, name) {
+  const m = name && /\.[a-z0-9]+$/i.exec(name);
+  if (m) return m[0];
+  if (mime === "audio/aac") return ".aac";
+  if (mime === "audio/mp4" || mime === "audio/x-m4a") return ".m4a";
+  return ".mp3";
+}
+function renderMusicTab() {
+  const tracks = loadAdminMusic();
+  const rows = tracks.map((t, i) =>
+    '<div class="adminRow" data-idx="' + i + '">' +
+      '<div class="rowName">' + t.name + '<div class="small" style="opacity:.75">' + (t.mime || "audio") + '</div></div>' +
+      '<audio controls preload="none" src="' + t.dataUrl + '" style="height:32px;max-width:220px"></audio>' +
+      '<button data-act="export" data-idx="' + i + '" ' + MINIBTN + '>EXPORT</button>' +
+      '<button data-act="del" data-idx="' + i + '" ' + MINIBTN_DANGER + '>DELETE</button>' +
+    '</div>'
+  ).join("") || '<div class="small">No custom tracks uploaded yet — the game ships with its own procedurally-generated soundtrack.</div>';
+  $("#adminBody").innerHTML =
+    '<div class="small" style="margin-bottom:8px">Upload your own music (.mp3/.aac/.m4a) — saved in this browser only. ' +
+    'Pick it from Settings → Music Track once uploaded, or leave "Auto (Shuffle)" to mix it into the built-in soundtrack\'s rotation.</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">' +
+      '<button id="importTrackBtn" ' + MINIBTN + '>IMPORT TRACK (.mp3/.aac)</button>' +
+      '<input type="file" id="importTrackFile" accept=".mp3,.aac,.m4a,audio/mpeg,audio/aac,audio/mp4,audio/x-m4a" style="display:none">' +
+      '<button id="exportTracksBtn" ' + MINIBTN + '>EXPORT ALL TRACKS (.json)</button>' +
+      '<button id="importTracksBtn" ' + MINIBTN + '>IMPORT TRACKS (.json)</button>' +
+      '<input type="file" id="importTracksFile" accept=".json" style="display:none">' +
+    '</div>' +
+    '<div class="lbl">CUSTOM TRACKS</div><div id="musicRows">' + rows + '</div>';
+  $("#importTrackBtn").onclick = () => $("#importTrackFile").click();
+  ($("#importTrackFile") as HTMLInputElement).onchange = async (e: Event) => {
+    const file = (e.target as HTMLInputElement).files[0];
+    if (!file) return;
+    const dataUrl = await fileToDataUrl(file) as string;
+    const list = loadAdminMusic();
+    list.push({ id: "trk_" + Date.now(), name: file.name.replace(/\.[a-z0-9]+$/i, ""), dataUrl, mime: file.type || "audio/mpeg" });
+    if (saveAdminMusic(list)) { refreshCustomMusic(); hint("Track added: " + file.name); renderMusicTab(); }
+    else hint("Could not save track — browser storage full?");
+  };
+  $("#exportTracksBtn").onclick = () => {
+    const blob = new Blob([JSON.stringify({ tracks: loadAdminMusic() }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "ifr_music.json"; a.click();
+  };
+  $("#importTracksBtn").onclick = () => $("#importTracksFile").click();
+  ($("#importTracksFile") as HTMLInputElement).onchange = (e: Event) => {
+    const file = (e.target as HTMLInputElement).files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        const list = Array.isArray(parsed.tracks) ? parsed.tracks : (Array.isArray(parsed) ? parsed : []);
+        if (saveAdminMusic(list)) { refreshCustomMusic(); renderMusicTab(); hint("Tracks imported"); }
+        else hint("Could not save — browser storage full?");
+      } catch (err) { hint("That file couldn't be read as a track export"); }
+    };
+    reader.readAsText(file);
+  };
+  $("#adminBody").querySelectorAll("[data-act]").forEach((btn: HTMLElement) => {
+    btn.onclick = () => {
+      const idx = +btn.dataset.idx, act = btn.dataset.act, list = loadAdminMusic(), t = list[idx];
+      if (!t) return;
+      if (act === "export") {
+        const a = document.createElement("a");
+        a.href = t.dataUrl; a.download = t.name + musicFileExt(t.mime, t.name); a.click();
+      } else if (act === "del") {
+        if (!confirm('Remove "' + t.name + '"?')) return;
+        list.splice(idx, 1);
+        saveAdminMusic(list); refreshCustomMusic(); renderMusicTab();
       }
     };
   });

@@ -539,7 +539,7 @@ body.fps #mmWrap{opacity:.55}
       <div class="fld"><label>Map</label><select id="mapSel"></select><div id="mapPreview"></div></div>
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
     </div>
-    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="adminBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b5b5b;background:#2a2a2a;color:#d8d8d8;font-size:13px">⚙ ADMIN</button>
+    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="adminBtn" style="display:block;margin:10px auto 0;padding:6px 16px;border-radius:20px;border:1px solid #5b5b5b;background:#2a2a2a;color:#9aa0a6;font-size:11px;letter-spacing:.5px">+ IMPORT / CREATE</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
       Tap a build card again to queue more · ▾ expands the build panel.<br>
       <b style="color:#e0b050">Ore:</b> amber ore feeds your economy, pale gem veins pay far more,
@@ -8816,7 +8816,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var musicBus = null;
   var playTrackRef = null;
   function setMasterVol(e) {
-    masterVol = e, masterGain && !muted && (masterGain.gain.value = e);
+    masterVol = e, masterGain && !muted && (masterGain.gain.value = e), customTrackEl && (customTrackEl.volume = muted ? 0 : e * musicVol);
     try {
       localStorage.setItem("ifr_masterVol", "" + e);
     } catch (t) {
@@ -8830,7 +8830,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   function setMusicVol(e) {
-    musicVol = e, musicBus && (musicBus.gain.value = 0.075 * e);
+    musicVol = e, musicBus && (musicBus.gain.value = 0.075 * e), customTrackEl && (customTrackEl.volume = muted ? 0 : masterVol * e);
     try {
       localStorage.setItem("ifr_musicVol", "" + e);
     } catch (t) {
@@ -8842,7 +8842,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       localStorage.setItem("ifr_track", "" + e);
     } catch (t) {
     }
-    musicOn && e >= 0 && playTrackRef && playTrackRef(e, 16);
+    musicOn && e >= 0 && playAnyTrack(e);
   }
   function audio() {
     if (!AC) try {
@@ -9044,7 +9044,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     sfxBudget > 9 || (sfxBudget++, "shell" === e || "rocket" === e || "grenade" === e ? noise(0.2, 0.06, 600) : "missile" === e && noise(0.16, 0.05, 800));
   }
   function setMuted(e) {
-    muted = e, masterGain && (masterGain.gain.value = e ? 0 : masterVol);
+    muted = e, masterGain && (masterGain.gain.value = e ? 0 : masterVol), customTrackEl && (customTrackEl.volume = e ? 0 : masterVol * musicVol);
     try {
       localStorage.setItem("ifr_muted", e ? "1" : "0");
     } catch (t2) {
@@ -9059,6 +9059,62 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var musicGen = 0;
   var MUSIC_ARR = [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0];
   var MUSIC_TRACKS = [{ name: "Iron March", step: 113.6, arr: MUSIC_ARR, sections: [{ bass: [82.41, 65.41, 98, 73.42], gtr: [164.81, 130.81, 196, 146.83], kickA: [0, 8], kickB: [6, 14], snare: [4, 12], hatDiv: 2 }, { bass: [98, 82.41, 73.42, 65.41], gtr: [196, 164.81, 146.83, 130.81], kickA: [0, 4, 8, 12], kickB: [6, 14], snare: [4, 8, 12], hatDiv: 1 }] }, { name: "Steel Thunder", step: 100, arr: MUSIC_ARR, sections: [{ bass: [73.42, 87.31, 65.41, 98], gtr: [146.83, 174.61, 130.81, 196], kickA: [0, 4, 8, 11], kickB: [2, 14], snare: [4, 12], hatDiv: 1 }, { bass: [65.41, 73.42, 98, 87.31], gtr: [130.81, 146.83, 196, 174.61], kickA: [0, 2, 4, 8, 10], kickB: [6, 12, 14], snare: [4, 8, 12], hatDiv: 2 }] }, { name: "War Drums", step: 136, arr: MUSIC_ARR, sections: [{ bass: [55, 43.65, 65.41, 49], gtr: [110, 87.31, 130.81, 98], kickA: [0, 8], kickB: [], snare: [2, 4, 6, 10, 12, 14], hatDiv: 4 }, { bass: [65.41, 49, 55, 43.65], gtr: [130.81, 98, 110, 87.31], kickA: [0, 4, 8, 12], kickB: [6], snare: [2, 4, 6, 10, 12, 14], hatDiv: 2 }] }, { name: "Blackout", step: 107, arr: MUSIC_ARR, sections: [{ bass: [65.41, 51.91, 77.78, 58.27], gtr: [130.81, 103.83, 155.56, 116.54], kickA: [0, 6, 8, 14], kickB: [3, 11], snare: [4, 12], hatDiv: 2 }, { bass: [77.78, 58.27, 65.41, 51.91], gtr: [155.56, 116.54, 130.81, 103.83], kickA: [0, 4, 8, 10, 14], kickB: [3, 6, 11], snare: [4, 8, 12], hatDiv: 1 }] }, { name: "Neon Assault", step: 118, synth: true, arr: MUSIC_ARR, sections: [{ bass: [73.42, 58.27, 87.31, 65.41], gtr: [146.83, 116.54, 174.61, 130.81], kickA: [0, 8], kickB: [6, 14], snare: [4, 12], clapAt: [4, 12], hatDiv: 2, toms: [15], crashAt: [] }, { bass: [87.31, 65.41, 73.42, 58.27], gtr: [174.61, 130.81, 146.83, 116.54], kickA: [0, 4, 8, 12], kickB: [6, 14], snare: [4, 8, 12], clapAt: [4, 8, 12], hatDiv: 1, toms: [3, 7, 11], crashAt: [0] }] }, { name: "Voltage Surge", step: 105, synth: true, arr: MUSIC_ARR, sections: [{ bass: [110, 87.31, 65.41, 98], gtr: [220, 174.61, 130.81, 196], kickA: [0, 8], kickB: [6, 14], snare: [4, 12], clapAt: [4, 12], hatDiv: 2, toms: [15], crashAt: [] }, { bass: [65.41, 98, 110, 87.31], gtr: [130.81, 196, 220, 174.61], kickA: [0, 4, 8, 12], kickB: [6, 14], snare: [4, 8, 12], clapAt: [4, 8, 12], hatDiv: 1, toms: [3, 7, 11], crashAt: [0] }] }, { name: "The Grind", step: 92, synth: true, arr: MUSIC_ARR, sections: [{ bass: [41.2, 41.2, 43.65, 41.2], gtr: [82.41, 82.41, 87.31, 82.41], kickA: [0, 4, 8, 12], kickB: [], snare: [4, 12], hatDiv: 1, industrial: true }, { bass: [43.65, 43.65, 41.2, 49], gtr: [87.31, 87.31, 82.41, 98], kickA: [0, 4, 8, 12], kickB: [2, 10], snare: [4, 12], hatDiv: 1, industrial: true }] }, { name: "Blood Eagle", step: 95, arr: MUSIC_ARR, sections: [{ bass: [82.41, 73.42, 65.41, 73.42], gtr: [164.81, 146.83, 130.81, 146.83], kickA: [0, 4, 8, 12], kickB: [6, 14], snare: [4, 12], hatDiv: 2, chantAt: [0, 8] }, { bass: [65.41, 73.42, 82.41, 98], gtr: [130.81, 146.83, 164.81, 196], kickA: [0, 2, 4, 6, 8, 10, 12, 14], kickB: [], snare: [4, 8, 12], hatDiv: 1, chantAt: [0, 2, 8, 10], chantHi: [2, 10], crashAt: [0] }] }, { name: "Iron Anthem", step: 150, arr: MUSIC_ARR, sections: [{ bass: [55, 49, 55, 65.41], gtr: [110, 98, 110, 130.81], kickA: [0, 8], kickB: [4, 12], snare: [4, 12], hatDiv: 4, chantAt: [0, 4, 8, 12] }, { bass: [65.41, 58.27, 49, 55], gtr: [130.81, 116.54, 98, 110], kickA: [0, 4, 8, 12], kickB: [2, 6, 10, 14], snare: [4, 8, 12], hatDiv: 2, chantAt: [0, 2, 4, 6, 8, 10, 12, 14], chantHi: [2, 6, 10, 14], crashAt: [0, 8] }] }, { name: "Ghost Protocol", step: 120, synth: true, arr: MUSIC_ARR, sections: [{ bass: [65.41, 58.27, 49, 55], gtr: [130.81, 116.54, 98, 110], kickA: [0, 8], kickB: [6], snare: [4, 12], clapAt: [4, 12], hatDiv: 2, toms: [15], crashAt: [], chantAt: [6] }, { bass: [49, 55, 65.41, 58.27], gtr: [98, 110, 130.81, 116.54], kickA: [0, 4, 8, 12], kickB: [6, 14], snare: [4, 8, 12], clapAt: [4, 8, 12], hatDiv: 1, toms: [3, 7, 11], crashAt: [0], chantAt: [0, 8], chantHi: [8] }] }, { name: "Last Stand", step: 150, arr: MUSIC_ARR, sections: [{ bass: [41.2, 36.71, 41.2, 49], gtr: [82.41, 73.42, 82.41, 98], kickA: [0, 8], kickB: [10], snare: [4, 12], hatDiv: 4, chantAt: [8] }, { bass: [49, 43.65, 41.2, 36.71], gtr: [98, 87.31, 82.41, 73.42], kickA: [0, 4, 8, 12], kickB: [6, 10, 14], snare: [4, 8, 12], hatDiv: 2, chantAt: [0, 4, 8, 12], chantHi: [4, 12], crashAt: [0, 8] }] }];
+  var ADMIN_MUSIC_KEY = "ifr_admin_music";
+  function loadAdminMusic() {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_MUSIC_KEY) || "[]");
+    } catch (e) {
+      return [];
+    }
+  }
+  function saveAdminMusic(list) {
+    try {
+      localStorage.setItem(ADMIN_MUSIC_KEY, JSON.stringify(list));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  var CUSTOM_MUSIC = loadAdminMusic();
+  function refreshCustomMusic() {
+    CUSTOM_MUSIC = loadAdminMusic();
+  }
+  function totalTrackCount() {
+    return MUSIC_TRACKS.length + CUSTOM_MUSIC.length;
+  }
+  function trackName(i) {
+    return i < MUSIC_TRACKS.length ? MUSIC_TRACKS[i].name : CUSTOM_MUSIC[i - MUSIC_TRACKS.length] ? CUSTOM_MUSIC[i - MUSIC_TRACKS.length].name : "?";
+  }
+  var customTrackEl = null;
+  var customTrackIdx = -1;
+  function stopCustomTrack() {
+    if (customTrackEl) {
+      try {
+        customTrackEl.pause();
+      } catch (e) {
+      }
+      customTrackEl = null, customTrackIdx = -1;
+    }
+  }
+  function playCustomTrack(i) {
+    const t = CUSTOM_MUSIC[i];
+    if (!t) return;
+    stopCustomTrack(), musicOn = true;
+    const el = new Audio(t.dataUrl);
+    el.volume = muted ? 0 : masterVol * musicVol, customTrackEl = el, customTrackIdx = i, el.onended = () => {
+      if (customTrackIdx !== i) return;
+      if (trackSel >= 0) el.currentTime = 0, el.play().catch(() => {
+      });
+      else {
+        const total = totalTrackCount();
+        total > 0 && playAnyTrack(Math.floor(Math.random() * total));
+      }
+    }, el.play().catch(() => {
+    });
+  }
+  function playAnyTrack(idx) {
+    idx < MUSIC_TRACKS.length ? (stopCustomTrack(), playTrackRef && playTrackRef(idx)) : playCustomTrack(idx - MUSIC_TRACKS.length);
+  }
   function startMusic() {
     const ac = audio();
     if (!ac || musicOn) return;
@@ -9261,13 +9317,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           }
         }
         step = (step + 1) % 16, 0 === step && (bar++, bar >= 4) ? (bar = 0, blk++, blk >= tr.arr.length ? setTimeout(() => {
-          const nxt = trackSel >= 0 ? trackSel : (idx + 1 + Math.floor(Math.random() * (MUSIC_TRACKS.length - 1))) % MUSIC_TRACKS.length;
-          playTrack(nxt);
+          const total = totalTrackCount(), nxt = trackSel >= 0 ? trackSel : (idx + 1 + Math.floor(Math.random() * (total - 1))) % total;
+          playAnyTrack(nxt);
         }, tr.step) : setTimeout(seq, tr.step)) : setTimeout(seq, tr.step);
       })();
     }
     playTrackRef = playTrack;
-    playTrack(trackSel >= 0 ? trackSel : Math.floor(Math.random() * MUSIC_TRACKS.length));
+    const _tot = totalTrackCount();
+    playAnyTrack(trackSel >= 0 ? trackSel : Math.floor(Math.random() * _tot));
   }
   var lightningT = 0;
   Object.assign(window, {
@@ -9283,7 +9340,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     startFpsAmbience,
     stopFpsAmbience,
     startMusic,
-    MUSIC_TRACKS
+    MUSIC_TRACKS,
+    loadAdminMusic,
+    saveAdminMusic,
+    refreshCustomMusic,
+    totalTrackCount,
+    trackName
   });
   Object.defineProperties(window, {
     lightningT: { get: () => lightningT, set: (v) => {
@@ -9296,7 +9358,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     masterVol: { get: () => masterVol, configurable: true },
     sfxVol: { get: () => sfxVol, configurable: true },
     musicVol: { get: () => musicVol, configurable: true },
-    trackSel: { get: () => trackSel, configurable: true }
+    trackSel: { get: () => trackSel, configurable: true },
+    CUSTOM_MUSIC: { get: () => CUSTOM_MUSIC, configurable: true }
   });
 })();
 
@@ -9930,7 +9993,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           S.running = true, openMenu(null);
         }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => S.mission ? S.mission.tutorial ? launchTutorial() : launchMission(S.mission.fac, S.mission.idx) : location.reload());
       } else if ("settings" === e) {
-        const trackOpts = ['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + e2.name + "</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
+        const trackOpts = ['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + e2.name + "</option>")).concat(CUSTOM_MUSIC.map((e2, t2) => '<option value="' + (MUSIC_TRACKS.length + t2) + '">' + e2.name + " (custom)</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
         const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
         const kbRows = Object.keys(KEYBINDS).map((action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>").join("");
@@ -10292,6 +10355,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const d = ov.kind === "unit" ? UNITS[key] : BLD[key];
     if (!d) return;
     if (ov.cost != null) d.cost = ov.cost;
+    if (ov.hp != null) d.hp = ov.hp;
     if (ov.tab !== void 0) d.tab = ov.tab || null;
     const target = ov.kind === "unit" ? d : d.weapon;
     if (target) {
@@ -10299,6 +10363,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       if (ov.vsVeh != null) target.vsVeh = ov.vsVeh;
       if (ov.vsBldg != null) target.vsBldg = ov.vsBldg;
       if (ov.aa !== void 0) target.aa = !!ov.aa;
+      if (ov.dps != null) target.dmg = ov.dps * (target.rof || 1);
     }
   }
   function applyAdminStats() {
@@ -10346,7 +10411,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     showSetup();
   }
   function renderAdminPanel() {
-    $("#panelMain").innerHTML = '<h1>ADMIN</h1><div class="sub">Custom assets &amp; maps \u2014 saved in this browser only</div><div style="display:flex;gap:6px;margin:10px 0;position:sticky;top:0;z-index:5;background:#101a1e;padding:4px 0"><button id="tabAssets" class="tabBtn' + (adminTab === "assets" ? " on" : "") + '">ASSETS</button><button id="tabMaps" class="tabBtn' + (adminTab === "maps" ? " on" : "") + '">MAPS</button><button id="backAdminTop" ' + MINIBTN + '>BACK</button></div><div id="adminBody"></div><button id="backAdmin" ' + SECBTN + ">BACK</button>";
+    $("#panelMain").innerHTML = '<h1>ADMIN</h1><div class="sub">Custom assets &amp; maps \u2014 saved in this browser only</div><div style="display:flex;gap:6px;margin:10px 0;position:sticky;top:0;z-index:5;background:#101a1e;padding:4px 0"><button id="tabAssets" class="tabBtn' + (adminTab === "assets" ? " on" : "") + '">ASSETS</button><button id="tabMaps" class="tabBtn' + (adminTab === "maps" ? " on" : "") + '">MAPS</button><button id="tabMusic" class="tabBtn' + (adminTab === "music" ? " on" : "") + '">MUSIC</button><button id="backAdminTop" ' + MINIBTN + '>BACK</button></div><div id="adminBody"></div><button id="backAdmin" ' + SECBTN + ">BACK</button>";
     $("#tabAssets").onclick = () => {
       adminTab = "assets";
       renderAdminPanel();
@@ -10355,10 +10420,15 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       adminTab = "maps";
       renderAdminPanel();
     };
+    $("#tabMusic").onclick = () => {
+      adminTab = "music";
+      renderAdminPanel();
+    };
     $("#backAdmin").onclick = closeAdmin;
     $("#backAdminTop").onclick = closeAdmin;
     if (adminTab === "assets") renderAssetsTab();
-    else renderMapsTab();
+    else if (adminTab === "maps") renderMapsTab();
+    else renderMusicTab();
   }
   var ASSET_CATEGORIES = [
     { k: "", n: "All" },
@@ -10409,8 +10479,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const d = kind === "unit" ? UNITS[key] : BLD[key];
     const stat = loadAdminStats()[key] || {};
     const target = assetStatTarget(key, kind);
-    const combatInputs = target ? '<input type="number" step="0.05" class="vsInfOv" value="' + (stat.vsInf ?? "") + '" placeholder="vsInf ' + (target.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier"><input type="number" step="0.05" class="vsVehOv" value="' + (stat.vsVeh ?? "") + '" placeholder="vsVeh ' + (target.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier"><input type="number" step="0.05" class="vsBldgOv" value="' + (stat.vsBldg ?? "") + '" placeholder="vsBldg ' + (target.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier"><label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (stat.aa != null ? stat.aa ? " checked" : "" : target.aa ? " checked" : "") + "> Anti-Air</label>" : "";
-    return '<div class="adminRow" data-key="' + key + '" data-kind="' + kind + '"><img class="assetThumb" data-thumb-key="' + key + '" data-thumb-kind="' + kind + '" width="40" height="40"><div class="rowName">' + assetDisplayName(key, kind) + '<div class="small" style="opacity:.75">' + assetFactionMembership(key, kind) + '</div></div><select class="facSel">' + FACTION_LIST.map((f) => '<option value="' + f.k + '">' + f.n + "</option>").join("") + '</select><input type="file" class="fileSel" accept=".glb,.gltf"><input type="number" class="scaleSel" value="1" min="0.05" step="0.05" style="width:52px">' + tags + '<div class="statRow" data-key="' + key + '" data-kind="' + kind + '" style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px"><input type="number" class="costOv" value="' + (stat.cost ?? "") + '" placeholder="Cost ' + (d.cost || 0) + '" style="width:80px" title="Cost override"><select class="tabOv" title="Category override">' + CATEGORY_OPTIONS.map((c) => '<option value="' + c.k + '"' + (stat.tab === c.k ? " selected" : "") + ">" + c.n + "</option>").join("") + "</select>" + combatInputs + "</div></div>";
+    const curDps = target && target.rof ? +(target.dmg / target.rof).toFixed(2) : 0;
+    const combatInputs = target ? '<input type="number" step="0.05" class="vsInfOv" value="' + (stat.vsInf ?? "") + '" placeholder="vsInf ' + (target.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier"><input type="number" step="0.05" class="vsVehOv" value="' + (stat.vsVeh ?? "") + '" placeholder="vsVeh ' + (target.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier"><input type="number" step="0.05" class="vsBldgOv" value="' + (stat.vsBldg ?? "") + '" placeholder="vsBldg ' + (target.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier"><input type="number" step="1" class="dpsOv" value="' + (stat.dps ?? "") + '" placeholder="DPS ' + curDps + '" style="width:64px" title="Damage per second \u2014 recalculates the underlying damage from the current rate of fire"><label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (stat.aa != null ? stat.aa ? " checked" : "" : target.aa ? " checked" : "") + "> Anti-Air</label>" : "";
+    return '<div class="adminRow" data-key="' + key + '" data-kind="' + kind + '"><img class="assetThumb" data-thumb-key="' + key + '" data-thumb-kind="' + kind + '" width="40" height="40"><div class="rowName">' + assetDisplayName(key, kind) + '<div class="small" style="opacity:.75">' + assetFactionMembership(key, kind) + '</div></div><select class="facSel">' + FACTION_LIST.map((f) => '<option value="' + f.k + '">' + f.n + "</option>").join("") + '</select><input type="file" class="fileSel" accept=".glb,.gltf"><input type="number" class="scaleSel" value="1" min="0.05" step="0.05" style="width:52px">' + tags + '<div class="statRow" data-key="' + key + '" data-kind="' + kind + '" style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px"><input type="number" class="costOv" value="' + (stat.cost ?? "") + '" placeholder="Cost ' + (d.cost || 0) + '" style="width:80px" title="Cost override"><input type="number" class="hpOv" value="' + (stat.hp ?? "") + '" placeholder="HP ' + (d.hp || 0) + '" style="width:70px" title="Hit points override"><select class="tabOv" title="Category override">' + CATEGORY_OPTIONS.map((c) => '<option value="' + c.k + '"' + (stat.tab === c.k ? " selected" : "") + ">" + c.n + "</option>").join("") + "</select>" + combatInputs + "</div></div>";
   }
   function renderAssetsTab() {
     const unitKeys = Object.keys(UNITS).filter(
@@ -10503,6 +10574,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const ov = { kind };
         const cost = row.querySelector(".costOv").value;
         if (cost !== "") ov.cost = parseFloat(cost);
+        const hp = row.querySelector(".hpOv").value;
+        if (hp !== "") ov.hp = parseFloat(hp);
         const tab = row.querySelector(".tabOv").value;
         if (tab) ov.tab = tab;
         const vsInfEl = row.querySelector(".vsInfOv");
@@ -10511,6 +10584,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         if (vsVehEl && vsVehEl.value !== "") ov.vsVeh = parseFloat(vsVehEl.value);
         const vsBldgEl = row.querySelector(".vsBldgOv");
         if (vsBldgEl && vsBldgEl.value !== "") ov.vsBldg = parseFloat(vsBldgEl.value);
+        const dpsEl = row.querySelector(".dpsOv");
+        if (dpsEl && dpsEl.value !== "") ov.dps = parseFloat(dpsEl.value);
         const aaEl = row.querySelector(".aaOv");
         if (aaEl) ov.aa = aaEl.checked;
         if (Object.keys(ov).length <= 1) delete stats[key];
@@ -10583,6 +10658,78 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           saveAdminMapStore(store2);
           syncCustomMaps();
           renderMapsTab();
+        }
+      };
+    });
+  }
+  function musicFileExt(mime, name) {
+    const m = name && /\.[a-z0-9]+$/i.exec(name);
+    if (m) return m[0];
+    if (mime === "audio/aac") return ".aac";
+    if (mime === "audio/mp4" || mime === "audio/x-m4a") return ".m4a";
+    return ".mp3";
+  }
+  function renderMusicTab() {
+    const tracks = loadAdminMusic();
+    const rows = tracks.map(
+      (t, i) => '<div class="adminRow" data-idx="' + i + '"><div class="rowName">' + t.name + '<div class="small" style="opacity:.75">' + (t.mime || "audio") + '</div></div><audio controls preload="none" src="' + t.dataUrl + '" style="height:32px;max-width:220px"></audio><button data-act="export" data-idx="' + i + '" ' + MINIBTN + '>EXPORT</button><button data-act="del" data-idx="' + i + '" ' + MINIBTN_DANGER + ">DELETE</button></div>"
+    ).join("") || '<div class="small">No custom tracks uploaded yet \u2014 the game ships with its own procedurally-generated soundtrack.</div>';
+    $("#adminBody").innerHTML = `<div class="small" style="margin-bottom:8px">Upload your own music (.mp3/.aac/.m4a) \u2014 saved in this browser only. Pick it from Settings \u2192 Music Track once uploaded, or leave "Auto (Shuffle)" to mix it into the built-in soundtrack's rotation.</div><div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><button id="importTrackBtn" ` + MINIBTN + '>IMPORT TRACK (.mp3/.aac)</button><input type="file" id="importTrackFile" accept=".mp3,.aac,.m4a,audio/mpeg,audio/aac,audio/mp4,audio/x-m4a" style="display:none"><button id="exportTracksBtn" ' + MINIBTN + '>EXPORT ALL TRACKS (.json)</button><button id="importTracksBtn" ' + MINIBTN + '>IMPORT TRACKS (.json)</button><input type="file" id="importTracksFile" accept=".json" style="display:none"></div><div class="lbl">CUSTOM TRACKS</div><div id="musicRows">' + rows + "</div>";
+    $("#importTrackBtn").onclick = () => $("#importTrackFile").click();
+    $("#importTrackFile").onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const dataUrl = await fileToDataUrl(file);
+      const list = loadAdminMusic();
+      list.push({ id: "trk_" + Date.now(), name: file.name.replace(/\.[a-z0-9]+$/i, ""), dataUrl, mime: file.type || "audio/mpeg" });
+      if (saveAdminMusic(list)) {
+        refreshCustomMusic();
+        hint("Track added: " + file.name);
+        renderMusicTab();
+      } else hint("Could not save track \u2014 browser storage full?");
+    };
+    $("#exportTracksBtn").onclick = () => {
+      const blob = new Blob([JSON.stringify({ tracks: loadAdminMusic() }, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "ifr_music.json";
+      a.click();
+    };
+    $("#importTracksBtn").onclick = () => $("#importTracksFile").click();
+    $("#importTracksFile").onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result));
+          const list = Array.isArray(parsed.tracks) ? parsed.tracks : Array.isArray(parsed) ? parsed : [];
+          if (saveAdminMusic(list)) {
+            refreshCustomMusic();
+            renderMusicTab();
+            hint("Tracks imported");
+          } else hint("Could not save \u2014 browser storage full?");
+        } catch (err) {
+          hint("That file couldn't be read as a track export");
+        }
+      };
+      reader.readAsText(file);
+    };
+    $("#adminBody").querySelectorAll("[data-act]").forEach((btn) => {
+      btn.onclick = () => {
+        const idx2 = +btn.dataset.idx, act = btn.dataset.act, list = loadAdminMusic(), t = list[idx2];
+        if (!t) return;
+        if (act === "export") {
+          const a = document.createElement("a");
+          a.href = t.dataUrl;
+          a.download = t.name + musicFileExt(t.mime, t.name);
+          a.click();
+        } else if (act === "del") {
+          if (!confirm('Remove "' + t.name + '"?')) return;
+          list.splice(idx2, 1);
+          saveAdminMusic(list);
+          refreshCustomMusic();
+          renderMusicTab();
         }
       };
     });

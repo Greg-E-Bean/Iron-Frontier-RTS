@@ -628,6 +628,11 @@ declare global {
   function stopFpsAmbience(): void;
   function startMusic(): void;
   const MUSIC_TRACKS: { name: string; step: number; [k: string]: unknown }[];
+  function loadAdminMusic(): { id?: string; name: string; dataUrl: string; mime?: string }[];
+  function saveAdminMusic(list: { id?: string; name: string; dataUrl: string; mime?: string }[]): boolean;
+  function refreshCustomMusic(): void;
+  function totalTrackCount(): number;
+  function trackName(i: number): string;
   var lightningT: number;
   var sfxBudget: number;
   var muted: boolean;
@@ -635,6 +640,7 @@ declare global {
   var sfxVol: number;
   var musicVol: number;
   var trackSel: number;
+  var CUSTOM_MUSIC: { id?: string; name: string; dataUrl: string; mime?: string }[];
 
   // === cards.js (build menu) ===
   function buildCards(): void;
