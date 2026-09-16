@@ -6199,7 +6199,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       blit(c2, r + (f - h) * t, n + 0.5 * (f + h) * t, t);
     }
     const c = n - (0.55 * a + ("conyard" === e.key ? 34 : 20)) * t;
-    e.bombT > 0 && (drawBombGlow(r, n, 0.7 * a, t, e.bombT, e.bombFuse), drawBombCountdown(r, c - 14 * t, e.bombT)), S.sel.includes(e) && (ctx.strokeStyle = "#7dff8a", ctx.lineWidth = 1.8, footprintPath(e.tx, e.ty, e.size), ctx.stroke()), (e.hp < 0.995 * e.maxhp || S.sel.includes(e)) && hpBar(r, c, 0.9 * a * t, e.hp / e.maxhp), S.sel.includes(e) && namePlate(r, c - 7 * t, e.name, "#e8f0f4", t), e.garrison && e.garrison.length && (ctx.fillStyle = "#ffd75e", ctx.font = "bold " + 10 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("\u25B2".repeat(Math.min(5, e.garrison.length)), r, c - 4 * t)), e.repair && (ctx.fillStyle = "#6fe36f", ctx.font = "bold " + 12 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("+", r, c - 6 * t)), e.hp < 0.5 * e.maxhp && Math.random() < 0.22 && S.fx.push({ kind: "smoke", x: e.x + rnd(-a / 3, a / 3), y: e.y + rnd(-a / 3, a / 3), z: 14, s: 1.2, c: "#4a4a4a", t: 0, life: 1.4 });
+    e.bombT > 0 && (drawBombGlow(r, n, 0.7 * a, t, e.bombT, e.bombFuse), drawBombCountdown(r, n - l.oy * t - 8 * t, e.bombT)), S.sel.includes(e) && (ctx.strokeStyle = "#7dff8a", ctx.lineWidth = 1.8, footprintPath(e.tx, e.ty, e.size), ctx.stroke()), (e.hp < 0.995 * e.maxhp || S.sel.includes(e)) && hpBar(r, c, 0.9 * a * t, e.hp / e.maxhp), S.sel.includes(e) && namePlate(r, c - 7 * t, e.name, "#e8f0f4", t), e.garrison && e.garrison.length && (ctx.fillStyle = "#ffd75e", ctx.font = "bold " + 10 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("\u25B2".repeat(Math.min(5, e.garrison.length)), r, c - 4 * t)), e.repair && (ctx.fillStyle = "#6fe36f", ctx.font = "bold " + 12 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("+", r, c - 6 * t)), e.hp < 0.5 * e.maxhp && Math.random() < 0.22 && S.fx.push({ kind: "smoke", x: e.x + rnd(-a / 3, a / 3), y: e.y + rnd(-a / 3, a / 3), z: 14, s: 1.2, c: "#4a4a4a", t: 0, life: 1.4 });
   }
   function footprintPath(e, t, r) {
     ctx.beginPath();
@@ -6562,11 +6562,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function drawBombCountdown(cx, topY, bombT) {
     ctx.fillStyle = "#ff3a2a", ctx.font = "bold 13px Tahoma", ctx.textAlign = "center", ctx.shadowColor = "#000", ctx.shadowBlur = 4, ctx.fillText("\u{1F4A3} " + Math.max(0, Math.ceil(bombT)) + "s", cx, topY), ctx.shadowBlur = 0;
   }
+  function bldSpriteOy(e, fac, pal) {
+    const key = "B" + e.key + "|" + fac + "|" + e.owner;
+    let spr = SPRITES.get(key);
+    return spr || (spr = makeSprite(BMODEL(e.key, fac), 0, pal), SPRITES.set(key, spr)), spr.oy;
+  }
   function bldHUD(e) {
     const t = cam.z, r = 32 * e.size, n = w2sx(e.x, e.y), a = w2sy(e.x, e.y);
     if (n < 2 * -r * t || n > CW + 2 * r * t || a < 3 * -r * t || a > CH + 2 * r * t) return;
     const o = a - (0.55 * r + ("conyard" === e.key ? 34 : 20)) * t, s = S.sel.includes(e);
-    e.bombT > 0 && (drawBombGlow(n, a, 0.7 * r, t, e.bombT, e.bombFuse), drawBombCountdown(n, o - 14 * t, e.bombT)), s && (ctx.strokeStyle = "#7dff8a", ctx.lineWidth = 1.8, footprintPath(e.tx, e.ty, e.size), ctx.stroke()), (e.hp < 0.995 * e.maxhp || s) && hpBar(n, o, 0.9 * r * t, e.hp / e.maxhp), s && namePlate(n, o - 7 * t, e.name, "#e8f0f4", t), e.garrison && e.garrison.length && (ctx.fillStyle = "#ffd75e", ctx.font = "bold " + 10 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("\u25B2".repeat(Math.min(8, e.garrison.length)), n, o - 4 * t)), e.repair && (ctx.fillStyle = "#6fe36f", ctx.font = "bold " + 12 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("+", n, o - 6 * t));
+    if (e.bombT > 0) {
+      const fac = e.owner < 0 ? "neutral" : S.players[e.owner].fac, pal = e.owner < 0 ? { body: MAT.neutral, dark: "#6a6252", trim: "#aaa" } : palette(e.owner);
+      drawBombGlow(n, a, 0.7 * r, t, e.bombT, e.bombFuse), drawBombCountdown(n, a - bldSpriteOy(e, fac, pal) * t - 8 * t, e.bombT);
+    }
+    s && (ctx.strokeStyle = "#7dff8a", ctx.lineWidth = 1.8, footprintPath(e.tx, e.ty, e.size), ctx.stroke()), (e.hp < 0.995 * e.maxhp || s) && hpBar(n, o, 0.9 * r * t, e.hp / e.maxhp), s && namePlate(n, o - 7 * t, e.name, "#e8f0f4", t), e.garrison && e.garrison.length && (ctx.fillStyle = "#ffd75e", ctx.font = "bold " + 10 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("\u25B2".repeat(Math.min(8, e.garrison.length)), n, o - 4 * t)), e.repair && (ctx.fillStyle = "#6fe36f", ctx.font = "bold " + 12 * t + "px Tahoma", ctx.textAlign = "center", ctx.fillText("+", n, o - 6 * t));
   }
   function render2D() {
     voidGrad && voidH === CH || (voidH = CH, voidGrad = ctx.createLinearGradient(0, 0, 0, CH), voidGrad.addColorStop(0, "#0b141f"), voidGrad.addColorStop(1, "#060a10")), ctx.fillStyle = voidGrad, ctx.fillRect(0, 0, CW, CH), drawTerrain(), drawRads();
