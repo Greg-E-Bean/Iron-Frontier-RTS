@@ -79,7 +79,7 @@ declare global {
   var FOG_ON: boolean;
   function idx(tx: number, ty: number): number;
   function inMap(tx: number, ty: number): boolean;
-  const MAPS: { k: string; n: string; mp?: number }[];
+  const MAPS: { k: string; n: string; mp?: number; s?: string; custom?: boolean }[];
   var mmPings: { x: number; y: number; spawnTime: number }[];
   function angDiff(a: number, b: number): number;
 
@@ -99,6 +99,9 @@ declare global {
   const bridge: AnyFn;
   const clearArea: AnyFn;
   function genMap(seed: number, mapKey: string): void;
+  const CUSTOM_MAPS: Record<string, any>;
+  function loadStaticMap(data: any, mapKey: string): void;
+  function computeMtnShore(): void;
   const freeTile: AnyFn;
   const addDeathProp: AnyFn;
   const addProp: AnyFn;
@@ -400,9 +403,9 @@ declare global {
   const MAT: Record<string, string>;
   const PILLAR_H: Record<string, number>;
   const TURRET_RISE: Record<string, number>;
-  function registerModelAsset(key: string, url: string, scale?: number): void;
-  function unregisterModelAsset(key: string): void;
-  function getAssetModel(key: string): any[] | null;
+  function registerModelAsset(key: string, url: string, scale?: number, faction?: string): void;
+  function unregisterModelAsset(key: string, faction?: string): void;
+  function getAssetModel(key: string, faction?: string): any[] | null;
   const MODEL_ASSETS: Record<string, string>;
   var camZTarget: number;
   var zoomPivot: { sx: number; sy: number } | null;
@@ -670,6 +673,9 @@ declare global {
   function serializeGame(): any;
   function loadSlot(n: number): void;
   function saveMeta(n: number): { fac: string; map: string; time: number; mission: unknown } | null;
+  function packArr(arr: any): string;
+  function unpackArr(b64: string, Ctor: any, len: number): any;
+  function showAdmin(): void;
 
   // === campaigns.js ===
   const FAC_NAME: Record<string, string>;

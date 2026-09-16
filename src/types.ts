@@ -75,6 +75,7 @@ export interface EntityDef {
   from?: string;
   build?: number;
   req?: string;
+  names?: Record<string, string>;
   tab?: string;
   [field: string]: unknown;
 }
@@ -278,6 +279,11 @@ export interface MapData {
   vis: Uint8Array;
   elev: Float32Array;
   mtn: Float32Array;
+  // Authored per-tile height offset, painted by the map editor. Always
+  // present (zero-filled) so cornerBump()/heightAt() can add it in
+  // unconditionally without special-casing procedural maps, which never
+  // touch it and so see no visual change.
+  elevOverride: Float32Array;
   shore?: Float32Array;
   bridge: Uint8Array;
   bridgeHp: Float32Array;

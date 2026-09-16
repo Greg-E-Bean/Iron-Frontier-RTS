@@ -170,6 +170,20 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   border:1px solid var(--edge);padding:20px;box-shadow:0 14px 50px #000c, inset 0 1px 0 #ffffff14, inset 0 0 60px #0006;
   clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);
   animation:panelIn .34s var(--ease)}
+.panel.wide{max-width:980px}
+.adminRow{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #1d2a31;font-size:11px;color:#c8d4de;flex-wrap:wrap}
+.adminRow .rowName{flex:1 1 110px;min-width:90px}
+.adminRow select,.adminRow input[type=number]{background:#0d1317;color:#c8d4de;border:1px solid var(--edge);border-radius:3px;padding:4px;font-size:11px}
+.adminRow input[type=file]{font-size:10px;color:#8fa3bb;max-width:130px}
+.adminTag{font-size:9px;padding:2px 5px;border-radius:8px;background:#22334a;color:#9fc4f0;white-space:nowrap}
+.adminTag button{background:none;border:none;color:#e0473a;cursor:pointer;font-size:10px;margin-left:3px;padding:0}
+.tabBtn{flex:1;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#182430;color:#8fa3bb;font-size:12px;letter-spacing:1px}
+.tabBtn.on{background:#22334a;color:#cfe0f5;border-color:#7ea0d8}
+#editorCanvas{border:1px solid var(--edge);cursor:crosshair;touch-action:none;image-rendering:pixelated;max-width:100%}
+.editorToolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;font-size:11px;color:#c8d4de}
+.editorToolbar select,.editorToolbar input{background:#0d1317;color:#c8d4de;border:1px solid var(--edge);border-radius:3px;padding:4px;font-size:11px}
+.editorToolbar button{padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:11px}
+.editorToolbar button.on{background:#3d3012;border-color:var(--amber);color:var(--amber2)}
 @keyframes panelIn{0%{opacity:0;transform:translateY(14px) scale(.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
 .panel h1{margin:0 0 2px;font-size:23px;color:#e8f0f4;letter-spacing:3px;text-align:center;
   text-shadow:0 0 20px #5ad04455}
@@ -507,7 +521,7 @@ body.fps #mmWrap{opacity:.55}
       <div class="fld"><label>Map</label><select id="mapSel"></select><div id="mapPreview"></div></div>
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
     </div>
-    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button>
+    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="adminBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b5b5b;background:#2a2a2a;color:#d8d8d8;font-size:13px">⚙ ADMIN</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
       Tap a build card again to queue more · ▾ expands the build panel.<br>
       <b style="color:#e0b050">Ore:</b> amber ore feeds your economy, pale gem veins pay far more,
@@ -605,7 +619,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/sim.ts
-  var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), bridge: new Uint8Array(6624), bridgeHp: new Float32Array(6624), bridgeSite: new Uint8Array(6624), bridgeHoriz: new Uint8Array(6624), fall: [] };
+  var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), bridge: new Uint8Array(6624), bridgeHp: new Float32Array(6624), bridgeSite: new Uint8Array(6624), bridgeHoriz: new Uint8Array(6624), elevOverride: new Float32Array(6624), fall: [] };
   var FOG_ON = true;
   var idx = (e, t) => 92 * t + e;
   var inMap = (e, t) => e >= 0 && t >= 0 && e < 92 && t < 72;
@@ -685,7 +699,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function baseTerrain(e, t) {
     for (let r = 0; r < 72; r++) for (let n = 0; n < 92; n++) {
       const a = idx(n, r), o = fbm(0.085 * n + e, 0.085 * r - e, e);
-      G.terr[a] = o > (void 0 === t ? 0.5 : t) ? 1 : 0, G.tint[a] = Math.floor(7.999 * fbm(0.16 * n + 3 * e, 0.16 * r, e + 5)), G.ore[a] = 0, G.occ[a] = 0, G.tib[a] = 0, G.blk[a] = 0, G.pave[a] = 0, G.vis[a] = 0, G.bridge[a] = 0, G.bridgeHp[a] = 0, G.bridgeSite[a] = 0, G.bridgeHoriz[a] = 0;
+      G.terr[a] = o > (void 0 === t ? 0.5 : t) ? 1 : 0, G.tint[a] = Math.floor(7.999 * fbm(0.16 * n + 3 * e, 0.16 * r, e + 5)), G.ore[a] = 0, G.occ[a] = 0, G.tib[a] = 0, G.blk[a] = 0, G.pave[a] = 0, G.vis[a] = 0, G.bridge[a] = 0, G.bridgeHp[a] = 0, G.bridgeSite[a] = 0, G.bridgeHoriz[a] = 0, G.elevOverride[a] = 0;
     }
     for (let e2 = 0; e2 < 3; e2++) {
       const e3 = Uint8Array.from(G.terr);
@@ -925,10 +939,24 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       visited = floodFrom(start[0], start[1]);
     }
   }
+  var CUSTOM_MAPS = {};
+  function loadStaticMap(data, mapKey) {
+    G.map = mapKey, G.trees = [], S.traffic = [];
+    G.terr = unpackArr(data.terr, Uint8Array, 6624), G.ore = unpackArr(data.ore, Float32Array, 6624), G.tib = data.tib ? unpackArr(data.tib, Uint8Array, 6624) : new Uint8Array(6624), G.blk = data.blk ? unpackArr(data.blk, Uint8Array, 6624) : new Uint8Array(6624), G.pave = data.pave ? unpackArr(data.pave, Uint8Array, 6624) : new Uint8Array(6624), G.elevOverride = data.elevOverride ? unpackArr(data.elevOverride, Float32Array, 6624) : new Float32Array(6624);
+    G.occ = new Int32Array(6624), G.vis = new Uint8Array(6624), G.tint = new Uint8Array(6624);
+    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) G.tint[idx(x, y)] = Math.floor(7.999 * fbm(0.16 * x + 3 * G.seed, 0.16 * y, G.seed + 5));
+    G.bridge = new Uint8Array(6624), G.bridgeHp = new Float32Array(6624), G.bridgeSite = new Uint8Array(6624), G.bridgeHoriz = new Uint8Array(6624);
+    G.civ = (data.civ || []).map((c) => c.slice()), G.special = (data.special || []).map((c) => c.slice()), G.props = (data.props || []).map((p) => Object.assign({}, p)), G.oreSpots = (data.oreSpots || []).map((o) => Object.assign({}, o)), G.fall = [];
+    G.spots = (data.spots && data.spots.length ? data.spots : [[13, 13], [76, 56]]).map((s) => s.slice());
+    computeMtnShore();
+    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) G.elev[idx(x, y)] = heightAt(32 * x + 16, 32 * y + 16);
+  }
   function genMap(e, t) {
     G.seed = e;
     let r = t || "basin";
-    "random" === r && (r = MAPS[Math.floor(Math.random() * (MAPS.length - 1))].k), G.map = r, G.trees = [], G.civ = [], G.oreSpots = [], S.traffic = [];
+    "random" === r && (r = MAPS[Math.floor(Math.random() * (MAPS.length - 1))].k);
+    if (CUSTOM_MAPS[r]) return void loadStaticMap(CUSTOM_MAPS[r], r);
+    G.map = r, G.trees = [], G.civ = [], G.oreSpots = [], S.traffic = [];
     let n = [[13, 13], [76, 56]], a = [], o = [];
     if ("divide" === r) baseTerrain(e, 0.46), ridge(46, -4, 46, 76, 4.4, 2, 16, e), bridge(46, 18.72, 16, 9), bridge(46, 53.28, 16, 9), blob(46, 36, 5, 3), blob(92 * 0.2, 72 * 0.18, 4, 3), blob(92 * 0.8, 59.04, 4, 3), n = [[10, Math.round(36) - 6], [78, Math.round(36) - 6]], a = [[12, 14], [12, 56], [78, 14], [78, 56], [92 * 0.3, 36], [92 * 0.7, 36]], o = [[46, 18.72], [46, 53.28]];
     else if ("high" === r) {
@@ -2470,6 +2498,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     damageBridgesAt,
     destroyBridgeTile,
     tickBridgeHut,
+    CUSTOM_MAPS,
+    loadStaticMap,
+    computeMtnShore,
     G,
     idx,
     inMap,
@@ -5490,14 +5521,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return null;
   }
   function UMODEL(e, t, extra) {
-    const _a = getAssetModel(e);
+    const _a = getAssetModel(e, t);
     return _a || UMODEL_(e, t || 0, extra);
   }
   function UTURRET(e, t, extra) {
     return UTURRET_(e, t || 0, extra);
   }
   function BMODEL(e, t, d, cn, rot) {
-    const _a = getAssetModel(e);
+    const _a = getAssetModel(e, t);
     return _a || BMODEL_(e, t, d, cn, rot);
   }
   function BTURRET(e, t, r) {
@@ -5507,15 +5538,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var MODEL_ASSET_SCALE = {};
   var _assetCache = /* @__PURE__ */ new Map();
   var _gltfLoader = null;
-  function registerModelAsset(key, url, scale) {
-    MODEL_ASSETS[key] = url;
-    MODEL_ASSET_SCALE[key] = scale || 1;
-    _assetCache.delete(key);
+  function registerModelAsset(key, url, scale, faction) {
+    const rkey = faction ? key + ":" + faction : key;
+    MODEL_ASSETS[rkey] = url;
+    MODEL_ASSET_SCALE[rkey] = scale || 1;
+    _assetCache.delete(rkey);
   }
-  function unregisterModelAsset(key) {
-    delete MODEL_ASSETS[key];
-    delete MODEL_ASSET_SCALE[key];
-    _assetCache.delete(key);
+  function unregisterModelAsset(key, faction) {
+    const rkey = faction ? key + ":" + faction : key;
+    delete MODEL_ASSETS[rkey];
+    delete MODEL_ASSET_SCALE[rkey];
+    _assetCache.delete(rkey);
   }
   function _hexOfMaterial(mat) {
     const m = Array.isArray(mat) ? mat[0] : mat;
@@ -5560,16 +5593,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     });
     return parts;
   }
-  function getAssetModel(key) {
-    const url = MODEL_ASSETS[key];
+  function getAssetModel(key, faction) {
+    const fkey = faction ? key + ":" + faction : null;
+    const rkey = fkey && MODEL_ASSETS[fkey] ? fkey : key;
+    const url = MODEL_ASSETS[rkey];
     if (!url) return null;
-    const cached = _assetCache.get(key);
+    const cached = _assetCache.get(rkey);
     if (cached === "loading" || cached === "failed") return null;
     if (cached) return cached;
-    _assetCache.set(key, "loading");
+    _assetCache.set(rkey, "loading");
     if (!_gltfLoader) {
       if (typeof THREE === "undefined" || typeof THREE.GLTFLoader !== "function") {
-        _assetCache.set(key, "failed");
+        _assetCache.set(rkey, "failed");
         return null;
       }
       _gltfLoader = new THREE.GLTFLoader();
@@ -5578,15 +5613,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       url,
       (gltf) => {
         try {
-          const parts = partsFromGLTF(gltf.scene, MODEL_ASSET_SCALE[key]);
-          _assetCache.set(key, parts.length ? parts : "failed");
+          const parts = partsFromGLTF(gltf.scene, MODEL_ASSET_SCALE[rkey]);
+          _assetCache.set(rkey, parts.length ? parts : "failed");
         } catch (err) {
-          _assetCache.set(key, "failed");
+          _assetCache.set(rkey, "failed");
         }
       },
       void 0,
       () => {
-        _assetCache.set(key, "failed");
+        _assetCache.set(rkey, "failed");
       }
     );
     return null;
@@ -7403,14 +7438,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (a < 0 || o < 0 || a >= 92 || o >= 72) return 0;
     }
     const r = G.seed || 0;
-    let mtn = 0, shore = 0, cnt = 0;
+    let mtn = 0, shore = 0, ov = 0, cnt = 0;
     for (let n = -1; n <= 0; n++) for (let a = -1; a <= 0; a++) {
       const o = e + a, s = t + n;
-      o >= 0 && s >= 0 && o < 92 && s < 72 && (mtn += G.mtn[idx(o, s)], shore += G.shore ? G.shore[idx(o, s)] : 0, cnt++);
+      o >= 0 && s >= 0 && o < 92 && s < 72 && (mtn += G.mtn[idx(o, s)], shore += G.shore ? G.shore[idx(o, s)] : 0, ov += G.elevOverride ? G.elevOverride[idx(o, s)] : 0, cnt++);
     }
-    mtn = cnt ? mtn / cnt : 0, shore = cnt ? shore / cnt : 0;
+    mtn = cnt ? mtn / cnt : 0, shore = cnt ? shore / cnt : 0, ov = cnt ? ov / cnt : 0;
     const peak = fbm(0.24 * e + r + 70, 0.24 * t - r + 70, r + 70), hills = (fbm(0.045 * e + r + 130, 0.045 * t - r + 130, r + 130) - 0.5) * 55, base = (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * 14 + hills + Math.pow(mtn, 0.55) * (230 + 90 * peak), land = Math.max(0, 1 - 1.15 * shore);
-    return base * land * land;
+    return base * land * land + 22 * ov;
   }
   function cornerNormal(e, t) {
     const r = cornerBump(e - 1, t), n = cornerBump(e + 1, t), a = cornerBump(e, t - 1), o = cornerBump(e, t + 1), s = (n - r) / 64, i = (o - a) / 64;
@@ -9658,6 +9693,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var MAP_SPAWNS = { divide: [[10, 30], [78, 30]], high: [[14, 52], [74, 14]], dust: [[40, 10], [40, 56]], lakes: [[13, 13], [76, 56]], line: [[16, 58], [76, 14]], ring: [[46, 8], [46, 66]], city: [[76, 36], [67, 54], [46, 61], [25, 54], [16, 36], [25, 18], [46, 11], [67, 18]], octagon: [[76, 36], [67, 54], [46, 61], [25, 54], [16, 36], [25, 18], [46, 11], [67, 18]], bastion: [[46, 12], [72, 24], [72, 48], [46, 60], [20, 48], [20, 24]], boomtown: [[46, 9], [75, 23], [75, 50], [46, 63], [17, 50], [17, 23]] };
   function mapSpots(key) {
+    if (CUSTOM_MAPS[key] && CUSTOM_MAPS[key].spots && CUSTOM_MAPS[key].spots.length) return CUSTOM_MAPS[key].spots;
     const e = MAP_SPAWNS[key] || [[13, 13], [76, 56]], cx = 46, cy = 36, rot = (e2) => [clamp(Math.round(cx - (e2[1] - cy)), 6, 85), clamp(Math.round(cy + (e2[0] - cx)), 6, 65)];
     return e.concat([rot(e[0]), rot(e[1])]);
   }
@@ -9979,10 +10015,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return p.credits = rec.credits, p.power = rec.power, p.drain = rec.drain, p.queues = rec.queues || { bld: null, def: null, inf: null, veh: null, air: null }, p.ready = rec.ready || { bld: null, def: null }, p.kills = rec.kills || 0, p.lost = rec.lost || 0, p.defeated = !!rec.defeated, p.spawnX = rec.spawnX, p.spawnY = rec.spawnY, p.spyCD = rec.spyCD || 0, p.paradropCD = rec.paradropCD || 0, p.empCD = rec.empCD || 0, p.isAI && rec.ai && (p.ai.t = rec.ai.t, p.ai.wave = rec.ai.wave || 0, p.ai.expand = rec.ai.expand || 0, rec.ai.personality && (p.ai.personality = rec.ai.personality), p.ai.diffScale = rec.ai.diffScale || 1, p.ai.adaptT = rec.ai.adaptT || 0), p;
   }
   function serializeMap() {
-    return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), bridge: packArr(G.bridge), bridgeHp: packArr(G.bridgeHp), bridgeSite: packArr(G.bridgeSite), bridgeHoriz: packArr(G.bridgeHoriz), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
+    return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), bridge: packArr(G.bridge), bridgeHp: packArr(G.bridgeHp), bridgeSite: packArr(G.bridgeSite), bridgeHoriz: packArr(G.bridgeHoriz), elevOverride: packArr(G.elevOverride), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
   }
   function restoreMap(rec) {
-    G.map = rec.map, G.seed = rec.seed, G.terr = unpackArr(rec.terr, Uint8Array, 6624), G.ore = unpackArr(rec.ore, Float32Array, 6624), G.tib = unpackArr(rec.tib, Uint8Array, 6624), G.blk = unpackArr(rec.blk, Uint8Array, 6624), G.pave = unpackArr(rec.pave, Uint8Array, 6624), G.vis = unpackArr(rec.vis, Uint8Array, 6624), G.elev = unpackArr(rec.elev, Float32Array, 6624), G.mtn = unpackArr(rec.mtn, Float32Array, 6624), G.tint = unpackArr(rec.tint, Uint8Array, 6624), G.bridge = rec.bridge ? unpackArr(rec.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = rec.bridgeHp ? unpackArr(rec.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = rec.bridgeSite ? unpackArr(rec.bridgeSite, Uint8Array, 6624) : new Uint8Array(G.bridge), G.bridgeHoriz = rec.bridgeHoriz ? unpackArr(rec.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624), G.occ = new Int32Array(6624), G.civ = rec.civ || [], G.special = rec.special || [], G.props = rec.props || [], G.oreSpots = rec.oreSpots || [], G.fall = rec.fall || [], G.spots = rec.spots || [], G.trees = [];
+    G.map = rec.map, G.seed = rec.seed, G.terr = unpackArr(rec.terr, Uint8Array, 6624), G.ore = unpackArr(rec.ore, Float32Array, 6624), G.tib = unpackArr(rec.tib, Uint8Array, 6624), G.blk = unpackArr(rec.blk, Uint8Array, 6624), G.pave = unpackArr(rec.pave, Uint8Array, 6624), G.vis = unpackArr(rec.vis, Uint8Array, 6624), G.elev = unpackArr(rec.elev, Float32Array, 6624), G.mtn = unpackArr(rec.mtn, Float32Array, 6624), G.tint = unpackArr(rec.tint, Uint8Array, 6624), G.bridge = rec.bridge ? unpackArr(rec.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = rec.bridgeHp ? unpackArr(rec.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = rec.bridgeSite ? unpackArr(rec.bridgeSite, Uint8Array, 6624) : new Uint8Array(G.bridge), G.bridgeHoriz = rec.bridgeHoriz ? unpackArr(rec.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624), G.elevOverride = rec.elevOverride ? unpackArr(rec.elevOverride, Float32Array, 6624) : new Float32Array(6624), G.occ = new Int32Array(6624), G.civ = rec.civ || [], G.special = rec.special || [], G.props = rec.props || [], G.oreSpots = rec.oreSpots || [], G.fall = rec.fall || [], G.spots = rec.spots || [], G.trees = [];
   }
   function serializeGame() {
     return { v: 1, time: S.time, fogOn: FOG_ON, neutral: NEUTRAL, cfg: JSON.parse(JSON.stringify(cfg)), cam: { x: cam.x, y: cam.y, z: cam.z }, nextId: S.nextId, mission: S.mission, players: S.players.map(playerToObj), units: S.units.filter((u) => !u.dead).map(unitToObj), blds: S.blds.filter((b) => !b.dead).map(bldToObj), rads: (S.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), weather: S.weather, map: serializeMap() };
@@ -10022,7 +10058,450 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   Object.assign(window, {
     serializeGame,
     loadSlot,
-    saveMeta
+    saveMeta,
+    packArr,
+    unpackArr
+  });
+})();
+
+</script>
+<script>
+(() => {
+  // src/admin.ts
+  var ADMIN_ASSETS_KEY = "ifr_admin_assets";
+  var ADMIN_MAPS_KEY = "ifr_admin_maps";
+  var MINIBTN = 'style="padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:11px;margin:2px 4px 2px 0"';
+  var MINIBTN_DANGER = 'style="padding:6px 10px;border-radius:6px;border:1px solid #a04040;background:#2a1c1c;color:#f0a0a0;font-size:11px;margin:2px 4px 2px 0"';
+  var FACTION_LIST = [
+    { k: "", n: "All factions" },
+    { k: "allied", n: "Vanguard" },
+    { k: "soviet", n: "Legion" },
+    { k: "yuri", n: "Syndicate" }
+  ];
+  var EDITOR_TILE = 8;
+  function loadAdminAssets() {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_ASSETS_KEY) || "[]");
+    } catch (e) {
+      return [];
+    }
+  }
+  function saveAdminAssets(list) {
+    try {
+      localStorage.setItem(ADMIN_ASSETS_KEY, JSON.stringify(list));
+    } catch (e) {
+      hint("Could not save \u2014 browser storage full?");
+    }
+  }
+  function loadAdminMapStore() {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_MAPS_KEY) || "{}");
+    } catch (e) {
+      return {};
+    }
+  }
+  function saveAdminMapStore(store) {
+    try {
+      localStorage.setItem(ADMIN_MAPS_KEY, JSON.stringify(store));
+      return true;
+    } catch (e) {
+      hint("Could not save map \u2014 browser storage full?");
+      return false;
+    }
+  }
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  function applyAdminAssets() {
+    for (const a of loadAdminAssets()) registerModelAsset(a.key, a.dataUrl, a.scale, a.faction || void 0);
+  }
+  function syncCustomMaps() {
+    for (let i = MAPS.length - 1; i >= 0; i--) if (MAPS[i].custom) MAPS.splice(i, 1);
+    for (const k of Object.keys(CUSTOM_MAPS)) delete CUSTOM_MAPS[k];
+    const store = loadAdminMapStore();
+    for (const key of Object.keys(store)) {
+      const entry = store[key];
+      CUSTOM_MAPS[key] = entry.data;
+      MAPS.push({ k: key, n: entry.name, s: "Custom map", mp: Math.max(2, (entry.data.spots || []).length), custom: true });
+    }
+  }
+  applyAdminAssets();
+  syncCustomMaps();
+  function blankMapData() {
+    const n = 6624;
+    return {
+      terr: packArr(new Uint8Array(n)),
+      ore: packArr(new Float32Array(n)),
+      tib: packArr(new Uint8Array(n)),
+      blk: packArr(new Uint8Array(n)),
+      pave: packArr(new Uint8Array(n)),
+      elevOverride: packArr(new Float32Array(n)),
+      spots: [[13, 13], [76, 56]],
+      civ: [],
+      special: [],
+      props: [],
+      oreSpots: []
+    };
+  }
+  var adminTab = "assets";
+  function showAdmin() {
+    adminTab = "assets";
+    $("#menu").classList.remove("hidden");
+    $("#panelMain").classList.add("wide");
+    renderAdminPanel();
+  }
+  function closeAdmin() {
+    $("#panelMain").classList.remove("wide");
+    showSetup();
+  }
+  function renderAdminPanel() {
+    $("#panelMain").innerHTML = '<h1>ADMIN</h1><div class="sub">Custom assets &amp; maps \u2014 saved in this browser only</div><div style="display:flex;gap:6px;margin:10px 0;position:sticky;top:0;z-index:5;background:#101a1e;padding:4px 0"><button id="tabAssets" class="tabBtn' + (adminTab === "assets" ? " on" : "") + '">ASSETS</button><button id="tabMaps" class="tabBtn' + (adminTab === "maps" ? " on" : "") + '">MAPS</button><button id="backAdminTop" ' + MINIBTN + '>BACK</button></div><div id="adminBody"></div><button id="backAdmin" ' + SECBTN + ">BACK</button>";
+    $("#tabAssets").onclick = () => {
+      adminTab = "assets";
+      renderAdminPanel();
+    };
+    $("#tabMaps").onclick = () => {
+      adminTab = "maps";
+      renderAdminPanel();
+    };
+    $("#backAdmin").onclick = closeAdmin;
+    $("#backAdminTop").onclick = closeAdmin;
+    if (adminTab === "assets") renderAssetsTab();
+    else renderMapsTab();
+  }
+  function assetDisplayName(key, kind) {
+    if (kind === "unit") return UNITS[key] && UNITS[key].name || key;
+    return BLD[key] && BLD[key].names && (BLD[key].names.neutral || BLD[key].names.allied) || key;
+  }
+  function assetRow(key, kind) {
+    const entries = loadAdminAssets().filter((a) => a.key === key);
+    const tags = entries.map(
+      (a) => '<span class="adminTag">' + (a.faction || "all") + '<button data-key="' + key + '" data-fac="' + (a.faction || "") + '">\u2715</button></span>'
+    ).join("");
+    return '<div class="adminRow" data-key="' + key + '" data-kind="' + kind + '"><div class="rowName">' + assetDisplayName(key, kind) + '</div><select class="facSel">' + FACTION_LIST.map((f) => '<option value="' + f.k + '">' + f.n + "</option>").join("") + '</select><input type="file" class="fileSel" accept=".glb,.gltf"><input type="number" class="scaleSel" value="1" min="0.05" step="0.05" style="width:52px">' + tags + "</div>";
+  }
+  function renderAssetsTab() {
+    const unitRows = Object.keys(UNITS).map((k) => assetRow(k, "unit")).join("");
+    const bldRows = Object.keys(BLD).map((k) => assetRow(k, "building")).join("");
+    $("#adminBody").innerHTML = `<div class="small" style="margin-bottom:8px">Upload a .glb/.gltf to replace a unit or building's model. Pick a faction to override just that faction's look, or leave "All factions" to replace it everywhere it appears.</div><div class="lbl">UNITS</div><div id="unitAssetRows">` + unitRows + '</div><div class="lbl">BUILDINGS</div><div id="bldAssetRows">' + bldRows + "</div>";
+    $("#adminBody").querySelectorAll(".adminRow").forEach((row) => {
+      const key = row.dataset.key, kind = row.dataset.kind;
+      row.querySelector(".fileSel").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const faction = row.querySelector(".facSel").value || null;
+        const scale = parseFloat(row.querySelector(".scaleSel").value) || 1;
+        const dataUrl = await fileToDataUrl(file);
+        const list = loadAdminAssets().filter((a) => !(a.key === key && (a.faction || "") === (faction || "")));
+        list.push({ key, faction, dataUrl, scale, kind });
+        saveAdminAssets(list);
+        registerModelAsset(key, dataUrl, scale, faction || void 0);
+        hint("Custom model applied to " + assetDisplayName(key, kind) + (faction ? " (" + faction + ")" : ""));
+        renderAssetsTab();
+      });
+    });
+    $("#adminBody").querySelectorAll(".adminTag button").forEach((btn) => {
+      btn.onclick = () => {
+        const key = btn.dataset.key, faction = btn.dataset.fac || null;
+        const list = loadAdminAssets().filter((a) => !(a.key === key && (a.faction || "") === (faction || "")));
+        saveAdminAssets(list);
+        unregisterModelAsset(key, faction || void 0);
+        renderAssetsTab();
+      };
+    });
+  }
+  function renderMapsTab() {
+    const store = loadAdminMapStore();
+    const keys = Object.keys(store);
+    const rows = keys.map((key) => {
+      const entry = store[key], spawnCount = (entry.data.spots || []).length;
+      return '<div class="adminRow" data-key="' + key + '"><div class="rowName">' + entry.name + ' <span class="small">(' + spawnCount + ' spawns)</span></div><button data-act="edit" data-key="' + key + '" ' + MINIBTN + '>EDIT</button><button data-act="dup" data-key="' + key + '" ' + MINIBTN + '>DUPLICATE</button><button data-act="export" data-key="' + key + '" ' + MINIBTN + '>EXPORT</button><button data-act="del" data-key="' + key + '" ' + MINIBTN_DANGER + ">DELETE</button></div>";
+    }).join("") || '<div class="small" style="margin-bottom:8px">No custom maps yet \u2014 make one below.</div>';
+    $("#adminBody").innerHTML = '<div class="small" style="margin-bottom:8px">Build a fully custom map with the editor, or import one someone shared with you. Custom maps show up in the skirmish Map dropdown.</div><div id="mapRows">' + rows + '</div><button id="newMapBtn" ' + SECBTN + '>+ NEW MAP</button><button id="importMapBtn" ' + SECBTN + '>IMPORT MAP (.json)</button><input type="file" id="importMapFile" accept=".json" style="display:none">';
+    $("#newMapBtn").onclick = () => {
+      const name = prompt("Name this map:", "My Map");
+      if (!name) return;
+      const key = "custom_" + Date.now();
+      const store2 = loadAdminMapStore();
+      store2[key] = { name, data: blankMapData() };
+      saveAdminMapStore(store2);
+      syncCustomMaps();
+      openMapEditor(key);
+    };
+    $("#importMapBtn").onclick = () => $("#importMapFile").click();
+    $("#importMapFile").onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result));
+          const key = "custom_" + Date.now();
+          const store2 = loadAdminMapStore();
+          store2[key] = { name: parsed.name || "Imported map", data: parsed.data || parsed };
+          saveAdminMapStore(store2);
+          syncCustomMaps();
+          renderMapsTab();
+          hint("Map imported");
+        } catch (err) {
+          hint("That file couldn't be read as a map");
+        }
+      };
+      reader.readAsText(file);
+    };
+    $("#adminBody").querySelectorAll("[data-act]").forEach((btn) => {
+      btn.onclick = () => {
+        const key = btn.dataset.key, act = btn.dataset.act, store2 = loadAdminMapStore();
+        if (!store2[key]) return;
+        if (act === "edit") openMapEditor(key);
+        else if (act === "dup") {
+          const nk = "custom_" + Date.now();
+          store2[nk] = { name: store2[key].name + " (copy)", data: JSON.parse(JSON.stringify(store2[key].data)) };
+          saveAdminMapStore(store2);
+          syncCustomMaps();
+          renderMapsTab();
+        } else if (act === "export") {
+          const blob = new Blob([JSON.stringify({ name: store2[key].name, data: store2[key].data })], { type: "application/json" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = store2[key].name.replace(/\s+/g, "_") + ".json";
+          a.click();
+        } else if (act === "del") {
+          if (!confirm('Delete "' + store2[key].name + '"? This cannot be undone.')) return;
+          delete store2[key];
+          saveAdminMapStore(store2);
+          syncCustomMaps();
+          renderMapsTab();
+        }
+      };
+    });
+  }
+  var editorMapKey = null;
+  var editorTool = "terrain";
+  var editorTerrainType = 0;
+  var editorElevSign = 1;
+  var editorOreType = 1;
+  var editorOreAmount = 1200;
+  var editorBuildingKey = "civ1";
+  var editorBrush = 1;
+  var editorPainting = false;
+  function openMapEditor(key) {
+    const store = loadAdminMapStore();
+    const entry = store[key];
+    if (!entry) return;
+    loadStaticMap(entry.data, key);
+    editorMapKey = key;
+    editorTool = "terrain";
+    adminTab = "maps";
+    $("#panelMain").innerHTML = '<div class="sub" style="text-align:left;margin-bottom:6px">Editing: ' + entry.name + '</div><div class="editorToolbar" id="editorToolbar"></div><div style="overflow:auto;max-width:100%"><canvas id="editorCanvas" width="' + 92 * EDITOR_TILE + '" height="' + 72 * EDITOR_TILE + '"></canvas></div><div style="display:flex;gap:8px;margin-top:10px"><button id="editorSave" ' + SECBTN + '>SAVE</button><button id="editorTestPlay" ' + SECBTN + '>SAVE &amp; TEST PLAY</button></div><button id="editorBack" ' + SECBTN + ">BACK TO MAP LIST</button>";
+    renderEditorToolbar();
+    wireEditorCanvas();
+    drawEditorCanvas();
+    $("#editorSave").onclick = () => {
+      saveEditorMap();
+      hint("Map saved");
+    };
+    $("#editorTestPlay").onclick = () => {
+      saveEditorMap();
+      cfg.map = editorMapKey;
+      $("#panelMain").classList.remove("wide");
+      startGame();
+    };
+    $("#editorBack").onclick = () => {
+      renderAdminPanel();
+    };
+  }
+  function renderEditorToolbar() {
+    const tools = [
+      { k: "terrain", n: "Terrain" },
+      { k: "elev", n: "Elevation" },
+      { k: "ore", n: "Ore" },
+      { k: "bld", n: "Building" },
+      { k: "spawn", n: "Spawn" },
+      { k: "erase", n: "Erase" }
+    ];
+    let extra = "";
+    if (editorTool === "terrain") {
+      extra = '<select id="terrainType"><option value="0">Grass</option><option value="1">Dirt</option><option value="2">Water</option><option value="3">Rock</option></select>';
+    } else if (editorTool === "elev") {
+      extra = '<button id="elevUp" class="' + (editorElevSign > 0 ? "on" : "") + '">\u25B2 Raise</button><button id="elevDown" class="' + (editorElevSign < 0 ? "on" : "") + '">\u25BC Lower</button>';
+    } else if (editorTool === "ore") {
+      extra = '<select id="oreType"><option value="1">Ore (amber)</option><option value="2">Gems (pale)</option></select><select id="oreAmount"><option value="600">Light</option><option value="1200" selected>Medium</option><option value="2000">Rich</option></select>';
+    } else if (editorTool === "bld") {
+      extra = '<select id="bldKey">' + Object.keys(BLD).map((k) => '<option value="' + k + '">' + assetDisplayName(k, "building") + "</option>").join("") + "</select>";
+    }
+    const toolbar = $("#editorToolbar");
+    toolbar.innerHTML = tools.map((t) => '<button data-tool="' + t.k + '" class="' + (editorTool === t.k ? "on" : "") + '">' + t.n + "</button>").join("") + '<span>Brush <input type="number" id="brushSize" min="1" max="6" value="' + editorBrush + '" style="width:42px"></span>' + extra;
+    toolbar.querySelectorAll("[data-tool]").forEach((b) => b.onclick = () => {
+      editorTool = b.dataset.tool;
+      renderEditorToolbar();
+    });
+    const bs = $("#brushSize");
+    if (bs) bs.onchange = () => {
+      editorBrush = Math.max(1, Math.min(6, parseInt(bs.value) || 1));
+    };
+    const tt = $("#terrainType");
+    if (tt) {
+      tt.value = String(editorTerrainType);
+      tt.onchange = () => editorTerrainType = parseInt(tt.value);
+    }
+    const eu = $("#elevUp");
+    if (eu) eu.onclick = () => {
+      editorElevSign = 1;
+      renderEditorToolbar();
+    };
+    const ed = $("#elevDown");
+    if (ed) ed.onclick = () => {
+      editorElevSign = -1;
+      renderEditorToolbar();
+    };
+    const ot = $("#oreType");
+    if (ot) {
+      ot.value = String(editorOreType);
+      ot.onchange = () => editorOreType = parseInt(ot.value);
+    }
+    const oa = $("#oreAmount");
+    if (oa) oa.onchange = () => editorOreAmount = parseInt(oa.value);
+    const bk = $("#bldKey");
+    if (bk) {
+      bk.value = editorBuildingKey;
+      bk.onchange = () => editorBuildingKey = bk.value;
+    }
+  }
+  function drawEditorCanvas() {
+    const cv = document.getElementById("editorCanvas");
+    if (!cv) return;
+    const ctx = cv.getContext("2d");
+    const TERR_COLORS = ["#3c6b35", "#7a5f3a", "#2f6fa8", "#5a5650"];
+    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
+      const i = idx(x, y);
+      ctx.fillStyle = TERR_COLORS[G.terr[i]] || "#888";
+      ctx.fillRect(x * EDITOR_TILE, y * EDITOR_TILE, EDITOR_TILE, EDITOR_TILE);
+      const ev = G.elevOverride[i];
+      if (ev) {
+        ctx.fillStyle = ev > 0 ? "rgba(255,255,255," + Math.min(0.6, 0.12 * Math.abs(ev)) + ")" : "rgba(0,0,0," + Math.min(0.6, 0.12 * Math.abs(ev)) + ")";
+        ctx.fillRect(x * EDITOR_TILE, y * EDITOR_TILE, EDITOR_TILE, EDITOR_TILE);
+      }
+      if (G.ore[i] > 0) {
+        ctx.fillStyle = 2 === G.tib[i] ? "#8ee8ff" : "#f0c93a";
+        const r = Math.max(1, EDITOR_TILE * 0.18 * Math.min(1, G.ore[i] / 1600));
+        ctx.beginPath();
+        ctx.arc(x * EDITOR_TILE + EDITOR_TILE / 2, y * EDITOR_TILE + EDITOR_TILE / 2, r, 0, 6.284);
+        ctx.fill();
+      }
+    }
+    for (const c of G.civ || []) {
+      const sz = BLD[c[2]] && BLD[c[2]].size || 1;
+      ctx.fillStyle = "#e0473a";
+      ctx.fillRect(c[0] * EDITOR_TILE, c[1] * EDITOR_TILE, EDITOR_TILE * sz, EDITOR_TILE * sz);
+      ctx.strokeStyle = "#1a1206";
+      ctx.strokeRect(c[0] * EDITOR_TILE + 0.5, c[1] * EDITOR_TILE + 0.5, EDITOR_TILE * sz - 1, EDITOR_TILE * sz - 1);
+    }
+    (G.spots || []).forEach((s, i) => {
+      ctx.fillStyle = "#f0a72c";
+      ctx.beginPath();
+      ctx.arc(s[0] * EDITOR_TILE, s[1] * EDITOR_TILE, EDITOR_TILE * 0.9, 0, 6.284);
+      ctx.fill();
+      ctx.fillStyle = "#1a1206";
+      ctx.font = EDITOR_TILE + "px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String.fromCharCode(65 + i), s[0] * EDITOR_TILE, s[1] * EDITOR_TILE);
+    });
+  }
+  function applyEditorTool(x, y) {
+    const i = idx(x, y);
+    if (editorTool === "terrain") G.terr[i] = editorTerrainType;
+    else if (editorTool === "elev") G.elevOverride[i] = clamp((G.elevOverride[i] || 0) + editorElevSign, -8, 8);
+    else if (editorTool === "ore") {
+      G.ore[i] = editorOreAmount;
+      G.tib[i] = editorOreType;
+    } else if (editorTool === "erase") {
+      G.ore[i] = 0;
+      G.tib[i] = 0;
+      G.civ = (G.civ || []).filter((c) => {
+        const sz = BLD[c[2]] && BLD[c[2]].size || 1;
+        return !(x >= c[0] && x < c[0] + sz && y >= c[1] && y < c[1] + sz);
+      });
+    }
+  }
+  function toggleSpawn(tx, ty) {
+    G.spots = G.spots || [];
+    const existing = G.spots.findIndex((s) => Math.abs(s[0] - tx) <= 1 && Math.abs(s[1] - ty) <= 1);
+    if (existing >= 0) G.spots.splice(existing, 1);
+    else if (G.spots.length < 8) G.spots.push([tx, ty]);
+    else hint("Maximum 8 spawn points");
+  }
+  function placeBuilding(tx, ty) {
+    G.civ = (G.civ || []).filter((c) => c[0] !== tx || c[1] !== ty);
+    G.civ.push([tx, ty, editorBuildingKey]);
+  }
+  function wireEditorCanvas() {
+    const cv = document.getElementById("editorCanvas");
+    if (!cv) return;
+    const tileAt = (e) => {
+      const rect = cv.getBoundingClientRect();
+      const sx = cv.width / rect.width, sy = cv.height / rect.height;
+      return [Math.floor((e.clientX - rect.left) * sx / EDITOR_TILE), Math.floor((e.clientY - rect.top) * sy / EDITOR_TILE)];
+    };
+    const paintAt = (tx, ty) => {
+      const r = editorBrush - 1;
+      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+        const x = tx + dx, y = ty + dy;
+        if (inMap(x, y)) applyEditorTool(x, y);
+      }
+      drawEditorCanvas();
+    };
+    cv.onpointerdown = (e) => {
+      e.preventDefault();
+      const [tx, ty] = tileAt(e);
+      if (!inMap(tx, ty)) return;
+      if (editorTool === "spawn") {
+        toggleSpawn(tx, ty);
+        drawEditorCanvas();
+        return;
+      }
+      if (editorTool === "bld") {
+        placeBuilding(tx, ty);
+        drawEditorCanvas();
+        return;
+      }
+      editorPainting = true;
+      paintAt(tx, ty);
+    };
+    cv.onpointermove = (e) => {
+      if (!editorPainting) return;
+      const [tx, ty] = tileAt(e);
+      if (inMap(tx, ty)) paintAt(tx, ty);
+    };
+    window.addEventListener("pointerup", () => editorPainting = false);
+  }
+  function saveEditorMap() {
+    const store = loadAdminMapStore();
+    if (!store[editorMapKey]) return;
+    store[editorMapKey].data = {
+      terr: packArr(G.terr),
+      ore: packArr(G.ore),
+      tib: packArr(G.tib),
+      blk: packArr(G.blk),
+      pave: packArr(G.pave),
+      elevOverride: packArr(G.elevOverride),
+      spots: (G.spots || []).map((s) => s.slice()),
+      civ: (G.civ || []).map((c) => c.slice()),
+      special: (G.special || []).map((c) => c.slice()),
+      props: (G.props || []).map((p) => Object.assign({}, p)),
+      oreSpots: (G.oreSpots || []).map((o) => Object.assign({}, o))
+    };
+    saveAdminMapStore(store);
+    syncCustomMaps();
+  }
+  Object.assign(window, {
+    showAdmin
   });
 })();
 
@@ -10246,6 +10725,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     lb && (lb.onclick = () => showSaveLoad("load"));
     const tb = $("#tutorialBtn");
     tb && (tb.onclick = launchTutorial);
+    const ab = $("#adminBtn");
+    ab && (ab.onclick = showAdmin);
   }
   function wallNeighborMask(tx, ty, owner) {
     let m = 0;
