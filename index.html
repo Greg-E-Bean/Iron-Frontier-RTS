@@ -981,7 +981,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         });
         for (let k = 0; k < 3; k++) ridge(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1], 2.2, 3, 3, e + hx + hy + k);
       }
-      n = [[15, 15], [77, 57]], a = [[22, 17], [70, 55], [70, 10], [20, 60]], o = [[36, 26], [56, 46]], G.civ.push([33, 24, "cannon"], [57, 46, "cannon"], [53, 16, "cannon"], [37, 54, "cannon"]);
+      hillRoad(34, 25, 8, true), hillRoad(54, 17, 8, true), n = [[15, 15], [77, 57]], a = [[22, 17], [70, 55], [70, 10], [20, 60]], o = [[36, 26], [56, 46]], G.civ.push([33, 24, "cannon"], [57, 46, "cannon"], [53, 16, "cannon"], [37, 54, "cannon"]);
     } else if ("harbor" === r) baseTerrain(e, 0.42), ridge(46, -4, 46, 76, 5.6, 2, 16, e), bridge(46, 18.72, 20, 10), bridge(46, 53.28, 20, 10), blob(46, 36, 5, 0), blob(92 * 0.22, 72 * 0.2, 4, 3), blob(92 * 0.78, 72 * 0.6, 4, 3), n = [[10, Math.round(36) - 6], [80, Math.round(36) - 6]], a = [[12, 14], [12, 56], [80, 14], [80, 56], [46, 16], [46, 56]], o = [[46, 18.72], [46, 53.28]];
     else if ("octagon" === r) {
       baseTerrain(e, 0.5), blob(46, 36, 7, 3);
@@ -990,7 +990,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       baseTerrain(e, 0.56);
       const walls = [[57.5, 20.4], [69, 36], [57.5, 51.6], [34.5, 51.6], [23, 36], [34.5, 20.4]];
       for (const [wx, wy] of walls) blob(wx, wy, 7, 3);
-      blob(46, 36, 4, 1), n = [[46, 12], [72, 24], [72, 48], [46, 60], [20, 48], [20, 24]], a = [[46, 19], [65, 27], [65, 44], [46, 53], [27, 44], [27, 27]], o = [[46, 36]];
+      blob(46, 36, 4, 1), hillRoad(57.5, 20.4, 7), hillRoad(34.5, 51.6, 7), n = [[46, 12], [72, 24], [72, 48], [46, 60], [20, 48], [20, 24]], a = [[46, 19], [65, 27], [65, 44], [46, 53], [27, 44], [27, 27]], o = [[46, 36]];
     } else if ("boomtown" === r) baseTerrain(e, 0.32), n = [[46, 9], [75, 23], [75, 50], [46, 63], [17, 50], [17, 23]], a = [[46, 16], [68, 26], [68, 46], [46, 56], [24, 46], [24, 26]], o = [[53, 27], [60, 36], [53, 46], [39, 46], [32, 36], [39, 27]], oreField(46, 36, 7, 2200, 1), oreField(60, 20, 4, 1800, 2), oreField(32, 52, 4, 1800, 2), oreField(20, 36, 4, 1600, 1), oreField(72, 36, 4, 1600, 1), oreField(46, 58, 4, 1600, 2), oreField(46, 14, 4, 1600, 2);
     else baseTerrain(e, 0.5), blob(46, 15.84, 7, 2), blob(46, 72 * 0.78, 7, 2), blob(25.76, 44.64, 6, 3), blob(66.24, 27.36, 6, 3), blob(12.88, 14.4, 3, 3), blob(79.12, 57.6, 3, 3), ridge(62, 44, 70, 56, 2.2, 3, 7, e + 11), ridge(30, 16, 22, 28, 2.2, 3, 7, e + 13), n = [[13, 13], [76, 56]], a = [[14, 14], [78, 58], [20, 52], [72, 20], [30, 36], [62, 36]], o = [[46, 36], [46, 22], [46, 50]];
     if (2 === n.length) {
@@ -1135,16 +1135,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         for (const t2 of n) dist(e3, r2, t2[0], t2[1]) < 26 && (a = false);
         if (a) {
           let t2 = 0, n2 = 0, m = 0;
-          for (let a2 = r2 - 9; a2 <= r2 + 9; a2++) for (let r3 = e3 - 10; r3 <= e3 + 10; r3++) {
-            !inMap(r3, a2) || G.terr[idx(r3, a2)] >= 2 ? t2++ : G.ore[idx(r3, a2)] > 0 && n2++;
+          for (let a2 = r2 - 6; a2 <= r2 + 6; a2++) for (let r3 = e3 - 7; r3 <= e3 + 7; r3++) {
+            !inMap(r3, a2) || G.terr[idx(r3, a2)] >= 2 ? t2++ : G.ore[idx(r3, a2)] > 400 && n2++;
             inMap(r3, a2) && G.mtn[idx(r3, a2)] > m && (m = G.mtn[idx(r3, a2)]);
           }
-          (t2 > 10 || n2 > 60 || m > 0.15) && (a = false);
+          (t2 > 45 || n2 > 140 || m > 0.4) && (a = false);
         }
       }
       if (!a) continue;
       n.push([e3, r2]);
       const o = irnd(5, 7), s = irnd(4, 6);
+      let plazaBudget = 1;
       for (let t2 = r2 - s; t2 <= r2 + s; t2++) for (let n2 = e3 - o; n2 <= e3 + o; n2++) {
         if (!inMap(n2, t2) || G.terr[idx(n2, t2)] >= 2 || G.ore[idx(n2, t2)] > 0 || G.mtn[idx(n2, t2)] > 0.12 || G.shore[idx(n2, t2)] > 0.08) continue;
         0 !== (n2 - e3 + o) % 4 && 0 !== (t2 - r2 + s) % 4 || (G.pave[idx(n2, t2)] = 1, G.blk[idx(n2, t2)] = 0);
@@ -1154,7 +1155,22 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         for (let n2 = t2; n2 < t2 + 2; n2++) for (let t3 = r3; t3 < r3 + 2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.mtn[idx(t3, n2)] > 0.12 || G.shore[idx(t3, n2)] > 0.08) && (e4 = false);
         if (e4) {
           for (let e5 = t2; e5 < t2 + 2; e5++) for (let t3 = r3; t3 < r3 + 2; t3++) G.blk[idx(t3, e5)] = 0;
-          G.civ.push([r3, t2, pick(["civ1", "civ2", "civ4", "civ6", "civ7", "civ8"])]), G.pave[idx(r3, t2)] = 1;
+          if (plazaBudget > 0 && Math.random() < 0.3) {
+            plazaBudget--;
+            for (let py = t2 - 2; py <= t2 + 3; py++) for (let px = r3 - 2; px <= r3 + 3; px++) {
+              const pi = idx(px, py);
+              inMap(px, py) && G.terr[pi] < 2 && (G.pave[pi] = 1, G.blk[pi] = 0);
+            }
+            addProp("monument", r3, t2, true);
+            for (const [sx, sy] of [[-3, -1], [3, -1], [-3, 2], [3, 2]]) {
+              const px = r3 + sx, py = t2 + sy;
+              inMap(px, py) && G.terr[idx(px, py)] < 2 && addProp("stall", px, py, true);
+            }
+            for (const [lx, ly] of [[-2, 1], [3, 1]]) {
+              const px = r3 + lx, py = t2 + ly;
+              inMap(px, py) && G.terr[idx(px, py)] < 2 && addProp("lamp", px, py, false);
+            }
+          } else G.civ.push([r3, t2, pick(["civ1", "civ2", "civ4", "civ6", "civ7", "civ8"])]), G.pave[idx(r3, t2)] = 1;
         }
       }
       for (let t2 = 0; t2 < 8; t2++) {
@@ -1173,7 +1189,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       t.t += t.dir * t.speed * e / r, t.t > 1 ? (t.t = 1, t.dir = -1) : t.t < 0 && (t.t = 0, t.dir = 1), t.x = t.x0 + (t.x1 - t.x0) * t.t, t.y = t.y0 + (t.y1 - t.y0) * t.t, t.ang = Math.atan2((t.y1 - t.y0) * t.dir, (t.x1 - t.x0) * t.dir);
     }
   }
-  function hillRoad(hx, hy, r) {
+  function hillRoad(hx, hy, r, skipMonument) {
     const steps = 14;
     for (let i = 0; i <= steps; i++) {
       const t = i / steps, ang = t * 3.4 * Math.PI, rad = r * (1 - 0.9 * t), px = hx + Math.cos(ang) * rad, py = hy + Math.sin(ang) * rad * 0.7;
@@ -1185,7 +1201,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         inMap(xx, yy) && G.terr[idx(xx, yy)] < 2 && (G.pave[idx(xx, yy)] = 1);
       }
     }
-    addProp("monument", hx, hy, true);
+    skipMonument || addProp("monument", hx, hy, true);
   }
   function buildCityscape(e) {
     S.traffic = [], G.props = [];
@@ -1753,7 +1769,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const o = t.sp * e;
       if (t.x += Math.cos(t.ang) * o, t.y += Math.sin(t.ang) * o, t.fall ? t.z = Math.max(4, (t.z || 0) - 90 * e) : "rocket" === t.kind ? (t.t0 = (t.t0 || 0) + e, t.z = (t.z0 || 9) + 130 * Math.sin(3.1416 * Math.min(1, t.t0 / (t.dur || 1)))) : "grenade" === t.kind && (t.t0 = (t.t0 || 0) + e, t.z = (t.z0 || 9) + 42 * Math.sin(3.1416 * Math.min(1, t.t0 / (t.dur || 1)))), "flame" === t.kind && Math.random() < 0.6 && S.fx.push({ kind: "smoke", x: t.x, y: t.y, s: 0.5, c: "#ff9a3c", t: 0, life: 0.3 }), dist2(t.x, t.y, r, n) < 144 || t.life <= 0) {
         if (t.dead = true, t.splash > 0) {
-          boom(t.x, t.y, t.splash / 30, "#ffb03a"), tibBlast(t.x, t.y, t.owner, t.by), damageBridgesAt(t.x, t.y, t.splash, t.dmg);
+          boom(t.x, t.y, t.splash / 30, "#ffb03a"), damageBridgesAt(t.x, t.y, t.splash, t.dmg);
           for (const e2 of S.units) {
             if (e2.dead || e2.owner === t.owner || e2.alt > 6) continue;
             const r2 = dist(e2.x, e2.y, t.x, t.y);
@@ -2641,7 +2657,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       return;
     }
     const known = S.knownEnemy.get(team), knownBlds = !FOG_ON ? S.blds.filter((b) => !b.dead && b.owner !== NEUTRAL && teamOf(b.owner) !== team) : known ? S.blds.filter((b) => !b.dead && known.has(b.id) && teamOf(b.owner) !== team) : [], scoutPt = i ? null != i.spawnX ? { x: i.spawnX, y: i.spawnY } : aiBaseCenter(i) : null;
-    const d = Math.round((r.army + 2 * e.ai.wave) * pz.armyMul);
+    const waveGrowth = e.ai.mimicProfile ? Math.min(e.ai.wave, 3) : e.ai.wave, d = Math.round((r.army + 2 * waveGrowth) * pz.armyMul);
     if (!e.ai.attack && s.length >= d && S.time > r.grace * pz.graceMul) {
       e.ai.attack = true, e.ai.wave++;
       let r2 = null;
@@ -6519,7 +6535,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function enterGarrison(e, t) {
     if (!fpsEnterable(t)) return false;
-    e.inside = t, e.alt = t.d.roof ? FLOOR_Z : 0, e.path = null, e.target = null, e.order = "idle";
+    e.inside = t, e.x = t.x, e.y = t.y, e.alt = t.d.roof ? FLOOR_Z : 0, e.path = null, e.target = null, e.order = "idle";
     const join = garrisonable(t, e.owner);
     return join ? (t.garrison = t.garrison || [], t.garrison.push(e), t.owner = e.owner, recalcPower(e.owner), 0 === e.owner && (sfx("place"), hint("Garrisoned \u2014 the building now fires"))) : 0 === e.owner && (sfx("place"), hint(t.garrison && t.garrison.length ? "Entered \u2014 hostiles inside, fight them off" : "Entered the building")), true;
   }
@@ -6921,9 +6937,6 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
     }
   }
-  function tibBlast() {
-    return false;
-  }
   Object.assign(window, {
     diamond,
     th2,
@@ -7007,7 +7020,6 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     unloadCargo,
     tickGarrisonMove,
     tickTiberium,
-    tibBlast,
     canCrewIfv,
     crewIfv,
     ejectGunner,

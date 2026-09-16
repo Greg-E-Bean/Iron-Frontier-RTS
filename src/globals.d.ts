@@ -498,11 +498,6 @@ declare global {
   function unloadCargo(u: Unit): void;
   function tickGarrisonMove(u: Unit, dt: number): void;
   function tickTiberium(dt: number): void;
-  // Always called with (x, y, owner, source) at call sites even though
-  // the current implementation ignores its arguments and returns false
-  // unconditionally - matching real call-site usage here rather than
-  // the (equally real) current implementation's arity.
-  function tibBlast(...args: any[]): boolean;
   const GRASS: string[];
   const DIRT: string[];
   const ROCK: string[];
