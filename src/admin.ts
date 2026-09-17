@@ -65,6 +65,31 @@ function fileToDataUrl(file) {
   });
 }
 
+// Every save in this panel goes through localStorage and every save
+// function already reacts to a full quota (catch -> hint), but nothing
+// warns proactively - you only find out you're out of room when a save
+// has already failed. This gives a rough live reading instead. Quota is
+// per-origin across ALL of localStorage (not just this panel's own keys),
+// so this sums everything, and typically runs 5-10MB depending on the
+// browser - there's no reliable synchronous "quota remaining" API, so
+// ~5MB is used as a conservative assumed ceiling for the warning color.
+const STORAGE_WARN_BYTES = 5 * 1024 * 1024;
+function localStorageUsageBytes() {
+  let total = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      total += ((k && k.length) || 0) + ((localStorage.getItem(k) || "").length);
+    }
+  } catch (e) {}
+  return total * 2; // UTF-16 code units -> a rough byte estimate
+}
+function formatBytes(n) {
+  if (n < 1024) return n + " B";
+  if (n < 1024 * 1024) return (n / 1024).toFixed(0) + " KB";
+  return (n / (1024 * 1024)).toFixed(1) + " MB";
+}
+
 function modelFormatOf(filename) {
   return /\.3mf$/i.test(filename || "") ? "3mf" : "gltf";
 }
@@ -86,41 +111,71 @@ function assetStatTargets(key, kind) {
   if (!d) return [];
   if (kind === "unit") return [{ id: "main", label: null, target: d }];
   if (d.weapons) {
-    return Object.keys(d.weapons).map(fac => ({ id: "weapons." + fac, label: (FAC_NAME[fac] || fac) + " weapon", target: d.weapons[fac] }));
+    // FAC_NAME lives in campaigns.ts, which loads after this module - the
+    // snapshotDefaults() call at the bottom of this file runs before that
+    // script has executed, so this guards against a ReferenceError there
+    // (which would otherwise abort the rest of this file, including the
+    // showAdmin export) while still using the real names once available.
+    const facName = typeof FAC_NAME !== "undefined" ? FAC_NAME : {};
+    return Object.keys(d.weapons).map(fac => ({ id: "weapons." + fac, label: (facName[fac] || fac) + " weapon", target: d.weapons[fac] }));
   }
   if (!d.weapon) return [];
   const out = [{ id: "weapon", label: d.weapon2 ? "Primary weapon" : null, target: d.weapon }];
   if (d.weapon2) out.push({ id: "weapon2", label: "Secondary weapon (anti-air)", target: d.weapon2 });
   return out;
 }
+// A snapshot of every unit/building's pristine (pre-override) editable
+// fields, captured once at load before any saved admin override is ever
+// applied. Without this, clearing an override field only stopped it from
+// being *persisted* - the live UNITS/BLD object stayed at the old
+// overridden value for the rest of the session, since nothing else
+// remembered what "default" actually was. applyAdminStat below now always
+// resolves each field to "override if set, else this snapshot's value",
+// so clearing a field really does put it back the way it was.
+const DEFAULT_SNAPSHOT = {};
+function captureDefaults(key, kind) {
+  const d = kind === "unit" ? UNITS[key] : BLD[key];
+  const t = {};
+  for (const entry of assetStatTargets(key, kind)) {
+    if (!entry.target) continue;
+    const w = entry.target;
+    t[entry.id] = { vsInf: w.vsInf, vsVeh: w.vsVeh, vsBldg: w.vsBldg, aa: !!w.aa, dps: w.rof ? w.dmg / w.rof : 0 };
+  }
+  return { cost: d.cost, hp: d.hp, tab: d.tab, t };
+}
+function snapshotDefaults() {
+  for (const key of Object.keys(UNITS)) DEFAULT_SNAPSHOT[key] = captureDefaults(key, "unit");
+  for (const key of Object.keys(BLD)) DEFAULT_SNAPSHOT[key] = captureDefaults(key, "building");
+}
 function applyAdminStat(key, ov) {
   const kind = ov.kind === "unit" ? "unit" : "building";
   const d = kind === "unit" ? UNITS[key] : BLD[key];
   if (!d) return;
+  const def = DEFAULT_SNAPSHOT[key];
   const cost = finiteNum(ov.cost);
-  if (cost != null && cost >= 0) d.cost = cost;
+  d.cost = cost != null && cost >= 0 ? cost : def ? def.cost : d.cost;
   const hp = finiteNum(ov.hp);
-  if (hp != null && hp > 0) d.hp = hp;
-  if (ov.tab !== undefined) d.tab = ov.tab || null;
+  d.hp = hp != null && hp > 0 ? hp : def ? def.hp : d.hp;
+  d.tab = ov.tab ? ov.tab : def ? def.tab : d.tab;
   // Back-compat: saves from before multi-weapon support stored vsInf/vsVeh/
   // vsBldg/dps/aa flat on ov, always meaning the one editable target of the
   // time (the unit itself, or a building's primary "weapon").
   const t = ov.t || (ov.vsInf !== undefined || ov.vsVeh !== undefined || ov.vsBldg !== undefined || ov.dps !== undefined || ov.aa !== undefined
-    ? { [kind === "unit" ? "main" : "weapon"]: { vsInf: ov.vsInf, vsVeh: ov.vsVeh, vsBldg: ov.vsBldg, dps: ov.dps, aa: ov.aa } } : null);
-  if (!t) return;
+    ? { [kind === "unit" ? "main" : "weapon"]: { vsInf: ov.vsInf, vsVeh: ov.vsVeh, vsBldg: ov.vsBldg, dps: ov.dps, aa: ov.aa } } : {});
   for (const entry of assetStatTargets(key, kind)) {
-    const sub = t[entry.id];
-    if (!sub || !entry.target) continue;
     const w = entry.target;
+    if (!w) continue;
+    const sub = t[entry.id] || {};
+    const defSub = (def && def.t && def.t[entry.id]) || {};
     const vsInf = finiteNum(sub.vsInf);
-    if (vsInf != null) w.vsInf = vsInf;
+    w.vsInf = vsInf != null ? vsInf : defSub.vsInf != null ? defSub.vsInf : w.vsInf;
     const vsVeh = finiteNum(sub.vsVeh);
-    if (vsVeh != null) w.vsVeh = vsVeh;
+    w.vsVeh = vsVeh != null ? vsVeh : defSub.vsVeh != null ? defSub.vsVeh : w.vsVeh;
     const vsBldg = finiteNum(sub.vsBldg);
-    if (vsBldg != null) w.vsBldg = vsBldg;
-    if (sub.aa !== undefined) w.aa = !!sub.aa;
+    w.vsBldg = vsBldg != null ? vsBldg : defSub.vsBldg != null ? defSub.vsBldg : w.vsBldg;
+    w.aa = sub.aa !== undefined ? !!sub.aa : defSub.aa !== undefined ? !!defSub.aa : w.aa;
     const dps = finiteNum(sub.dps);
-    if (dps != null && dps >= 0 && w.rof) w.dmg = dps * w.rof;
+    if (w.rof) w.dmg = dps != null && dps >= 0 ? dps * w.rof : defSub.dps != null ? defSub.dps * w.rof : w.dmg;
   }
 }
 function applyAdminStats() {
@@ -174,6 +229,7 @@ function syncCustomMaps() {
   }
 }
 applyAdminAssets();
+snapshotDefaults();
 applyAdminStats();
 syncCustomMaps();
 
@@ -205,8 +261,13 @@ function closeAdmin() {
   showSetup();
 }
 function renderAdminPanel() {
+  const usedBytes = localStorageUsageBytes(), warnUsage = usedBytes > 0.8 * STORAGE_WARN_BYTES;
   $("#panelMain").innerHTML =
     '<h1>ADMIN</h1><div class="sub">Custom assets &amp; maps — saved in this browser only</div>' +
+    '<div class="small" style="opacity:.75;margin:-4px 0 6px' + (warnUsage ? ';color:#e0a03a' : "") + '">' +
+      'Browser storage used: ' + formatBytes(usedBytes) + ' (quota varies by browser, typically 5–10MB)' +
+      (warnUsage ? ' — getting close to the limit; uploads may start failing' : "") +
+    '</div>' +
     '<div style="display:flex;gap:6px;margin:10px 0;position:sticky;top:0;z-index:5;background:#101a1e;padding:4px 0">' +
       '<button id="tabAssets" class="tabBtn' + (adminTab === "assets" ? " on" : "") + '">ASSETS</button>' +
       '<button id="tabMaps" class="tabBtn' + (adminTab === "maps" ? " on" : "") + '">MAPS</button>' +
@@ -245,7 +306,15 @@ function assetDisplayName(key, kind) {
 function assetCategory(key, kind) {
   const d = kind === "unit" ? UNITS[key] : BLD[key];
   const t = d && d.tab;
-  return ASSET_CATEGORIES.some(c => c.k === t) ? t : "other";
+  if (ASSET_CATEGORIES.some(c => c.k === t)) return t;
+  // Some buildings (the deploy-only triturret/Bastion Line, the
+  // capturable neutral cannon...) have no real build-menu tab at all
+  // (tab: null) but do have a weapon, so they were falling into a
+  // catch-all "Other" bucket instead of "Defense" where you'd look for
+  // them. A weapon is the clearest available signal for "this is a
+  // defense structure" when the menu placement itself doesn't say so.
+  if (kind === "building" && d && d.weapon) return "def";
+  return "other";
 }
 function assetFactionMembership(key, kind) {
   if (kind === "unit") {
@@ -424,13 +493,19 @@ function renderAssetsTab() {
     const readStat = () => {
       const stats = loadAdminStats();
       const ov: any = { kind };
+      let hasAny = false;
       const cost = (row.querySelector(".costOv") as HTMLInputElement).value;
-      if (cost !== "") ov.cost = parseFloat(cost);
+      if (cost !== "") { ov.cost = parseFloat(cost); hasAny = true; }
       const hp = (row.querySelector(".hpOv") as HTMLInputElement).value;
-      if (hp !== "") ov.hp = parseFloat(hp);
+      if (hp !== "") { ov.hp = parseFloat(hp); hasAny = true; }
       const tab = (row.querySelector(".tabOv") as HTMLSelectElement).value;
-      if (tab) ov.tab = tab;
+      // Always recorded (even "" for "(default)") so switching back to
+      // default is a real, persisted choice - not indistinguishable from
+      // "never touched" - and applyAdminStat can revert it correctly.
+      ov.tab = tab;
+      if (tab) hasAny = true;
       const t: any = {};
+      const defaults = DEFAULT_SNAPSHOT[key] && DEFAULT_SNAPSHOT[key].t;
       row.querySelectorAll(".statTargetRow").forEach((tr: HTMLElement) => {
         const sub: any = {};
         const vsInfEl = tr.querySelector(".vsInfOv") as HTMLInputElement;
@@ -442,13 +517,15 @@ function renderAssetsTab() {
         const dpsEl = tr.querySelector(".dpsOv") as HTMLInputElement;
         if (dpsEl.value !== "") sub.dps = parseFloat(dpsEl.value);
         const aaEl = tr.querySelector(".aaOv") as HTMLInputElement;
-        if (aaEl) sub.aa = aaEl.checked;
-        if (Object.keys(sub).length) t[tr.dataset.target] = sub;
+        const targetId = tr.dataset.target;
+        const defaultAa = !!(defaults && defaults[targetId] && defaults[targetId].aa);
+        if (aaEl && aaEl.checked !== defaultAa) sub.aa = aaEl.checked;
+        if (Object.keys(sub).length) { t[targetId] = sub; hasAny = true; }
       });
-      if (Object.keys(t).length) ov.t = t;
-      if (Object.keys(ov).length <= 1) delete stats[key]; else stats[key] = ov;
+      ov.t = t;
+      if (!hasAny) delete stats[key]; else stats[key] = ov;
       saveAdminStats(stats);
-      if (stats[key]) applyAdminStat(key, stats[key]);
+      applyAdminStat(key, stats[key] || { kind });
       renderAssetsTab();
     };
     row.querySelectorAll("input,select").forEach(el => el.addEventListener("change", readStat));
@@ -485,7 +562,7 @@ function renderMapsTab() {
     const key = "custom_" + Date.now();
     const store2 = loadAdminMapStore();
     store2[key] = { name, data: blankMapData() };
-    saveAdminMapStore(store2);
+    if (!saveAdminMapStore(store2)) return;
     syncCustomMaps();
     openMapEditor(key);
   };
@@ -500,7 +577,7 @@ function renderMapsTab() {
         const key = "custom_" + Date.now();
         const store2 = loadAdminMapStore();
         store2[key] = { name: parsed.name || "Imported map", data: parsed.data || parsed };
-        saveAdminMapStore(store2);
+        if (!saveAdminMapStore(store2)) return;
         syncCustomMaps();
         renderMapsTab();
         hint("Map imported");
@@ -517,19 +594,20 @@ function renderMapsTab() {
         const name = prompt("Rename map:", store2[key].name);
         if (!name) return;
         store2[key].name = name;
-        saveAdminMapStore(store2); syncCustomMaps(); renderMapsTab();
+        if (saveAdminMapStore(store2)) { syncCustomMaps(); renderMapsTab(); }
       }
       else if (act === "dup") {
         const nk = "custom_" + Date.now();
         store2[nk] = { name: store2[key].name + " (copy)", data: JSON.parse(JSON.stringify(store2[key].data)) };
-        saveAdminMapStore(store2); syncCustomMaps(); renderMapsTab();
+        if (saveAdminMapStore(store2)) { syncCustomMaps(); renderMapsTab(); }
       } else if (act === "export") {
         const blob = new Blob([JSON.stringify({ name: store2[key].name, data: store2[key].data })], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob); a.download = store2[key].name.replace(/\s+/g, "_") + ".json"; a.click();
       } else if (act === "del") {
         if (!confirm('Delete "' + store2[key].name + '"? This cannot be undone.')) return;
-        delete store2[key]; saveAdminMapStore(store2); syncCustomMaps(); renderMapsTab();
+        delete store2[key];
+        if (saveAdminMapStore(store2)) { syncCustomMaps(); renderMapsTab(); }
       }
     };
   });
@@ -550,6 +628,7 @@ function renderMusicTab() {
     '<div class="adminRow" data-idx="' + i + '">' +
       '<div class="rowName">' + t.name + '<div class="small" style="opacity:.75">' + (t.mime || "audio") + '</div></div>' +
       '<audio controls preload="none" src="' + t.dataUrl + '" style="height:32px;max-width:220px"></audio>' +
+      '<button data-act="rename" data-idx="' + i + '" ' + MINIBTN + '>RENAME</button>' +
       '<button data-act="export" data-idx="' + i + '" ' + MINIBTN + '>EXPORT</button>' +
       '<button data-act="del" data-idx="' + i + '" ' + MINIBTN_DANGER + '>DELETE</button>' +
     '</div>'
@@ -602,10 +681,16 @@ function renderMusicTab() {
       if (act === "export") {
         const a = document.createElement("a");
         a.href = t.dataUrl; a.download = t.name + musicFileExt(t.mime, t.name); a.click();
+      } else if (act === "rename") {
+        const name = prompt("Rename track:", t.name);
+        if (!name) return;
+        t.name = name;
+        if (saveAdminMusic(list)) { refreshCustomMusic(); renderMusicTab(); }
       } else if (act === "del") {
         if (!confirm('Remove "' + t.name + '"?')) return;
         list.splice(idx, 1);
-        saveAdminMusic(list); refreshCustomMusic();
+        if (!saveAdminMusic(list)) return;
+        refreshCustomMusic();
         if (trackSel >= MUSIC_TRACKS.length) setTrackSel(-1);
         renderMusicTab();
       }
@@ -741,9 +826,13 @@ function renderEditorToolbar() {
   const ed = $("#elevDown"); if (ed) ed.onclick = () => { editorElevSign = -1; renderEditorToolbar(); };
   const ot = $("#oreType") as HTMLSelectElement; if (ot) { ot.value = String(editorOreType); ot.onchange = () => editorOreType = parseInt(ot.value); }
   const oa = $("#oreAmount") as HTMLSelectElement; if (oa) oa.onchange = () => editorOreAmount = parseInt(oa.value);
-  $("#editorSave").onclick = () => { saveEditorMap(); hint("Map saved"); };
+  $("#editorSave").onclick = () => { if (saveEditorMap()) hint("Map saved"); };
   $("#editorTestPlay").onclick = () => {
-    saveEditorMap();
+    // Bail out on a failed save (e.g. browser storage full - saveEditorMap
+    // already showed that hint) instead of test-playing whatever the map's
+    // last successfully-saved version was, which would silently look like
+    // your latest edits worked when they were never actually persisted.
+    if (!saveEditorMap()) return;
     cfg.map = editorMapKey;
     closeMapEditor();
     startGame();
@@ -918,7 +1007,7 @@ function wireEditorCanvas() {
 
 function saveEditorMap() {
   const store = loadAdminMapStore();
-  if (!store[editorMapKey]) return;
+  if (!store[editorMapKey]) return false;
   store[editorMapKey].data = {
     terr: packArr(G.terr),
     ore: packArr(G.ore),
@@ -932,8 +1021,9 @@ function saveEditorMap() {
     props: (G.props || []).map(p => Object.assign({}, p)),
     oreSpots: (G.oreSpots || []).map(o => Object.assign({}, o)),
   };
-  saveAdminMapStore(store);
-  syncCustomMaps();
+  const saved = saveAdminMapStore(store);
+  if (saved) syncCustomMaps();
+  return saved;
 }
 
 Object.assign(window, {

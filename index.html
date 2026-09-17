@@ -10657,6 +10657,23 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       reader.readAsDataURL(file);
     });
   }
+  var STORAGE_WARN_BYTES = 5 * 1024 * 1024;
+  function localStorageUsageBytes() {
+    let total = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        total += (k && k.length || 0) + (localStorage.getItem(k) || "").length;
+      }
+    } catch (e) {
+    }
+    return total * 2;
+  }
+  function formatBytes(n) {
+    if (n < 1024) return n + " B";
+    if (n < 1024 * 1024) return (n / 1024).toFixed(0) + " KB";
+    return (n / (1024 * 1024)).toFixed(1) + " MB";
+  }
   function modelFormatOf(filename) {
     return /\.3mf$/i.test(filename || "") ? "3mf" : "gltf";
   }
@@ -10671,37 +10688,54 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (!d) return [];
     if (kind === "unit") return [{ id: "main", label: null, target: d }];
     if (d.weapons) {
-      return Object.keys(d.weapons).map((fac) => ({ id: "weapons." + fac, label: (FAC_NAME[fac] || fac) + " weapon", target: d.weapons[fac] }));
+      const facName = typeof FAC_NAME !== "undefined" ? FAC_NAME : {};
+      return Object.keys(d.weapons).map((fac) => ({ id: "weapons." + fac, label: (facName[fac] || fac) + " weapon", target: d.weapons[fac] }));
     }
     if (!d.weapon) return [];
     const out = [{ id: "weapon", label: d.weapon2 ? "Primary weapon" : null, target: d.weapon }];
     if (d.weapon2) out.push({ id: "weapon2", label: "Secondary weapon (anti-air)", target: d.weapon2 });
     return out;
   }
+  var DEFAULT_SNAPSHOT = {};
+  function captureDefaults(key, kind) {
+    const d = kind === "unit" ? UNITS[key] : BLD[key];
+    const t = {};
+    for (const entry of assetStatTargets(key, kind)) {
+      if (!entry.target) continue;
+      const w = entry.target;
+      t[entry.id] = { vsInf: w.vsInf, vsVeh: w.vsVeh, vsBldg: w.vsBldg, aa: !!w.aa, dps: w.rof ? w.dmg / w.rof : 0 };
+    }
+    return { cost: d.cost, hp: d.hp, tab: d.tab, t };
+  }
+  function snapshotDefaults() {
+    for (const key of Object.keys(UNITS)) DEFAULT_SNAPSHOT[key] = captureDefaults(key, "unit");
+    for (const key of Object.keys(BLD)) DEFAULT_SNAPSHOT[key] = captureDefaults(key, "building");
+  }
   function applyAdminStat(key, ov) {
     const kind = ov.kind === "unit" ? "unit" : "building";
     const d = kind === "unit" ? UNITS[key] : BLD[key];
     if (!d) return;
+    const def = DEFAULT_SNAPSHOT[key];
     const cost = finiteNum(ov.cost);
-    if (cost != null && cost >= 0) d.cost = cost;
+    d.cost = cost != null && cost >= 0 ? cost : def ? def.cost : d.cost;
     const hp = finiteNum(ov.hp);
-    if (hp != null && hp > 0) d.hp = hp;
-    if (ov.tab !== void 0) d.tab = ov.tab || null;
-    const t = ov.t || (ov.vsInf !== void 0 || ov.vsVeh !== void 0 || ov.vsBldg !== void 0 || ov.dps !== void 0 || ov.aa !== void 0 ? { [kind === "unit" ? "main" : "weapon"]: { vsInf: ov.vsInf, vsVeh: ov.vsVeh, vsBldg: ov.vsBldg, dps: ov.dps, aa: ov.aa } } : null);
-    if (!t) return;
+    d.hp = hp != null && hp > 0 ? hp : def ? def.hp : d.hp;
+    d.tab = ov.tab ? ov.tab : def ? def.tab : d.tab;
+    const t = ov.t || (ov.vsInf !== void 0 || ov.vsVeh !== void 0 || ov.vsBldg !== void 0 || ov.dps !== void 0 || ov.aa !== void 0 ? { [kind === "unit" ? "main" : "weapon"]: { vsInf: ov.vsInf, vsVeh: ov.vsVeh, vsBldg: ov.vsBldg, dps: ov.dps, aa: ov.aa } } : {});
     for (const entry of assetStatTargets(key, kind)) {
-      const sub = t[entry.id];
-      if (!sub || !entry.target) continue;
       const w = entry.target;
+      if (!w) continue;
+      const sub = t[entry.id] || {};
+      const defSub = def && def.t && def.t[entry.id] || {};
       const vsInf = finiteNum(sub.vsInf);
-      if (vsInf != null) w.vsInf = vsInf;
+      w.vsInf = vsInf != null ? vsInf : defSub.vsInf != null ? defSub.vsInf : w.vsInf;
       const vsVeh = finiteNum(sub.vsVeh);
-      if (vsVeh != null) w.vsVeh = vsVeh;
+      w.vsVeh = vsVeh != null ? vsVeh : defSub.vsVeh != null ? defSub.vsVeh : w.vsVeh;
       const vsBldg = finiteNum(sub.vsBldg);
-      if (vsBldg != null) w.vsBldg = vsBldg;
-      if (sub.aa !== void 0) w.aa = !!sub.aa;
+      w.vsBldg = vsBldg != null ? vsBldg : defSub.vsBldg != null ? defSub.vsBldg : w.vsBldg;
+      w.aa = sub.aa !== void 0 ? !!sub.aa : defSub.aa !== void 0 ? !!defSub.aa : w.aa;
       const dps = finiteNum(sub.dps);
-      if (dps != null && dps >= 0 && w.rof) w.dmg = dps * w.rof;
+      if (w.rof) w.dmg = dps != null && dps >= 0 ? dps * w.rof : defSub.dps != null ? defSub.dps * w.rof : w.dmg;
     }
   }
   function applyAdminStats() {
@@ -10749,6 +10783,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
   }
   applyAdminAssets();
+  snapshotDefaults();
   applyAdminStats();
   syncCustomMaps();
   function blankMapData() {
@@ -10779,7 +10814,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     showSetup();
   }
   function renderAdminPanel() {
-    $("#panelMain").innerHTML = '<h1>ADMIN</h1><div class="sub">Custom assets &amp; maps \u2014 saved in this browser only</div><div style="display:flex;gap:6px;margin:10px 0;position:sticky;top:0;z-index:5;background:#101a1e;padding:4px 0"><button id="tabAssets" class="tabBtn' + (adminTab === "assets" ? " on" : "") + '">ASSETS</button><button id="tabMaps" class="tabBtn' + (adminTab === "maps" ? " on" : "") + '">MAPS</button><button id="tabMusic" class="tabBtn' + (adminTab === "music" ? " on" : "") + '">MUSIC</button><button id="backAdminTop" ' + MINIBTN + '>BACK</button></div><div id="adminBody"></div><button id="backAdmin" ' + SECBTN + ">BACK</button>";
+    const usedBytes = localStorageUsageBytes(), warnUsage = usedBytes > 0.8 * STORAGE_WARN_BYTES;
+    $("#panelMain").innerHTML = '<h1>ADMIN</h1><div class="sub">Custom assets &amp; maps \u2014 saved in this browser only</div><div class="small" style="opacity:.75;margin:-4px 0 6px' + (warnUsage ? ";color:#e0a03a" : "") + '">Browser storage used: ' + formatBytes(usedBytes) + " (quota varies by browser, typically 5\u201310MB)" + (warnUsage ? " \u2014 getting close to the limit; uploads may start failing" : "") + '</div><div style="display:flex;gap:6px;margin:10px 0;position:sticky;top:0;z-index:5;background:#101a1e;padding:4px 0"><button id="tabAssets" class="tabBtn' + (adminTab === "assets" ? " on" : "") + '">ASSETS</button><button id="tabMaps" class="tabBtn' + (adminTab === "maps" ? " on" : "") + '">MAPS</button><button id="tabMusic" class="tabBtn' + (adminTab === "music" ? " on" : "") + '">MUSIC</button><button id="backAdminTop" ' + MINIBTN + '>BACK</button></div><div id="adminBody"></div><button id="backAdmin" ' + SECBTN + ">BACK</button>";
     $("#tabAssets").onclick = () => {
       adminTab = "assets";
       renderAdminPanel();
@@ -10817,7 +10853,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function assetCategory(key, kind) {
     const d = kind === "unit" ? UNITS[key] : BLD[key];
     const t = d && d.tab;
-    return ASSET_CATEGORIES.some((c) => c.k === t) ? t : "other";
+    if (ASSET_CATEGORIES.some((c) => c.k === t)) return t;
+    if (kind === "building" && d && d.weapon) return "def";
+    return "other";
   }
   function assetFactionMembership(key, kind) {
     if (kind === "unit") {
@@ -10962,13 +11000,22 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const readStat = () => {
         const stats = loadAdminStats();
         const ov = { kind };
+        let hasAny = false;
         const cost = row.querySelector(".costOv").value;
-        if (cost !== "") ov.cost = parseFloat(cost);
+        if (cost !== "") {
+          ov.cost = parseFloat(cost);
+          hasAny = true;
+        }
         const hp = row.querySelector(".hpOv").value;
-        if (hp !== "") ov.hp = parseFloat(hp);
+        if (hp !== "") {
+          ov.hp = parseFloat(hp);
+          hasAny = true;
+        }
         const tab = row.querySelector(".tabOv").value;
-        if (tab) ov.tab = tab;
+        ov.tab = tab;
+        if (tab) hasAny = true;
         const t = {};
+        const defaults = DEFAULT_SNAPSHOT[key] && DEFAULT_SNAPSHOT[key].t;
         row.querySelectorAll(".statTargetRow").forEach((tr) => {
           const sub = {};
           const vsInfEl = tr.querySelector(".vsInfOv");
@@ -10980,14 +11027,19 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           const dpsEl = tr.querySelector(".dpsOv");
           if (dpsEl.value !== "") sub.dps = parseFloat(dpsEl.value);
           const aaEl = tr.querySelector(".aaOv");
-          if (aaEl) sub.aa = aaEl.checked;
-          if (Object.keys(sub).length) t[tr.dataset.target] = sub;
+          const targetId = tr.dataset.target;
+          const defaultAa = !!(defaults && defaults[targetId] && defaults[targetId].aa);
+          if (aaEl && aaEl.checked !== defaultAa) sub.aa = aaEl.checked;
+          if (Object.keys(sub).length) {
+            t[targetId] = sub;
+            hasAny = true;
+          }
         });
-        if (Object.keys(t).length) ov.t = t;
-        if (Object.keys(ov).length <= 1) delete stats[key];
+        ov.t = t;
+        if (!hasAny) delete stats[key];
         else stats[key] = ov;
         saveAdminStats(stats);
-        if (stats[key]) applyAdminStat(key, stats[key]);
+        applyAdminStat(key, stats[key] || { kind });
         renderAssetsTab();
       };
       row.querySelectorAll("input,select").forEach((el) => el.addEventListener("change", readStat));
@@ -11007,7 +11059,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const key = "custom_" + Date.now();
       const store2 = loadAdminMapStore();
       store2[key] = { name, data: blankMapData() };
-      saveAdminMapStore(store2);
+      if (!saveAdminMapStore(store2)) return;
       syncCustomMaps();
       openMapEditor(key);
     };
@@ -11022,7 +11074,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           const key = "custom_" + Date.now();
           const store2 = loadAdminMapStore();
           store2[key] = { name: parsed.name || "Imported map", data: parsed.data || parsed };
-          saveAdminMapStore(store2);
+          if (!saveAdminMapStore(store2)) return;
           syncCustomMaps();
           renderMapsTab();
           hint("Map imported");
@@ -11041,15 +11093,17 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           const name = prompt("Rename map:", store2[key].name);
           if (!name) return;
           store2[key].name = name;
-          saveAdminMapStore(store2);
-          syncCustomMaps();
-          renderMapsTab();
+          if (saveAdminMapStore(store2)) {
+            syncCustomMaps();
+            renderMapsTab();
+          }
         } else if (act === "dup") {
           const nk = "custom_" + Date.now();
           store2[nk] = { name: store2[key].name + " (copy)", data: JSON.parse(JSON.stringify(store2[key].data)) };
-          saveAdminMapStore(store2);
-          syncCustomMaps();
-          renderMapsTab();
+          if (saveAdminMapStore(store2)) {
+            syncCustomMaps();
+            renderMapsTab();
+          }
         } else if (act === "export") {
           const blob = new Blob([JSON.stringify({ name: store2[key].name, data: store2[key].data })], { type: "application/json" });
           const a = document.createElement("a");
@@ -11059,9 +11113,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         } else if (act === "del") {
           if (!confirm('Delete "' + store2[key].name + '"? This cannot be undone.')) return;
           delete store2[key];
-          saveAdminMapStore(store2);
-          syncCustomMaps();
-          renderMapsTab();
+          if (saveAdminMapStore(store2)) {
+            syncCustomMaps();
+            renderMapsTab();
+          }
         }
       };
     });
@@ -11076,7 +11131,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function renderMusicTab() {
     const tracks = loadAdminMusic();
     const rows = tracks.map(
-      (t, i) => '<div class="adminRow" data-idx="' + i + '"><div class="rowName">' + t.name + '<div class="small" style="opacity:.75">' + (t.mime || "audio") + '</div></div><audio controls preload="none" src="' + t.dataUrl + '" style="height:32px;max-width:220px"></audio><button data-act="export" data-idx="' + i + '" ' + MINIBTN + '>EXPORT</button><button data-act="del" data-idx="' + i + '" ' + MINIBTN_DANGER + ">DELETE</button></div>"
+      (t, i) => '<div class="adminRow" data-idx="' + i + '"><div class="rowName">' + t.name + '<div class="small" style="opacity:.75">' + (t.mime || "audio") + '</div></div><audio controls preload="none" src="' + t.dataUrl + '" style="height:32px;max-width:220px"></audio><button data-act="rename" data-idx="' + i + '" ' + MINIBTN + '>RENAME</button><button data-act="export" data-idx="' + i + '" ' + MINIBTN + '>EXPORT</button><button data-act="del" data-idx="' + i + '" ' + MINIBTN_DANGER + ">DELETE</button></div>"
     ).join("") || '<div class="small">No custom tracks uploaded yet \u2014 the game ships with its own procedurally-generated soundtrack.</div>';
     $("#adminBody").innerHTML = `<div class="small" style="margin-bottom:8px">Upload your own music (.mp3/.aac/.m4a) \u2014 saved in this browser only. Pick it from Settings \u2192 Music Track once uploaded, or leave "Auto (Shuffle)" to mix it into the built-in soundtrack's rotation.</div><div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><button id="importTrackBtn" ` + MINIBTN + '>IMPORT TRACK (.mp3/.aac)</button><input type="file" id="importTrackFile" accept=".mp3,.aac,.m4a,audio/mpeg,audio/aac,audio/mp4,audio/x-m4a" style="display:none"><button id="exportTracksBtn" ' + MINIBTN + '>EXPORT ALL TRACKS (.json)</button><button id="importTracksBtn" ' + MINIBTN + '>IMPORT TRACKS (.json)</button><input type="file" id="importTracksFile" accept=".json" style="display:none"></div><div class="lbl">CUSTOM TRACKS</div><div id="musicRows">' + rows + "</div>";
     $("#importTrackBtn").onclick = () => $("#importTrackFile").click();
@@ -11128,10 +11183,18 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           a.href = t.dataUrl;
           a.download = t.name + musicFileExt(t.mime, t.name);
           a.click();
+        } else if (act === "rename") {
+          const name = prompt("Rename track:", t.name);
+          if (!name) return;
+          t.name = name;
+          if (saveAdminMusic(list)) {
+            refreshCustomMusic();
+            renderMusicTab();
+          }
         } else if (act === "del") {
           if (!confirm('Remove "' + t.name + '"?')) return;
           list.splice(idx2, 1);
-          saveAdminMusic(list);
+          if (!saveAdminMusic(list)) return;
           refreshCustomMusic();
           if (trackSel >= MUSIC_TRACKS.length) setTrackSel(-1);
           renderMusicTab();
@@ -11258,11 +11321,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const oa = $("#oreAmount");
     if (oa) oa.onchange = () => editorOreAmount = parseInt(oa.value);
     $("#editorSave").onclick = () => {
-      saveEditorMap();
-      hint("Map saved");
+      if (saveEditorMap()) hint("Map saved");
     };
     $("#editorTestPlay").onclick = () => {
-      saveEditorMap();
+      if (!saveEditorMap()) return;
       cfg.map = editorMapKey;
       closeMapEditor();
       startGame();
@@ -11478,7 +11540,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   function saveEditorMap() {
     const store = loadAdminMapStore();
-    if (!store[editorMapKey]) return;
+    if (!store[editorMapKey]) return false;
     store[editorMapKey].data = {
       terr: packArr(G.terr),
       ore: packArr(G.ore),
@@ -11492,8 +11554,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       props: (G.props || []).map((p) => Object.assign({}, p)),
       oreSpots: (G.oreSpots || []).map((o) => Object.assign({}, o))
     };
-    saveAdminMapStore(store);
-    syncCustomMaps();
+    const saved = saveAdminMapStore(store);
+    if (saved) syncCustomMaps();
+    return saved;
   }
   Object.assign(window, {
     showAdmin
