@@ -7,28 +7,25 @@ export {};
 // request, no bundle weight), matching the rest of this game's "everything
 // works offline until you ask for something that needs the network" design.
 //
-// FIREBASE_CONFIG below is a placeholder. To enable this feature for real:
-//  1. Create a free Firebase project at https://console.firebase.google.com
-//  2. Enable Authentication -> Sign-in method -> Email/Password (and
-//     Anonymous, for guest cloud-saves without signup).
-//  3. Enable Firestore Database (production mode is fine).
-//  4. Project settings -> General -> Your apps -> add a Web app -> copy the
-//     firebaseConfig object it gives you into FIREBASE_CONFIG below. These
-//     values are public/client-safe by design (Firebase's real security
-//     boundary is Firestore security rules, not hiding this config) - see
-//     README or ask for the matching security-rules snippet.
-//  5. Add whatever domain you serve this game from (and "localhost" for
-//     local testing) under Authentication -> Settings -> Authorized domains.
-// Until FIREBASE_CONFIG is filled in, the Account screen shows a clear
-// "not configured yet" message instead of failing confusingly.
+// FIREBASE_CONFIG below points at the "frontier-command" Firebase project.
+// These values are public/client-safe by design - Firebase's real security
+// boundary is the Firestore security rules (see README), not hiding this
+// config. If this ever needs to point at a different project: Firebase
+// console -> Project settings -> General -> Your apps -> Web app.
+// Whatever domain this game is actually served from (plus "localhost" for
+// local testing) needs to be listed under Authentication -> Settings ->
+// Authorized domains, or sign-in will fail there.
+// If FIREBASE_CONFIG.apiKey is ever reset to a REPLACE_-prefixed placeholder,
+// the Account screen shows a clear "not configured yet" message instead of
+// failing confusingly.
 
 const FIREBASE_CONFIG = {
-  apiKey: "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_PROJECT.firebaseapp.com",
-  projectId: "REPLACE_WITH_YOUR_PROJECT",
-  storageBucket: "REPLACE_WITH_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID",
+  apiKey: "AIzaSyBkGLUXaGA1c7gsyHPGzfbILD9qP5jsquU",
+  authDomain: "frontier-command-542b2.firebaseapp.com",
+  projectId: "frontier-command-542b2",
+  storageBucket: "frontier-command-542b2.firebasestorage.app",
+  messagingSenderId: "816860942961",
+  appId: "1:816860942961:web:b98accdb79efa64b1941d0",
 };
 const FIREBASE_SDK_VER = "10.14.1";
 const FIREBASE_CDN = "https://www.gstatic.com/firebasejs/" + FIREBASE_SDK_VER;
