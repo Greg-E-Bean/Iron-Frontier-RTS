@@ -8615,9 +8615,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     const key = bld.key;
     if ("civ3" === key) {
-      for (const [px, pz] of [[-half + 13, -half + 13], [half - 13, -half + 13], [-half + 13, half - 13], [half - 13, half - 13]]) box(9, 9, ROOM_H - 4, px, pz, floorZ, 4210752, im.trim);
-      box(24, 10, 26, 0, -half + 16, floorZ, 3487763), box(4, 4, 18, -9, -half + 11, floorZ + 26, 2960939, im.trim), box(4, 4, 18, 9, -half + 11, floorZ + 26, 2960939, im.trim);
-      for (const sx of [-1, 1]) box(2, 10, 1, sx * (half - 6), 0, floorZ + 22, 16766814, emisMat(16766814));
+      box(42, 12, 18, -6, -half + 13, floorZ, 3811360, im.trim), box(12, 12, 22, 22, -half + 13, floorZ, 3811360, im.trim);
+      box(46, 13, 1.5, -6, -half + 13, floorZ + 18, 1842207), box(13, 13, 1.5, 22, -half + 13, floorZ + 22, 1842207);
+      box(10, 1, 7, -16, -half + 9, floorZ + 19, 8568544, emisMat(8568544)), cyl(0.8, 9, -2, -half + 9, floorZ + 19, 3618876, im.trim), box(4, 4, 3, -4, -half + 8, floorZ + 27, 3811360);
+      box(50, 2, 10, -6, -half + 1, floorZ + 40, 11045448);
+      cyl(7, 3, -6, -half + 24, floorZ, 2105378, im.trim), box(7, 1, 10, -6, -half + 28, floorZ + 3, 2105378), cyl(1, 15, -6, -half + 24, floorZ + 3, 3618876, metalMat(3618876));
+      for (const [ex, pz] of [[half - 0.5, -16], [half - 0.5, 14]]) box(1, 18, 38, ex, pz, floorZ, 9869467, im.trim), box(0.6, 8, 34, ex - 0.5, pz - 4.5, floorZ, 6316646), box(0.6, 8, 34, ex - 0.5, pz + 4.5, floorZ, 6316646), box(0.6, 4, 4, ex - 0.5, pz, floorZ + 40, 16762970, emisMat(16762970));
+      box(0.8, 3, 6, half - 0.5, -1, floorZ + 18, 9869467, im.trim);
+      box(1.5, 22, 28, half - 0.5, half - 14, floorZ + 9, 3946290), box(1, 20, 26, half - 1, half - 14, floorZ + 10, 15460578);
+      box(30, 24, 0.3, -half + 20, 15, floorZ + 0.3, 7086630), box(14, 10, 1, -half + 20, 15, floorZ + 8, 11847885);
+      for (const [lx, lz] of [[-half + 15, 10], [-half + 25, 10], [-half + 15, 20], [-half + 25, 20]]) cyl(0.6, 8, lx, lz, floorZ, 4074528, im.trim);
+      cyl(7, 3, -half + 8, 4, floorZ, 4479076, im.trim), box(9, 1, 10, -half + 8, 0, floorZ + 3, 4479076), cyl(7, 3, -half + 32, 26, floorZ, 4479076, im.trim), box(9, 1, 10, -half + 32, 30, floorZ + 3, 4479076);
+      cyl(4, 10, -half + 8, 26, floorZ, 5913642, im.trim), sph(7, -half + 8, 26, floorZ + 10, 3173434), sph(5, -half + 6, 28, floorZ + 15, 3173434);
     } else if ("civ5" === key) {
       box(19, 12, 4, -half + 15, -half + 14, floorZ, 6044193, im.trim), box(17, 10, 7, -half + 15, -half + 14, floorZ + 4, 13222566), box(17, 4, 3, -half + 15, -half + 18, floorZ + 11, 9187119);
       box(11, 10, ROOM_H - 16, half - 11, -half + 11, floorZ, 6044193, im.trim);
