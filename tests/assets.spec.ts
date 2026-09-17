@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { collectPageErrors } from "./helpers";
 import { TRIANGLE_GLB_B64 } from "./fixtures/triangle-glb";
+import { TRIANGLE_3MF_B64 } from "./fixtures/triangle-3mf";
 
 // Models in this engine are baked part-arrays (see P_/buildTris), not live
 // THREE.Object3D graphs, so "valid model" here means a non-empty array of
@@ -107,6 +108,80 @@ test("external GLTF/GLB asset loading falls back gracefully and converts correct
   expect(matched, `triangle points don't match expected Y-up->Z-up conversion: ${JSON.stringify(pts)}`).toBe(true);
 
   await page.evaluate(() => (window as any).unregisterModelAsset("testtri"));
+
+  expect(errs).toEqual([]);
+});
+
+test("external 3MF asset loading falls back gracefully and converts correctly", async ({ page }) => {
+  const errs = collectPageErrors(page);
+  await page.goto("/index.html");
+  await page.waitForTimeout(300);
+
+  // THREE.ThreeMFLoader (plus its fflate unzip dependency) is vendored
+  // inline right after THREE.GLTFLoader - confirm it's actually there.
+  const hasLoader = await page.evaluate(() => typeof (window as any).THREE.ThreeMFLoader === "function");
+  expect(hasLoader).toBe(true);
+
+  // 1. A bad/undersized data: URI (not a real zip) -> graceful fallback,
+  //    same as the bad-GLB case above.
+  const r1 = await page.evaluate(() => {
+    const w = window as any;
+    const isParts = (x: any) => Array.isArray(x) && x.length > 0 && x[0] && Array.isArray(x[0].m);
+    w.registerModelAsset("bad3mf", "data:model/3mf;base64,AAAA", 1, undefined, "3mf");
+    const first = w.UMODEL("bad3mf", 0);
+    return { firstOk: isParts(first) };
+  });
+  expect(r1.firstOk).toBe(true);
+
+  await page.waitForTimeout(500);
+  const r1b = await page.evaluate(() => {
+    const w = window as any;
+    const isParts = (x: any) => Array.isArray(x) && x.length > 0 && x[0] && Array.isArray(x[0].m);
+    const second = w.UMODEL("bad3mf", 0);
+    const failed = w.assetFailed("bad3mf", undefined);
+    w.unregisterModelAsset("bad3mf");
+    return { stillOk: isParts(second), failed };
+  });
+  expect(r1b.stillOk).toBe(true);
+  expect(r1b.failed).toBe(true);
+
+  // 2. Real successful load: a hand-built minimal valid 3MF (one red
+  //    triangle via a base material), so it loads with no network access.
+  //    Confirms the format dispatch in getAssetModel() and partsFromGLTF's
+  //    handling of a 3MF Group (no {scene} wrapper, unlike GLTF) both work.
+  const r2 = await page.evaluate((b64) => {
+    const w = window as any;
+    const dataUri = "data:model/3mf;base64," + b64;
+    w.registerModelAsset("test3mf", dataUri, 5, undefined, "3mf");
+    const before = w.UMODEL("test3mf", 0); // still loading -> procedural fallback
+    return { beforeIsProcedural: before !== null };
+  }, TRIANGLE_3MF_B64);
+  expect(r2.beforeIsProcedural).toBe(true);
+
+  let loaded: any = null;
+  for (let i = 0; i < 20; i++) {
+    await page.waitForTimeout(150);
+    loaded = await page.evaluate(() => (window as any).UMODEL("test3mf", 0));
+    if (loaded && loaded.length === 1 && loaded[0]?.c === "#ff0000") break;
+  }
+
+  expect(loaded).not.toBeNull();
+  expect(loaded.length).toBe(1);
+  const part = loaded[0];
+  expect(part.c).toBe("#ff0000");
+  const tris = part.m;
+  expect(tris.length).toBe(1);
+  const pts: number[][] = tris[0].p;
+  const expected = [
+    [0, 0, 0],
+    [5, 0, 0],
+    [0, 0, 5],
+  ];
+  const close = (a: number[], b: number[], eps = 1e-3) => a.every((v, i) => Math.abs(v - b[i]) < eps);
+  const matched = pts.every((p) => expected.some((e) => close(p, e)));
+  expect(matched, `triangle points don't match expected Y-up->Z-up conversion: ${JSON.stringify(pts)}`).toBe(true);
+
+  await page.evaluate(() => (window as any).unregisterModelAsset("test3mf"));
 
   expect(errs).toEqual([]);
 });

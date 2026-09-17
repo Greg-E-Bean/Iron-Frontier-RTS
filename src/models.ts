@@ -851,34 +851,46 @@ n.push(P_(DOME(.055*r,.05*r,10),-.16*r,-.06*r,l+.4*r+.16*r,"psi",{e:1,a:{spin:.6
 n.push(P_(CYL(.07*r,.24*r,10),.3*-r,.22*-r,l,o?"rust":"steel")),n.push(P_(CYL(.07*r,.24*r,10),.3*-r,.22*r,l,o?"rust":"steel")),n.push(P_(BOXM(.24*r,.9*r,.05*r,.3),.02*r,.02*r,l+.02*r,"wood"));
 break;}case"civ6":{const w=.86*r,d=.6*r,h=.3*r;n.push(P_(BOXM(w,d,h,.5),0,0,l,"cv1")),n.push(P_(BOXM(w+4,.14*r,.05*r,.3),0,-d/2-.05*r,l+h,"rust")),n.push(P_(BOXM(w+2,.16*r,.03*r,.2),0,-d/2-.08*r,l+h-.06*r,"red")),windows(n,w*.86,d*.86,l+.12*r,.1*r,3,"glass"),n.push(P_(BOXM(.12*r,.02*r,.14*r,.2),-.28*r,-d/2-.02*r,l+h+.02*r,"gold"));break}case"civ7":{const w=.9*r,d=.7*r,h=.34*r;n.push(P_(BOXM(w,d,h,.4),0,0,l,"concrete2")),n.push(P_(BOXM(w*.96,d*.5,.06*r,.2),0,-d*.2,l+h,"darkmetal")),n.push(P_(CYL(.05*r,.36*r,8),.32*r,.2*r,l+h,"rust")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),-.2*r,-d/2-.01*r,l+.06*r,"darkmetal")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),.05*r,-d/2-.01*r,l+.06*r,"darkmetal"));break}case"civ8":{const w=.7*r,d=.62*r,h=.4*r;n.push(P_(BOXM(w,d,h,.6),0,0,l,"wood")),n.push(P_(TSLAB(roundRectProfile(w+6,d+6,3,3),.22*r,.15,"tvrf"),0,0,l+h,"rust")),windows(n,w*.8,d*.8,l+.14*r,.08*r,2,"lightY"),n.push(P_(BOXM(.05*r,.05*r,.3*r,.1),.28*r,.2*r,l+h,"rock2"));break}case"civ9":{const w=.86*r;for(let tier=0;tier<3;tier++){const tw=w*(1-.22*tier),th=.32*r,tz=l+tier*th;n.push(P_(BOXM(tw,.82*tw,th,.6),0,-.06*r*tier,tz,tier%2?"cv2":"cv1")),windows(n,tw*.85,.7*tw,tz+.5*th,.09*r,2+tier%2,"glassdark")}break}case"bridgehut":tier(n,.7*r,.66*r,.36*r,0,0,l,"neutral","cv2",.94),n.push(P_(SLAB(roundRectProfile(.78*r,.74*r,3,3),2.4,.7,"cv2r"),0,0,l+.36*r,"rust")),windows(n,.56*r,.5*r,l+.12*r,.09*r,1,"glassdark"),n.push(P_(CYL(1.4,.14*r,10),.2*r,-.18*r,l+.36*r+2.4,"darkmetal"));break;case"civ4":for(const p of towerModel(1))n.push(p);break;case"civ5":for(const p of towerModel(2))n.push(p);break;case"civ3":for(const p of towerModel(3))n.push(p)}return detailPass(n,e,t,r),n}function BTURRET_(e,t,r){const n="allied"===t,a="soviet"===t;if("def1"===e){const e=[];return n?(e.push(P_(CYL(5.6,4.5,12),0,0,14.6,"armor")),e.push(P_(SLAB(hexProfile(11,9),5,1.6,"d1vt"),0,0,19.1,"body")),e.push(P_(CYL(1.5,15,9),5,0,21.6,"gunmetal",{ty:PI2})),e.push(P_(CYL(2,3.5,9),17,0,21.6,"steel",{ty:PI2}))):a?(e.push(P_(CYL(6.4,5,10),0,0,11.6,"armor2")),e.push(P_(SLAB(roundRectProfile(12,10,2,2),5.5,1.5,"d1lt"),0,0,16.6,"body")),e.push(P_(CYL(1.8,13,8),5,-2.2,19.1,"gunmetal",{ty:PI2})),e.push(P_(CYL(1.8,13,8),5,2.2,19.1,"gunmetal",{ty:PI2}))):(e.push(P_(DOME(6.5,5,12),0,0,9.6,"carapace")),e.push(P_(CONE(4,1.6,9,9),4,0,12.6,"body",{ty:PI2})),e.push(P_(CYL(1.2,4,7),13,0,12.6,"psi",{ty:PI2,e:1}))),e}if("aa"===e){const e=[],t=n?15.6:a?14.6:13.6;if(e.push(P_(CYL(5.2,4,12),0,0,t-4,"armor3")),n){e.push(P_(SLAB(hexProfile(10,9),4.5,1.4,"aavt"),0,0,t,"body"));for(const r of[-3.2,3.2])e.push(P_(BOXM(11,3.6,3.6,1),4,r,t+3.4,"steel")),e.push(P_(CONE(1.4,.4,2.6,7),10,r,t+3.4,"red",{ty:PI2}))}else if(a){e.push(P_(SLAB(roundRectProfile(11,10,2,2),5,1.4,"aalt"),0,0,t,"body"));for(const r of[-2.6,2.6])e.push(P_(CYL(1.5,14,8),4,r,t+4,"gunmetal",{ty:PI2,tx:0}));e.push(P_(BOXM(5,7,3,1),-4,0,t+4,"darkmetal"))}else{e.push(P_(CONE(5.5,2.5,7,10),0,0,t,"carapace"));for(let r=0;r<3;r++){const n=2.09*r;e.push(P_(CYL(.9,12,6),2,2.4*Math.cos(n),t+4+2.4*Math.sin(n),"psi",{ty:PI2,e:1}))}}return e}if("def2"===e&&"yuri"===t){const e=[P_(DOME(5.5,4.5,12),0,0,31.6,"psi",{e:1})];for(let t=0;t<3;t++){const n=2.09*t+(r?.5:0);e.push(P_(CYL(1,10,6),4*Math.cos(n),4*Math.sin(n),34,"crystal",{e:1}))}return e}return null}function UMODEL(e,t,extra){const fac=extra&&"object"==typeof extra?extra.fac:void 0,_a=getAssetModel(e,fac);return _a||UMODEL_(e,t||0,extra)}function UTURRET(e,t,extra?){return UTURRET_(e,t||0,extra)}function BMODEL(e,t,d,cn,rot){const _a=getAssetModel(e,t);return _a||BMODEL_(e,t,d,cn,rot)}function BTURRET(e,t,r){return BTURRET_(e,t,r||0)}
 /*
- * Optional external 3D asset loading (GLTF/GLB), with graceful fallback.
+ * Optional external 3D asset loading (GLTF/GLB or 3MF), with graceful
+ * fallback.
  *
  * Nothing is registered by default - every model is procedural, exactly as
- * before. Call registerModelAsset(key, url, scale?) to have that
- * unit/building/prop key load a real asset instead. The load happens
- * asynchronously in the background; until it resolves (or if it fails -
- * including simply being unreachable because the page was opened via
- * file://, where fetch is blocked), the existing procedural model is used
- * with no error and no visual gap. Once loaded, the converted model is
- * cached and reused for every future instance of that key.
+ * before. Call registerModelAsset(key, url, scale?, faction?, format?) to
+ * have that unit/building/prop key load a real asset instead - format is
+ * "gltf" (default) or "3mf". The load happens asynchronously in the
+ * background; until it resolves (or if it fails - including simply being
+ * unreachable because the page was opened via file://, where fetch is
+ * blocked), the existing procedural model is used with no error and no
+ * visual gap. Once loaded, the converted model is cached and reused for
+ * every future instance of that key.
+ *
+ * Both THREE.GLTFLoader and THREE.ThreeMFLoader (plus its fflate unzip
+ * dependency) are vendored inline in index.template.html right after the
+ * THREE core build, the same way the rest of this project avoids runtime
+ * network fetches for anything but the optional cloud-save feature.
  *
  * Models in this engine aren't a live THREE.js scene graph - every part is
  * baked into a flat triangle list (see P_/buildTris) that the software
- * rasterizer turns into a cached sprite. A loaded GLTF's mesh geometry is
- * converted into that same format here (partsFromGLTF), so an asset-backed
- * model flows through the exact same rendering path as a procedural one.
- * GLTF is Y-up by convention; this engine's model space is Z-up, so the
- * scene is wrapped in a group that rotates it into place before baking.
+ * rasterizer turns into a cached sprite. A loaded asset's mesh geometry is
+ * converted into that same format here (partsFromGLTF - it takes any
+ * THREE.Object3D to traverse, so it works unchanged for a GLTF's `.scene`
+ * or a 3MF's plain Group), so an asset-backed model flows through the
+ * exact same rendering path as a procedural one. Both formats are Y-up by
+ * convention; this engine's model space is Z-up, so the scene is wrapped
+ * in a group that rotates it into place before baking.
  */
 const MODEL_ASSETS = {};
 const MODEL_ASSET_SCALE = {};
+const MODEL_ASSET_FORMAT = {};
 const _assetCache = new Map();
 let _gltfLoader = null;
+let _3mfLoader = null;
 
-function registerModelAsset(key, url, scale, faction) {
+function registerModelAsset(key, url, scale, faction, format) {
   const rkey = faction ? key + ":" + faction : key;
   MODEL_ASSETS[rkey] = url;
   MODEL_ASSET_SCALE[rkey] = scale || 1;
+  MODEL_ASSET_FORMAT[rkey] = format === "3mf" ? "3mf" : "gltf";
   _assetCache.delete(rkey);
 }
 
@@ -886,6 +898,7 @@ function unregisterModelAsset(key, faction) {
   const rkey = faction ? key + ":" + faction : key;
   delete MODEL_ASSETS[rkey];
   delete MODEL_ASSET_SCALE[rkey];
+  delete MODEL_ASSET_FORMAT[rkey];
   _assetCache.delete(rkey);
 }
 
@@ -941,26 +954,30 @@ function getAssetModel(key, faction?) {
   if (cached === "loading" || cached === "failed") return null;
   if (cached) return cached;
   _assetCache.set(rkey, "loading");
-  if (!_gltfLoader) {
-    if (typeof THREE === "undefined" || typeof THREE.GLTFLoader !== "function") {
-      _assetCache.set(rkey, "failed");
-      return null;
-    }
-    _gltfLoader = new THREE.GLTFLoader();
+  const is3mf = MODEL_ASSET_FORMAT[rkey] === "3mf";
+  if (typeof THREE === "undefined" || (is3mf ? typeof THREE.ThreeMFLoader !== "function" : typeof THREE.GLTFLoader !== "function")) {
+    _assetCache.set(rkey, "failed");
+    return null;
   }
-  _gltfLoader.load(
-    url,
-    (gltf) => {
-      try {
-        const parts = partsFromGLTF(gltf.scene, MODEL_ASSET_SCALE[rkey]);
-        _assetCache.set(rkey, parts.length ? parts : "failed");
-      } catch (err) {
-        _assetCache.set(rkey, "failed");
-      }
-    },
-    undefined,
-    () => { _assetCache.set(rkey, "failed"); }
-  );
+  const onLoaded = (scene) => {
+    try {
+      const parts = partsFromGLTF(scene, MODEL_ASSET_SCALE[rkey]);
+      _assetCache.set(rkey, parts.length ? parts : "failed");
+    } catch (err) {
+      _assetCache.set(rkey, "failed");
+    }
+  };
+  const onFailed = () => { _assetCache.set(rkey, "failed"); };
+  if (is3mf) {
+    if (!_3mfLoader) _3mfLoader = new THREE.ThreeMFLoader();
+    // ThreeMFLoader.load() hands its onLoad callback the parsed Group
+    // directly (unlike GLTFLoader's {scene} wrapper) - partsFromGLTF just
+    // needs an Object3D to traverse, so either shape works unchanged.
+    _3mfLoader.load(url, onLoaded, undefined, onFailed);
+  } else {
+    if (!_gltfLoader) _gltfLoader = new THREE.GLTFLoader();
+    _gltfLoader.load(url, (gltf) => onLoaded(gltf.scene), undefined, onFailed);
+  }
   return null;
 }
 

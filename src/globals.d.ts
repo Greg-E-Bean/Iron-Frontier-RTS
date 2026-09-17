@@ -403,7 +403,7 @@ declare global {
   const MAT: Record<string, string>;
   const PILLAR_H: Record<string, number>;
   const TURRET_RISE: Record<string, number>;
-  function registerModelAsset(key: string, url: string, scale?: number, faction?: string): void;
+  function registerModelAsset(key: string, url: string, scale?: number, faction?: string, format?: string): void;
   function unregisterModelAsset(key: string, faction?: string): void;
   function getAssetModel(key: string, faction?: string): any[] | null;
   function assetFailed(key: string, faction?: string): boolean;

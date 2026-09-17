@@ -2,7 +2,7 @@
 // Two independent tools, both reachable from a new "ADMIN" button on the
 // skirmish setup screen and both persisted to localStorage (this browser
 // only, no server):
-//  - Asset manager: upload a .glb/.gltf to replace a unit or building's
+//  - Asset manager: upload a .glb/.gltf/.3mf to replace a unit or building's
 //    model, optionally scoped to one faction (registerModelAsset already
 //    supports a "key:faction" composite key - see src/models.ts).
 //  - Map editor: paint terrain (including water), raise/lower land, seed
@@ -65,8 +65,11 @@ function fileToDataUrl(file) {
   });
 }
 
+function modelFormatOf(filename) {
+  return /\.3mf$/i.test(filename || "") ? "3mf" : "gltf";
+}
 function applyAdminAssets() {
-  for (const a of loadAdminAssets()) registerModelAsset(a.key, a.dataUrl, a.scale, a.faction || undefined);
+  for (const a of loadAdminAssets()) registerModelAsset(a.key, a.dataUrl, a.scale, a.faction || undefined, a.format);
 }
 function finiteNum(v) {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
@@ -301,7 +304,7 @@ function assetRow(key, kind) {
         '<div class="small" style="opacity:.75">' + assetFactionMembership(key, kind) + '</div>' +
       '</div>' +
       '<select class="facSel">' + FACTION_LIST.map(f => '<option value="' + f.k + '">' + f.n + '</option>').join("") + '</select>' +
-      '<input type="file" class="fileSel" accept=".glb,.gltf">' +
+      '<input type="file" class="fileSel" accept=".glb,.gltf,.3mf">' +
       '<input type="number" class="scaleSel" value="' + (initialScale ?? 1) + '" min="0.05" step="0.05" style="width:52px" title="Model scale">' +
       tags +
       '<div class="statRow" data-key="' + key + '" data-kind="' + kind + '" style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px">' +
@@ -325,7 +328,7 @@ function renderAssetsTab() {
   const unitRows = unitKeys.map(k => assetRow(k, "unit")).join("") || '<div class="small">No units match.</div>';
   const bldRows = bldKeys.map(k => assetRow(k, "building")).join("") || '<div class="small">No buildings match.</div>';
   $("#adminBody").innerHTML =
-    '<div class="small" style="margin-bottom:8px">Upload a .glb/.gltf to replace a unit or building\'s model, and optionally override its cost, category, and combat role. ' +
+    '<div class="small" style="margin-bottom:8px">Upload a .glb/.gltf/.3mf to replace a unit or building\'s model, and optionally override its cost, category, and combat role. ' +
     'Pick a faction to scope a model to just that faction\'s look, or leave "All factions" to replace it everywhere it appears.</div>' +
     '<div style="display:flex;gap:8px;margin-bottom:10px">' +
       '<button id="exportAssetsBtn" ' + MINIBTN + '>EXPORT ASSETS (.json)</button>' +
@@ -389,17 +392,18 @@ function renderAssetsTab() {
       if (!file) return;
       const faction = row.querySelector(".facSel").value || null;
       const scale = parseFloat(row.querySelector(".scaleSel").value) || 1;
+      const format = modelFormatOf(file.name);
       const dataUrl = await fileToDataUrl(file) as string;
       const list = loadAdminAssets().filter(a => !(a.key === key && (a.faction || "") === (faction || "")));
-      list.push({ key, faction, dataUrl, scale, kind });
+      list.push({ key, faction, dataUrl, scale, kind, format });
       saveAdminAssets(list);
-      registerModelAsset(key, dataUrl, scale, faction || undefined);
+      registerModelAsset(key, dataUrl, scale, faction || undefined, format);
       hint("Custom model applied to " + assetDisplayName(key, kind) + (faction ? " (" + faction + ")" : ""));
       renderAssetsTab();
       let tries = 0;
       const checkFailed = () => {
         tries++;
-        if (assetFailed(key, faction || undefined)) hint("⚠ " + file.name + " failed to load — use a self-contained .glb, or a .gltf with its buffers/textures embedded as base64");
+        if (assetFailed(key, faction || undefined)) hint("⚠ " + file.name + " failed to load — use a self-contained .glb/.3mf, or a .gltf with its buffers/textures embedded as base64");
         else if (tries < 14) setTimeout(checkFailed, 350);
       };
       setTimeout(checkFailed, 350);
