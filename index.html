@@ -4408,6 +4408,90 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return e.push(P_(BOXM(w * 0.8, w * 0.8, 3, 0.6), 0, 0, h, "darkmetal")), v > 1 && (e.push(P_(CYL(0.6, 14, 6), 0, 0, h + 3, "darkmetal")), e.push(P_(CYL(1, 1.4, 6), 0, 0, h + 16, "red", { e: 1 }))), e;
   }
+  function highRiseModel(r) {
+    const e = [], l = 3.6, PW = 0.6 * r, PD = 0.46 * r, PH = 9, shaftW = 0.4 * r, shaftD = 0.32 * r, floors = 9, fH = 8.2, shaftH = floors * fH, TH = PH + shaftH;
+    e.push(P_(BOXM(PW, PD, PH, 1.4), 0, 0, l, "concrete2"));
+    e.push(P_(BOXM(shaftW * 0.7, 3.5, PH - 2.5, 0.5), 0, -PD / 2 + 1.8, l + 1.2, "glassdark"));
+    e.push(P_(BOXM(shaftW * 0.85, 5, 1.4, 0.3), 0, -PD / 2 - 1.6, l + PH - 2.4, "trim"));
+    for (const sx of [-1, 1]) e.push(P_(CYL(0.5, PH - 2, 8), sx * shaftW * 0.42, -PD / 2 - 1.6, l, "trim"));
+    e.push(P_(BOXM(shaftW, shaftD, shaftH, 1.6), 0, 0, l + PH, "#9c5843"));
+    for (let f = 0; f < floors; f++) {
+      const z = l + PH + 3.6 + f * fH;
+      windows(e, shaftW * 0.8, shaftD * 0.72, z, 0.1 * shaftW, 4, "glass"), f % 3 == 2 && e.push(P_(BOXM(shaftW + 1, shaftD + 1, 0.7, 0.2), 0, 0, z - 1.6, "trim"));
+    }
+    e.push(P_(BOXM(shaftW + 3, shaftD + 3, 2.2, 0.4), 0, 0, l + TH - 2.2, "trim"));
+    e.push(P_(BOXM(shaftW * 0.74, shaftD * 0.7, 3, 0.5), 0, 0, l + TH, "concrete2"));
+    const wtZ = l + TH + 3;
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) e.push(P_(CYL(0.55, 6.4, 6), sx * shaftW * 0.22, sy * shaftD * 0.24, wtZ, "darkmetal"));
+    e.push(P_(CYL(shaftW * 0.17, 7, 12), 0, 0, wtZ + 6.4, "wood")), e.push(P_(CONE(shaftW * 0.2, shaftW * 0.02, 3.2, 12), 0, 0, wtZ + 13.4, "roof"));
+    return e;
+  }
+  function tenementModel(r) {
+    const e = [], l = 3.6, W = 0.56 * r, D = 0.46 * r, floors = 5, fH = 8, H = floors * fH;
+    e.push(P_(BOXM(W, D, H, 1.4), 0, 0, l, "#8a4a38"));
+    for (let f = 0; f < floors; f++) {
+      const z = l + 3.6 + f * fH;
+      windows(e, W * 0.82, D * 0.7, z, 0.1 * W, 3, "glass"), e.push(P_(BOXM(W + 0.6, D + 0.6, 0.6, 0.2), 0, 0, z - 1.6, "trim"));
+    }
+    e.push(P_(BOXM(W + 2, D + 2, 1.6, 0.3), 0, 0, l + H, "trim"));
+    const steps = 3, stepW = W * 0.28, stepD = 3.2;
+    for (let i = 0; i < steps; i++) {
+      const h = (i + 1) * 2.2, d = (steps - i) * stepD;
+      e.push(P_(BOXM(stepW, d, h, 0.2), 0, -D / 2 - d / 2, l, "concrete"));
+    }
+    for (const sx of [-1, 1]) e.push(P_(BOXM(0.5, steps * stepD, steps * 2.2 + 2, 0.15), sx * stepW / 2, -D / 2 - steps * stepD / 2, l, "darkmetal"));
+    const feX = W / 2 + 2.4;
+    for (const sy of [-1, 1]) e.push(P_(CYL(0.35, H, 8), feX, sy * D * 0.27, l, "darkmetal"));
+    for (let f = 1; f < floors; f++) {
+      const z = l + f * fH;
+      e.push(P_(BOXM(2.4, D * 0.55, 0.4, 0.15), feX, 0, z, "darkmetal")), e.push(P_(BOXM(2.4, 0.4, 3, 0.1), feX, -D * 0.27, z, "darkmetal")), e.push(P_(BOXM(2.4, 0.4, 3, 0.1), feX, D * 0.27, z, "darkmetal"));
+    }
+    for (let f = 1; f < floors; f++) {
+      const z0 = l + (f - 1) * fH + 0.4, z1 = l + f * fH, dir = f % 2 ? 1 : -1;
+      strut3(e, feX, dir * D * 0.2, z0, feX, -dir * D * 0.2, z1, 0.35, "darkmetal", 6);
+    }
+    for (const [cx, cy] of [[-W * 0.3, -D * 0.25], [W * 0.28, D * 0.2]]) e.push(P_(BOXM(2.6, 2.6, 5, 0.3), cx, cy, l + H + 1.6, "rock2"));
+    return e;
+  }
+  function marketRowModel(r) {
+    const e = [], l = 3.6, stalls = 4, totalW = 0.92 * r, stallW = totalW / stalls, D = 0.5 * r, backH = 7, counterH = 3.2, cols = ["#c0392b", "#3f8f4a", "#3a6bb0", "#d9a531"];
+    for (let i = 0; i < stalls; i++) {
+      const cx = -totalW / 2 + stallW * (i + 0.5), col = cols[i % cols.length];
+      e.push(P_(BOXM(stallW * 0.92, D * 0.5, backH, 0.5), cx, D * 0.15, l, "wood"));
+      e.push(P_(BOXM(stallW * 0.86, D * 0.22, counterH, 0.3), cx, -D * 0.1, l, "#6b4a2f"));
+      for (const sx of [-1, 1]) e.push(P_(CYL(0.5, backH + 3, 6), cx + sx * stallW * 0.42, -D * 0.32, l, "wood"));
+      e.push(P_(WEDGE(stallW * 0.98, D * 0.55, 2, 5), cx, 0, l + backH, col));
+      e.push(P_(BOXM(stallW * 0.98, 0.3, 0.5, 0.1), cx, -D * 0.32, l + backH + 1.9, "white"));
+      e.push(P_(BOXM(stallW * 0.5, 0.15, 2, 0.1), cx, D * 0.4, l + backH + 1, "darkmetal"));
+      crate(e, cx - stallW * 0.22, D * 0.3, l, 3.4, i % 2 ? "olive" : "rust", 0.2 * i);
+      i % 2 == 0 && barrel(e, cx + stallW * 0.24, D * 0.3, l);
+    }
+    return e;
+  }
+  function tavernModel(r) {
+    const e = [], l = 3.6, W = 0.62 * r, D = 0.5 * r, GH = 8, UH = 7;
+    e.push(P_(BOXM(W, D, GH, 1.2), 0, 0, l, "rock2"));
+    windows(e, W * 0.7, D * 0.7, l + 2.6, 0.1 * W, 2, "lightY");
+    e.push(P_(BOXM(W + 2, D + 2, 0.8, 0.3), 0, 0, l + GH, "trim"));
+    const uw = W * 0.94, ud = D * 0.94, uz = l + GH + 0.8;
+    e.push(P_(BOXM(uw, ud, UH, 0.8), 0, 0, uz, "#d8c9a3"));
+    for (const sx of [-1, 1]) e.push(P_(BOXM(0.6, ud + 0.4, UH, 0.1), sx * uw * 0.42, 0, uz, "#3a2a1e")), e.push(P_(BOXM(uw + 0.4, 0.6, UH, 0.1), 0, sx * ud * 0.42, uz, "#3a2a1e"));
+    e.push(P_(BOXM(uw + 0.4, ud + 0.4, 0.6, 0.1), 0, 0, uz + UH * 0.5, "#3a2a1e"));
+    windows(e, uw * 0.72, ud * 0.72, uz + 2.5, 0.1 * uw, 2, "lightY");
+    const rz = uz + UH, RW = uw + 4, RD = ud + 4, RIDGE = 10, EAVE = 2;
+    e.push(P_(WEDGE(RW / 2, RD, EAVE, RIDGE), -RW / 4, 0, rz, "roof")), e.push(P_(WEDGE(RW / 2, RD, RIDGE, EAVE), RW / 4, 0, rz, "roof"));
+    e.push(P_(BOXM(3, 3, 7, 0.3), W * 0.3, D * 0.28, uz + UH, "rock2"));
+    const doorY = -D / 2 - 0.2;
+    e.push(P_(BOXM(6, 1, 7, 0.2), 0, doorY, l, "wood"));
+    e.push(P_(WEDGE(7, 3, 1, 3), 0, doorY - 1.3, l + 7, "roof"));
+    for (const sx of [-1, 1]) e.push(P_(CYL(0.3, 3, 6), sx * 3, doorY - 2.4, l + 4, "darkmetal"));
+    e.push(P_(BOXM(0.25, 0.25, 4, 0.1), -W / 2 - 0.3, doorY + 2, l + 7, "darkmetal"));
+    e.push(P_(BOXM(3, 0.2, 2.4, 0.1), -W / 2 - 1.6, doorY + 2, l + 5, "wood"));
+    e.push(P_(BOXM(W * 0.65, 1.2, 1, 0.2), 0, -D / 2 - 0.3, l + 2.2, "wood"));
+    for (let i = 0; i < 4; i++) e.push(P_(DOME(0.6, 0.5, 6), -W * 0.28 + i * W * 0.19, -D / 2 - 0.3, l + 2.8, i % 2 ? "red" : "gold"));
+    barrel(e, W * 0.34, D * 0.4, l), barrel(e, W * 0.42, D * 0.35, l, "olive");
+    return e;
+  }
   function carModel(v) {
     const cols = ["red", "white", "black", "gunmetal"], col = cols[v % cols.length], e = [];
     e.push(P_(BOXM(16, 7.4, 4, 1.2), 0, 0, 2.3, col)), e.push(P_(BOXM(8.6, 6.6, 2.9, 0.8), -0.6, 0, 5.4, "glass", { e: 1 }));
@@ -5515,21 +5599,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         n.push(P_(CYL(0.07 * r, 0.24 * r, 10), 0.3 * -r, 0.22 * -r, l, o ? "rust" : "steel")), n.push(P_(CYL(0.07 * r, 0.24 * r, 10), 0.3 * -r, 0.22 * r, l, o ? "rust" : "steel")), n.push(P_(BOXM(0.24 * r, 0.9 * r, 0.05 * r, 0.3), 0.02 * r, 0.02 * r, l + 0.02 * r, "wood"));
         break;
       }
-      case "civ6": {
-        const w = 0.86 * r, d2 = 0.6 * r, h = 0.3 * r;
-        n.push(P_(BOXM(w, d2, h, 0.5), 0, 0, l, "cv1")), n.push(P_(BOXM(w + 4, 0.14 * r, 0.05 * r, 0.3), 0, -d2 / 2 - 0.05 * r, l + h, "rust")), n.push(P_(BOXM(w + 2, 0.16 * r, 0.03 * r, 0.2), 0, -d2 / 2 - 0.08 * r, l + h - 0.06 * r, "red")), windows(n, w * 0.86, d2 * 0.86, l + 0.12 * r, 0.1 * r, 3, "glass"), n.push(P_(BOXM(0.12 * r, 0.02 * r, 0.14 * r, 0.2), -0.28 * r, -d2 / 2 - 0.02 * r, l + h + 0.02 * r, "gold"));
+      case "civ6":
+        for (const p of marketRowModel(r)) n.push(p);
         break;
-      }
       case "civ7": {
         const w = 0.9 * r, d2 = 0.7 * r, h = 0.34 * r;
         n.push(P_(BOXM(w, d2, h, 0.4), 0, 0, l, "concrete2")), n.push(P_(BOXM(w * 0.96, d2 * 0.5, 0.06 * r, 0.2), 0, -d2 * 0.2, l + h, "darkmetal")), n.push(P_(CYL(0.05 * r, 0.36 * r, 8), 0.32 * r, 0.2 * r, l + h, "rust")), n.push(P_(BOXM(0.3 * r, 0.04 * r, 0.2 * r, 0.1), -0.2 * r, -d2 / 2 - 0.01 * r, l + 0.06 * r, "darkmetal")), n.push(P_(BOXM(0.3 * r, 0.04 * r, 0.2 * r, 0.1), 0.05 * r, -d2 / 2 - 0.01 * r, l + 0.06 * r, "darkmetal"));
         break;
       }
-      case "civ8": {
-        const w = 0.7 * r, d2 = 0.62 * r, h = 0.4 * r;
-        n.push(P_(BOXM(w, d2, h, 0.6), 0, 0, l, "wood")), n.push(P_(TSLAB(roundRectProfile(w + 6, d2 + 6, 3, 3), 0.22 * r, 0.15, "tvrf"), 0, 0, l + h, "rust")), windows(n, w * 0.8, d2 * 0.8, l + 0.14 * r, 0.08 * r, 2, "lightY"), n.push(P_(BOXM(0.05 * r, 0.05 * r, 0.3 * r, 0.1), 0.28 * r, 0.2 * r, l + h, "rock2"));
+      case "civ8":
+        for (const p of tavernModel(r)) n.push(p);
         break;
-      }
       case "civ9": {
         const w = 0.86 * r;
         for (let tier2 = 0; tier2 < 3; tier2++) {
@@ -5545,10 +5625,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         for (const p of churchModel()) n.push(p);
         break;
       case "civ5":
-        for (const p of towerModel(2)) n.push(p);
+        for (const p of tenementModel(r)) n.push(p);
         break;
       case "civ3":
-        for (const p of towerModel(3)) n.push(p);
+        for (const p of highRiseModel(r)) n.push(p);
     }
     return detailPass(n, e, t, r), n;
   }
