@@ -219,6 +219,8 @@ export interface Building {
   bombFuse?: number;
   bombOwner?: number;
   bombMesh?: unknown;
+  crumbleT?: number;
+  crumbleDur?: number;
   [field: string]: unknown;
 }
 
