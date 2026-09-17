@@ -539,7 +539,7 @@ body.fps #mmWrap{opacity:.55}
       <div class="fld"><label>Map</label><select id="mapSel"></select><div id="mapPreview"></div></div>
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
     </div>
-    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="adminBtn" style="display:block;margin:10px auto 0;padding:6px 16px;border-radius:20px;border:1px solid #5b5b5b;background:#2a2a2a;color:#9aa0a6;font-size:11px;letter-spacing:.5px">+ IMPORT / CREATE</button>
+    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="accountBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">ACCOUNT</button><button id="adminBtn" style="display:block;margin:10px auto 0;padding:6px 16px;border-radius:20px;border:1px solid #5b5b5b;background:#2a2a2a;color:#9aa0a6;font-size:11px;letter-spacing:.5px">+ IMPORT / CREATE</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
       Tap a build card again to queue more · ▾ expands the build panel.<br>
       <b style="color:#e0b050">Ore:</b> amber ore feeds your economy, pale gem veins pay far more,
@@ -1685,16 +1685,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function cmdMove(e, t, r, n, queue) {
     S.mission && S.mission.tutorial && e.some((u) => 0 === u.owner) && (n ? S.tutorialAmoved = true : S.tutorialMoved = true);
-    const a = e.length, o = Math.ceil(Math.sqrt(a)), s = Math.max(34, 3.6 * e.reduce((e2, t2) => Math.max(e2, t2.d.radius), 8));
+    const cnt = e.length, o = Math.ceil(Math.sqrt(cnt)), s = Math.max(34, 3.6 * e.reduce((e2, t2) => Math.max(e2, t2.d.radius), 8));
+    let fx = 0, fy = -1, rx = 1, ry = 0, l = e;
+    if (cnt > 1) {
+      const cx = e.reduce((s2, u) => s2 + u.x, 0) / cnt, cy = e.reduce((s2, u) => s2 + u.y, 0) / cnt, flen = Math.hypot(t - cx, r - cy) || 1;
+      fx = (t - cx) / flen, fy = (r - cy) / flen, rx = -fy, ry = fx, l = e.slice().sort((u1, u2) => (u1.x - cx) * rx + (u1.y - cy) * ry - ((u2.x - cx) * rx + (u2.y - cy) * ry));
+    }
     let i = 0;
-    const l = e.slice().sort((e2, n2) => dist2(e2.x, e2.y, t, r) - dist2(n2.x, n2.y, t, r));
     for (const e2 of l) {
-      const a2 = clamp(t + (i % o - (o - 1) / 2) * s, 8, 2936), c = clamp(r + (Math.floor(i / o) - (o - 1) / 2) * s, 8, 2296);
+      const col = i % o - (o - 1) / 2, row = Math.floor(i / o), a = clamp(t + col * s * rx - row * s * fx, 8, 2936), c = clamp(r + col * s * ry - row * s * fy, 8, 2296);
       if (i++, queue && e2.order && "idle" !== e2.order) {
-        (e2.queue = e2.queue || []).push({ x: a2, y: c, amove: !!n });
+        (e2.queue = e2.queue || []).push({ x: a, y: c, amove: !!n });
         continue;
       }
-      queue || (e2.queue = []), e2.deployed && toggleDeploy(e2), e2.order = n ? "amove" : "move", e2.target = null, e2.ore = null, e2.tx = a2, e2.ty = c, e2.d.fly ? (e2.path = null, e2.state = null) : repath(e2);
+      queue || (e2.queue = []), e2.deployed && toggleDeploy(e2), e2.order = n ? "amove" : "move", e2.target = null, e2.ore = null, e2.tx = a, e2.ty = c, e2.d.fly ? (e2.path = null, e2.state = null) : repath(e2);
     }
   }
   function nextWaypoint(e) {
@@ -8929,7 +8933,53 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   var sfxBudget = 0;
+  var VOICE_LINES = { allied: { sel: ["Yes, sir?", "Awaiting orders.", "Reporting.", "Standing by.", "At your command."], go: ["Moving out.", "Acknowledged.", "On our way.", "Right away.", "Affirmative."], unit: ["Unit ready.", "Reinforcements ready.", "Unit deployed."], ready: ["Construction complete.", "Structure online."] }, soviet: { sel: ["Da?", "Comrade?", "At your command.", "We serve.", "Standing ready."], go: ["For the motherland!", "Moving out.", "As ordered.", "Advancing.", "We march."], unit: ["Unit ready, comrade.", "New recruit ready.", "Reporting for duty."], ready: ["Construction complete, comrade.", "Structure ready."] }, yuri: { sel: ["Yes... master.", "We hear you.", "Command us.", "We obey.", "Listening."], go: ["It shall be done.", "Moving to obey.", "As you wish.", "We advance.", "Your will."], unit: ["A new mind serves.", "Unit ready.", "We have grown."], ready: ["The structure is complete.", "It is finished."] } };
+  var FACTION_VOICE_PARAMS = { allied: { pitch: 1.08, rate: 1.05, hint: /en-US|en_US|US English|Samantha|Google US/i }, soviet: { pitch: 0.72, rate: 0.9, hint: /en-GB|en_GB|UK English|Daniel|Male/i }, yuri: { pitch: 1.3, rate: 0.82, hint: /en-IN|en_IN|Whisper|Zira|India/i } };
+  var VOICE_LIST = [];
+  function refreshVoiceList() {
+    try {
+      VOICE_LIST = speechSynthesis.getVoices() || [];
+    } catch (e) {
+    }
+  }
+  try {
+    "undefined" != typeof speechSynthesis && (refreshVoiceList(), speechSynthesis.onvoiceschanged = refreshVoiceList);
+  } catch (e) {
+  }
+  var lastVoiceT = 0;
+  var voicesEnabled = (() => {
+    try {
+      return "0" !== localStorage.getItem("ifr_voices");
+    } catch (e) {
+      return true;
+    }
+  })();
+  function setVoicesEnabled(v) {
+    voicesEnabled = v;
+    try {
+      localStorage.setItem("ifr_voices", v ? "1" : "0");
+    } catch (e) {
+    }
+  }
+  function playVoiceLine(fac, category) {
+    if (!voicesEnabled || muted || sfxVol <= 0) return;
+    if ("undefined" == typeof speechSynthesis) return;
+    const now = performance.now();
+    if (now - lastVoiceT < 900) return;
+    lastVoiceT = now;
+    const lines = VOICE_LINES[fac] && VOICE_LINES[fac][category];
+    if (!lines || !lines.length) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(lines[Math.floor(Math.random() * lines.length)]), params = FACTION_VOICE_PARAMS[fac] || FACTION_VOICE_PARAMS.allied;
+      u.pitch = params.pitch, u.rate = params.rate, u.volume = Math.min(1, sfxVol);
+      const voice = VOICE_LIST.find((v) => params.hint.test(v.name + " " + v.lang));
+      voice && (u.voice = voice), speechSynthesis.speak(u);
+    } catch (e) {
+    }
+  }
   function sfx(e) {
+    ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e);
     if (!(sfxBudget > 7)) switch (sfxBudget++, e) {
       case "gun":
         tone(1200, 0.04, "square", 0.018, 700);
@@ -9355,7 +9405,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     saveAdminMusic,
     refreshCustomMusic,
     totalTrackCount,
-    trackName
+    trackName,
+    playVoiceLine,
+    setVoicesEnabled
   });
   Object.defineProperties(window, {
     lightningT: { get: () => lightningT, set: (v) => {
@@ -9369,7 +9421,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     sfxVol: { get: () => sfxVol, configurable: true },
     musicVol: { get: () => musicVol, configurable: true },
     trackSel: { get: () => trackSel, configurable: true },
-    CUSTOM_MUSIC: { get: () => CUSTOM_MUSIC, configurable: true }
+    CUSTOM_MUSIC: { get: () => CUSTOM_MUSIC, configurable: true },
+    voicesEnabled: { get: () => voicesEnabled, configurable: true }
   });
 })();
 
@@ -9564,7 +9617,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   Object.assign(window, {
     buildCards,
     updateCards,
-    doDeploy
+    doDeploy,
+    cardClick
+  });
+  Object.defineProperties(window, {
+    cardEls: { get: () => cardEls, configurable: true }
   });
 })();
 
@@ -9572,8 +9629,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 <script>
 (() => {
   // src/ui.ts
-  var KEYBINDS_DEFAULT = { camUp: "w", camDown: "s", camLeft: "a", camRight: "d", attackMove: "q", pause: " " };
-  var KEYBIND_LABEL = { camUp: "Pan Camera Up", camDown: "Pan Camera Down", camLeft: "Pan Camera Left", camRight: "Pan Camera Right", attackMove: "Attack-Move", pause: "Pause / Resume" };
+  var BUILD_HOTKEY_ACTIONS = ["buildSlot1", "buildSlot2", "buildSlot3", "buildSlot4", "buildSlot5", "buildSlot6", "buildSlot7", "buildSlot8"];
+  var KEYBINDS_DEFAULT = { camUp: "w", camDown: "s", camLeft: "a", camRight: "d", attackMove: "q", pause: " ", buildSlot1: "e", buildSlot2: "r", buildSlot3: "t", buildSlot4: "y", buildSlot5: "u", buildSlot6: "i", buildSlot7: "o", buildSlot8: "p" };
+  var KEYBIND_LABEL = { camUp: "Pan Camera Up", camDown: "Pan Camera Down", camLeft: "Pan Camera Left", camRight: "Pan Camera Right", attackMove: "Attack-Move", pause: "Pause / Resume", buildSlot1: "Build Card 1", buildSlot2: "Build Card 2", buildSlot3: "Build Card 3", buildSlot4: "Build Card 4", buildSlot5: "Build Card 5", buildSlot6: "Build Card 6", buildSlot7: "Build Card 7", buildSlot8: "Build Card 8" };
   var KEYBINDS = { ...KEYBINDS_DEFAULT };
   try {
     const saved = JSON.parse(localStorage.getItem("ifr_keybinds") || "null");
@@ -9877,6 +9935,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const t = 50 / cam.z, k = e.key.toLowerCase();
     ("ArrowLeft" === e.key || k === KEYBINDS.camLeft) && (cam.x -= t, cam.y += t), ("ArrowRight" === e.key || k === KEYBINDS.camRight) && (cam.x += t, cam.y -= t), ("ArrowUp" === e.key || k === KEYBINDS.camUp) && (cam.x -= t, cam.y -= t), ("ArrowDown" === e.key || k === KEYBINDS.camDown) && (cam.x += t, cam.y += t), clampCam();
     k === KEYBINDS.attackMove && (amoveAim ? amoveAim = false : S.sel.some((u) => "u" === u.e && 0 === u.owner) ? (amoveAim = true, hint("Attack-move armed \u2014 right-click a destination")) : hint("Select units first"));
+    for (let bi = 0; bi < BUILD_HOTKEY_ACTIONS.length; bi++) if (k === KEYBINDS[BUILD_HOTKEY_ACTIONS[bi]] && cardEls[bi]) {
+      cardClick(cardEls[bi].it);
+      break;
+    }
     if (e.key >= "0" && e.key <= "9") {
       const g = +e.key;
       if (e.ctrlKey || e.metaKey) e.preventDefault(), S.sel.length && (ctrlGroups[g] = S.sel.slice());
@@ -10007,8 +10069,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const trackOpts = ['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + e2.name + "</option>")).concat(CUSTOM_MUSIC.map((e2, t2) => '<option value="' + (MUSIC_TRACKS.length + t2) + '">' + e2.name + " (custom)</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
         const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
-        const kbRows = Object.keys(KEYBINDS).map((action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>").join("");
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
+        const kbRow = (action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>";
+        const kbRows = Object.keys(KEYBINDS).filter((a) => !BUILD_HOTKEY_ACTIONS.includes(a)).map(kbRow).join(""), buildKbRows = BUILD_HOTKEY_ACTIONS.map(kbRow).join("");
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
@@ -10018,7 +10081,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         };
         wireVol("masterVolOpt", setMasterVol), wireVol("sfxVolOpt", (e2) => {
           setSfxVol(e2), sfx("sel");
-        }), wireVol("musicVolOpt", setMusicVol), $("#trackSelOpt").addEventListener("change", (e2) => setTrackSel(+e2.target.value)), $("#settingsClose").addEventListener("click", () => openMenu("pause")), $("#kbReset").addEventListener("click", () => {
+        }), wireVol("musicVolOpt", setMusicVol), $("#trackSelOpt").addEventListener("change", (e2) => setTrackSel(+e2.target.value)), $("#voicesOpt").addEventListener("change", (e2) => setVoicesEnabled(e2.target.checked)), $("#settingsClose").addEventListener("click", () => openMenu("pause")), $("#kbReset").addEventListener("click", () => {
           resetKeybinds(), openMenu("settings");
         }), $("#panelMain").querySelectorAll(".kbBtn").forEach((b) => b.addEventListener("click", () => {
           const action = b.dataset.a;
@@ -10279,6 +10342,182 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     saveMeta,
     packArr,
     unpackArr
+  });
+})();
+
+</script>
+<script>
+(() => {
+  // src/cloud.ts
+  var FIREBASE_CONFIG = {
+    apiKey: "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
+    authDomain: "REPLACE_WITH_YOUR_PROJECT.firebaseapp.com",
+    projectId: "REPLACE_WITH_YOUR_PROJECT",
+    storageBucket: "REPLACE_WITH_YOUR_PROJECT.appspot.com",
+    messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
+    appId: "REPLACE_WITH_YOUR_APP_ID"
+  };
+  var FIREBASE_SDK_VER = "10.14.1";
+  var FIREBASE_CDN = "https://www.gstatic.com/firebasejs/" + FIREBASE_SDK_VER;
+  var CLOUD_SAVE_MAX_BYTES = 9e5;
+  function firebaseConfigured() {
+    return !!FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith("REPLACE_");
+  }
+  var fb = null;
+  var fbLoadPromise = null;
+  var cloudUser = null;
+  var cloudAuthListeners = [];
+  function onCloudAuthChanged(cb) {
+    cloudAuthListeners.push(cb);
+  }
+  async function ensureFirebase() {
+    if (fb) return fb;
+    if (!firebaseConfigured()) throw new Error("Cloud save isn't configured yet.");
+    if (!fbLoadPromise) {
+      fbLoadPromise = (async () => {
+        const [appMod, authMod, fsMod] = await Promise.all([
+          import(
+            /* webpackIgnore: true */
+            FIREBASE_CDN + "/firebase-app.js"
+          ),
+          import(
+            /* webpackIgnore: true */
+            FIREBASE_CDN + "/firebase-auth.js"
+          ),
+          import(
+            /* webpackIgnore: true */
+            FIREBASE_CDN + "/firebase-firestore.js"
+          )
+        ]);
+        const app = appMod.initializeApp(FIREBASE_CONFIG);
+        const auth = authMod.getAuth(app);
+        const db = fsMod.getFirestore(app);
+        authMod.onAuthStateChanged(auth, (u) => {
+          cloudUser = u ? { uid: u.uid, email: u.email, isAnonymous: u.isAnonymous } : null;
+          cloudAuthListeners.forEach((cb) => {
+            try {
+              cb(cloudUser);
+            } catch (e) {
+            }
+          });
+        });
+        fb = { app, auth, db, authMod, fsMod };
+        return fb;
+      })();
+    }
+    return fbLoadPromise;
+  }
+  function cloudCurrentUser() {
+    return cloudUser;
+  }
+  async function cloudSignUp(email, password) {
+    const { auth, authMod } = await ensureFirebase();
+    const cred = await authMod.createUserWithEmailAndPassword(auth, email, password);
+    return cred.user;
+  }
+  async function cloudSignIn(email, password) {
+    const { auth, authMod } = await ensureFirebase();
+    const cred = await authMod.signInWithEmailAndPassword(auth, email, password);
+    return cred.user;
+  }
+  async function cloudSignInGuest() {
+    const { auth, authMod } = await ensureFirebase();
+    const cred = await authMod.signInAnonymously(auth);
+    return cred.user;
+  }
+  async function cloudSignOut() {
+    const { auth, authMod } = await ensureFirebase();
+    await authMod.signOut(auth);
+  }
+  async function cloudSaveSlot(n, data) {
+    const { db, fsMod } = await ensureFirebase();
+    if (!cloudUser) throw new Error("Not signed in");
+    const json = JSON.stringify(data);
+    if (json.length > CLOUD_SAVE_MAX_BYTES) throw new Error("Save is too large for cloud sync (try a smaller/simpler map).");
+    await fsMod.setDoc(fsMod.doc(db, "users", cloudUser.uid, "saves", "slot" + n), { data: json, savedAt: Date.now() });
+  }
+  async function cloudLoadSlot(n) {
+    const { db, fsMod } = await ensureFirebase();
+    if (!cloudUser) throw new Error("Not signed in");
+    const snap = await fsMod.getDoc(fsMod.doc(db, "users", cloudUser.uid, "saves", "slot" + n));
+    if (!snap.exists()) return null;
+    return JSON.parse(snap.data().data);
+  }
+  async function cloudListSaves() {
+    const { db, fsMod } = await ensureFirebase();
+    if (!cloudUser) return {};
+    const snaps = await fsMod.getDocs(fsMod.collection(db, "users", cloudUser.uid, "saves"));
+    const out = {};
+    snaps.forEach((s) => {
+      out[+String(s.id).replace("slot", "")] = s.data().savedAt;
+    });
+    return out;
+  }
+  function showAccount() {
+    $("#menu").classList.remove("hidden");
+    renderAccountScreen();
+  }
+  function renderAccountScreen(status) {
+    if (!firebaseConfigured()) {
+      $("#panelMain").innerHTML = `<h1>ACCOUNT</h1><div class="sub">Cloud save</div><div class="small" style="margin:12px 0;line-height:1.5">Cloud save isn't configured for this build yet - it needs a Firebase project's config wired into src/cloud.ts. Local save/load in the pause menu still works normally.</div><button id="backAccount" ` + SECBTN + ">BACK</button>";
+      $("#backAccount").onclick = showSetup;
+      return;
+    }
+    const u = cloudCurrentUser();
+    if (u) {
+      $("#panelMain").innerHTML = '<h1>ACCOUNT</h1><div class="sub">' + (u.isAnonymous ? "Signed in as guest" : "Signed in as " + u.email) + "</div>" + (status ? '<div class="small" style="margin:8px 0;color:#9db4cc">' + status + "</div>" : "") + `<div class="small" style="margin:10px 0">Cloud saves sync from the SAVE / LOAD GAME screens once you're signed in.</div><button id="acctSignOut" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #a04040;background:#2a1c1c;color:#f0a0a0;font-size:13px">SIGN OUT</button><button id="backAccount" ` + SECBTN + ">BACK</button>";
+      $("#acctSignOut").onclick = async () => {
+        await cloudSignOut();
+        renderAccountScreen("Signed out.");
+      };
+      $("#backAccount").onclick = showSetup;
+      return;
+    }
+    $("#panelMain").innerHTML = '<h1>ACCOUNT</h1><div class="sub">Sign in for cloud save</div>' + (status ? '<div class="small" style="margin:8px 0;color:#ff9a8a">' + status + "</div>" : "") + '<div class="fld"><label>Email</label><input type="email" id="acctEmail" placeholder="you@example.com"></div><div class="fld"><label>Password</label><input type="password" id="acctPassword" placeholder="At least 6 characters"></div><button id="acctSignIn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SIGN IN</button><button id="acctSignUp" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:13px">CREATE ACCOUNT</button><button id="acctGuest" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px dashed #5b74a0;background:transparent;color:#9db4cc;font-size:13px">CONTINUE AS GUEST</button><button id="backAccount" ' + SECBTN + ">BACK</button>";
+    const cred = () => ({ email: $("#acctEmail").value.trim(), password: $("#acctPassword").value });
+    $("#acctSignIn").onclick = async () => {
+      const { email, password } = cred();
+      if (!email || !password) return renderAccountScreen("Enter an email and password.");
+      try {
+        await cloudSignIn(email, password);
+        renderAccountScreen("Signed in.");
+      } catch (e) {
+        renderAccountScreen(e.message || "Sign in failed.");
+      }
+    };
+    $("#acctSignUp").onclick = async () => {
+      const { email, password } = cred();
+      if (!email || !password) return renderAccountScreen("Enter an email and password.");
+      try {
+        await cloudSignUp(email, password);
+        renderAccountScreen("Account created.");
+      } catch (e) {
+        renderAccountScreen(e.message || "Could not create account.");
+      }
+    };
+    $("#acctGuest").onclick = async () => {
+      try {
+        await cloudSignInGuest();
+        renderAccountScreen("Signed in as guest.");
+      } catch (e) {
+        renderAccountScreen(e.message || "Could not sign in as guest.");
+      }
+    };
+    $("#backAccount").onclick = showSetup;
+  }
+  Object.assign(window, {
+    firebaseConfigured,
+    cloudCurrentUser,
+    onCloudAuthChanged,
+    cloudSignUp,
+    cloudSignIn,
+    cloudSignInGuest,
+    cloudSignOut,
+    cloudSaveSlot,
+    cloudLoadSlot,
+    cloudListSaves,
+    showAccount,
+    renderAccountScreen
   });
 })();
 
@@ -11315,13 +11554,33 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     $("#panelMain").innerHTML = "<h1>" + (idx2 + 1) + ". " + m.name.toUpperCase() + '</h1><div class="sub">' + FAC_NAME[fac] + ' COMMAND</div><div class="small" style="margin:10px 0;line-height:1.5">' + m.briefing + '</div><button id="launchM">LAUNCH MISSION</button><button id="backCamp" ' + SECBTN + ">BACK</button>", $("#launchM").onclick = () => launchMission(fac, idx2), $("#backCamp").onclick = () => showMissionList(fac);
   }
   function showSaveLoad(mode) {
+    const cu = cloudCurrentUser();
     const rows = [0, 1, 2].map((n) => {
-      const meta = saveMeta(n), label = meta ? FAC_NAME[meta.fac] + " \u2014 " + (meta.mission || meta.map) + " \u2014 " + Math.floor(meta.time / 60) + "m" : "Empty";
-      return '<button class="saveRow" data-n="' + n + '" style="width:100%;text-align:left;margin-top:6px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px;display:flex;justify-content:space-between"><span>SLOT ' + (n + 1) + "</span><span>" + label + "</span></button>";
+      const meta = saveMeta(n), label = meta ? FAC_NAME[meta.fac] + " \u2014 " + (meta.mission || meta.map) + " \u2014 " + Math.floor(meta.time / 60) + "m" : "Empty", cloudBtn = cu ? '<button class="cloudRow" data-n="' + n + '" style="padding:6px 8px;border-radius:6px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:11px;margin-left:6px;white-space:nowrap">' + ("save" === mode ? "\u2601 UPLOAD" : "\u2601 DOWNLOAD") + "</button>" : "";
+      return '<div style="display:flex;align-items:center;margin-top:6px"><button class="saveRow" data-n="' + n + '" style="flex:1;text-align:left;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px;display:flex;justify-content:space-between"><span>SLOT ' + (n + 1) + "</span><span>" + label + "</span></button>" + cloudBtn + "</div>";
     }).join("");
-    $("#menu").classList.remove("hidden"), $("#panelMain").innerHTML = "<h1>" + ("save" === mode ? "SAVE GAME" : "LOAD GAME") + '</h1><div id="saveRows">' + rows + '</div><button id="backSL" ' + SECBTN + ">BACK</button>", $("#panelMain").querySelectorAll(".saveRow").forEach((b) => b.onclick = () => {
+    $("#menu").classList.remove("hidden"), $("#panelMain").innerHTML = "<h1>" + ("save" === mode ? "SAVE GAME" : "LOAD GAME") + "</h1>" + (firebaseConfigured() ? '<div class="small" style="margin-bottom:6px">' + (cu ? "Signed in" + (cu.isAnonymous ? " as guest" : " as " + cu.email) + " \u2014 cloud buttons sync this slot." : 'Not signed in \u2014 <a href="#" id="slAccountLink" style="color:#8fc4f0">sign in</a> to sync saves to the cloud.') + "</div>" : "") + '<div id="saveRows">' + rows + '</div><button id="backSL" ' + SECBTN + ">BACK</button>", $("#slAccountLink") && ($("#slAccountLink").onclick = (e) => {
+      e.preventDefault(), showAccount();
+    }), $("#panelMain").querySelectorAll(".saveRow").forEach((b) => b.onclick = () => {
       const n = +b.dataset.n;
       "save" === mode ? (localStorage.setItem("ifr_save" + n, JSON.stringify(serializeGame())), hint("Saved to slot " + (n + 1)), showSaveLoad("save")) : saveMeta(n) ? loadSlot(n) : hint("Slot " + (n + 1) + " is empty");
+    }), $("#panelMain").querySelectorAll(".cloudRow").forEach((b) => b.onclick = async () => {
+      const n = +b.dataset.n;
+      b.disabled = true, b.textContent = "...";
+      try {
+        if ("save" === mode) {
+          const s = localStorage.getItem("ifr_save" + n);
+          if (!s) return hint("Slot " + (n + 1) + " is empty \u2014 save locally first"), b.disabled = false, void (b.textContent = "\u2601 UPLOAD");
+          await cloudSaveSlot(n, JSON.parse(s)), hint("Uploaded slot " + (n + 1) + " to the cloud");
+        } else {
+          const data = await cloudLoadSlot(n);
+          if (!data) return hint("No cloud save in that slot"), b.disabled = false, void (b.textContent = "\u2601 DOWNLOAD");
+          localStorage.setItem("ifr_save" + n, JSON.stringify(data)), hint("Downloaded \u2014 loading\u2026"), loadSlot(n);
+        }
+      } catch (e) {
+        hint(e && e.message || "Cloud sync failed");
+      }
+      b.disabled = false, b.textContent = "save" === mode ? "\u2601 UPLOAD" : "\u2601 DOWNLOAD";
     }), $("#backSL").onclick = () => "save" === mode ? openMenu("pause") : showSetup();
   }
   var SETUP_HTML = null;
@@ -11338,6 +11597,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     tb && (tb.onclick = launchTutorial);
     const ab = $("#adminBtn");
     ab && (ab.onclick = showAdmin);
+    const acb = $("#accountBtn");
+    acb && (acb.onclick = showAccount);
   }
   function wallNeighborMask(tx, ty, owner) {
     let m = 0;

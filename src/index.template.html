@@ -539,7 +539,7 @@ body.fps #mmWrap{opacity:.55}
       <div class="fld"><label>Map</label><select id="mapSel"></select><div id="mapPreview"></div></div>
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
     </div>
-    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="adminBtn" style="display:block;margin:10px auto 0;padding:6px 16px;border-radius:20px;border:1px solid #5b5b5b;background:#2a2a2a;color:#9aa0a6;font-size:11px;letter-spacing:.5px">+ IMPORT / CREATE</button>
+    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="accountBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">ACCOUNT</button><button id="adminBtn" style="display:block;margin:10px auto 0;padding:6px 16px;border-radius:20px;border:1px solid #5b5b5b;background:#2a2a2a;color:#9aa0a6;font-size:11px;letter-spacing:.5px">+ IMPORT / CREATE</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
       Tap a build card again to queue more · ▾ expands the build panel.<br>
       <b style="color:#e0b050">Ore:</b> amber ore feeds your economy, pale gem veins pay far more,
@@ -582,6 +582,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 <script>/* BUNDLE:cards */</script>
 <script>/* BUNDLE:ui */</script>
 <script>/* BUNDLE:saveload */</script>
+<script>/* BUNDLE:cloud */</script>
 <script>/* BUNDLE:admin */</script>
 <script>
 "use strict";

@@ -633,6 +633,9 @@ declare global {
   function refreshCustomMusic(): void;
   function totalTrackCount(): number;
   function trackName(i: number): string;
+  function playVoiceLine(fac: string, category: string): void;
+  function setVoicesEnabled(v: boolean): void;
+  var voicesEnabled: boolean;
   var lightningT: number;
   var sfxBudget: number;
   var muted: boolean;
@@ -646,6 +649,8 @@ declare global {
   function buildCards(): void;
   function updateCards(): void;
   function doDeploy(): void;
+  function cardClick(item: { kind: string; key: string; foreign?: boolean }): void;
+  var cardEls: { el: HTMLElement; it: { kind: string; key: string; foreign?: boolean }; pg: HTMLElement; bd: HTMLElement; nm: HTMLElement; qn: HTMLElement }[];
 
   // === ui.js (input, game-setup/pause/settings menus, startGame) ===
   const endPtr: AnyFn;
@@ -685,6 +690,20 @@ declare global {
   function packArr(arr: any): string;
   function unpackArr(b64: string, Ctor: any, len: number): any;
   function showAdmin(): void;
+
+  // === cloud.js ===
+  function firebaseConfigured(): boolean;
+  function cloudCurrentUser(): { uid: string; email: string | null; isAnonymous: boolean } | null;
+  function onCloudAuthChanged(cb: (u: { uid: string; email: string | null; isAnonymous: boolean } | null) => void): void;
+  function cloudSignUp(email: string, password: string): Promise<any>;
+  function cloudSignIn(email: string, password: string): Promise<any>;
+  function cloudSignInGuest(): Promise<any>;
+  function cloudSignOut(): Promise<void>;
+  function cloudSaveSlot(n: number, data: any): Promise<void>;
+  function cloudLoadSlot(n: number): Promise<any>;
+  function cloudListSaves(): Promise<Record<number, number>>;
+  function showAccount(): void;
+  function renderAccountScreen(status?: string): void;
 
   // === campaigns.js ===
   const FAC_NAME: Record<string, string>;
