@@ -702,8 +702,9 @@ declare global {
   function cloudSaveSlot(n: number, data: any): Promise<void>;
   function cloudLoadSlot(n: number): Promise<any>;
   function cloudListSaves(): Promise<Record<number, number>>;
-  function showAccount(): void;
+  function showAccount(firstRun?: boolean): void;
   function renderAccountScreen(status?: string): void;
+  function accountPromptSeen(): boolean;
 
   // === campaigns.js ===
   const FAC_NAME: Record<string, string>;

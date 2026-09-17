@@ -117,29 +117,44 @@ async function cloudListSaves(): Promise<Record<number, number>> {
 
 // ---------- Account screen ----------
 
-function showAccount() {
+const ACCOUNT_PROMPT_SEEN_KEY = "ifr_acct_prompt_seen";
+function accountPromptSeen() {
+  try { return !!localStorage.getItem(ACCOUNT_PROMPT_SEEN_KEY); } catch (e) { return true; }
+}
+function markAccountPromptSeen() {
+  try { localStorage.setItem(ACCOUNT_PROMPT_SEEN_KEY, "1"); } catch (e) {}
+}
+let isFirstRunPrompt = false;
+function showAccount(firstRun?: boolean) {
+  isFirstRunPrompt = !!firstRun;
   $("#menu").classList.remove("hidden");
   renderAccountScreen();
 }
+function backFromAccount() {
+  isFirstRunPrompt && markAccountPromptSeen();
+  showSetup();
+}
 function renderAccountScreen(status?: string) {
+  const skipBtn = isFirstRunPrompt ? '<button id="acctSkip" style="width:100%;margin-top:8px;padding:9px;border-radius:8px;border:1px dashed #5b5b5b;background:transparent;color:#9aa0a6;font-size:12px">SKIP FOR NOW</button>' : "";
   if (!firebaseConfigured()) {
     $("#panelMain").innerHTML =
       '<h1>ACCOUNT</h1><div class="sub">Cloud save</div>' +
       '<div class="small" style="margin:12px 0;line-height:1.5">Cloud save isn\'t configured for this build yet - it needs a Firebase project\'s config wired into src/cloud.ts. Local save/load in the pause menu still works normally.</div>' +
-      '<button id="backAccount" ' + SECBTN + '>BACK</button>';
-    $("#backAccount").onclick = showSetup;
+      '<button id="backAccount" ' + SECBTN + '>' + (isFirstRunPrompt ? "CONTINUE" : "BACK") + '</button>';
+    $("#backAccount").onclick = backFromAccount;
     return;
   }
   const u = cloudCurrentUser();
   if (u) {
+    isFirstRunPrompt && markAccountPromptSeen();
     $("#panelMain").innerHTML =
       '<h1>ACCOUNT</h1><div class="sub">' + (u.isAnonymous ? "Signed in as guest" : "Signed in as " + u.email) + '</div>' +
       (status ? '<div class="small" style="margin:8px 0;color:#9db4cc">' + status + '</div>' : '') +
       '<div class="small" style="margin:10px 0">Cloud saves sync from the SAVE / LOAD GAME screens once you\'re signed in.</div>' +
       '<button id="acctSignOut" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #a04040;background:#2a1c1c;color:#f0a0a0;font-size:13px">SIGN OUT</button>' +
-      '<button id="backAccount" ' + SECBTN + '>BACK</button>';
+      '<button id="backAccount" ' + SECBTN + '>' + (isFirstRunPrompt ? "CONTINUE" : "BACK") + '</button>';
     $("#acctSignOut").onclick = async () => { await cloudSignOut(); renderAccountScreen("Signed out."); };
-    $("#backAccount").onclick = showSetup;
+    $("#backAccount").onclick = backFromAccount;
     return;
   }
   $("#panelMain").innerHTML =
@@ -150,7 +165,7 @@ function renderAccountScreen(status?: string) {
     '<button id="acctSignIn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SIGN IN</button>' +
     '<button id="acctSignUp" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:13px">CREATE ACCOUNT</button>' +
     '<button id="acctGuest" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px dashed #5b74a0;background:transparent;color:#9db4cc;font-size:13px">CONTINUE AS GUEST</button>' +
-    '<button id="backAccount" ' + SECBTN + '>BACK</button>';
+    '<button id="backAccount" ' + SECBTN + '>' + (isFirstRunPrompt ? "SIGN IN LATER" : "BACK") + '</button>' + skipBtn;
   const cred = () => ({ email: ($("#acctEmail") as HTMLInputElement).value.trim(), password: ($("#acctPassword") as HTMLInputElement).value });
   $("#acctSignIn").onclick = async () => {
     const { email, password } = cred();
@@ -168,12 +183,13 @@ function renderAccountScreen(status?: string) {
     try { await cloudSignInGuest(); renderAccountScreen("Signed in as guest."); }
     catch (e: any) { renderAccountScreen(e.message || "Could not sign in as guest."); }
   };
-  $("#backAccount").onclick = showSetup;
+  $("#backAccount").onclick = backFromAccount;
+  $("#acctSkip") && ($("#acctSkip").onclick = backFromAccount);
 }
 
 Object.assign(window, {
   firebaseConfigured, cloudCurrentUser, onCloudAuthChanged,
   cloudSignUp, cloudSignIn, cloudSignInGuest, cloudSignOut,
   cloudSaveSlot, cloudLoadSlot, cloudListSaves,
-  showAccount, renderAccountScreen,
+  showAccount, renderAccountScreen, accountPromptSeen,
 });
