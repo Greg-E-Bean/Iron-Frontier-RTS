@@ -8628,14 +8628,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       cyl(7, 3, -half + 8, 4, floorZ, 4479076, im.trim), box(9, 1, 10, -half + 8, 0, floorZ + 3, 4479076), cyl(7, 3, -half + 32, 26, floorZ, 4479076, im.trim), box(9, 1, 10, -half + 32, 30, floorZ + 3, 4479076);
       cyl(4, 10, -half + 8, 26, floorZ, 5913642, im.trim), sph(7, -half + 8, 26, floorZ + 10, 3173434), sph(5, -half + 6, 28, floorZ + 15, 3173434);
     } else if ("civ5" === key) {
-      box(19, 12, 4, -half + 15, -half + 14, floorZ, 6044193, im.trim), box(17, 10, 7, -half + 15, -half + 14, floorZ + 4, 13222566), box(17, 4, 3, -half + 15, -half + 18, floorZ + 11, 9187119);
-      box(11, 10, ROOM_H - 16, half - 11, -half + 11, floorZ, 6044193, im.trim);
-      cyl(5, 9, half - 13, half - 13, floorZ, 2763306, im.trim), cyl(1.3, ROOM_H - 13, half - 13, half - 13, floorZ + 9, 4737096, metalMat(4737096));
-      box(10, 8, 16, 0, -9, floorZ, 8016432, im.trim), cyl(2.2, 14, -5, -9, floorZ, 7031343, im.trim), cyl(2.2, 14, 5, -9, floorZ, 7031343, im.trim), cyl(2.2, 14, 0, -16, floorZ, 7031343, im.trim);
-      box(1, half * 1.4, 1, -half * 0.4, 0, floorZ + ROOM_H - 16, 3815994, metalMat(3815994));
-      for (const [cz, cc] of [[-half * 0.4, 3824268], [0, 15394e3], [half * 0.4, 9187119]]) box(6, 0.4, 9, -half * 0.4, cz, floorZ + ROOM_H - 25, cc);
-      const rug = new THREE.Mesh(new THREE.PlaneGeometry(14, 20), propMat(8006957));
-      rug.rotation.x = -Math.PI / 2, rug.position.set(0, floorZ + 0.4, 0), rug.renderOrder = ro + 1, g.add(rug);
+      box(7, 6, 11, -25, -24, floorZ, 2829099, metalMat(2829099)), cyl(1, 22, -25, -24, floorZ + 11, 3815994, metalMat(3815994));
+      box(13, 6, 8, -25, -10, floorZ, 7029795, im.trim), box(13, 6, 0.6, -25, -10, floorZ + 8, 9132587);
+      cyl(2.5, 2, -19, -9, floorZ + 8, 15263976, im.trim), sph(1.3, -16, -9, floorZ + 9, 3829413);
+      box(9, 9, 1, -14, -20, floorZ + 9, 9132587, im.trim);
+      for (const [lx, lz] of [[-18, -24], [-10, -24], [-18, -16], [-10, -16]]) cyl(0.4, 9, lx, lz, floorZ, 9132587, im.trim);
+      for (const cx of [-18, -10]) box(5, 5, 6, cx, -27, floorZ, 9132587, im.trim);
+      box(15, 6, 7, -22, 10, floorZ, 8010566, im.trim), box(15, 1, 2, -22, 7, floorZ + 6, 4861722);
+      box(7, 7, 7, -9, 18, floorZ, 4876938, im.trim);
+      box(7, 5, 3, -18, 18, floorZ + 3, 7029795, im.trim);
+      const rug = new THREE.Mesh(new THREE.PlaneGeometry(14, 18), propMat(3107642));
+      rug.rotation.x = -Math.PI / 2, rug.position.set(-18, floorZ + 0.4, 13), rug.renderOrder = ro + 1, g.add(rug);
+      box(14, 20, 3, 20, -6, floorZ, 2829099, metalMat(2829099)), box(13, 19, 2.5, 20, -6, floorZ + 3, 14736584), box(5, 4, 2, 20, -14, floorZ + 6, 16117984), box(13, 9, 1, 20, 0, floorZ + 6.5, 9120812);
+      box(9, 6, 18, 26, 20, floorZ, 5913114, im.trim);
+      box(5, 5, 6, 12, -6, floorZ, 7029795, im.trim), cyl(1, 4, 12, -6, floorZ + 6, 3815994, metalMat(3815994)), sph(2, 12, -6, floorZ + 10, 16107898, emisMat(16107898));
+      box(0.6, 10, 16, half - 0.6, 20, floorZ + 16, 4861722, im.trim), box(0.4, 8, 14, half - 0.8, 20, floorZ + 16, 12113120, metalMat(12113120));
+      box(50, 0.5, 0.5, 0, -28, floorZ + 45, 3815994, metalMat(3815994));
+      box(3, 1, 5, -15, -28, floorZ + 38, 13213856, im.trim), box(3, 1, 5, 0, -28, floorZ + 38, 10533065, im.trim), box(3, 1, 4, 15, -28, floorZ + 37, 13224352, im.trim);
     } else if ("civ6" === key) {
       box(half * 2 - 16, 7, 3, 0, -half + 10, floorZ, 8016432, im.trim);
       box(6, 4, 2, -half + 20, -half + 10, floorZ + 3, 7031343, im.trim), cyl(1.6, 3, -half + 20, -half + 10, floorZ + 5, 12092939, metalMat(12092939));
