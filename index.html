@@ -8646,22 +8646,47 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       box(50, 0.5, 0.5, 0, -28, floorZ + 45, 3815994, metalMat(3815994));
       box(3, 1, 5, -15, -28, floorZ + 38, 13213856, im.trim), box(3, 1, 5, 0, -28, floorZ + 38, 10533065, im.trim), box(3, 1, 4, 15, -28, floorZ + 37, 13224352, im.trim);
     } else if ("civ6" === key) {
-      box(half * 2 - 16, 7, 3, 0, -half + 10, floorZ, 8016432, im.trim);
-      box(6, 4, 2, -half + 20, -half + 10, floorZ + 3, 7031343, im.trim), cyl(1.6, 3, -half + 20, -half + 10, floorZ + 5, 12092939, metalMat(12092939));
-      for (const [px, pz] of [[-half + 12, -half + 22], [-half + 12, -half + 34], [half - 12, -half + 22]]) box(9, 9, 9, px, pz, floorZ, 8016432, im.trim);
-      for (const [px, pz] of [[half - 13, -half + 34], [half - 13, -half + 46]]) cyl(6, 14, px, pz, floorZ, 7029795, im.trim);
-      for (const [cx, cc] of [[-half + 14, 4165439], [-half + 22, 11680314], [-half + 30, 14845739]]) sph(3, cx, half - 16, floorZ, cc);
-      box(1, 1, 22, 0, -half + 14, floorZ + 26, 4737096, metalMat(4737096));
-      for (const cz of [-half + 11, -half + 14, -half + 17]) sph(1.6, 0, cz, floorZ + 6, 14206090);
-    } else if ("civ8" === key) {
-      box(half * 2 - 20, 6, 15, 0, -half + 9, floorZ, 5912608, im.trim), box(half * 2 - 24, 3, 20, 0, -half + 7, floorZ + 15, 4007959, im.trim);
-      for (const [bx, bc] of [[-half + 10, 3038271], [-half + 2, 6044186], [half * 0.1, 3038271], [half * 0.2, 6044186], [half * 0.3, 3038271]]) box(2, 2, 5, bx, -half + 7, floorZ + 18, bc);
-      for (const [cx, cz] of [[-half * 0.56, -half * 0.25], [half * 0.44, -half * 0.31]]) {
-        cyl(8, 3, cx, cz, floorZ, 8016432, im.trim);
-        for (const [sx, sz] of [[cx - 8, cz], [cx + 8, cz], [cx, cz - 8]]) cyl(2.4, 7, sx, sz, floorZ, 7031343, im.trim);
+      for (const [sx, awn] of [[-20, 9186600], [0, 3628855], [20, 9861190]]) {
+        box(16, 6, 10, sx, -27, floorZ, 7029795, im.trim), box(17, 6.5, 1, sx, -27, floorZ + 10, 9132587);
+        box(15, 3, 18, sx, -30.5, floorZ, 7029795, im.trim), box(14, 2.5, 0.8, sx, -29.5, floorZ + 8, 9132587), box(14, 2.5, 0.8, sx, -29.5, floorZ + 14, 9132587);
+        box(5, 5, 4, sx - 4, -26, floorZ + 10, 9201985, im.trim), box(5, 5, 4, sx + 4, -26, floorZ + 10, 6572845, im.trim);
+        cyl(1, 30, sx - 8, -24, floorZ, 5258275, im.trim), cyl(1, 30, sx + 8, -24, floorZ, 5258275, im.trim);
+        box(18, 10, 1, sx, -20, floorZ + 30, awn);
       }
-      for (const [px, pz] of [[half - 12, half - 12], [half - 12, half - 22]]) cyl(6, 14, px, pz, floorZ, 7029795, im.trim);
-      box(16, 10, 3, -half + 16, half - 14, floorZ, 9079430, im.trim), box(9, 5, 10, -half + 16, half - 14, floorZ + 3, 2829099), sph(3, -half + 16, half - 14, floorZ + 8, 16742953, emisMat(16742953));
+      box(0.3, 0.3, 10, 0, -20, floorZ + 22, 5258275, im.trim);
+      for (const [dx, pc] of [[-6, 11152685], [0, 13137960], [6, 13808700]]) sph(2, dx, -20, floorZ + 21, pc);
+      for (const [bx, bz] of [[10, 10], [16, 10], [13, 16]]) {
+        cyl(5, 12, bx, bz, floorZ, 472403, im.trim), cyl(5.2, 1, bx, bz, floorZ + 2, 3946290, metalMat(3946290)), cyl(5.2, 1, bx, bz, floorZ + 9, 3946290, metalMat(3946290));
+      }
+      box(16, 10, 3, -14, 12, floorZ + 7, 7887415, im.trim), cyl(3, 2, -18, 10, floorZ + 2, 3616035, im.trim), cyl(3, 2, -10, 10, floorZ + 2, 3616035, im.trim), cyl(3, 2, -18, 15, floorZ + 2, 3616035, im.trim), cyl(3, 2, -10, 15, floorZ + 2, 3616035, im.trim);
+      for (const [px, pz, pc] of [[-18, 10, 13137960], [-14, 11, 11152685], [-10, 13, 6259255], [-16, 14, 13808700], [-12, 10, 13137960]]) sph(2, px, pz, floorZ + 10, pc);
+      box(9, 9, 7, -half + 10, half - 14, floorZ, 9201985, im.trim), box(6, 6, 6, -half + 10, half - 14, floorZ + 7, 6572845, im.trim);
+      box(9, 9, 9, half - 11, half - 12, floorZ, 10521705, im.trim);
+    } else if ("civ8" === key) {
+      box(60, 10, 10, 0, -27, floorZ, 7228205, im.trim), box(62, 10.5, 1, 0, -27, floorZ + 10, 4928025);
+      box(58, 3, 18, 0, -30.5, floorZ, 4928025, im.trim);
+      for (const sh of [8, 14]) box(56, 2.5, 0.6, 0, -29.5, floorZ + sh, 4928025);
+      for (let i = 0; i < 10; i++) {
+        const bx = -25 + i * 5.5, bm = [2641972, 5255706, 9874080][i % 3];
+        cyl(1.2, 5, bx, -29, floorZ + 9, bm, im.trim), cyl(1.2, 5, bx, -29, floorZ + 15, bm, im.trim);
+      }
+      for (const sx of [-24, -12, 0, 12, 24]) cyl(4, 3, sx, -19, floorZ + 3, 6571565, im.trim), cyl(1, 18, sx, -19, floorZ, 6571565, im.trim);
+      for (const [bx, bz] of [[24, -16], [30, -16], [27, -9]]) {
+        cyl(6, 14, bx, bz, floorZ, 472403, im.trim), cyl(6.2, 1, bx, bz, floorZ + 2, 3946290, metalMat(3946290)), cyl(6.2, 1, bx, bz, floorZ + 11, 3946290, metalMat(3946290));
+      }
+      for (const [tx, tz] of [[-16, 4], [16, 4], [-16, 20]]) {
+        cyl(1.2, 16, tx, tz, floorZ, 6900525, im.trim), cyl(10, 1.5, tx, tz, floorZ + 16, 6900525, im.trim);
+        for (let i = 0; i < 4; i++) {
+          const a = Math.PI / 2 * i + Math.PI / 4, sx = tx + 14 * Math.cos(a), sz = tz + 14 * Math.sin(a);
+          cyl(2.5, 2, sx, sz, floorZ + 9, 6571565, im.trim), cyl(0.6, 9, sx, sz, floorZ, 6571565, im.trim);
+        }
+      }
+      box(1.5, 16, 32, half - 0.5, 20, floorZ, 7235940, im.trim), box(10, 1.5, 32, half - 11, 10, floorZ, 7235940, im.trim), box(10, 1.5, 32, half - 11, 28, floorZ, 7235940, im.trim), box(10, 16, 3, half - 11, 20, floorZ + 29, 7235940, im.trim), box(7, 10, 4, half - 8, 20, floorZ + 3, 15104040, emisMat(15104040));
+      cyl(0.6, 20, 0, 0, floorZ + 30, 2631203, metalMat(2631203)), cyl(9, 1.2, 0, 0, floorZ + 28, 2631203, metalMat(2631203));
+      for (let i = 0; i < 6; i++) {
+        const a = Math.PI / 3 * i, cx = 8 * Math.cos(a), cz = 8 * Math.sin(a);
+        cyl(0.5, 4, cx, cz, floorZ + 28, 2631203, metalMat(2631203)), cyl(0.7, 2, cx, cz, floorZ + 32, 15774800, emisMat(15774800));
+      }
     } else if (tall) {
       for (const [px, pz] of [[-half + 13, -half + 13], [half - 13, -half + 13], [-half + 13, half - 13], [half - 13, half - 13]]) box(8, 8, ROOM_H - 4, px, pz, floorZ, 4210752, im.trim);
       box(16, 10, 10, 0, -half + 14, floorZ, 5333596), box(14, 20, 3, 0, half - 16, floorZ, 6250335);
