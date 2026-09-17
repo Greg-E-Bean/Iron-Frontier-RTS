@@ -4376,6 +4376,28 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [];
     return e.push(P_(CYL(1.4, 1.6, 10), 0, 0, 0, "concrete2")), e.push(P_(CYL(0.75, 17, 8), 0, 0, 1.6, "darkmetal")), e.push(P_(BOXM(4.2, 1, 0.9, 0.25), 1.6, 0, 18.2, "darkmetal")), e.push(P_(BOXM(2.6, 1.8, 1, 0.3), 3.4, 0, 17.4, "lightY", { e: 1 })), e;
   }
+  function churchModel() {
+    const e = [], NW = 36, ND = 56, WH = 18, TW = 14, TH = 58, SPH = 20, l = 3.6;
+    e.push(P_(BOXM(NW, ND, WH, 0.6), 0, 0, l, "rock2"));
+    const RW = NW + 4, RD = ND + 4, RIDGE = 16, EAVE = 3, rz = l + WH;
+    e.push(P_(WEDGE(RW / 2, RD, EAVE, RIDGE), -RW / 4, 0, rz, "roof"));
+    e.push(P_(WEDGE(RW / 2, RD, RIDGE, EAVE), RW / 4, 0, rz, "roof"));
+    const TY = -ND / 2 - TW / 2 + 2;
+    e.push(P_(BOXM(TW, TW, TH, 0.5), 0, TY, l, "rock2"));
+    e.push(P_(CONE(TW * 0.62, 0, SPH, 4), 0, TY, l + TH, "roof"));
+    e.push(P_(BOXM(1.1, 1.1, 7, 0.15), 0, TY, l + TH + SPH - 1, "gold"));
+    e.push(P_(BOXM(5, 1.1, 1.1, 0.15), 0, TY, l + TH + SPH + 2.5, "gold"));
+    const DY = TY - TW / 2 - 0.3;
+    e.push(P_(BOXM(6.5, 1, 10, 0.2), 0, DY, l, "wood"));
+    e.push(P_(BOXM(4.4, 1, 1, 0.15), 0, DY - 0.15, l + 10.8, "gold"));
+    for (const y of [-18, 0, 18]) {
+      e.push(P_(BOXM(1, 4, 6.5, 0.15), -NW / 2 - 0.2, y, l + 7, "glass", { e: 1 })), e.push(P_(BOXM(1, 4, 6.5, 0.15), NW / 2 + 0.2, y, l + 7, "glass", { e: 1 }));
+    }
+    for (const y of [-24, -9, 9, 24]) {
+      e.push(P_(BOXM(2.6, 4.4, WH, 0.25), -NW / 2 - 1.3, y, l, "bone")), e.push(P_(BOXM(2.6, 4.4, WH, 0.25), NW / 2 + 1.3, y, l, "bone"));
+    }
+    return e;
+  }
   function towerModel(v) {
     const e = [], w = 26 + 10 * (v % 2), h = 60 + 30 * v, floors = Math.round(h / 9);
     e.push(P_(BOXM(w, w, h, 1.6), 0, 0, 0, v % 2 ? "concrete2" : "dark2"));
@@ -5520,7 +5542,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         tier(n, 0.7 * r, 0.66 * r, 0.36 * r, 0, 0, l, "neutral", "cv2", 0.94), n.push(P_(SLAB(roundRectProfile(0.78 * r, 0.74 * r, 3, 3), 2.4, 0.7, "cv2r"), 0, 0, l + 0.36 * r, "rust")), windows(n, 0.56 * r, 0.5 * r, l + 0.12 * r, 0.09 * r, 1, "glassdark"), n.push(P_(CYL(1.4, 0.14 * r, 10), 0.2 * r, -0.18 * r, l + 0.36 * r + 2.4, "darkmetal"));
         break;
       case "civ4":
-        for (const p of towerModel(1)) n.push(p);
+        for (const p of churchModel()) n.push(p);
         break;
       case "civ5":
         for (const p of towerModel(2)) n.push(p);
@@ -5849,6 +5871,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     fallModel,
     lampModel,
     towerModel,
+    churchModel,
     carModel,
     PROPMODEL,
     craterModel,

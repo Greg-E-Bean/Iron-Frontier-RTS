@@ -340,6 +340,7 @@ declare global {
   const fallModel: AnyFn;
   const lampModel: AnyFn;
   const towerModel: AnyFn;
+  const churchModel: AnyFn;
   const carModel: AnyFn;
   const PROPMODEL: AnyFn;
   const craterModel: AnyFn;
