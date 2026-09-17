@@ -325,7 +325,7 @@ e.push(P_(BOXM(shaftW*.7,3.5,PH-2.5,.5),0,-PD/2+1.8,l+1.2,"glassdark"));
 e.push(P_(BOXM(shaftW*.85,5,1.4,.3),0,-PD/2-1.6,l+PH-2.4,"trim"));
 for(const sx of[-1,1])e.push(P_(CYL(.5,PH-2,8),sx*shaftW*.42,-PD/2-1.6,l,"trim"));
 e.push(P_(BOXM(shaftW,shaftD,shaftH,1.6),0,0,l+PH,"#9c5843"));
-for(let f=0;f<floors;f++){const z=l+PH+3.6+f*fH;windows(e,shaftW*.8,shaftD*.72,z,.1*shaftW,4,"glass"),f%3==2&&e.push(P_(BOXM(shaftW+1,shaftD+1,.7,.2),0,0,z-1.6,"trim"))}
+for(let f=0;f<floors;f++){const z=l+PH+3.6+f*fH;windows(e,shaftW*.98,shaftD*.98,z,.12*shaftW,4,"glass"),f%3==2&&e.push(P_(BOXM(shaftW+1,shaftD+1,.7,.2),0,0,z-1.6,"trim"))}
 e.push(P_(BOXM(shaftW+3,shaftD+3,2.2,.4),0,0,l+TH-2.2,"trim"));
 e.push(P_(BOXM(shaftW*.74,shaftD*.7,3,.5),0,0,l+TH,"concrete2"));
 const wtZ=l+TH+3;
@@ -334,7 +334,7 @@ e.push(P_(CYL(shaftW*.17,7,12),0,0,wtZ+6.4,"wood")),e.push(P_(CONE(shaftW*.2,sha
 return e}
 function tenementModel(r){const e=[],l=3.6,W=.56*r,D=.46*r,floors=5,fH=8,H=floors*fH;
 e.push(P_(BOXM(W,D,H,1.4),0,0,l,"#8a4a38"));
-for(let f=0;f<floors;f++){const z=l+3.6+f*fH;windows(e,W*.82,D*.7,z,.1*W,3,"glass"),e.push(P_(BOXM(W+.6,D+.6,.6,.2),0,0,z-1.6,"trim"))}
+for(let f=0;f<floors;f++){const z=l+3.6+f*fH;windows(e,W*.98,D*.98,z,.12*W,3,"glass"),e.push(P_(BOXM(W+.6,D+.6,.6,.2),0,0,z-1.6,"trim"))}
 e.push(P_(BOXM(W+2,D+2,1.6,.3),0,0,l+H,"trim"));
 const steps=3,stepW=W*.28,stepD=3.2;
 for(let i=0;i<steps;i++){const h=(i+1)*2.2,d=(steps-i)*stepD;e.push(P_(BOXM(stepW,d,h,.2),0,-D/2-d/2,l,"concrete"))}
@@ -356,16 +356,16 @@ e.push(P_(BOXM(stallW*.5,.15,2,.1),cx,D*.4,l+backH+1,"darkmetal"));
 crate(e,cx-stallW*.22,D*.3,l,3.4,i%2?"olive":"rust",.2*i);
 i%2==0&&barrel(e,cx+stallW*.24,D*.3,l)}
 return e}
-function tavernModel(r){const e=[],l=3.6,W=.62*r,D=.5*r,GH=8,UH=7;
+function tavernModel(r){const e=[],l=3.6,W=.62*r,D=.5*r,GH=11,UH=10;
 e.push(P_(BOXM(W,D,GH,1.2),0,0,l,"rock2"));
-windows(e,W*.7,D*.7,l+2.6,.1*W,2,"lightY");
+windows(e,W*.96,D*.96,l+2.6,.12*W,2,"lightY");
 e.push(P_(BOXM(W+2,D+2,.8,.3),0,0,l+GH,"trim"));
-const uw=W*.94,ud=D*.94,uz=l+GH+.8;
+const uw=W*.78,ud=D*.78,uz=l+GH+.8;
 e.push(P_(BOXM(uw,ud,UH,.8),0,0,uz,"#d8c9a3"));
 for(const sx of[-1,1])e.push(P_(BOXM(.6,ud+.4,UH,.1),sx*uw*.42,0,uz,"#3a2a1e")),e.push(P_(BOXM(uw+.4,.6,UH,.1),0,sx*ud*.42,uz,"#3a2a1e"));
 e.push(P_(BOXM(uw+.4,ud+.4,.6,.1),0,0,uz+UH*.5,"#3a2a1e"));
-windows(e,uw*.72,ud*.72,uz+2.5,.1*uw,2,"lightY");
-const rz=uz+UH,RW=uw+4,RD=ud+4,RIDGE=10,EAVE=2;
+windows(e,uw*.96,ud*.96,uz+2.5,.12*uw,2,"lightY");
+const rz=uz+UH,RW=uw+2,RD=ud+2,RIDGE=15,EAVE=1;
 e.push(P_(WEDGE(RW/2,RD,EAVE,RIDGE),-RW/4,0,rz,"roof")),e.push(P_(WEDGE(RW/2,RD,RIDGE,EAVE),RW/4,0,rz,"roof"));
 e.push(P_(BOXM(3,3,7,.3),W*.3,D*.28,uz+UH,"rock2"));
 const doorY=-D/2-.2;

@@ -4417,7 +4417,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.push(P_(BOXM(shaftW, shaftD, shaftH, 1.6), 0, 0, l + PH, "#9c5843"));
     for (let f = 0; f < floors; f++) {
       const z = l + PH + 3.6 + f * fH;
-      windows(e, shaftW * 0.8, shaftD * 0.72, z, 0.1 * shaftW, 4, "glass"), f % 3 == 2 && e.push(P_(BOXM(shaftW + 1, shaftD + 1, 0.7, 0.2), 0, 0, z - 1.6, "trim"));
+      windows(e, shaftW * 0.98, shaftD * 0.98, z, 0.12 * shaftW, 4, "glass"), f % 3 == 2 && e.push(P_(BOXM(shaftW + 1, shaftD + 1, 0.7, 0.2), 0, 0, z - 1.6, "trim"));
     }
     e.push(P_(BOXM(shaftW + 3, shaftD + 3, 2.2, 0.4), 0, 0, l + TH - 2.2, "trim"));
     e.push(P_(BOXM(shaftW * 0.74, shaftD * 0.7, 3, 0.5), 0, 0, l + TH, "concrete2"));
@@ -4431,7 +4431,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.push(P_(BOXM(W, D, H, 1.4), 0, 0, l, "#8a4a38"));
     for (let f = 0; f < floors; f++) {
       const z = l + 3.6 + f * fH;
-      windows(e, W * 0.82, D * 0.7, z, 0.1 * W, 3, "glass"), e.push(P_(BOXM(W + 0.6, D + 0.6, 0.6, 0.2), 0, 0, z - 1.6, "trim"));
+      windows(e, W * 0.98, D * 0.98, z, 0.12 * W, 3, "glass"), e.push(P_(BOXM(W + 0.6, D + 0.6, 0.6, 0.2), 0, 0, z - 1.6, "trim"));
     }
     e.push(P_(BOXM(W + 2, D + 2, 1.6, 0.3), 0, 0, l + H, "trim"));
     const steps = 3, stepW = W * 0.28, stepD = 3.2;
@@ -4469,16 +4469,16 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return e;
   }
   function tavernModel(r) {
-    const e = [], l = 3.6, W = 0.62 * r, D = 0.5 * r, GH = 8, UH = 7;
+    const e = [], l = 3.6, W = 0.62 * r, D = 0.5 * r, GH = 11, UH = 10;
     e.push(P_(BOXM(W, D, GH, 1.2), 0, 0, l, "rock2"));
-    windows(e, W * 0.7, D * 0.7, l + 2.6, 0.1 * W, 2, "lightY");
+    windows(e, W * 0.96, D * 0.96, l + 2.6, 0.12 * W, 2, "lightY");
     e.push(P_(BOXM(W + 2, D + 2, 0.8, 0.3), 0, 0, l + GH, "trim"));
-    const uw = W * 0.94, ud = D * 0.94, uz = l + GH + 0.8;
+    const uw = W * 0.78, ud = D * 0.78, uz = l + GH + 0.8;
     e.push(P_(BOXM(uw, ud, UH, 0.8), 0, 0, uz, "#d8c9a3"));
     for (const sx of [-1, 1]) e.push(P_(BOXM(0.6, ud + 0.4, UH, 0.1), sx * uw * 0.42, 0, uz, "#3a2a1e")), e.push(P_(BOXM(uw + 0.4, 0.6, UH, 0.1), 0, sx * ud * 0.42, uz, "#3a2a1e"));
     e.push(P_(BOXM(uw + 0.4, ud + 0.4, 0.6, 0.1), 0, 0, uz + UH * 0.5, "#3a2a1e"));
-    windows(e, uw * 0.72, ud * 0.72, uz + 2.5, 0.1 * uw, 2, "lightY");
-    const rz = uz + UH, RW = uw + 4, RD = ud + 4, RIDGE = 10, EAVE = 2;
+    windows(e, uw * 0.96, ud * 0.96, uz + 2.5, 0.12 * uw, 2, "lightY");
+    const rz = uz + UH, RW = uw + 2, RD = ud + 2, RIDGE = 15, EAVE = 1;
     e.push(P_(WEDGE(RW / 2, RD, EAVE, RIDGE), -RW / 4, 0, rz, "roof")), e.push(P_(WEDGE(RW / 2, RD, RIDGE, EAVE), RW / 4, 0, rz, "roof"));
     e.push(P_(BOXM(3, 3, 7, 0.3), W * 0.3, D * 0.28, uz + UH, "rock2"));
     const doorY = -D / 2 - 0.2;
@@ -8622,7 +8622,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       box(19, 12, 4, -half + 15, -half + 14, floorZ, 6044193, im.trim), box(17, 10, 7, -half + 15, -half + 14, floorZ + 4, 13222566), box(17, 4, 3, -half + 15, -half + 18, floorZ + 11, 9187119);
       box(11, 10, ROOM_H - 16, half - 11, -half + 11, floorZ, 6044193, im.trim);
       cyl(5, 9, half - 13, half - 13, floorZ, 2763306, im.trim), cyl(1.3, ROOM_H - 13, half - 13, half - 13, floorZ + 9, 4737096, metalMat(4737096));
-      box(11, 9, 16, half * 0.35, half - 17, floorZ, 8016432, im.trim), cyl(2.2, 14, half * 0.35 - 6, half - 9, floorZ, 7031343, im.trim), cyl(2.2, 14, half * 0.35 + 6, half - 9, floorZ, 7031343, im.trim);
+      box(10, 8, 16, 0, -9, floorZ, 8016432, im.trim), cyl(2.2, 14, -5, -9, floorZ, 7031343, im.trim), cyl(2.2, 14, 5, -9, floorZ, 7031343, im.trim), cyl(2.2, 14, 0, -16, floorZ, 7031343, im.trim);
       box(1, half * 1.4, 1, -half * 0.4, 0, floorZ + ROOM_H - 16, 3815994, metalMat(3815994));
       for (const [cz, cc] of [[-half * 0.4, 3824268], [0, 15394e3], [half * 0.4, 9187119]]) box(6, 0.4, 9, -half * 0.4, cz, floorZ + ROOM_H - 25, cc);
       const rug = new THREE.Mesh(new THREE.PlaneGeometry(14, 20), propMat(8006957));
@@ -8730,13 +8730,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const hw = half - 8, gap = STAIR_GAP, zStart = hw - gap, cd = half - 2 + zStart;
       const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, cd), im.ceil);
       ceil.rotation.x = Math.PI / 2, ceil.position.set(0, ceilZ, (zStart - (half - 2)) / 2), ceil.renderOrder = ro + 1, g.add(ceil);
-      const steps = 10;
+      const steps = 8, stepD = gap / steps, stepH = (ROOF_Z - floorZ) / steps;
       for (let i = 0; i < steps; i++) {
-        const t01 = (i + 0.5) / steps, sz = new THREE.Mesh(new THREE.BoxGeometry(14, 2, gap / steps + 0.4), im.trim);
-        sz.position.set(0, floorZ + t01 * (ROOF_Z - floorZ), zStart + t01 * gap), sz.renderOrder = ro + 1, g.add(sz);
+        const topY = (i + 1) * stepH, z0 = zStart + i * stepD, block = new THREE.Mesh(new THREE.BoxGeometry(16, topY, stepD + 0.15), im.trim);
+        block.position.set(0, floorZ + topY / 2, z0 + stepD / 2), block.renderOrder = ro + 1, g.add(block);
       }
-      const rampAngle = Math.atan2(ROOF_Z - floorZ, gap), rampLen = Math.hypot(gap, ROOF_Z - floorZ), ramp = new THREE.Mesh(new THREE.BoxGeometry(15, 5, rampLen + 6), im.trim);
-      ramp.position.set(0, floorZ + 0.5 * (ROOF_Z - floorZ) - 3, zStart + 0.5 * gap), ramp.rotation.x = -rampAngle, ramp.renderOrder = ro + 1, g.add(ramp);
+      const rampAngle = Math.atan2(ROOF_Z - floorZ, gap), rampLen = Math.hypot(gap, ROOF_Z - floorZ), railH = 8;
+      for (const rx of [-8.5, 8.5]) {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(1, 1, rampLen), im.trim);
+        rail.position.set(rx, floorZ + 0.5 * (ROOF_Z - floorZ) + railH, zStart + 0.5 * gap), rail.rotation.x = -rampAngle, rail.renderOrder = ro + 1, g.add(rail);
+        for (let i = 0; i <= steps; i++) {
+          const t01 = i / steps, post = new THREE.Mesh(new THREE.BoxGeometry(1, railH, 1), im.trim);
+          post.position.set(rx, floorZ + t01 * (ROOF_Z - floorZ) + railH / 2, zStart + t01 * gap), post.renderOrder = ro + 1, g.add(post);
+        }
+      }
       const rf = hw, roof = new THREE.Mesh(new THREE.PlaneGeometry(rf * 2, rf * 2), im.floor);
       roof.rotation.x = -Math.PI / 2, roof.position.y = ROOF_Z, roof.renderOrder = ro + 1, g.add(roof);
       const parH = 8;

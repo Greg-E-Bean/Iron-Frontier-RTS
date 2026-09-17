@@ -218,7 +218,7 @@ function furnishInterior(g,bld,half,floorZ,tall){
     box(19,12,4,-half+15,-half+14,floorZ,6044193,im.trim),box(17,10,7,-half+15,-half+14,floorZ+4,13222566),box(17,4,3,-half+15,-half+18,floorZ+11,9187119);
     box(11,10,ROOM_H-16,half-11,-half+11,floorZ,6044193,im.trim);
     cyl(5,9,half-13,half-13,floorZ,2763306,im.trim),cyl(1.3,ROOM_H-13,half-13,half-13,floorZ+9,4737096,metalMat(4737096));
-    box(11,9,16,half*.35,half-17,floorZ,8016432,im.trim),cyl(2.2,14,half*.35-6,half-9,floorZ,7031343,im.trim),cyl(2.2,14,half*.35+6,half-9,floorZ,7031343,im.trim);
+    box(10,8,16,0,-9,floorZ,8016432,im.trim),cyl(2.2,14,-5,-9,floorZ,7031343,im.trim),cyl(2.2,14,5,-9,floorZ,7031343,im.trim),cyl(2.2,14,0,-16,floorZ,7031343,im.trim);
     box(1,half*1.4,1,-half*.4,0,floorZ+ROOM_H-16,3815994,metalMat(3815994));
     for(const[cz,cc]of[[-half*.4,3824268],[0,15394000],[half*.4,9187119]])box(6,.4,9,-half*.4,cz,floorZ+ROOM_H-25,cc);
     const rug=new THREE.Mesh(new THREE.PlaneGeometry(14,20),propMat(8006957));rug.rotation.x=-Math.PI/2,rug.position.set(0,floorZ+.4,0),rug.renderOrder=ro+1,g.add(rug);
@@ -313,13 +313,20 @@ function ensureInterior(bld){
     const hw=half-8,gap=STAIR_GAP,zStart=hw-gap,cd=half-2+zStart;
     const ceil=new THREE.Mesh(new THREE.PlaneGeometry(half*2-2,cd),im.ceil);
     ceil.rotation.x=Math.PI/2,ceil.position.set(0,ceilZ,(zStart-(half-2))/2),ceil.renderOrder=ro+1,g.add(ceil);
-    const steps=10;
+    const steps=8,stepD=gap/steps,stepH=(ROOF_Z-floorZ)/steps;
     for(let i=0;i<steps;i++){
-      const t01=(i+.5)/steps,sz=new THREE.Mesh(new THREE.BoxGeometry(14,2,gap/steps+.4),im.trim);
-      sz.position.set(0,floorZ+t01*(ROOF_Z-floorZ),zStart+t01*gap),sz.renderOrder=ro+1,g.add(sz);
+      const topY=(i+1)*stepH,z0=zStart+i*stepD,block=new THREE.Mesh(new THREE.BoxGeometry(16,topY,stepD+.15),im.trim);
+      block.position.set(0,floorZ+topY/2,z0+stepD/2),block.renderOrder=ro+1,g.add(block);
     }
-    const rampAngle=Math.atan2(ROOF_Z-floorZ,gap),rampLen=Math.hypot(gap,ROOF_Z-floorZ),ramp=new THREE.Mesh(new THREE.BoxGeometry(15,5,rampLen+6),im.trim);
-    ramp.position.set(0,floorZ+.5*(ROOF_Z-floorZ)-3,zStart+.5*gap),ramp.rotation.x=-rampAngle,ramp.renderOrder=ro+1,g.add(ramp);
+    const rampAngle=Math.atan2(ROOF_Z-floorZ,gap),rampLen=Math.hypot(gap,ROOF_Z-floorZ),railH=8;
+    for(const rx of[-8.5,8.5]){
+      const rail=new THREE.Mesh(new THREE.BoxGeometry(1,1,rampLen),im.trim);
+      rail.position.set(rx,floorZ+.5*(ROOF_Z-floorZ)+railH,zStart+.5*gap),rail.rotation.x=-rampAngle,rail.renderOrder=ro+1,g.add(rail);
+      for(let i=0;i<=steps;i++){
+        const t01=i/steps,post=new THREE.Mesh(new THREE.BoxGeometry(1,railH,1),im.trim);
+        post.position.set(rx,floorZ+t01*(ROOF_Z-floorZ)+railH/2,zStart+t01*gap),post.renderOrder=ro+1,g.add(post);
+      }
+    }
     const rf=hw,roof=new THREE.Mesh(new THREE.PlaneGeometry(rf*2,rf*2),im.floor);
     roof.rotation.x=-Math.PI/2,roof.position.y=ROOF_Z,roof.renderOrder=ro+1,g.add(roof);
     const parH=8;
