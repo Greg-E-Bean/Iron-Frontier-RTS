@@ -981,6 +981,11 @@ function assetPending(key, faction) {
   const cached = _assetCache.get(rkey);
   return cached === "loading" || cached === undefined;
 }
+function assetFailed(key, faction) {
+  const fkey = faction ? key + ":" + faction : null;
+  const rkey = fkey && MODEL_ASSETS[fkey] ? fkey : key;
+  return _assetCache.get(rkey) === "failed";
+}
 
 function thumbCanvas(key, kind, faction, size?) {
   size = size || 48;
@@ -1054,7 +1059,7 @@ Object.assign(window, {
   triGunHead, triAAHead, heliRotor, heliTailRotor,
   BMODEL_, BTURRET_, UMODEL, UTURRET, BMODEL, BTURRET, faceIdx,
   SPRITES, SHADOWS, MAT,
-  registerModelAsset, unregisterModelAsset, getAssetModel, MODEL_ASSETS,
+  registerModelAsset, unregisterModelAsset, getAssetModel, MODEL_ASSETS, assetFailed,
   PILLAR_H, TURRET_RISE,
   thumbCanvas, renderThumbInto,
 });

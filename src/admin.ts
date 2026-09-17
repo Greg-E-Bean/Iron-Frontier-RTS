@@ -71,30 +71,94 @@ function applyAdminAssets() {
 function finiteNum(v) {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
+// A unit has exactly one weapon (its own top-level stats). A building can
+// have zero (conyard, power...), one ("weapon" - most defenses), two
+// ("weapon" + "weapon2" - e.g. the triturret's separate anti-air gun), or a
+// per-faction set ("weapons.<fac>" - only def2/Photon-Arc-Psionic Tower,
+// which bweapon() always resolves from `weapons[fac]` in preference to the
+// generic `weapon` fallback). Each entry here is one independently
+// editable/taggable combat profile.
+function assetStatTargets(key, kind) {
+  const d = kind === "unit" ? UNITS[key] : BLD[key];
+  if (!d) return [];
+  if (kind === "unit") return [{ id: "main", label: null, target: d }];
+  if (d.weapons) {
+    return Object.keys(d.weapons).map(fac => ({ id: "weapons." + fac, label: (FAC_NAME[fac] || fac) + " weapon", target: d.weapons[fac] }));
+  }
+  if (!d.weapon) return [];
+  const out = [{ id: "weapon", label: d.weapon2 ? "Primary weapon" : null, target: d.weapon }];
+  if (d.weapon2) out.push({ id: "weapon2", label: "Secondary weapon (anti-air)", target: d.weapon2 });
+  return out;
+}
 function applyAdminStat(key, ov) {
-  const d = ov.kind === "unit" ? UNITS[key] : BLD[key];
+  const kind = ov.kind === "unit" ? "unit" : "building";
+  const d = kind === "unit" ? UNITS[key] : BLD[key];
   if (!d) return;
   const cost = finiteNum(ov.cost);
   if (cost != null && cost >= 0) d.cost = cost;
   const hp = finiteNum(ov.hp);
   if (hp != null && hp > 0) d.hp = hp;
   if (ov.tab !== undefined) d.tab = ov.tab || null;
-  const target = ov.kind === "unit" ? d : d.weapon;
-  if (target) {
-    const vsInf = finiteNum(ov.vsInf);
-    if (vsInf != null) target.vsInf = vsInf;
-    const vsVeh = finiteNum(ov.vsVeh);
-    if (vsVeh != null) target.vsVeh = vsVeh;
-    const vsBldg = finiteNum(ov.vsBldg);
-    if (vsBldg != null) target.vsBldg = vsBldg;
-    if (ov.aa !== undefined) target.aa = !!ov.aa;
-    const dps = finiteNum(ov.dps);
-    if (dps != null && dps >= 0 && target.rof) target.dmg = dps * target.rof;
+  // Back-compat: saves from before multi-weapon support stored vsInf/vsVeh/
+  // vsBldg/dps/aa flat on ov, always meaning the one editable target of the
+  // time (the unit itself, or a building's primary "weapon").
+  const t = ov.t || (ov.vsInf !== undefined || ov.vsVeh !== undefined || ov.vsBldg !== undefined || ov.dps !== undefined || ov.aa !== undefined
+    ? { [kind === "unit" ? "main" : "weapon"]: { vsInf: ov.vsInf, vsVeh: ov.vsVeh, vsBldg: ov.vsBldg, dps: ov.dps, aa: ov.aa } } : null);
+  if (!t) return;
+  for (const entry of assetStatTargets(key, kind)) {
+    const sub = t[entry.id];
+    if (!sub || !entry.target) continue;
+    const w = entry.target;
+    const vsInf = finiteNum(sub.vsInf);
+    if (vsInf != null) w.vsInf = vsInf;
+    const vsVeh = finiteNum(sub.vsVeh);
+    if (vsVeh != null) w.vsVeh = vsVeh;
+    const vsBldg = finiteNum(sub.vsBldg);
+    if (vsBldg != null) w.vsBldg = vsBldg;
+    if (sub.aa !== undefined) w.aa = !!sub.aa;
+    const dps = finiteNum(sub.dps);
+    if (dps != null && dps >= 0 && w.rof) w.dmg = dps * w.rof;
   }
 }
 function applyAdminStats() {
   const stats = loadAdminStats();
   for (const key of Object.keys(stats)) applyAdminStat(key, stats[key]);
+}
+
+// ---------- Strong/weak-against tags ----------
+// Independent per-category thresholds (not "pick the single dominant one",
+// like the in-game unitRoleTag()) so a multi-weapon entity can show more
+// than one tag at once - e.g. the Iron Rampart/Sentinel Line (triturret)
+// is genuinely both anti-vehicle (its main gun) AND anti-air (weapon2).
+const THREAT_META = {
+  inf: { short: "AI", label: "Infantry", color: "#e0473a" },
+  veh: { short: "AV", label: "Vehicles", color: "#4aa3d9" },
+  bldg: { short: "SG", label: "Structures", color: "#e8c53a" },
+  air: { short: "AA", label: "Air", color: "#b57fe0" },
+};
+function targetTags(target) {
+  const strong = [], weak = [];
+  if (!target || !(target.dmg > 0) && !target.aa) return { strong, weak };
+  if (target.aa) strong.push(THREAT_META.air);
+  if (!target.airOnly) {
+    for (const [field, cat] of [["vsInf", "inf"], ["vsVeh", "veh"], ["vsBldg", "bldg"]]) {
+      const v = target[field];
+      if (v == null) continue;
+      if (v >= 1) strong.push(THREAT_META[cat]);
+      else if (v <= 0.4) weak.push(THREAT_META[cat]);
+    }
+  }
+  return { strong, weak };
+}
+function entityTags(key, kind) {
+  const strongMap = new Map(), weakMap = new Map();
+  for (const entry of assetStatTargets(key, kind)) {
+    const { strong, weak } = targetTags(entry.target);
+    strong.forEach(m => strongMap.set(m.short, m));
+    weak.forEach(m => weakMap.set(m.short, m));
+  }
+  for (const k of strongMap.keys()) weakMap.delete(k);
+  return { strong: [...strongMap.values()], weak: [...weakMap.values()] };
 }
 function syncCustomMaps() {
   for (let i = MAPS.length - 1; i >= 0; i--) if (MAPS[i].custom) MAPS.splice(i, 1);
@@ -195,43 +259,56 @@ function assetPrimaryFaction(key, kind) {
   }
   return (BLD[key] && BLD[key].civ) ? "neutral" : "allied";
 }
-function assetStatTarget(key, kind) {
-  const d = kind === "unit" ? UNITS[key] : BLD[key];
-  if (!d) return null;
-  return kind === "unit" ? d : (d.weapon || null);
+function statTargetBlock(entry, stat) {
+  const s = (stat.t && stat.t[entry.id]) || {};
+  const w = entry.target || {};
+  const curDps = w.rof ? +(w.dmg / w.rof).toFixed(2) : 0;
+  return (
+    (entry.label ? '<div class="small" style="opacity:.75;margin-top:2px">' + entry.label + '</div>' : "") +
+    '<div class="statTargetRow" data-target="' + entry.id + '" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">' +
+      '<input type="number" step="0.05" class="vsInfOv" value="' + (s.vsInf ?? "") + '" placeholder="vsInf ' + (w.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier">' +
+      '<input type="number" step="0.05" class="vsVehOv" value="' + (s.vsVeh ?? "") + '" placeholder="vsVeh ' + (w.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier">' +
+      '<input type="number" step="0.05" class="vsBldgOv" value="' + (s.vsBldg ?? "") + '" placeholder="vsBldg ' + (w.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier">' +
+      '<input type="number" step="1" class="dpsOv" value="' + (s.dps ?? "") + '" placeholder="DPS ' + curDps + '" style="width:64px"' + (w.rof ? "" : " disabled") + ' title="' + (w.rof ? "Damage per second — recalculates the underlying damage from the current rate of fire" : "No rate of fire (unarmed/support) — DPS does not apply") + '">' +
+      '<label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (s.aa != null ? s.aa ? " checked" : "" : w.aa ? " checked" : "") + '> Anti-Air</label>' +
+    '</div>'
+  );
+}
+function threatBadgeHtml(m, strong) {
+  return '<span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle;' +
+    (strong ? 'background:' + m.color + '22;border:1px solid ' + m.color + ';color:' + m.color
+            : 'border:1px dashed #666;color:#888;font-weight:400') +
+    '" title="' + (strong ? "Strong" : "Weak") + ' vs ' + m.label + '">' + m.short + '</span>';
 }
 function assetRow(key, kind) {
   const entries = loadAdminAssets().filter(a => a.key === key);
   const tags = entries.map(a =>
-    '<span class="adminTag">' + (a.faction || "all") +
+    '<span class="adminTag">' + (a.faction || "all") + (a.scale && a.scale !== 1 ? " ×" + a.scale : "") +
     '<button data-key="' + key + '" data-fac="' + (a.faction || "") + '">✕</button></span>'
   ).join("");
   const d = kind === "unit" ? UNITS[key] : BLD[key];
   const stat = loadAdminStats()[key] || {};
-  const target = assetStatTarget(key, kind);
-  const curDps = target && target.rof ? +(target.dmg / target.rof).toFixed(2) : 0;
-  const combatInputs = target ? (
-    '<input type="number" step="0.05" class="vsInfOv" value="' + (stat.vsInf ?? "") + '" placeholder="vsInf ' + (target.vsInf ?? 0) + '" style="width:56px" title="Anti-Infantry multiplier">' +
-    '<input type="number" step="0.05" class="vsVehOv" value="' + (stat.vsVeh ?? "") + '" placeholder="vsVeh ' + (target.vsVeh ?? 0) + '" style="width:56px" title="Anti-Vehicle multiplier">' +
-    '<input type="number" step="0.05" class="vsBldgOv" value="' + (stat.vsBldg ?? "") + '" placeholder="vsBldg ' + (target.vsBldg ?? 0) + '" style="width:56px" title="Anti-Structure multiplier">' +
-    '<input type="number" step="1" class="dpsOv" value="' + (stat.dps ?? "") + '" placeholder="DPS ' + curDps + '" style="width:64px"' + (target.rof ? "" : " disabled") + ' title="' + (target.rof ? "Damage per second — recalculates the underlying damage from the current rate of fire" : "This unit has no rate of fire (unarmed/support) — DPS does not apply") + '">' +
-    '<label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (stat.aa != null ? stat.aa ? " checked" : "" : target.aa ? " checked" : "") + '> Anti-Air</label>'
-  ) : "";
+  const targets = assetStatTargets(key, kind);
+  const combatInputs = targets.map(t => statTargetBlock(t, stat)).join("");
+  const threat = entityTags(key, kind);
+  const threatBadges = threat.strong.map(m => threatBadgeHtml(m, true)).join("") + threat.weak.map(m => threatBadgeHtml(m, false)).join("");
+  const defaultEntry = entries.find(a => (a.faction || "") === "");
+  const initialScale = defaultEntry ? defaultEntry.scale : 1;
   return (
     '<div class="adminRow" data-key="' + key + '" data-kind="' + kind + '">' +
       '<img class="assetThumb" data-thumb-key="' + key + '" data-thumb-kind="' + kind + '" width="40" height="40">' +
-      '<div class="rowName">' + assetDisplayName(key, kind) +
+      '<div class="rowName">' + assetDisplayName(key, kind) + threatBadges +
         '<div class="small" style="opacity:.75">' + assetFactionMembership(key, kind) + '</div>' +
       '</div>' +
       '<select class="facSel">' + FACTION_LIST.map(f => '<option value="' + f.k + '">' + f.n + '</option>').join("") + '</select>' +
       '<input type="file" class="fileSel" accept=".glb,.gltf">' +
-      '<input type="number" class="scaleSel" value="1" min="0.05" step="0.05" style="width:52px">' +
+      '<input type="number" class="scaleSel" value="' + (initialScale ?? 1) + '" min="0.05" step="0.05" style="width:52px" title="Model scale">' +
       tags +
       '<div class="statRow" data-key="' + key + '" data-kind="' + kind + '" style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px">' +
         '<input type="number" class="costOv" value="' + (stat.cost ?? "") + '" placeholder="Cost ' + (d.cost || 0) + '" style="width:80px" title="Cost override">' +
         '<input type="number" class="hpOv" value="' + (stat.hp ?? "") + '" placeholder="HP ' + (d.hp || 0) + '" style="width:70px" title="Hit points override">' +
         '<select class="tabOv" title="Category override">' + CATEGORY_OPTIONS.map(c => '<option value="' + c.k + '"' + (stat.tab === c.k ? " selected" : "") + '>' + c.n + '</option>').join("") + '</select>' +
-        combatInputs +
+        (combatInputs ? '<div style="flex-basis:100%;display:flex;flex-direction:column;gap:4px;margin-top:2px">' + combatInputs + '</div>' : "") +
       '</div>' +
     '</div>'
   );
@@ -301,6 +378,12 @@ function renderAssetsTab() {
   });
   $("#adminBody").querySelectorAll(".adminRow").forEach(row => {
     const key = row.dataset.key, kind = row.dataset.kind;
+    const entries = loadAdminAssets().filter(a => a.key === key);
+    const facSel = row.querySelector(".facSel") as HTMLSelectElement, scaleSel = row.querySelector(".scaleSel") as HTMLInputElement;
+    facSel.addEventListener("change", () => {
+      const match = entries.find(a => (a.faction || "") === (facSel.value || ""));
+      scaleSel.value = String(match ? match.scale : 1);
+    });
     row.querySelector(".fileSel").addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -313,11 +396,19 @@ function renderAssetsTab() {
       registerModelAsset(key, dataUrl, scale, faction || undefined);
       hint("Custom model applied to " + assetDisplayName(key, kind) + (faction ? " (" + faction + ")" : ""));
       renderAssetsTab();
+      let tries = 0;
+      const checkFailed = () => {
+        tries++;
+        if (assetFailed(key, faction || undefined)) hint("⚠ " + file.name + " failed to load — use a self-contained .glb, or a .gltf with its buffers/textures embedded as base64");
+        else if (tries < 14) setTimeout(checkFailed, 350);
+      };
+      setTimeout(checkFailed, 350);
     });
   });
   $("#adminBody").querySelectorAll(".adminTag button").forEach(btn => {
     btn.onclick = () => {
       const key = btn.dataset.key, faction = btn.dataset.fac || null;
+      if (!confirm("Remove this custom model" + (faction ? " (" + faction + ")" : "") + "? It will fall back to the built-in model.")) return;
       const list = loadAdminAssets().filter(a => !(a.key === key && (a.faction || "") === (faction || "")));
       saveAdminAssets(list);
       unregisterModelAsset(key, faction || undefined);
@@ -335,19 +426,26 @@ function renderAssetsTab() {
       if (hp !== "") ov.hp = parseFloat(hp);
       const tab = (row.querySelector(".tabOv") as HTMLSelectElement).value;
       if (tab) ov.tab = tab;
-      const vsInfEl = row.querySelector(".vsInfOv") as HTMLInputElement;
-      if (vsInfEl && vsInfEl.value !== "") ov.vsInf = parseFloat(vsInfEl.value);
-      const vsVehEl = row.querySelector(".vsVehOv") as HTMLInputElement;
-      if (vsVehEl && vsVehEl.value !== "") ov.vsVeh = parseFloat(vsVehEl.value);
-      const vsBldgEl = row.querySelector(".vsBldgOv") as HTMLInputElement;
-      if (vsBldgEl && vsBldgEl.value !== "") ov.vsBldg = parseFloat(vsBldgEl.value);
-      const dpsEl = row.querySelector(".dpsOv") as HTMLInputElement;
-      if (dpsEl && dpsEl.value !== "") ov.dps = parseFloat(dpsEl.value);
-      const aaEl = row.querySelector(".aaOv") as HTMLInputElement;
-      if (aaEl) ov.aa = aaEl.checked;
+      const t: any = {};
+      row.querySelectorAll(".statTargetRow").forEach((tr: HTMLElement) => {
+        const sub: any = {};
+        const vsInfEl = tr.querySelector(".vsInfOv") as HTMLInputElement;
+        if (vsInfEl.value !== "") sub.vsInf = parseFloat(vsInfEl.value);
+        const vsVehEl = tr.querySelector(".vsVehOv") as HTMLInputElement;
+        if (vsVehEl.value !== "") sub.vsVeh = parseFloat(vsVehEl.value);
+        const vsBldgEl = tr.querySelector(".vsBldgOv") as HTMLInputElement;
+        if (vsBldgEl.value !== "") sub.vsBldg = parseFloat(vsBldgEl.value);
+        const dpsEl = tr.querySelector(".dpsOv") as HTMLInputElement;
+        if (dpsEl.value !== "") sub.dps = parseFloat(dpsEl.value);
+        const aaEl = tr.querySelector(".aaOv") as HTMLInputElement;
+        if (aaEl) sub.aa = aaEl.checked;
+        if (Object.keys(sub).length) t[tr.dataset.target] = sub;
+      });
+      if (Object.keys(t).length) ov.t = t;
       if (Object.keys(ov).length <= 1) delete stats[key]; else stats[key] = ov;
       saveAdminStats(stats);
       if (stats[key]) applyAdminStat(key, stats[key]);
+      renderAssetsTab();
     };
     row.querySelectorAll("input,select").forEach(el => el.addEventListener("change", readStat));
   });
@@ -364,6 +462,7 @@ function renderMapsTab() {
       '<div class="adminRow" data-key="' + key + '">' +
         '<div class="rowName">' + entry.name + ' <span class="small">(' + spawnCount + ' spawns)</span></div>' +
         '<button data-act="edit" data-key="' + key + '" ' + MINIBTN + '>EDIT</button>' +
+        '<button data-act="rename" data-key="' + key + '" ' + MINIBTN + '>RENAME</button>' +
         '<button data-act="dup" data-key="' + key + '" ' + MINIBTN + '>DUPLICATE</button>' +
         '<button data-act="export" data-key="' + key + '" ' + MINIBTN + '>EXPORT</button>' +
         '<button data-act="del" data-key="' + key + '" ' + MINIBTN_DANGER + '>DELETE</button>' +
@@ -410,6 +509,12 @@ function renderMapsTab() {
       const key = btn.dataset.key, act = btn.dataset.act, store2 = loadAdminMapStore();
       if (!store2[key]) return;
       if (act === "edit") openMapEditor(key);
+      else if (act === "rename") {
+        const name = prompt("Rename map:", store2[key].name);
+        if (!name) return;
+        store2[key].name = name;
+        saveAdminMapStore(store2); syncCustomMaps(); renderMapsTab();
+      }
       else if (act === "dup") {
         const nk = "custom_" + Date.now();
         store2[nk] = { name: store2[key].name + " (copy)", data: JSON.parse(JSON.stringify(store2[key].data)) };
