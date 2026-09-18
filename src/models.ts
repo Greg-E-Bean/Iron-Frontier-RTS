@@ -464,7 +464,7 @@ function roofFarm(e,t,r,n,a){const o=e=>(43758.5453*Math.sin(12.9898*e+78.233*a)
 // fire-availability check, both in src/sim.ts) - routing the rise fraction
 // through dep for them too would silently break those toggles.
 function hasStagedBuild(e){return"conyard"===e||"factory"===e||"power"===e||"barracks"===e||"refinery"===e||"airfield"===e||"navalyard"===e||"lab"===e}
-function BMODEL_(e,t,dep,cn,rot){cn=cn||0;const r=32*BLD[e].size,n=[],a="allied"===t,o="soviet"===t,d=!1!==dep;const s=.3*r,i=.24*r,l=3.6,c=l+s;
+function BMODEL_(e,t,dep,cn,rot,prod){cn=cn||0;const r=32*BLD[e].size,n=[],a="allied"===t,o="soviet"===t,d=!1!==dep;const s=.3*r,i=.24*r,l=3.6,c=l+s;
 // Construction reveal stage (0=bare pad+crane, 4=fully built). Only keys in
 // hasStagedBuild() actually vary this - render.ts passes the live rise
 // fraction (0-1) via dep for them, and bakes the resulting bucket into the
@@ -753,68 +753,78 @@ n.push(P_(DOME(.5,.45,6),mx,my,l+1.85,"skin",{a:{orbit:.7,pvx:yx,pvy:yy}}));
 }}
 break;}
 case"factory":{
-const CORNERS=[[-1,-1],[1,-1],[1,1],[-1,1]];
-n.push(P_(SLAB(roundRectProfile(.9*r,.9*r,3,3),1.1,.5,"fcpad"),0,0,l,"asphalt"));
+// A wide, low vehicle hangar with a big shutter door dominating the front
+// (+Y) face. The door is a real closed/open state, not just decoration:
+// closed (fully slatted, nothing visible) whenever the owner's vehicle
+// queue is empty, rolled open to reveal whatever's queued (threaded in as
+// `prod`, from S.players[owner].queues.veh via render.ts) parked just
+// inside the opening, built from that unit's own UMODEL_ hull.
+const bw=.8*r,bd=.5*r,bh=.24*r,doorW=.7*r,doorH=.9*bh,doorY=bd+.6,z2=l+bh;
+const facMat=a?{body:"armor",trim:"armor3",accent:"glow",frame:"armor3",dark:"dark2"}
+  :o?{body:"concrete",trim:"concrete2",accent:"red",frame:"rust",dark:"dark2"}
+  :{body:"carapace2",trim:"bone",accent:"psi",frame:"carapace",dark:"dark2"};
+const isOpen=riseBucket>=4&&!!(prod&&UNITS[prod]);
+n.push(P_(SLAB(roundRectProfile(.95*r,.95*r,3,3),1.1,.5,"fcpad"),0,0,l,"asphalt"));
+if(riseBucket>=1){
+tier(n,bw,bd,bh,0,0,l,facMat.body,"favH",.995);
+railPosts(n,bw,bd,z2,2.2);
+}
+if(riseBucket>=2){
+// An open frame (top lintel + 2 jambs, nothing filling the middle) around
+// the shutter itself: fully slatted top-to-bottom when closed, or rolled
+// up into just the top band with a dark gap (and the parked vehicle)
+// revealed below when producing.
+const jamb=5,shutterSplit=isOpen?.36:1;
+n.push(P_(BOXM(doorW+2*jamb,3.4,jamb,.2),0,doorY,l+doorH,facMat.frame));
+for(const sx of[-1,1])n.push(P_(BOXM(jamb,3.4,doorH+jamb,.2),sx*(doorW/2+jamb/2),doorY,l,facMat.frame));
+const gapH=doorH*(1-shutterSplit);
+if(gapH>.5)n.push(P_(BOXM(doorW,3.2,gapH,.1),0,doorY,l,facMat.dark));
+const slats=Math.max(1,Math.round(6*shutterSplit)),slatH=doorH*shutterSplit/slats;
+for(let i=0;i<slats;i++)n.push(P_(BOXM(doorW-2,3,slatH*.86,.1),0,doorY-.5,l+gapH+slatH*i,i%2?facMat.frame:facMat.trim));
+hazard(n,0,doorY-2.2,5.2,doorW+10,0);
+windows(n,.3*r,bd-.02*r,z2-.06*bh,.11*r,3,a?"glass":o?"glassdark":"psi");
+if(isOpen)try{
+// The hangar body is a solid filled mass (no real hollow interior), so
+// anything placed more than a couple of units behind the front face is
+// buried in solid geometry and invisible - park the vehicle right at the
+// doorway threshold instead, flush with the door, so it reads as "in the
+// doorway" without vanishing into the wall or floating off on its own.
+const pu=UMODEL_(prod,0,{fac:t}),scale=.78,ang=Math.PI/2,cs=Math.cos(ang),sn=Math.sin(ang),py=doorY+4;
+for(const p of pu){
+const lx=(p.x||0)*scale,ly=(p.y||0)*scale;
+n.push(Object.assign({},p,{
+x:lx*cs-ly*sn,y:py+(lx*sn+ly*cs),z:l+(p.z||0)*scale,
+sx:(p.sx||1)*scale,sy:(p.sy||1)*scale,sz:(p.sz||1)*scale,
+r:(p.r||0)+ang
+}));
+}
+}catch(e){}
+}
+if(riseBucket>=3){
 if(a){
-if(riseBucket>=1){
-tier(n,.6*r,.42*r,.24*s,0,0,l,"armor","fav1",.95);
-railPosts(n,.6*r,.42*r,l+.24*s,2.2);
-}
-const z2=l+.24*s;
-if(riseBucket>=2){
-n.push(P_(BOXM(.56*r,.38*r,.06*r,.3),0,0,z2,"armor3"));
-windows(n,.54*r,.34*r,l+.11*s,.11*s,5);
-n.push(P_(BOXM(.26*r,.02*r,.15*r,.15),0,-.21*r,l+.01*r,"black"));
-}
-if(riseBucket>=3){
-n.push(P_(BOXM(.24*r,.015*r,.02*r,.1),0,-.215*r,l+.09*r,"glow",{e:1}));
-for(let e=0;e<2;e++)fan(n,-.2*r+e*.4*r,0,z2+.06*r,3.4,4,"gunmetal",2.2);
-n.push(P_(BOXM(.1*r,.08*r,.25,.12),.26*r,.16*r,z2,"darkmetal"));
-n.push(P_(BOXM(.09*r,.07*r,.2,.1),.26*r,.16*r,z2+.25,"crystal",{e:1,ty:.25}));
-}
-if(riseBucket>=4){
-n.push(P_(CYL(.02*r,.14*r,10),.28*r,-.16*r,z2+.06*r,"darkmetal"));
-n.push(P_(CYL(.04*r,.05*r,8),.28*r,-.16*r,z2+.2*r,"glow",{e:1,a:{spin:.6}}));
-}
+for(let e=0;e<2;e++)fan(n,-.34*r+e*.68*r,-.36*r,z2+.02*r,4.2,5,"gunmetal",2.4);
+n.push(P_(CYL(.022*r,.22*r,10),0,-.4*r,z2,"darkmetal"));
+n.push(P_(BOXM(.13*r,.013*r,.013*r,.05),0,-.4*r,z2+.22*r,"darkmetal",{a:{spin:.9}}));
+n.push(P_(DOME(.07*r,.05*r,12),0,-.4*r,z2+.02*r,"glassdark"));
 }else if(o){
-if(riseBucket>=1){
-tier(n,.62*r,.44*r,.26*s,0,0,l,"concrete","fol1",.96);
-}
-const z2=l+.26*s;
-if(riseBucket>=2){
-n.push(P_(BOXM(.58*r,.4*r,.08*r,.3),0,0,z2,"concrete2"));
-windows(n,.56*r,.36*r,l+.12*s,.1*s,5,"glassdark");
-n.push(P_(BOXM(.28*r,.02*r,.16*r,.2),0,-.22*r,l+.01*r,"rust"));
-}
-if(riseBucket>=3){
-for(const cc of CORNERS)n.push(P_(CYL(.03*r,.26*s,10),cc[0]*.26*r,cc[1]*.18*r,z2,"darkmetal"));
-for(const e of[-1,1])stack(n,e*.24*r,.24*r,z2+.08*r,.035*r,.16*r,"rust");
-}
-if(riseBucket>=4){
-n.push(P_(CYL(.03*r,.14*r,10),0,0,z2+.08*r,"darkmetal"));
-n.push(P_(CYL(.05*r,.05*r,8),0,0,z2+.08*r+.14*r,"red",{e:1,a:{spin:1}}));
-}
+stack(n,-.3*r,-.3*r,z2,.06*r,.3*r,"rust");
+stack(n,.12*r,-.34*r,z2,.05*r,.24*r,"rust");
+n.push(P_(CYL(.035*r,.14*r,10),-.3*r,-.3*r,z2+.3*r,"darkmetal"));
+n.push(P_(CYL(.065*r,.065*r,10),-.3*r,-.3*r,z2+.44*r,"red",{e:1,a:{spin:1.3}}));
 }else{
-if(riseBucket>=1){
-n.push(P_(TSLAB(circleProfile(.3*r,10),.07*s,.92,"fyfound"),0,0,l,"carapace2"));
+for(const cc of[[-.3,-.3],[.3,-.32]])hive(n,{x:cc[0]*r,y:cc[1]*r,z:z2,r:.08*r,h:.22*r,crown:.04*r,seg:6,crest:!1,vein:"psi"});
+n.push(P_(CYL(1.6,2.6,10),0,-.4*r,z2+.06*r,"psi",{e:1,a:{spin:1.1}}));
 }
-if(riseBucket>=2){
-hive(n,{x:0,y:0,z:l,r:.28*r,h:.85*s,crown:.1*r,seg:9,pods:4,crest:!1,vein:"psi",body:"bone",body2:"bile2"});
-}
-if(riseBucket>=3){
-n.push(P_(CYL(1.8,2.6,10),0,0,l+.5*s,"psi",{e:1,a:{spin:1.2}}));
-for(const cc of[[-1,0],[1,0]])hive(n,{x:cc[0]*.34*r,y:.04*r,z:l,r:.08*r,h:.28*s,crown:.045*r,seg:6,crest:!1,vein:"psi"});
+gantry(n,.28*r,-.34*r,l,.4*r,.24*r,0);
+n.push(P_(CYL(.01*r,.13*r,6),.28*r,-.34*r,l+.1*r,"darkmetal",{a:{orbit:.8,amp:.28,pvx:.28*r,pvy:-.34*r}}));
+n.push(P_(BOXM(.042*r,.03*r,.02*r,.1),.28*r,-.34*r,l+.1*r,"gunmetal",{a:{orbit:.8,amp:.28,pvx:.28*r,pvy:-.34*r}}));
 }
 if(riseBucket>=4){
-veins(n,0,0,l+2,.28*r,.32*s,9,"psi");
+for(let e=0;e<3;e++)n.push(P_(CYL(1.8,2.8,12),-.3*r+e*.3*r,-.44*r,l+1.4,"steel",{a:{spin:1.4+.15*e}}));
+crate(n,.42*r,-.34*r,l,5,"olive",-.2);
+containerBox(n,.4*r,-.42*r,l,5.5,2.8,2.5,"rust",.25);
+barrel(n,.28*r,-.4*r,l);
 }
-}
-gantry(n,.18*r,.3*r,l,.38*r,.22*r,0);
-for(let e=0;e<4;e++)n.push(P_(CYL(1.6,2.5,12),.05*r+e*r*.09,.36*r,l+1.5,"steel",{a:{spin:1.5+.15*e}}));
-hazard(n,.2*r,.3*r,4.2,.35*r,0);
-crate(n,-.34*r,.28*r,l,5,"olive",-.2);
-containerBox(n,-.36*r,.36*r,l,5.5,2.8,2.5,"rust",.25);
-barrel(n,-.1*r,.4*r,l);
 break;}
 case"lab":if(a){
 if(riseBucket>=1){tier(n,.66*r,.66*r,s,0,0,l,"armor","lbv1",.94),windows(n,.62*r,.62*r,l+.34*s,.32*s,4),railPosts(n,.64*r,.64*r,c,2.4)}
@@ -924,7 +934,7 @@ n.push(P_(DOME(.055*r,.05*r,10),-.16*r,-.06*r,l+.4*r+.16*r,"psi",{e:1,a:{spin:.6
 }
 }
 n.push(P_(CYL(.07*r,.24*r,10),.3*-r,.22*-r,l,o?"rust":"steel")),n.push(P_(CYL(.07*r,.24*r,10),.3*-r,.22*r,l,o?"rust":"steel")),n.push(P_(BOXM(.24*r,.9*r,.05*r,.3),.02*r,.02*r,l+.02*r,"wood"));
-break;}case"civ6":for(const p of marketRowModel(r))n.push(p);break;case"civ7":{const w=.9*r,d=.7*r,h=.34*r;n.push(P_(BOXM(w,d,h,.4),0,0,l,"concrete2")),n.push(P_(BOXM(w*.96,d*.5,.06*r,.2),0,-d*.2,l+h,"darkmetal")),n.push(P_(CYL(.05*r,.36*r,8),.32*r,.2*r,l+h,"rust")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),-.2*r,-d/2-.01*r,l+.06*r,"darkmetal")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),.05*r,-d/2-.01*r,l+.06*r,"darkmetal"));break}case"civ8":for(const p of tavernModel(r))n.push(p);break;case"civ9":{const w=.86*r;for(let tier=0;tier<3;tier++){const tw=w*(1-.22*tier),th=.32*r,tz=l+tier*th;n.push(P_(BOXM(tw,.82*tw,th,.6),0,-.06*r*tier,tz,tier%2?"cv2":"cv1")),windows(n,tw*.85,.7*tw,tz+.5*th,.09*r,2+tier%2,"glassdark")}break}case"bridgehut":tier(n,.7*r,.66*r,.36*r,0,0,l,"neutral","cv2",.94),n.push(P_(SLAB(roundRectProfile(.78*r,.74*r,3,3),2.4,.7,"cv2r"),0,0,l+.36*r,"rust")),windows(n,.56*r,.5*r,l+.12*r,.09*r,1,"glassdark"),n.push(P_(CYL(1.4,.14*r,10),.2*r,-.18*r,l+.36*r+2.4,"darkmetal"));break;case"civ4":for(const p of churchModel())n.push(p);break;case"civ5":for(const p of tenementModel(r))n.push(p);break;case"civ3":for(const p of highRiseModel(r))n.push(p)}return detailPass(n,e,t,r),n}function BTURRET_(e,t,r){const n="allied"===t,a="soviet"===t;if("def1"===e){const e=[];return n?(e.push(P_(CYL(5.6,4.5,12),0,0,14.6,"armor")),e.push(P_(SLAB(hexProfile(11,9),5,1.6,"d1vt"),0,0,19.1,"body")),e.push(P_(CYL(1.5,15,9),5,0,21.6,"gunmetal",{ty:PI2})),e.push(P_(CYL(2,3.5,9),17,0,21.6,"steel",{ty:PI2}))):a?(e.push(P_(CYL(6.4,5,10),0,0,11.6,"armor2")),e.push(P_(SLAB(roundRectProfile(12,10,2,2),5.5,1.5,"d1lt"),0,0,16.6,"body")),e.push(P_(CYL(1.8,13,8),5,-2.2,19.1,"gunmetal",{ty:PI2})),e.push(P_(CYL(1.8,13,8),5,2.2,19.1,"gunmetal",{ty:PI2}))):(e.push(P_(DOME(6.5,5,12),0,0,9.6,"carapace")),e.push(P_(CONE(4,1.6,9,9),4,0,12.6,"body",{ty:PI2})),e.push(P_(CYL(1.2,4,7),13,0,12.6,"psi",{ty:PI2,e:1}))),e}if("aa"===e){const e=[],t=n?15.6:a?14.6:13.6;if(e.push(P_(CYL(5.2,4,12),0,0,t-4,"armor3")),n){e.push(P_(SLAB(hexProfile(10,9),4.5,1.4,"aavt"),0,0,t,"body"));for(const r of[-3.2,3.2])e.push(P_(BOXM(11,3.6,3.6,1),4,r,t+3.4,"steel")),e.push(P_(CONE(1.4,.4,2.6,7),10,r,t+3.4,"red",{ty:PI2}))}else if(a){e.push(P_(SLAB(roundRectProfile(11,10,2,2),5,1.4,"aalt"),0,0,t,"body"));for(const r of[-2.6,2.6])e.push(P_(CYL(1.5,14,8),4,r,t+4,"gunmetal",{ty:PI2,tx:0}));e.push(P_(BOXM(5,7,3,1),-4,0,t+4,"darkmetal"))}else{e.push(P_(CONE(5.5,2.5,7,10),0,0,t,"carapace"));for(let r=0;r<3;r++){const n=2.09*r;e.push(P_(CYL(.9,12,6),2,2.4*Math.cos(n),t+4+2.4*Math.sin(n),"psi",{ty:PI2,e:1}))}}return e}if("def2"===e&&"yuri"===t){const e=[P_(DOME(5.5,4.5,12),0,0,31.6,"psi",{e:1})];for(let t=0;t<3;t++){const n=2.09*t+(r?.5:0);e.push(P_(CYL(1,10,6),4*Math.cos(n),4*Math.sin(n),34,"crystal",{e:1}))}return e}return null}function UMODEL(e,t,extra){const fac=extra&&"object"==typeof extra?extra.fac:void 0,_a=getAssetModel(e,fac);return _a||UMODEL_(e,t||0,extra)}function UTURRET(e,t,extra?){return UTURRET_(e,t||0,extra)}function BMODEL(e,t,d,cn,rot){const _a=getAssetModel(e,t);return _a||BMODEL_(e,t,d,cn,rot)}function BTURRET(e,t,r){return BTURRET_(e,t,r||0)}
+break;}case"civ6":for(const p of marketRowModel(r))n.push(p);break;case"civ7":{const w=.9*r,d=.7*r,h=.34*r;n.push(P_(BOXM(w,d,h,.4),0,0,l,"concrete2")),n.push(P_(BOXM(w*.96,d*.5,.06*r,.2),0,-d*.2,l+h,"darkmetal")),n.push(P_(CYL(.05*r,.36*r,8),.32*r,.2*r,l+h,"rust")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),-.2*r,-d/2-.01*r,l+.06*r,"darkmetal")),n.push(P_(BOXM(.3*r,.04*r,.2*r,.1),.05*r,-d/2-.01*r,l+.06*r,"darkmetal"));break}case"civ8":for(const p of tavernModel(r))n.push(p);break;case"civ9":{const w=.86*r;for(let tier=0;tier<3;tier++){const tw=w*(1-.22*tier),th=.32*r,tz=l+tier*th;n.push(P_(BOXM(tw,.82*tw,th,.6),0,-.06*r*tier,tz,tier%2?"cv2":"cv1")),windows(n,tw*.85,.7*tw,tz+.5*th,.09*r,2+tier%2,"glassdark")}break}case"bridgehut":tier(n,.7*r,.66*r,.36*r,0,0,l,"neutral","cv2",.94),n.push(P_(SLAB(roundRectProfile(.78*r,.74*r,3,3),2.4,.7,"cv2r"),0,0,l+.36*r,"rust")),windows(n,.56*r,.5*r,l+.12*r,.09*r,1,"glassdark"),n.push(P_(CYL(1.4,.14*r,10),.2*r,-.18*r,l+.36*r+2.4,"darkmetal"));break;case"civ4":for(const p of churchModel())n.push(p);break;case"civ5":for(const p of tenementModel(r))n.push(p);break;case"civ3":for(const p of highRiseModel(r))n.push(p)}return detailPass(n,e,t,r),n}function BTURRET_(e,t,r){const n="allied"===t,a="soviet"===t;if("def1"===e){const e=[];return n?(e.push(P_(CYL(5.6,4.5,12),0,0,14.6,"armor")),e.push(P_(SLAB(hexProfile(11,9),5,1.6,"d1vt"),0,0,19.1,"body")),e.push(P_(CYL(1.5,15,9),5,0,21.6,"gunmetal",{ty:PI2})),e.push(P_(CYL(2,3.5,9),17,0,21.6,"steel",{ty:PI2}))):a?(e.push(P_(CYL(6.4,5,10),0,0,11.6,"armor2")),e.push(P_(SLAB(roundRectProfile(12,10,2,2),5.5,1.5,"d1lt"),0,0,16.6,"body")),e.push(P_(CYL(1.8,13,8),5,-2.2,19.1,"gunmetal",{ty:PI2})),e.push(P_(CYL(1.8,13,8),5,2.2,19.1,"gunmetal",{ty:PI2}))):(e.push(P_(DOME(6.5,5,12),0,0,9.6,"carapace")),e.push(P_(CONE(4,1.6,9,9),4,0,12.6,"body",{ty:PI2})),e.push(P_(CYL(1.2,4,7),13,0,12.6,"psi",{ty:PI2,e:1}))),e}if("aa"===e){const e=[],t=n?15.6:a?14.6:13.6;if(e.push(P_(CYL(5.2,4,12),0,0,t-4,"armor3")),n){e.push(P_(SLAB(hexProfile(10,9),4.5,1.4,"aavt"),0,0,t,"body"));for(const r of[-3.2,3.2])e.push(P_(BOXM(11,3.6,3.6,1),4,r,t+3.4,"steel")),e.push(P_(CONE(1.4,.4,2.6,7),10,r,t+3.4,"red",{ty:PI2}))}else if(a){e.push(P_(SLAB(roundRectProfile(11,10,2,2),5,1.4,"aalt"),0,0,t,"body"));for(const r of[-2.6,2.6])e.push(P_(CYL(1.5,14,8),4,r,t+4,"gunmetal",{ty:PI2,tx:0}));e.push(P_(BOXM(5,7,3,1),-4,0,t+4,"darkmetal"))}else{e.push(P_(CONE(5.5,2.5,7,10),0,0,t,"carapace"));for(let r=0;r<3;r++){const n=2.09*r;e.push(P_(CYL(.9,12,6),2,2.4*Math.cos(n),t+4+2.4*Math.sin(n),"psi",{ty:PI2,e:1}))}}return e}if("def2"===e&&"yuri"===t){const e=[P_(DOME(5.5,4.5,12),0,0,31.6,"psi",{e:1})];for(let t=0;t<3;t++){const n=2.09*t+(r?.5:0);e.push(P_(CYL(1,10,6),4*Math.cos(n),4*Math.sin(n),34,"crystal",{e:1}))}return e}return null}function UMODEL(e,t,extra){const fac=extra&&"object"==typeof extra?extra.fac:void 0,_a=getAssetModel(e,fac);return _a||UMODEL_(e,t||0,extra)}function UTURRET(e,t,extra?){return UTURRET_(e,t||0,extra)}function BMODEL(e,t,d,cn,rot,prod=null){const _a=getAssetModel(e,t);return _a||BMODEL_(e,t,d,cn,rot,prod)}function BTURRET(e,t,r){return BTURRET_(e,t,r||0)}
 /*
  * Optional external 3D asset loading (GLTF/GLB or 3MF), with graceful
  * fallback.

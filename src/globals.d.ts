@@ -398,7 +398,7 @@ declare global {
   const BTURRET_: AnyFn;
   function UMODEL(key: string, frame?: number, extra?: any): any;
   const UTURRET: AnyFn;
-  function BMODEL(key: string, fac: string, deployed?: number | boolean, colorName?: string, rot?: number): any;
+  function BMODEL(key: string, fac: string, deployed?: number | boolean, colorName?: string, rot?: number, prod?: string | null): any;
   const BTURRET: AnyFn;
   function faceIdx(ang: number): number;
   const SPRITES: Map<string, any>;
