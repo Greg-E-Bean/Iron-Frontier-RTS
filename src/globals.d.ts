@@ -618,7 +618,7 @@ declare global {
 
   // === audio.js ===
   function audio(): void;
-  function sfx(name: string): void;
+  function sfx(name: string, unit?: GameEntity | null): void;
   function sfxHit(kind?: string): void;
   function setMuted(v: boolean): void;
   function setMasterVol(v: number): void;
@@ -635,7 +635,7 @@ declare global {
   function refreshCustomMusic(): void;
   function totalTrackCount(): number;
   function trackName(i: number): string;
-  function playVoiceLine(fac: string, category: string): void;
+  function playVoiceLine(fac: string, category: string, role?: string | null): void;
   function setVoicesEnabled(v: boolean): void;
   var voicesEnabled: boolean;
   var lightningT: number;

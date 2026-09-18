@@ -750,7 +750,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function computeMtnShore() {
     let mB = new Float32Array(6624);
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) mB[idx(x, y)] = 3 === G.terr[idx(x, y)] ? 1 : 0;
-    for (let pass = 0; pass < 4; pass++) {
+    for (let pass = 0; pass < 2; pass++) {
       const mN = new Float32Array(6624);
       for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
         let sum = 0, cnt = 0;
@@ -998,8 +998,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
       blob(46, 36, 7, 3), ridge(20.24, 4.32, 92 * 0.3, 72 * 0.94, 3, 3, 10, e + 2), ridge(71.76, 4.32, 92 * 0.7, 72 * 0.94, 3, 3, 10, e + 4), blob(23.92, 36, 3, 2), blob(68.08, 36, 3, 2), n = [[14, 52], [74, 14]], a = [[16, 56], [74, 18], [46, 15.84], [46, 72 * 0.78], [22.08, 72 * 0.3], [69.92, 50.4]], o = [[38.64, 36], [53.36, 36]];
     } else if ("dust" === r) {
-      baseTerrain(e, 0.26), blob(46, 36, 8, 3), blob(14.72, 37.44, 4, 2), blob(77.28, 34.56, 4, 2), ridge(58, 50, 50, 62, 2.4, 3, 7, e + 11), ridge(34, 10, 26, 22, 2.4, 3, 7, e + 13);
-      for (let e2 = 0; e2 < 5; e2++) blob(92 * (0.25 + 0.12 * e2), 72 * (e2 % 2 ? 0.18 : 0.82), 3, 3);
+      baseTerrain(e, 0.26), blob(14.72, 37.44, 4, 2), blob(77.28, 34.56, 4, 2);
+      for (let e2 = 0; e2 < 4; e2++) blob(92 * (0.12 + 0.76 * (e2 % 2)) + irnd(-3, 3), 72 * (e2 < 2 ? 0.14 : 0.86) + irnd(-3, 3), 2, 3);
       n = [[Math.round(46) - 6, 10], [Math.round(46) - 6, 56]], a = [[30, 14], [62, 14], [30, 56], [62, 56], [16, 36], [74, 36]], o = [[35, 36], [57, 36], [46, 25]];
     } else if ("lakes" === r) {
       baseTerrain(e, 0.48);
@@ -7688,7 +7688,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       o >= 0 && s >= 0 && o < 92 && s < 72 && (mtn += G.mtn[idx(o, s)], shore += G.shore ? G.shore[idx(o, s)] : 0, cnt++);
     }
     mtn = cnt ? mtn / cnt : 0, shore = cnt ? shore / cnt : 0;
-    const peak = fbm(0.24 * e + r + 70, 0.24 * t - r + 70, r + 70), hills = (fbm(0.045 * e + r + 130, 0.045 * t - r + 130, r + 130) - 0.5) * 55, base = (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * 14 + hills + Math.pow(mtn, 0.55) * (230 + 90 * peak), land = Math.max(0, 1 - 1.15 * shore);
+    const peak = fbm(0.24 * e + r + 70, 0.24 * t - r + 70, r + 70), hills = (fbm(0.045 * e + r + 130, 0.045 * t - r + 130, r + 130) - 0.5) * 30, base = (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * 9 + hills + Math.pow(mtn, 2.1) * (190 + 70 * peak), land = Math.max(0, 1 - 1.15 * shore);
     return base * land * land;
   }
   function cornerOv(e, t) {
@@ -9157,7 +9157,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   var sfxBudget = 0;
-  var VOICE_LINES = { allied: { sel: ["Yes, sir?", "Awaiting orders.", "Reporting.", "Standing by.", "At your command."], go: ["Moving out.", "Acknowledged.", "On our way.", "Right away.", "Affirmative."], unit: ["Unit ready.", "Reinforcements ready.", "Unit deployed."], ready: ["Construction complete.", "Structure online."] }, soviet: { sel: ["Da?", "Comrade?", "At your command.", "We serve.", "Standing ready."], go: ["For the motherland!", "Moving out.", "As ordered.", "Advancing.", "We march."], unit: ["Unit ready, comrade.", "New recruit ready.", "Reporting for duty."], ready: ["Construction complete, comrade.", "Structure ready."] }, yuri: { sel: ["Yes... master.", "We hear you.", "Command us.", "We obey.", "Listening."], go: ["It shall be done.", "Moving to obey.", "As you wish.", "We advance.", "Your will."], unit: ["A new mind serves.", "Unit ready.", "We have grown."], ready: ["The structure is complete.", "It is finished."] } };
+  var VOICE_LINES = { allied: { sel: ["Yes, sir?", "Awaiting orders.", "Reporting.", "Standing by.", "At your command."], go: ["Moving out.", "Acknowledged.", "On our way.", "Right away.", "Affirmative."], unit: ["Unit ready.", "Reinforcements ready.", "Unit deployed."], ready: ["Construction complete.", "Structure online."], support: { sel: ["Construction crew standing by.", "Ready to deploy.", "Awaiting deployment order.", "Systems nominal.", "On standby."], go: ["Relocating.", "Moving to new site.", "Convoy under way.", "Repositioning.", "En route."] } }, soviet: { sel: ["Da?", "Comrade?", "At your command.", "We serve.", "Standing ready."], go: ["For the motherland!", "Moving out.", "As ordered.", "Advancing.", "We march."], unit: ["Unit ready, comrade.", "New recruit ready.", "Reporting for duty."], ready: ["Construction complete, comrade.", "Structure ready."], support: { sel: ["Engine idling, comrade.", "Ready when needed.", "Standing by for orders.", "Chassis ready.", "Awaiting instruction."], go: ["Rolling out slowly.", "Convoy moving.", "Under way, comrade.", "Relocating equipment.", "Advancing with the column."] } }, yuri: { sel: ["Yes... master.", "We hear you.", "Command us.", "We obey.", "Listening."], go: ["It shall be done.", "Moving to obey.", "As you wish.", "We advance.", "Your will."], unit: ["A new mind serves.", "Unit ready.", "We have grown."], ready: ["The structure is complete.", "It is finished."], support: { sel: ["The vessel awaits.", "Ready to serve.", "Standing by, master.", "We are prepared.", "Dormant no longer."], go: ["Moving as bidden.", "The vessel advances.", "We relocate.", "Proceeding quietly.", "As you will it."] } } };
+  function voiceRoleFor(u) {
+    if (!u) return null;
+    const role = u.d && u.d.role;
+    return "mcv" === u.key || "hivetrans" === u.key || "mcv" === role || "hivetrans" === role || "miner" === role ? "support" : null;
+  }
   var FACTION_VOICE_PARAMS = { allied: { pitch: 1.08, rate: 1.05, hint: /en-US|en_US|US English|Samantha|Google US/i }, soviet: { pitch: 0.72, rate: 0.9, hint: /en-GB|en_GB|UK English|Daniel|Male/i }, yuri: { pitch: 1.3, rate: 0.82, hint: /en-IN|en_IN|Whisper|Zira|India/i } };
   var VOICE_LIST = [];
   function refreshVoiceList() {
@@ -9185,13 +9190,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } catch (e) {
     }
   }
-  function playVoiceLine(fac, category) {
+  function playVoiceLine(fac, category, role) {
     if (!voicesEnabled || muted || sfxVol <= 0) return;
     if ("undefined" == typeof speechSynthesis) return;
     const now = performance.now();
     if (now - lastVoiceT < 900) return;
     lastVoiceT = now;
-    const lines = VOICE_LINES[fac] && VOICE_LINES[fac][category];
+    const roleSet = role && VOICE_LINES[fac] && VOICE_LINES[fac][role], lines = roleSet && roleSet[category] || VOICE_LINES[fac] && VOICE_LINES[fac][category];
     if (!lines || !lines.length) return;
     try {
       speechSynthesis.cancel();
@@ -9202,8 +9207,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } catch (e) {
     }
   }
-  function sfx(e) {
-    ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e);
+  function sfx(e, u) {
+    ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u));
     if (!(sfxBudget > 7)) switch (sfxBudget++, e) {
       case "gun":
         tone(1200, 0.04, "square", 0.018, 700);
@@ -9703,7 +9708,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       r.addEventListener("pointerdown", (e2) => {
         e2.stopPropagation(), r._t = setTimeout(() => {
           const q = P().queues[t.kind];
-          q && q.list.includes(t.key) && (r._long = true, cancelBuild(P(), t.kind, t.key), hint("Removed from queue"), sfx("sel"));
+          q && q.list.includes(t.key) && (r._long = true, cancelBuild(P(), t.kind, t.key), hint("Removed from queue"), sfx("place"));
         }, 750), r._long = false;
       }), r.addEventListener("pointerup", (e2) => {
         e2.stopPropagation(), clearTimeout(r._t), r._long || cardClick(t);
@@ -9723,7 +9728,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const r = UNITS[e.key];
       return void (r.limit ? hint("Only " + r.limit + " " + r.name + " allowed") : r.ammo && "airfield" === r.from && hasBld(t.id, "airfield") ? hint("Airfield at capacity \u2014 build another airfield") : hint("Needs " + bname(r.req || r.from, t.fac)));
     }
-    startBuild(t, e.kind, e.key), sfx("sel");
+    startBuild(t, e.kind, e.key), sfx("place");
   }
   var QLABEL = (e, t) => "bld" === e || "def" === e ? bname(t, P().fac) : UNITS[t].name;
   function updateQueueStrip() {
@@ -9742,7 +9747,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       n2.className = "qi" + (r2.head ? " b" : "");
       const a = r2.head ? e.ready[r2.kind] === r2.k ? "READY" : Math.round(100 * (e.queues[r2.kind].prog || 0)) + "%" : "";
       n2.innerHTML = QLABEL(r2.kind, r2.k) + (r2.n > 1 ? " <i>x" + r2.n + "</i>" : "") + (a ? " <i>" + a + "</i>" : ""), n2.addEventListener("click", (t2) => {
-        t2.stopPropagation(), r2.head && e.ready[r2.kind] === r2.k ? (S.placing = r2.k, S.ghost = null, S.deployUnit = null, hint("Drag on the map, lift to place")) : (cancelBuild(e, r2.kind, r2.k), sfx("sel"));
+        t2.stopPropagation(), r2.head && e.ready[r2.kind] === r2.k ? (S.placing = r2.k, S.ghost = null, S.deployUnit = null, hint("Drag on the map, lift to place")) : (cancelBuild(e, r2.kind, r2.k), sfx("place"));
       }), t.appendChild(n2);
     })) : t.style.paddingTop = "0");
   }
@@ -9761,7 +9766,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       r2.className = "si " + (n2 ? "" : "inf" === t2.ent.d.kind ? "inf" : "veh");
       const a2 = n2 ? t2.ent.name : uname(t2.ent.key, S.players[t2.ent.owner].fac), o = !n2 && t2.list.some((e2) => e2.vet > 0) ? t2.list.some((e2) => e2.vet > 1) ? " \u2605" : " \u25B2" : "";
       r2.innerHTML = a2 + o + (t2.n > 1 ? " <b>\xD7" + t2.n + "</b>" : ""), r2.addEventListener("click", (e2) => {
-        e2.stopPropagation(), S.sel = S.sel.length === t2.list.length ? [] : t2.list.slice(), sfx("sel");
+        e2.stopPropagation(), S.sel = S.sel.length === t2.list.length ? [] : t2.list.slice(), sfx("sel", t2.list[0]);
       }), e.appendChild(r2);
     }
     fpsPromptTarget = t.find((u) => "u" === u.e && 0 === u.owner), $("#fpsPrompt").classList.toggle("hidden", !fpsPromptTarget), $("#deployPrompt").classList.toggle("hidden", !t.some(isDeployable));
@@ -9770,7 +9775,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     rotateTarget = t.find((b) => "b" === b.e && 0 === b.owner && ("triturret" === b.key || "gate" === b.key)), $("#rotatePrompt").classList.toggle("hidden", !rotateTarget);
     const a = document.createElement("div");
     a.className = "clr", a.textContent = "\u2715 CLEAR", a.addEventListener("click", (e2) => {
-      e2.stopPropagation(), S.sel = [], sfx("go");
+      e2.stopPropagation(), S.sel = [], sfx("sel");
     }), e.appendChild(a);
   }
   var _tabEls = null;
@@ -9815,28 +9820,28 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   var TAB_REQ = { inf: "barracks", veh: "factory", air: "airfield", sea: "navalyard" };
   document.querySelectorAll(".tab").forEach((e) => e.addEventListener("click", () => {
     if (e.classList.contains("locked")) return void hint("Needs " + bname(TAB_REQ[e.dataset.t], P().fac));
-    document.querySelectorAll(".tab").forEach((e2) => e2.classList.remove("on")), e.classList.add("on"), S.tab = e.dataset.t, buildCards(), sfx("sel");
+    document.querySelectorAll(".tab").forEach((e2) => e2.classList.remove("on")), e.classList.add("on"), S.tab = e.dataset.t, buildCards();
   })), $("#more").addEventListener("click", () => {
     const e = $("#cards").classList.toggle("tall");
-    $("#more").classList.toggle("on", e), $("#more").textContent = e ? "\u25B4" : "\u25BE", sfx("sel");
+    $("#more").classList.toggle("on", e), $("#more").textContent = e ? "\u25B4" : "\u25BE";
   });
   function isDeployable(t) {
     return "b" === t.e ? "hive" === t.key || t.garrison && t.garrison.length > 0 : "mcv" === t.key || "hivetrans" === t.key || "bastion" === t.key || t.d.deploy || t.d.transport || t.d.fly || t.gunner;
   }
   function doDeploy() {
-    let e = false;
+    let e = false, vu = null;
     for (const t of S.sel) if ("b" === t.e) "hive" === t.key ? (undeployHive(t), e = true) : t.garrison && t.garrison.length && (evacuate(t), hint("Garrison evacuated"), e = true);
-    else if ("mcv" === t.key) startDeployPlacement(t, "conyard"), e = true;
-    else if ("hivetrans" === t.key) startDeployPlacement(t, "hive"), e = true;
-    else if ("bastion" === t.key) startDeployPlacement(t, "triturret"), e = true;
-    else if (t.d.deploy) toggleDeploy(t), e = true;
-    else if (t.d.transport) unloadCargo(t), e = true;
-    else if (t.gunner) ejectGunner(t), e = true;
+    else if ("mcv" === t.key) startDeployPlacement(t, "conyard"), e = true, vu = t;
+    else if ("hivetrans" === t.key) startDeployPlacement(t, "hive"), e = true, vu = t;
+    else if ("bastion" === t.key) startDeployPlacement(t, "triturret"), e = true, vu = t;
+    else if (t.d.deploy) toggleDeploy(t), e = true, vu = vu || t;
+    else if (t.d.transport) unloadCargo(t), e = true, vu = vu || t;
+    else if (t.gunner) ejectGunner(t), e = true, vu = vu || t;
     else if (t.d.fly) {
       const r = homePad(t);
-      r && (t.state = "rtb", t.rtb = r, t.order = "idle", e = true);
+      r && (t.state = "rtb", t.rtb = r, t.order = "idle", e = true, vu = vu || t);
     }
-    e ? sfx("go") : hint("Select your Mobile HQ, a deployable tank, aircraft, or a garrisoned building");
+    e ? sfx("go", vu) : hint("Select your Mobile HQ, a deployable tank, aircraft, or a garrisoned building");
   }
   Object.assign(window, {
     buildCards,
@@ -9929,7 +9934,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }), $("#bStop").addEventListener("click", () => {
     S.sel.forEach((e) => {
       "u" === e.e && (e.order = "miner" === e.d.role ? "harvest" : "idle", e.path = null, e.target = null);
-    }), sfx("go");
+    }), sfx("go", S.sel[0]);
   }), $("#bDeselect").addEventListener("click", () => {
     S.sel.length && (S.sel = [], hint("Deselected"), sfx("sel"));
   }), $("#deployPrompt").addEventListener("click", doDeploy), $("#rotatePrompt").addEventListener("click", () => {
@@ -10025,12 +10030,12 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           const loadable = S.sel.filter((u) => "u" === u.e && u !== o && 0 === u.owner && !u.d.transport && !u.d.fly);
           if (loadable.length) return loadable.forEach((u) => {
             u.order = "load", u.target = o, u.path = null;
-          }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, sfx("go"), void 0;
+          }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, sfx("go", loadable[0]), void 0;
         }
         const engs = "b" === o.e ? S.sel.filter((u) => "u" === u.e && "engineer" === u.d.role) : [];
         if (engs.length) engs.forEach((u) => {
           u.order = "capture", u.target = o, u.path = null;
-        }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, sfx("go");
+        }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, sfx("go", engs[0]);
         else {
           const e2 = performance.now();
           "u" === o.e ? (e2 - lastTap < 330 && S.sel.includes(o) ? (S.sel = S.units.filter((e3) => 0 === e3.owner && !e3.dead && e3.key === o.key), hint("Selected all " + o.d.name)) : S.sel.includes(o) && S.sel.length > 1 ? (S.sel = S.sel.filter((e3) => e3 !== o), hint("Dropped " + o.d.name)) : S.sel.includes(o) && 1 === S.sel.length ? (S.sel = [], hint("Deselected")) : S.sel = [o], lastTap = e2) : S.sel = S.sel.includes(o) ? [] : [o], sfx("sel");
@@ -10039,14 +10044,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         hint((o.d.name || "Ally") + " \u2014 allied, cannot attack");
       } else {
         const e2 = S.sel.filter((e3) => "u" === e3.e);
-        e2.length ? (cmdAttack(e2, o), S.marker = { x: o.x, y: o.y, t: 0, c: "#ff7d7d" }, sfx("go")) : S.sel = [];
+        e2.length ? (cmdAttack(e2, o), S.marker = { x: o.x, y: o.y, t: 0, c: "#ff7d7d" }, sfx("go", e2[0])) : S.sel = [];
       }
       return;
     }
     const s = S.sel.filter((e2) => "u" === e2.e && 0 === e2.owner);
     if (s.length) {
       const e2 = Math.floor(n / 32), t2 = Math.floor(a / 32);
-      return inMap(e2, t2) && G.ore[idx(e2, t2)] > 0 && s.some((e3) => "miner" === e3.d.role) ? (cmdHarvest(s, e2, t2), s.filter((e3) => "miner" !== e3.d.role).forEach((e3) => cmdMove([e3], n, a)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }) : (cmdMove(s, n, a), S.marker = { x: n, y: a, t: 0, c: "#7dff8a" }), void sfx("go");
+      return inMap(e2, t2) && G.ore[idx(e2, t2)] > 0 && s.some((e3) => "miner" === e3.d.role) ? (cmdHarvest(s, e2, t2), s.filter((e3) => "miner" !== e3.d.role).forEach((e3) => cmdMove([e3], n, a)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }) : (cmdMove(s, n, a), S.marker = { x: n, y: a, t: 0, c: "#7dff8a" }), void sfx("go", s[0]);
     }
     const i = S.sel.find((e2) => "b" === e2.e);
     if (i && 0 === i.owner) return i.rally = { x: n, y: a }, S.marker = { x: n, y: a, t: 0, c: "#7dc4ff" }, void hint("Rally point set");
@@ -10081,24 +10086,24 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           const loadable = S.sel.filter((u) => "u" === u.e && u !== o && 0 === u.owner && !u.d.transport && !u.d.fly);
           if (loadable.length) return loadable.forEach((u) => {
             u.order = "load", u.target = o, u.path = null;
-          }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, void sfx("go");
+          }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, void sfx("go", loadable[0]);
         }
         const engs = "b" === o.e ? S.sel.filter((u) => "u" === u.e && "engineer" === u.d.role) : [];
         if (engs.length) return engs.forEach((u) => {
           u.order = "capture", u.target = o, u.path = null;
-        }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, void sfx("go");
+        }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, void sfx("go", engs[0]);
       } else if (teamOf(o.owner) === teamOf(0)) {
         return void hint((o.d.name || "Ally") + " \u2014 allied, cannot attack");
       } else {
         const atk = S.sel.filter((e2) => "u" === e2.e);
-        if (atk.length) return cmdAttack(atk, o), S.marker = { x: o.x, y: o.y, t: 0, c: "#ff7d7d" }, void sfx("go");
+        if (atk.length) return cmdAttack(atk, o), S.marker = { x: o.x, y: o.y, t: 0, c: "#ff7d7d" }, void sfx("go", atk[0]);
         return;
       }
     }
     const s = S.sel.filter((e2) => "u" === e2.e && 0 === e2.owner);
     if (s.length) {
       const ex = Math.floor(n / 32), ey = Math.floor(a / 32);
-      return inMap(ex, ey) && G.ore[idx(ex, ey)] > 0 && s.some((e2) => "miner" === e2.d.role) ? (cmdHarvest(s, ex, ey), s.filter((e2) => "miner" !== e2.d.role).forEach((e2) => cmdMove([e2], n, a, wasAmove, queueMod)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }, void sfx("go")) : (cmdMove(s, n, a, wasAmove, queueMod), S.marker = { x: n, y: a, t: 0, c: wasAmove ? "#ff9a3c" : "#7dff8a" }, void sfx("go"));
+      return inMap(ex, ey) && G.ore[idx(ex, ey)] > 0 && s.some((e2) => "miner" === e2.d.role) ? (cmdHarvest(s, ex, ey), s.filter((e2) => "miner" !== e2.d.role).forEach((e2) => cmdMove([e2], n, a, wasAmove, queueMod)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }, void sfx("go", s[0])) : (cmdMove(s, n, a, wasAmove, queueMod), S.marker = { x: n, y: a, t: 0, c: wasAmove ? "#ff9a3c" : "#7dff8a" }, void sfx("go", s[0]));
     }
     const i = S.sel.find((e2) => "b" === e2.e);
     if (i && 0 === i.owner) return void (i.rally = { x: n, y: a }, S.marker = { x: n, y: a, t: 0, c: "#7dc4ff" }, hint("Rally point set"));
