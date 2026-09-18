@@ -165,8 +165,8 @@ function spawnShell(vm){const flash=vm.userData.akimbo&&vm.userData.altFire?vm.u
 function tickShells(vm){const shells=vm.userData.shells;if(!shells||!shells.length)return;for(let i=shells.length-1;i>=0;i--){const s=shells[i],dt=S.time-s.userData.t0;if(dt>.45){vm.remove(s),shells.splice(i,1);continue}s.position.set(s.userData.bx+s.userData.dx*dt,s.userData.by+s.userData.dy*dt-2.4*dt*dt,s.userData.bz+s.userData.dz*dt),s.rotation.x=16*dt,s.rotation.z=11*dt}}
 const VM_KEY={marksman:"sniper",engineer:"tool",chrono:"beam_temporal",vindicator:"beam_plasma",leech:"beam_drain"};
 function unitViewmodelKind(e){return e.heroMode?("sniper"===e.heroMode?"sniper":"rifle"):VM_KEY[e.key]||e.d.proj||"rifle"}
-const TOWER_H=150,ROOM_H=60,FLOOR_Z=TOWER_H-ROOM_H-8,ROOF_Z=TOWER_H-2,STAIR_GAP=24;
-function interiorHalf(bld){return 16*bld.size}
+const TOWER_H=150,ROOM_H=66,FLOOR_Z=TOWER_H-ROOM_H-8,ROOF_Z=TOWER_H-2,STAIR_GAP=24,ROOM_H_SHORT=56;
+function interiorHalf(bld){return 20*bld.size}
 function ensureInteriorMats(){
   if(GL.intMats)return GL.intMats;
   const cloneTex=s=>{const m=s.map.clone();return m.needsUpdate=!0,m};
@@ -207,7 +207,7 @@ function furnishInterior(g,bld,half,floorZ,tall){
   const owner=bld.owner;
   if(void 0!==owner&&owner!==NEUTRAL){
     const pal=S.players[owner]?palette(owner):null,accent=pal&&pal.body||"#8fe0ff",flag=new THREE.Mesh(new THREE.PlaneGeometry(10,14),new THREE.MeshStandardMaterial({color:new THREE.Color(accent),roughness:.6,side:THREE.DoubleSide}));
-    flag.position.set(0,floorZ+(tall?ROOM_H:50)-14,-half+.6),flag.renderOrder=ro+1,g.add(flag);
+    flag.position.set(0,floorZ+(tall?ROOM_H:ROOM_H_SHORT)-14,-half+.6),flag.renderOrder=ro+1,g.add(flag);
   }
   const key=bld.key;
   if("civ3"===key){
@@ -231,12 +231,12 @@ function furnishInterior(g,bld,half,floorZ,tall){
     for(const[lx,lz]of[[-18,-24],[-10,-24],[-18,-16],[-10,-16]])cyl(.4,9,lx,lz,floorZ,9132587,im.trim);
     for(const cx of[-18,-10])box(5,5,6,cx,-27,floorZ,9132587,im.trim);
     box(15,6,7,-22,10,floorZ,8010566,im.trim),box(15,1,2,-22,7,floorZ+6,4861722);
-    box(7,7,7,-9,18,floorZ,4876938,im.trim);
+    box(7,7,7,-11,18,floorZ,4876938,im.trim);
     box(7,5,3,-18,18,floorZ+3,7029795,im.trim);
     const rug=new THREE.Mesh(new THREE.PlaneGeometry(14,18),propMat(3107642));rug.rotation.x=-Math.PI/2,rug.position.set(-18,floorZ+.4,13),rug.renderOrder=ro+1,g.add(rug);
     box(14,20,3,20,-6,floorZ,2829099,metalMat(2829099)),box(13,19,2.5,20,-6,floorZ+3,14736584),box(5,4,2,20,-14,floorZ+6,16117984),box(13,9,1,20,0,floorZ+6.5,9120812);
     box(9,6,18,26,20,floorZ,5913114,im.trim);
-    box(5,5,6,12,-6,floorZ,7029795,im.trim),cyl(1,4,12,-6,floorZ+6,3815994,metalMat(3815994)),sph(2,12,-6,floorZ+10,16107898,emisMat(16107898));
+    box(5,5,6,14,-6,floorZ,7029795,im.trim),cyl(1,4,14,-6,floorZ+6,3815994,metalMat(3815994)),sph(2,14,-6,floorZ+10,16107898,emisMat(16107898));
     box(.6,10,16,half-.6,20,floorZ+16,4861722,im.trim),box(.4,8,14,half-.8,20,floorZ+16,12113120,metalMat(12113120));
     box(50,.5,.5,0,-28,floorZ+45,3815994,metalMat(3815994));
     box(3,1,5,-15,-28,floorZ+38,13213856,im.trim),box(3,1,5,0,-28,floorZ+38,10533065,im.trim),box(3,1,4,15,-28,floorZ+37,13224352,im.trim);
@@ -250,7 +250,7 @@ function furnishInterior(g,bld,half,floorZ,tall){
     }
     box(.3,.3,10,0,-20,floorZ+22,5258275,im.trim);
     for(const[dx,pc]of[[-6,11152685],[0,13137960],[6,13808700]])sph(2,dx,-20,floorZ+21,pc);
-    for(const[bx,bz]of[[10,10],[16,10],[13,16]]){cyl(5,12,bx,bz,floorZ,472403,im.trim),cyl(5.2,1,bx,bz,floorZ+2,3946290,metalMat(3946290)),cyl(5.2,1,bx,bz,floorZ+9,3946290,metalMat(3946290));}
+    for(const[bx,bz]of[[14,10],[24,10],[19,19]]){cyl(5,12,bx,bz,floorZ,472403,im.trim),cyl(5.2,1,bx,bz,floorZ+2,3946290,metalMat(3946290)),cyl(5.2,1,bx,bz,floorZ+9,3946290,metalMat(3946290));}
     box(16,10,3,-14,12,floorZ+7,7887415,im.trim),cyl(3,2,-18,10,floorZ+2,3616035,im.trim),cyl(3,2,-10,10,floorZ+2,3616035,im.trim),cyl(3,2,-18,15,floorZ+2,3616035,im.trim),cyl(3,2,-10,15,floorZ+2,3616035,im.trim);
     for(const[px,pz,pc]of[[-18,10,13137960],[-14,11,11152685],[-10,13,6259255],[-16,14,13808700],[-12,10,13137960]])sph(2,px,pz,floorZ+10,pc);
     box(9,9,7,-half+10,half-14,floorZ,9201985,im.trim),box(6,6,6,-half+10,half-14,floorZ+7,6572845,im.trim);
@@ -262,7 +262,7 @@ function furnishInterior(g,bld,half,floorZ,tall){
     for(let i=0;i<10;i++){const bx=-25+i*5.5,bm=[2641972,5255706,9874080][i%3];cyl(1.2,5,bx,-29,floorZ+9,bm,im.trim),cyl(1.2,5,bx,-29,floorZ+15,bm,im.trim)}
     for(const sx of[-24,-12,0,12,24])cyl(4,3,sx,-19,floorZ+3,6571565,im.trim),cyl(1,18,sx,-19,floorZ,6571565,im.trim);
     for(const[bx,bz]of[[24,-16],[30,-16],[27,-9]]){cyl(6,14,bx,bz,floorZ,472403,im.trim),cyl(6.2,1,bx,bz,floorZ+2,3946290,metalMat(3946290)),cyl(6.2,1,bx,bz,floorZ+11,3946290,metalMat(3946290));}
-    for(const[tx,tz]of[[-16,4],[16,4],[-16,20]]){cyl(1.2,16,tx,tz,floorZ,6900525,im.trim),cyl(10,1.5,tx,tz,floorZ+16,6900525,im.trim);for(let i=0;i<4;i++){const a=Math.PI/2*i+Math.PI/4,sx=tx+14*Math.cos(a),sz=tz+14*Math.sin(a);cyl(2.5,2,sx,sz,floorZ+9,6571565,im.trim),cyl(.6,9,sx,sz,floorZ,6571565,im.trim)}}
+    for(const[tx,tz]of[[-27,-3],[8,-3],[-9,22]]){cyl(1.2,16,tx,tz,floorZ,6900525,im.trim),cyl(10,1.5,tx,tz,floorZ+16,6900525,im.trim);for(let i=0;i<4;i++){const a=Math.PI/2*i+Math.PI/4,sx=tx+10*Math.cos(a),sz=tz+10*Math.sin(a);cyl(2.5,2,sx,sz,floorZ+9,6571565,im.trim),cyl(.6,9,sx,sz,floorZ,6571565,im.trim)}}
     box(1.5,16,32,half-.5,20,floorZ,7235940,im.trim),box(10,1.5,32,half-11,10,floorZ,7235940,im.trim),box(10,1.5,32,half-11,28,floorZ,7235940,im.trim),box(10,16,3,half-11,20,floorZ+29,7235940,im.trim),box(7,10,4,half-8,20,floorZ+3,15104040,emisMat(15104040));
     cyl(.6,20,0,0,floorZ+30,2631203,metalMat(2631203)),cyl(9,1.2,0,0,floorZ+28,2631203,metalMat(2631203));
     for(let i=0;i<6;i++){const a=Math.PI/3*i,cx=8*Math.cos(a),cz=8*Math.sin(a);cyl(.5,4,cx,cz,floorZ+28,2631203,metalMat(2631203)),cyl(.7,2,cx,cz,floorZ+32,15774800,emisMat(15774800))}
@@ -288,7 +288,7 @@ function furnishInterior(g,bld,half,floorZ,tall){
     box(6,5,10,20,-20,floorZ,3942938,im.trim),box(7,6,1,20,-20,floorZ+10,3942938);
     for(const bz of[-20,-5,10])box(half*2-6,2,2,0,bz,44,3811356,im.trim);
   }else if(PROD_THEME[key]){
-    const theme=PROD_THEME[key],rh=tall?ROOM_H:50;
+    const theme=PROD_THEME[key],rh=tall?ROOM_H:ROOM_H_SHORT;
     if("hq"===theme){
       box(half*1.1,half*1.1,4,0,0,floorZ,2500134,im.trim);
       cyl(9,1.4,0,0,floorZ+4,16766814,emisMat(16766814));
@@ -337,7 +337,7 @@ function furnishInterior(g,bld,half,floorZ,tall){
 }
 function ensureInterior(bld){
   if(bld.interior)return bld.interior;
-  const half=interiorHalf(bld),tall=!!bld.d.roof,roomH=tall?ROOM_H:50,floorZ=tall?FLOOR_Z:0,ceilZ=floorZ+roomH,g=new THREE.Group,ro=-1e4,im=ensureInteriorMats();
+  const half=interiorHalf(bld),tall=!!bld.d.roof,roomH=tall?ROOM_H:ROOM_H_SHORT,floorZ=tall?FLOOR_Z:0,ceilZ=floorZ+roomH,g=new THREE.Group,ro=-1e4,im=ensureInteriorMats();
   const winW=Math.min(half*1.3,half*2-8),winH=roomH*.45,winZ=roomH*.3,doorW=Math.min(22,half*1.1),doorH=roomH*.62;
   const mkWall=(w,rotY,px,pz,isDoor?)=>{
     const wg=panelWall(w,roomH,isDoor?Math.min(doorW,w-6):Math.min(winW,w-6),isDoor?doorH:winH,isDoor?0:winZ,im.wall,isDoor?null:im.glass);
