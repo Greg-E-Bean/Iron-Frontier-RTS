@@ -210,6 +210,7 @@ export interface Building {
   garrison?: Unit[];
   pairId?: number | null;
   gateT?: number;
+  doorT?: number;
   open?: boolean;
   furnCols?: unknown[];
   interior?: unknown;

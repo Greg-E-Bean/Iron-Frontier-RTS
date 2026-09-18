@@ -2493,6 +2493,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const p = S.players[e.owner];
       if (p && !p.neutral) {
         const qk = "factory" === e.key ? "veh" : "barracks" === e.key ? "inf" : "air", q = p.queues[qk];
+        if ("factory" === e.key) {
+          const making = !!(q && q.list.length && !q.hold);
+          e.doorT = clamp((e.doorT || 0) + ((making ? 1 : 0) - (e.doorT || 0)) * Math.min(1, 1.4 * t), 0, 1);
+        }
         if (q && q.list.length && !q.hold && q.prog > 0) {
           const R = 16 * e.size;
           if (Math.random() < 0.1) {
@@ -5074,7 +5078,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function hasStagedBuild(e) {
     return "conyard" === e || "factory" === e || "power" === e || "barracks" === e || "refinery" === e || "airfield" === e || "navalyard" === e || "lab" === e;
   }
-  function BMODEL_(e, t, dep, cn, rot, prod) {
+  function BMODEL_(e, t, dep, cn, rot, prod, doorT = 0) {
     cn = cn || 0;
     const r = 32 * BLD[e].size, n = [], a = "allied" === t, o = "soviet" === t, d = false !== dep;
     const s = 0.3 * r, i = 0.24 * r, l = 3.6, c = l + s;
@@ -5425,14 +5429,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       case "factory": {
         const bw = 0.8 * r, bd = 0.5 * r, bh = 0.24 * r, doorW = 0.7 * r, doorH = 0.9 * bh, doorY = bd + 0.6, z2 = l + bh;
         const facMat = a ? { body: "armor", trim: "armor3", accent: "glow", frame: "armor3", dark: "dark2" } : o ? { body: "concrete", trim: "concrete2", accent: "red", frame: "rust", dark: "dark2" } : { body: "carapace2", trim: "bone", accent: "psi", frame: "carapace", dark: "dark2" };
-        const isOpen = riseBucket >= 4 && !!(prod && UNITS[prod]);
         n.push(P_(SLAB(roundRectProfile(0.95 * r, 0.95 * r, 3, 3), 1.1, 0.5, "fcpad"), 0, 0, l, "asphalt"));
         if (riseBucket >= 1) {
           tier(n, bw, bd, bh, 0, 0, l, facMat.body, "favH", 0.995);
           railPosts(n, bw, bd, z2, 2.2);
         }
         if (riseBucket >= 2) {
-          const jamb = 5, shutterSplit = isOpen ? 0.36 : 1;
+          const dt2 = riseBucket >= 4 ? doorT : 0, jamb = 5, shutterSplit = 1 - 0.64 * dt2;
           n.push(P_(BOXM(doorW + 2 * jamb, 3.4, jamb, 0.2), 0, doorY, l + doorH, facMat.frame));
           for (const sx of [-1, 1]) n.push(P_(BOXM(jamb, 3.4, doorH + jamb, 0.2), sx * (doorW / 2 + jamb / 2), doorY, l, facMat.frame));
           const gapH = doorH * (1 - shutterSplit);
@@ -5441,8 +5444,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           for (let i2 = 0; i2 < slats; i2++) n.push(P_(BOXM(doorW - 2, 3, slatH * 0.86, 0.1), 0, doorY - 0.5, l + gapH + slatH * i2, i2 % 2 ? facMat.frame : facMat.trim));
           hazard(n, 0, doorY - 2.2, 5.2, doorW + 10, 0);
           windows(n, 0.3 * r, bd - 0.02 * r, z2 - 0.06 * bh, 0.11 * r, 3, a ? "glass" : o ? "glassdark" : "psi");
-          if (isOpen) try {
-            const pu = UMODEL_(prod, 0, { fac: t }), scale = 0.78, ang = Math.PI / 2, cs = Math.cos(ang), sn = Math.sin(ang), py = doorY + 4;
+          const reveal = clamp((dt2 - 0.15) / 0.5, 0, 1);
+          if (prod && UNITS[prod] && reveal > 0.02) try {
+            const pu = UMODEL_(prod, 0, { fac: t }), scale = 0.78 * reveal, ang = Math.PI / 2, cs = Math.cos(ang), sn = Math.sin(ang), py = doorY + 4;
             for (const p of pu) {
               const lx = (p.x || 0) * scale, ly = (p.y || 0) * scale;
               n.push(Object.assign({}, p, {
@@ -5795,9 +5799,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function UTURRET(e, t, extra) {
     return UTURRET_(e, t || 0, extra);
   }
-  function BMODEL(e, t, d, cn, rot, prod = null) {
+  function BMODEL(e, t, d, cn, rot, prod = null, doorT = 0) {
     const _a = getAssetModel(e, t);
-    return _a || BMODEL_(e, t, d, cn, rot, prod);
+    return _a || BMODEL_(e, t, d, cn, rot, prod, doorT);
   }
   function BTURRET(e, t, r) {
     return BTURRET_(e, t, r || 0);
@@ -8148,8 +8152,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f + 220) continue;
       if (!seen(e2)) continue;
       const live = 2 === visAt(e2.x, e2.y);
-      const t2 = e2.owner < 0 ? "neutral" : S.players[e2.owner].fac, r2 = e2.owner < 0 ? { body: MAT.neutral, dark: "#6a6252", trim: "#aaa" } : palette(e2.owner), gy = heightAt(e2.x, e2.y), n2 = (hasStagedBuild(e2.key) ? 0 : e2.rise >= 1 ? 0 : -(1 - e2.rise) * (32 * e2.size * 0.62 + 30)) + gy, conn = "wall" === e2.key || "gate" === e2.key ? wallNeighborMask(e2.tx, e2.ty, e2.owner) : 0, gateBucket = "gate" === e2.key ? Math.round(8 * (e2.gateT || 0)) : 0, riseBucket = hasStagedBuild(e2.key) ? Math.round(4 * Math.min(1, e2.rise)) : 4, mf = e2.capturedFac || t2, prod = "factory" === e2.key && S.players[e2.owner] && S.players[e2.owner].queues.veh && S.players[e2.owner].queues.veh.list.length ? S.players[e2.owner].queues.veh.list[0] : null, a2 = "B" + e2.key + ("hive" === e2.key || "super" === e2.key ? e2.deployed ? "D" : "U" : "gate" === e2.key ? "G" + gateBucket : hasStagedBuild(e2.key) ? "R" + riseBucket : "") + (conn ? "_c" + conn : "") + ("factory" === e2.key ? "|PU" + (prod || "-") : "") + "|" + mf + "|" + e2.owner;
-      c(a2, () => BMODEL(e2.key, mf, "gate" === e2.key ? gateBucket / 8 : hasStagedBuild(e2.key) ? Math.min(1, e2.rise) : e2.deployed, conn, e2.rot || 0, prod), r2, e2.x, e2.y, n2, e2.rot || 0);
+      const t2 = e2.owner < 0 ? "neutral" : S.players[e2.owner].fac, r2 = e2.owner < 0 ? { body: MAT.neutral, dark: "#6a6252", trim: "#aaa" } : palette(e2.owner), gy = heightAt(e2.x, e2.y), n2 = (hasStagedBuild(e2.key) ? 0 : e2.rise >= 1 ? 0 : -(1 - e2.rise) * (32 * e2.size * 0.62 + 30)) + gy, conn = "wall" === e2.key || "gate" === e2.key ? wallNeighborMask(e2.tx, e2.ty, e2.owner) : 0, gateBucket = "gate" === e2.key ? Math.round(8 * (e2.gateT || 0)) : 0, riseBucket = hasStagedBuild(e2.key) ? Math.round(4 * Math.min(1, e2.rise)) : 4, mf = e2.capturedFac || t2, prod = "factory" === e2.key && S.players[e2.owner] && S.players[e2.owner].queues.veh && S.players[e2.owner].queues.veh.list.length ? S.players[e2.owner].queues.veh.list[0] : null, doorBucket = "factory" === e2.key ? Math.round(10 * (e2.doorT || 0)) : 0, a2 = "B" + e2.key + ("hive" === e2.key || "super" === e2.key ? e2.deployed ? "D" : "U" : "gate" === e2.key ? "G" + gateBucket : hasStagedBuild(e2.key) ? "R" + riseBucket : "") + (conn ? "_c" + conn : "") + ("factory" === e2.key ? "|PU" + (prod || "-") + "|DR" + doorBucket : "") + "|" + mf + "|" + e2.owner;
+      c(a2, () => BMODEL(e2.key, mf, "gate" === e2.key ? gateBucket / 8 : hasStagedBuild(e2.key) ? Math.min(1, e2.rise) : e2.deployed, conn, e2.rot || 0, prod, doorBucket / 10), r2, e2.x, e2.y, n2, e2.rot || 0);
       const o2 = GLGEO.get(a2);
       if (live && o2 && o2.anims) for (let t3 = 0; t3 < o2.anims.length; t3++) {
         const s2 = o2.anims[t3];
