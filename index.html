@@ -8267,7 +8267,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (!b) return;
     b.garrison = (b.garrison || []).filter((x) => x !== u), u.inside = null, u.alt = 0;
     const r = nearestFree(b.tx + irnd(0, b.size - 1), b.ty + irnd(0, b.size - 1), walkable);
-    r ? (u.x = 32 * r[0] + 16, u.y = 32 * r[1] + 16) : (u.x = b.x, u.y = b.y + 16 * b.size + 14), u.order = "idle", b.garrison.length || (b.owner = NEUTRAL);
+    r ? (u.x = 32 * r[0] + 16, u.y = 32 * r[1] + 16) : (u.x = b.x, u.y = b.y + 16 * b.size + 14), u.order = "idle", b.d.civ && !b.garrison.length && (b.owner = NEUTRAL);
   }
   function fpsBeingTargeted(e) {
     return S.units.some((u) => !u.dead && u.owner !== e.owner && teamOf(u.owner) !== teamOf(e.owner) && u.target === e && ("attack" === u.order || "amove" === u.order));
