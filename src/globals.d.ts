@@ -71,6 +71,8 @@ declare global {
   function bname(key: string, fac: string): string;
   function unitRoleTag(key: string): { short: string; label: string; desc: string; color: string } | null;
   function bweapon(key: string, fac: string): EntityDef | null;
+  const UNIT_DESC: Record<string, string>;
+  const BLD_DESC: Record<string, string>;
 
   // === sim.js (core simulation) ===
   var S: GameState;
@@ -517,6 +519,7 @@ declare global {
   var tileSprites: any;
   var mmCache: HTMLCanvasElement | null;
   var NEUTRAL: number;
+  const BRIDGE_MAX_HP: number;
 
   // === render.js (Three.js engine bootstrap) ===
   const initGL: AnyFn;
