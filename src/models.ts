@@ -770,6 +770,7 @@ const facMat=a?{body:"armor",trim:"armor3",accent:"glow",frame:"gunmetal",dark:"
 n.push(P_(SLAB(roundRectProfile(.95*r,.95*r,3,3),1.1,.5,"fcpad"),0,0,l,"asphalt"));
 const ridgeH=.34*r,eaveH=.08*r,archH=hw;
 const archAt=x=>archH*Math.sqrt(Math.max(0,1-(x/hw)*(x/hw))),pitchAt=x=>ridgeH+(eaveH-ridgeH)*((x+hw)/bw);
+const roofZ=z2;
 if(riseBucket>=1){
 // Legion gets a mono-pitch shed roof, Vanguard a true semicircular barrel
 // vault, sized to the exact bw/bd footprint so the roof meets the wall
@@ -784,8 +785,15 @@ n.push(P_(BOXM(bw*1.06,bd*1.06,1.1,.35),0,0,l+.05,"concrete2"));
 // curved or sloped surface in a shiny "metal" bucket color picks up such a
 // strong specular wash from the sky/sun that it reads as pale/washed-out
 // (almost see-through) rather than a solid faction-colored roof.
-if(o)n.push(P_(WEDGE(bw,bd,ridgeH,eaveH),0,0,z2,facMat.trim));
-else n.push(P_(BARREL(bw,bd,archH),0,0,z2,"roof"));
+if(o)n.push(P_(WEDGE(bw,bd,ridgeH,eaveH),0,0,roofZ,facMat.trim));
+else n.push(P_(BARREL(bw,bd,archH),0,0,roofZ,"roof"));
+// A true semicircle's height drops to exactly zero right at the wall
+// line, so that edge is a mathematically zero-thickness sliver - at a
+// grazing view angle it depth-compares inconsistently against anything
+// standing nearby (a unit walking past can flicker half-behind it). A
+// solid eave band with real volume at that seam removes the degenerate
+// thin edge instead of leaving the bare tangent line to fend for itself.
+n.push(P_(SLAB(roundRectProfile(bw*1.02,bd*1.02,.1*Math.min(bw,bd),3),3,.3,"eaveband"),0,0,roofZ-1.2,o?facMat.trim:"roof"));
 }else{
 tier(n,bw,bd,bh,0,0,l,facMat.body,"favH",.995);
 railPosts(n,bw,bd,z2,2.2);
@@ -810,7 +818,17 @@ const ribBot=l+doorH-(i+1)*ribGap;
 if(ribBot>=l+doorH-curtH-.01)n.push(P_(BOXM(doorW-3,2.6,ribGap*.3,.08),0,doorY-.05,ribBot+ribGap*.35,i%2?facMat.frame:facMat.trim));
 }
 hazard(n,0,doorY-2.2,5.2,doorW+10,0);
-windows(n,.3*r,bd-.02*r,z2-.06*bh,3.4,3,a?"glass":o?"glassdark":"psi");
+// windows()'s first loop spreads across `t` and plants windows on the
+// +-r faces, the second spreads across `r` and plants them on the +-t
+// faces - so t/r have to be the building's actual full width/depth (not
+// an arbitrary "spread" value), or the second loop's side-wall windows
+// land at the wrong x entirely, floating deep inside the building instead
+// of on the real side wall.
+// Kept at mid-wall height rather than up near z2: right at the top of
+// the wall, the window frame's own height (~2 units) pushes its top
+// past z2 and visually collides with the pitched/vaulted roof's low
+// edge there, instead of reading as clearly on the vertical wall face.
+windows(n,bw,bd,l+.5*bh,3.4,3,a?"glass":o?"glassdark":"psi");
 // The vehicle only reveals once the shutter's rolled up far enough to
 // show it, growing in as the curtain retracts - it disappears the instant
 // the real unit spawns (prod goes null) even if the shutter takes a
@@ -841,10 +859,10 @@ if(riseBucket>=3){
 // scaled off hd (the real half-depth) rather than r, so nothing sticks
 // out past the back eave.
 if(a){
-for(let e=0;e<2;e++){const fx=-.34*r+e*.68*r,fy=-.55*hd;fan(n,fx,fy,z2+archAt(fx)+.02*r,4.2,5,"gunmetal",2.4)}
-n.push(P_(CYL(.022*r,.22*r,10),0,-.7*hd,z2+archAt(0),"darkmetal"));
-n.push(P_(BOXM(.13*r,.013*r,.013*r,.05),0,-.7*hd,z2+archAt(0)+.22*r,"darkmetal",{a:{spin:.9}}));
-n.push(P_(DOME(.07*r,.05*r,12),0,-.7*hd,z2+archAt(0)+.02*r,"glassdark"));
+for(let e=0;e<2;e++){const fx=-.34*r+e*.68*r,fy=-.55*hd;fan(n,fx,fy,roofZ+archAt(fx)+.02*r,4.2,5,"gunmetal",2.4)}
+n.push(P_(CYL(.022*r,.22*r,10),0,-.7*hd,roofZ+archAt(0),"darkmetal"));
+n.push(P_(BOXM(.13*r,.013*r,.013*r,.05),0,-.7*hd,roofZ+archAt(0)+.22*r,"darkmetal",{a:{spin:.9}}));
+n.push(P_(DOME(.07*r,.05*r,12),0,-.7*hd,roofZ+archAt(0)+.02*r,"glassdark"));
 }else if(o){
 const sx1=-.3*r,sx2=.12*r,sy1=-.55*hd,sy2=-.65*hd;
 // A flared flashing collar in the roof's own color at each stack's base -
@@ -852,12 +870,12 @@ const sx1=-.3*r,sx2=.12*r,sy1=-.55*hd,sy2=-.65*hd;
 // touches it along one edge (its base is flat, the roof isn't), leaving
 // a sliver of open air on the uphill side; the flare hides that seam and
 // reads as the roofing material flashed up around the pipe.
-n.push(P_(CONE(.16*r,.075*r,.05*r,10),sx1,sy1,z2+pitchAt(sx1)-.01*r,facMat.trim));
-n.push(P_(CONE(.13*r,.065*r,.045*r,10),sx2,sy2,z2+pitchAt(sx2)-.01*r,facMat.trim));
-stack(n,sx1,sy1,z2+pitchAt(sx1),.06*r,.3*r,"rust");
-stack(n,sx2,sy2,z2+pitchAt(sx2),.05*r,.24*r,"rust");
-n.push(P_(CYL(.035*r,.14*r,10),sx1,sy1,z2+pitchAt(sx1)+.3*r,"darkmetal"));
-n.push(P_(CYL(.065*r,.065*r,10),sx1,sy1,z2+pitchAt(sx1)+.44*r,"red",{e:1,a:{spin:1.3}}));
+n.push(P_(CONE(.16*r,.075*r,.05*r,10),sx1,sy1,roofZ+pitchAt(sx1)-.01*r,facMat.trim));
+n.push(P_(CONE(.13*r,.065*r,.045*r,10),sx2,sy2,roofZ+pitchAt(sx2)-.01*r,facMat.trim));
+stack(n,sx1,sy1,roofZ+pitchAt(sx1),.06*r,.3*r,"rust");
+stack(n,sx2,sy2,roofZ+pitchAt(sx2),.05*r,.24*r,"rust");
+n.push(P_(CYL(.035*r,.14*r,10),sx1,sy1,roofZ+pitchAt(sx1)+.3*r,"darkmetal"));
+n.push(P_(CYL(.065*r,.065*r,10),sx1,sy1,roofZ+pitchAt(sx1)+.44*r,"red",{e:1,a:{spin:1.3}}));
 }else{
 for(const cc of[[-.3*r,-.55*hd],[.3*r,-.65*hd]])hive(n,{x:cc[0],y:cc[1],z:z2,r:.08*r,h:.22*r,crown:.04*r,seg:6,crest:!1,vein:"psi"});
 n.push(P_(CYL(1.6,2.6,10),0,-.6*hd,z2+.06*r,"psi",{e:1,a:{spin:1.1}}));

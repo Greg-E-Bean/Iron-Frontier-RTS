@@ -5433,12 +5433,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         n.push(P_(SLAB(roundRectProfile(0.95 * r, 0.95 * r, 3, 3), 1.1, 0.5, "fcpad"), 0, 0, l, "asphalt"));
         const ridgeH = 0.34 * r, eaveH = 0.08 * r, archH = hw;
         const archAt = (x) => archH * Math.sqrt(Math.max(0, 1 - x / hw * (x / hw))), pitchAt = (x) => ridgeH + (eaveH - ridgeH) * ((x + hw) / bw);
+        const roofZ = z2;
         if (riseBucket >= 1) {
           if (o || a) {
             n.push(P_(TSLAB(roundRectProfile(bw, bd, 0.1 * Math.min(bw, bd), 3), bh, 0.995, "favW"), 0, 0, l, facMat.body));
             n.push(P_(BOXM(bw * 1.06, bd * 1.06, 1.1, 0.35), 0, 0, l + 0.05, "concrete2"));
-            if (o) n.push(P_(WEDGE(bw, bd, ridgeH, eaveH), 0, 0, z2, facMat.trim));
-            else n.push(P_(BARREL(bw, bd, archH), 0, 0, z2, "roof"));
+            if (o) n.push(P_(WEDGE(bw, bd, ridgeH, eaveH), 0, 0, roofZ, facMat.trim));
+            else n.push(P_(BARREL(bw, bd, archH), 0, 0, roofZ, "roof"));
+            n.push(P_(SLAB(roundRectProfile(bw * 1.02, bd * 1.02, 0.1 * Math.min(bw, bd), 3), 3, 0.3, "eaveband"), 0, 0, roofZ - 1.2, o ? facMat.trim : "roof"));
           } else {
             tier(n, bw, bd, bh, 0, 0, l, facMat.body, "favH", 0.995);
             railPosts(n, bw, bd, z2, 2.2);
@@ -5457,7 +5459,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
             if (ribBot >= l + doorH - curtH - 0.01) n.push(P_(BOXM(doorW - 3, 2.6, ribGap * 0.3, 0.08), 0, doorY - 0.05, ribBot + ribGap * 0.35, i2 % 2 ? facMat.frame : facMat.trim));
           }
           hazard(n, 0, doorY - 2.2, 5.2, doorW + 10, 0);
-          windows(n, 0.3 * r, bd - 0.02 * r, z2 - 0.06 * bh, 3.4, 3, a ? "glass" : o ? "glassdark" : "psi");
+          windows(n, bw, bd, l + 0.5 * bh, 3.4, 3, a ? "glass" : o ? "glassdark" : "psi");
           const reveal = clamp((dt2 - 0.15) / 0.5, 0, 1);
           if (prod && UNITS[prod] && reveal > 0.02) try {
             const pu = UMODEL_(prod, 0, { fac: t }), scale = 0.78 * reveal, ang = Math.PI / 2, cs = Math.cos(ang), sn = Math.sin(ang), py = doorY + 4;
@@ -5480,19 +5482,19 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           if (a) {
             for (let e2 = 0; e2 < 2; e2++) {
               const fx = -0.34 * r + e2 * 0.68 * r, fy = -0.55 * hd;
-              fan(n, fx, fy, z2 + archAt(fx) + 0.02 * r, 4.2, 5, "gunmetal", 2.4);
+              fan(n, fx, fy, roofZ + archAt(fx) + 0.02 * r, 4.2, 5, "gunmetal", 2.4);
             }
-            n.push(P_(CYL(0.022 * r, 0.22 * r, 10), 0, -0.7 * hd, z2 + archAt(0), "darkmetal"));
-            n.push(P_(BOXM(0.13 * r, 0.013 * r, 0.013 * r, 0.05), 0, -0.7 * hd, z2 + archAt(0) + 0.22 * r, "darkmetal", { a: { spin: 0.9 } }));
-            n.push(P_(DOME(0.07 * r, 0.05 * r, 12), 0, -0.7 * hd, z2 + archAt(0) + 0.02 * r, "glassdark"));
+            n.push(P_(CYL(0.022 * r, 0.22 * r, 10), 0, -0.7 * hd, roofZ + archAt(0), "darkmetal"));
+            n.push(P_(BOXM(0.13 * r, 0.013 * r, 0.013 * r, 0.05), 0, -0.7 * hd, roofZ + archAt(0) + 0.22 * r, "darkmetal", { a: { spin: 0.9 } }));
+            n.push(P_(DOME(0.07 * r, 0.05 * r, 12), 0, -0.7 * hd, roofZ + archAt(0) + 0.02 * r, "glassdark"));
           } else if (o) {
             const sx1 = -0.3 * r, sx2 = 0.12 * r, sy1 = -0.55 * hd, sy2 = -0.65 * hd;
-            n.push(P_(CONE(0.16 * r, 0.075 * r, 0.05 * r, 10), sx1, sy1, z2 + pitchAt(sx1) - 0.01 * r, facMat.trim));
-            n.push(P_(CONE(0.13 * r, 0.065 * r, 0.045 * r, 10), sx2, sy2, z2 + pitchAt(sx2) - 0.01 * r, facMat.trim));
-            stack(n, sx1, sy1, z2 + pitchAt(sx1), 0.06 * r, 0.3 * r, "rust");
-            stack(n, sx2, sy2, z2 + pitchAt(sx2), 0.05 * r, 0.24 * r, "rust");
-            n.push(P_(CYL(0.035 * r, 0.14 * r, 10), sx1, sy1, z2 + pitchAt(sx1) + 0.3 * r, "darkmetal"));
-            n.push(P_(CYL(0.065 * r, 0.065 * r, 10), sx1, sy1, z2 + pitchAt(sx1) + 0.44 * r, "red", { e: 1, a: { spin: 1.3 } }));
+            n.push(P_(CONE(0.16 * r, 0.075 * r, 0.05 * r, 10), sx1, sy1, roofZ + pitchAt(sx1) - 0.01 * r, facMat.trim));
+            n.push(P_(CONE(0.13 * r, 0.065 * r, 0.045 * r, 10), sx2, sy2, roofZ + pitchAt(sx2) - 0.01 * r, facMat.trim));
+            stack(n, sx1, sy1, roofZ + pitchAt(sx1), 0.06 * r, 0.3 * r, "rust");
+            stack(n, sx2, sy2, roofZ + pitchAt(sx2), 0.05 * r, 0.24 * r, "rust");
+            n.push(P_(CYL(0.035 * r, 0.14 * r, 10), sx1, sy1, roofZ + pitchAt(sx1) + 0.3 * r, "darkmetal"));
+            n.push(P_(CYL(0.065 * r, 0.065 * r, 10), sx1, sy1, roofZ + pitchAt(sx1) + 0.44 * r, "red", { e: 1, a: { spin: 1.3 } }));
           } else {
             for (const cc of [[-0.3 * r, -0.55 * hd], [0.3 * r, -0.65 * hd]]) hive(n, { x: cc[0], y: cc[1], z: z2, r: 0.08 * r, h: 0.22 * r, crown: 0.04 * r, seg: 6, crest: false, vein: "psi" });
             n.push(P_(CYL(1.6, 2.6, 10), 0, -0.6 * hd, z2 + 0.06 * r, "psi", { e: 1, a: { spin: 1.1 } }));
