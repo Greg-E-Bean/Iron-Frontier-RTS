@@ -3107,6 +3107,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var SLAB = (e, t, r, n) => meshOf("S" + n, () => slabMesh(e, t, r));
   var TSLAB = (e, t, r, n) => meshOf("T" + n, () => taperSlabMesh(e, t, r));
   var WEDGE = (e, t, r, n) => meshOf("W" + e.toFixed(2) + "_" + t.toFixed(2) + "_" + r.toFixed(2) + "_" + n.toFixed(2), () => wedgeMesh(e, t, r, n));
+  var WALLONLY = (e, t, r, n) => meshOf("WO" + n, () => wallMesh(e, 0, t, 1, r, false));
   function P_(e, t, r, n, a, o) {
     const s = { m: e, x: t || 0, y: r || 0, z: n || 0, c: a || "body" };
     return o && Object.assign(s, o), s;
@@ -4885,25 +4886,26 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
     }
   }
-  function barrelRoofMesh(e, t, r, n) {
+  function barrelRoofMesh(e, t, r, n, mh) {
     const a = [];
-    n = n || 16;
+    n = n || 16, mh = mh || 0;
     const o = [];
     for (let t2 = 0; t2 <= n; t2++) {
       const a2 = Math.PI * t2 / n;
-      o.push([Math.cos(a2) * e / 2, Math.sin(a2) * r]);
+      o.push([Math.cos(a2) * e / 2, mh + (r - mh) * Math.sin(a2)]);
     }
     for (let s = 0; s < n; s++) {
-      const n2 = [o[s][0], -t / 2, o[s][1]], i = [o[s + 1][0], -t / 2, o[s + 1][1]], l = [o[s + 1][0], t / 2, o[s + 1][1]], c = [o[s][0], t / 2, o[s][1]], d = nrm3(o[s][0] / (e / 2), 0, o[s][1] / r), f = nrm3(o[s + 1][0] / (e / 2), 0, o[s + 1][1] / r);
+      const n2 = [o[s][0], -t / 2, o[s][1]], i = [o[s + 1][0], -t / 2, o[s + 1][1]], l = [o[s + 1][0], t / 2, o[s + 1][1]], c = [o[s][0], t / 2, o[s][1]], d = nrm3(o[s][0] / (e / 2), 0, (o[s][1] - mh) / (r - mh) || 1), f = nrm3(o[s + 1][0] / (e / 2), 0, (o[s + 1][1] - mh) / (r - mh) || 1);
       pushTri(a, n2, i, l, d, f, f), pushTri(a, n2, l, c, d, f, d);
     }
-    for (let e2 = 0; e2 < n; e2++) {
-      const r2 = [0, -1, 0], n2 = [0, 1, 0];
-      pushTri(a, [o[e2][0], -t / 2, o[e2][1]], [0, -t / 2, 0], [o[e2 + 1][0], -t / 2, o[e2 + 1][1]], r2, r2, r2), pushTri(a, [o[e2 + 1][0], t / 2, o[e2 + 1][1]], [0, t / 2, 0], [o[e2][0], t / 2, o[e2][1]], n2, n2, n2);
+    const cap = mh > 0 ? [[e / 2, 0], ...o, [-e / 2, 0]] : o;
+    for (let k = 0; k < cap.length - 1; k++) {
+      const r2 = [0, -1, 0], fn = [0, 1, 0];
+      pushTri(a, [cap[k + 1][0], -t / 2, cap[k + 1][1]], [0, -t / 2, 0], [cap[k][0], -t / 2, cap[k][1]], r2, r2, r2), pushTri(a, [cap[k][0], t / 2, cap[k][1]], [0, t / 2, 0], [cap[k + 1][0], t / 2, cap[k + 1][1]], fn, fn, fn);
     }
     return a;
   }
-  var BARREL = (e, t, r) => meshOf("BR" + e.toFixed(1) + "_" + t.toFixed(1) + "_" + r.toFixed(1), () => barrelRoofMesh(e, t, r));
+  var BARREL = (e, t, r, mh) => meshOf("BR" + e.toFixed(1) + "_" + t.toFixed(1) + "_" + r.toFixed(1) + "_" + (mh || 0).toFixed(1), () => barrelRoofMesh(e, t, r, 16, mh));
   function tier(e, t, r, n, a, o, s, i, l, c) {
     const d = void 0 === c ? 0.94 : c, f = roundRectProfile(t, r, 0.1 * Math.min(t, r), 3);
     e.push(P_(TSLAB(f, n, d, "tr" + l), a, o, s, i));
@@ -5431,25 +5433,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const bw = 0.8 * r, bd = 0.5 * r, bh = 0.24 * r, hw = bw / 2, hd = bd / 2, doorW = 0.7 * r, doorH = 0.9 * bh, doorY = hd + 0.3, z2 = l + bh;
         const facMat = a ? { body: "armor", trim: "armor3", accent: "glow", frame: "gunmetal", dark: "dark2" } : o ? { body: "concrete", trim: "concrete2", accent: "red", frame: "rust", dark: "dark2" } : { body: "carapace2", trim: "bone", accent: "psi", frame: "flesh", dark: "dark2" };
         n.push(P_(SLAB(roundRectProfile(0.95 * r, 0.95 * r, 3, 3), 1.1, 0.5, "fcpad"), 0, 0, l, "asphalt"));
-        const ridgeH = 0.34 * r, eaveH = 0.08 * r, archH = hw;
-        const archAt = (x) => archH * Math.sqrt(Math.max(0, 1 - x / hw * (x / hw))), pitchAt = (x) => ridgeH + (eaveH - ridgeH) * ((x + hw) / bw);
+        const ridgeH = 0.34 * r, eaveH = 0.08 * r, archH = hw, archMinH = 0.22 * archH;
+        const archAt = (x) => archMinH + (archH - archMinH) * Math.sqrt(Math.max(0, 1 - x / hw * (x / hw))), pitchAt = (x) => ridgeH + (eaveH - ridgeH) * ((x + hw) / bw);
         const roofZ = z2;
         if (riseBucket >= 1) {
           if (o || a) {
-            n.push(P_(TSLAB(roundRectProfile(bw, bd, 0.1 * Math.min(bw, bd), 3), bh, 0.995, "favW"), 0, 0, l, facMat.body));
+            n.push(P_(WALLONLY(roundRectProfile(bw, bd, 0.1 * Math.min(bw, bd), 3), bh, 0.995, "favW"), 0, 0, l, facMat.body));
             n.push(P_(BOXM(bw * 1.06, bd * 1.06, 1.1, 0.35), 0, 0, l + 0.05, "concrete2"));
             if (o) n.push(P_(WEDGE(bw, bd, ridgeH, eaveH), 0, 0, roofZ, facMat.trim));
             else {
-              n.push(P_(BARREL(bw, bd, archH), 0, 0, roofZ, "roof"));
+              n.push(P_(BARREL(bw, bd, archH, archMinH), 0, 0, roofZ, "roof"));
               for (let i2 = -4; i2 <= 4; i2++) {
                 const rx = i2 * 0.09 * bw, rh = archAt(rx);
                 if (rh > 4) n.push(P_(BOXM(1.6, bd * 0.92, 1.3, 0.25), rx, 0, roofZ + rh - 0.55, "darkmetal"));
               }
-            }
-            {
-              const ringT = 3, ringH = 2.4, ringZ = roofZ - 1.2, ringC = o ? facMat.trim : "roof";
-              for (const sy of [-1, 1]) n.push(P_(BOXM(bw + 2 * ringT, ringT, ringH, 0.2), 0, sy * (hd - 0.5 * ringT), ringZ, ringC));
-              for (const sx of [-1, 1]) n.push(P_(BOXM(ringT, bd, ringH, 0.2), sx * (hw - 0.5 * ringT), 0, ringZ, ringC));
             }
           } else {
             tier(n, bw, bd, bh, 0, 0, l, facMat.body, "favH", 0.995);
