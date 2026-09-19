@@ -5439,8 +5439,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
             n.push(P_(TSLAB(roundRectProfile(bw, bd, 0.1 * Math.min(bw, bd), 3), bh, 0.995, "favW"), 0, 0, l, facMat.body));
             n.push(P_(BOXM(bw * 1.06, bd * 1.06, 1.1, 0.35), 0, 0, l + 0.05, "concrete2"));
             if (o) n.push(P_(WEDGE(bw, bd, ridgeH, eaveH), 0, 0, roofZ, facMat.trim));
-            else n.push(P_(BARREL(bw, bd, archH), 0, 0, roofZ, "roof"));
-            n.push(P_(SLAB(roundRectProfile(bw * 1.02, bd * 1.02, 0.1 * Math.min(bw, bd), 3), 3, 0.3, "eaveband"), 0, 0, roofZ - 1.2, o ? facMat.trim : "roof"));
+            else {
+              n.push(P_(BARREL(bw, bd, archH), 0, 0, roofZ, "roof"));
+              for (let i2 = -4; i2 <= 4; i2++) {
+                const rx = i2 * 0.09 * bw, rh = archAt(rx);
+                if (rh > 4) n.push(P_(BOXM(1.6, bd * 0.92, 1.3, 0.25), rx, 0, roofZ + rh - 0.55, "darkmetal"));
+              }
+            }
+            {
+              const ringT = 3, ringH = 2.4, ringZ = roofZ - 1.2, ringC = o ? facMat.trim : "roof";
+              for (const sy of [-1, 1]) n.push(P_(BOXM(bw + 2 * ringT, ringT, ringH, 0.2), 0, sy * (hd - 0.5 * ringT), ringZ, ringC));
+              for (const sx of [-1, 1]) n.push(P_(BOXM(ringT, bd, ringH, 0.2), sx * (hw - 0.5 * ringT), 0, ringZ, ringC));
+            }
           } else {
             tier(n, bw, bd, bh, 0, 0, l, facMat.body, "favH", 0.995);
             railPosts(n, bw, bd, z2, 2.2);

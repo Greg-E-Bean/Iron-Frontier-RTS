@@ -786,14 +786,27 @@ n.push(P_(BOXM(bw*1.06,bd*1.06,1.1,.35),0,0,l+.05,"concrete2"));
 // strong specular wash from the sky/sun that it reads as pale/washed-out
 // (almost see-through) rather than a solid faction-colored roof.
 if(o)n.push(P_(WEDGE(bw,bd,ridgeH,eaveH),0,0,roofZ,facMat.trim));
-else n.push(P_(BARREL(bw,bd,archH),0,0,roofZ,"roof"));
+else{
+n.push(P_(BARREL(bw,bd,archH),0,0,roofZ,"roof"));
+// The barrel's own texture is a subtle low-contrast concrete grain, which
+// on a big smooth curved surface reads as an almost-flat silhouette next
+// to the wall's busier metal panelling. Real raised ribs (not just a
+// texture) running the depth of the roof give it actual corrugated
+// detail regardless of material subtlety, echoing a real Quonset hut's
+// corrugated panels.
+for(let i=-4;i<=4;i++){const rx=i*.09*bw,rh=archAt(rx);if(rh>4)n.push(P_(BOXM(1.6,bd*.92,1.3,.25),rx,0,roofZ+rh-.55,"darkmetal"))}
+}
 // A true semicircle's height drops to exactly zero right at the wall
 // line, so that edge is a mathematically zero-thickness sliver - at a
 // grazing view angle it depth-compares inconsistently against anything
-// standing nearby (a unit walking past can flicker half-behind it). A
-// solid eave band with real volume at that seam removes the degenerate
-// thin edge instead of leaving the bare tangent line to fend for itself.
-n.push(P_(SLAB(roundRectProfile(bw*1.02,bd*1.02,.1*Math.min(bw,bd),3),3,.3,"eaveband"),0,0,roofZ-1.2,o?facMat.trim:"roof"));
+// standing nearby (a unit walking past can flicker half-behind it), and
+// naively slabbing the whole footprint to fix that (as an earlier pass
+// here did) just recreates the same flat-panel-over-the-dome look with
+// different coloring. A thin ring hugging only the true perimeter gives
+// that seam real volume without covering the roof itself.
+{const ringT=3,ringH=2.4,ringZ=roofZ-1.2,ringC=o?facMat.trim:"roof";
+for(const sy of[-1,1])n.push(P_(BOXM(bw+2*ringT,ringT,ringH,.2),0,sy*(hd-.5*ringT),ringZ,ringC));
+for(const sx of[-1,1])n.push(P_(BOXM(ringT,bd,ringH,.2),sx*(hw-.5*ringT),0,ringZ,ringC));}
 }else{
 tier(n,bw,bd,bh,0,0,l,facMat.body,"favH",.995);
 railPosts(n,bw,bd,z2,2.2);
