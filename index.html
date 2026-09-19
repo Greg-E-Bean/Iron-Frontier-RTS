@@ -1565,7 +1565,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function addBuilding(e, t, r, n, a) {
     const o = BLD[t], s = S.players[e], i = { id: S.nextId++, e: "b", key: t, d: o, owner: e, tx: r, ty: n, size: o.size, x: 32 * (r + o.size / 2), y: 32 * (n + o.size / 2), hp: a ? o.hp : 0.25 * o.hp, maxhp: o.hp, name: bname(t, s.fac), cool: 0, target: null, dead: false, rally: null, sellT: 0, repair: false, chargeT: 0, rise: 1, w: bweapon(t, s.fac), w2: o.weapon2 || null, spin: 0, rot: 0, pads: "airfield" === t ? [null, null, null, null] : null };
     for (let e2 = n; e2 < n + o.size; e2++) for (let t2 = r; t2 < r + o.size; t2++) inMap(t2, e2) && (G.occ[idx(t2, e2)] = i.id, G.ore[idx(t2, e2)] = 0, G.tib[idx(t2, e2)] = 0);
-    e !== NEUTRAL && flattenFootprint(r, n, o.size);
+    flattenFootprint(r, n, o.size);
     if (S.blds.push(i), S.bldById.set(i.id, i), recalcPower(e), evict(i), "refinery" === t) {
       const t2 = addUnit(e, s.f.miner, i.x, i.y + 70.4);
       t2 && (t2.order = "harvest");
@@ -2787,6 +2787,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return r[n < 0.45 ? 0 : n < 0.75 ? Math.min(1, r.length - 1) : Math.random() * r.length | 0];
   }
   function tickAI(e, t) {
+    if (!hasBld(e.id, "conyard")) {
+      const mcv = S.units.find((u) => u.owner === e.id && !u.dead && "mcv" === u.key);
+      return void (mcv && deployMCV(mcv));
+    }
     const r = DIFFS[e.diff];
     if (e.ai.t -= t, e.ai.t > 0) return;
     const s = aiArmy(e), as = s.length, pz = aiPersonality(e);
@@ -10576,12 +10580,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         }
         cam.z = camZTarget = clamp(CW / 620, 0.42, 0.85), cam.x = wx, cam.y = wy + 83.2, clampCam();
       } else {
-        const a = addBuilding(t, "conyard", r, n, true);
-        addBuilding(t, "power", r + 4, n, true), addBuilding(t, "power", r + 4, n + 3, true);
-        for (let e = 0; e < 2; e++) {
-          const e2 = addUnit(t, o.miner, 32 * (r + 1.5) + rnd(-30, 30), 32 * (n + 4.5) + rnd(0, 40));
-          e2 && (e2.order = "harvest");
-        }
+        addUnit(t, "mcv", S.players[t].spawnX, S.players[t].spawnY);
         for (let e = 0; e < 3; e++) addUnit(t, o.base, 32 * (r + 3.5) + rnd(-40, 40), 32 * (n + 5) + rnd(-20, 30));
       }
     }), spawnCivs(), spawnSpecials(), applyPendingMission(), S.players[0].credits = 1e4, S.running = true, $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), openMenu(null), hint("COMMAND: select your Mobile HQ and tap DEPLOY"), setTimeout(() => {
