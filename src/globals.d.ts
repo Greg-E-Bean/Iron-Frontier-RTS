@@ -493,6 +493,7 @@ declare global {
   function tickChrono(u: Unit, dt: number): void;
   const acquireFor: AnyFn;
   function toggleDeploy(u: Unit): void;
+  function tickTitanGarrison(u: Unit, dt: number): void;
   function homePad(u: Unit): Building | null;
   function tickAir(u: Unit, dt: number): void;
   const flyTo: AnyFn;
