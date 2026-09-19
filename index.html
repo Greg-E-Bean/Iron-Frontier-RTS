@@ -5451,7 +5451,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
             n.push(P_(BOXM(bw * 1.06, bd * 1.06, 1.1, 0.35), 0, 0, l + 0.05, "concrete2"));
             if (o) n.push(P_(WEDGE(bw, bd, ridgeH, eaveH), 0, 0, roofZ, facMat.trim));
             else {
-              n.push(P_(BARREL(bw, bd, archH, archMinH), 0, 0, roofZ, "roof"));
+              n.push(P_(SLAB(roundRectProfile(bw, bd, 0.1 * Math.min(bw, bd), 3), 0.85 * archMinH, 0.28 * archMinH, "favRoofCap"), 0, 0, roofZ, "roof")), n.push(P_(BARREL(bw, bd, archH, archMinH), 0, 0, roofZ, "roof"));
               for (let i2 = -5; i2 <= 5; i2++) {
                 const rx = i2 * 0.092 * bw, rh = archAt(rx);
                 if (rh > 4) n.push(P_(BOXM(1.6, bd * 0.97, 1.3, 0.25), rx, 0, roofZ + rh - 0.55, "darkmetal"));
@@ -5778,7 +5778,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const w = 0.86 * r;
         for (let tier2 = 0; tier2 < 3; tier2++) {
           const tw = w * (1 - 0.22 * tier2), th = 0.32 * r, tz = l + tier2 * th;
-          n.push(P_(BOXM(tw, 0.82 * tw, th, 0.6), 0, -0.06 * r * tier2, tz, tier2 % 2 ? "cv2" : "cv1")), windows(n, tw * 0.85, 0.7 * tw, tz + 0.5 * th, 0.09 * r, 2 + tier2 % 2, "glassdark");
+          n.push(P_(BOXM(tw, 0.82 * tw, th, 0.6), 0, -0.06 * r * tier2, tz, tier2 % 2 ? "concrete2" : "neutral")), windows(n, tw * 0.85, 0.7 * tw, tz + 0.5 * th, 0.09 * r, 2 + tier2 % 2, "glassdark");
         }
         break;
       }
@@ -8938,7 +8938,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       wg.rotation.y = rotY, wg.position.set(px, floorZ, pz), wg.children.forEach((m) => m.renderOrder = ro), g.add(wg);
     };
     mkWall(half * 2, 0, 0, -half), mkWall(half * 2, 0, 0, half, true), mkWall(half * 2, Math.PI / 2, -half, 0), mkWall(half * 2, Math.PI / 2, half, 0);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, half * 2 - 2), im.floor);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 + 2, half * 2 + 2), im.floor);
     floor.rotation.x = -Math.PI / 2, floor.position.y = floorZ + 0.3, floor.renderOrder = ro + 1, g.add(floor);
     const baseH = 6, baseband = (w, rotY, px, pz) => {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w - 4, baseH), im.trim);
@@ -8946,9 +8946,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     };
     baseband(half * 2, 0, 0, -half + 0.3), baseband(half * 2, 0, 0, half - 0.3), baseband(half * 2, Math.PI / 2, -half + 0.3, 0), baseband(half * 2, Math.PI / 2, half - 0.3, 0);
     if (tall) {
-      const hw = half - 8, gap = STAIR_GAP, zStart = hw - gap, cd = half - 2 + zStart;
-      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, cd), im.ceil);
-      ceil.rotation.x = Math.PI / 2, ceil.position.set(0, ceilZ, (zStart - (half - 2)) / 2), ceil.renderOrder = ro + 1, g.add(ceil);
+      const hw = half - 8, gap = STAIR_GAP, zStart = hw - gap, cd = half + 2 + zStart;
+      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 + 2, cd), im.ceil);
+      ceil.rotation.x = Math.PI / 2, ceil.position.set(0, ceilZ, (zStart - (half + 2)) / 2), ceil.renderOrder = ro + 1, g.add(ceil);
       const steps = 8, stepD = gap / steps, stepH = (ROOF_Z - floorZ) / steps;
       for (let i = 0; i < steps; i++) {
         const topY = (i + 1) * stepH, z0 = zStart + i * stepD, block = new THREE.Mesh(new THREE.BoxGeometry(16, topY, stepD + 0.15), im.trim);
@@ -8972,7 +8972,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       };
       mkPar(rf * 2, 0, 0, -rf), mkPar(rf * 2, 0, 0, rf), mkPar(rf * 2, Math.PI / 2, -rf, 0), mkPar(rf * 2, Math.PI / 2, rf, 0);
     } else {
-      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 - 2, half * 2 - 2), im.ceil);
+      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 + 2, half * 2 + 2), im.ceil);
       ceil.rotation.x = Math.PI / 2, ceil.position.y = ceilZ, ceil.renderOrder = ro + 1, g.add(ceil);
     }
     bld.furnCols = furnishInterior(g, bld, half, floorZ, tall);

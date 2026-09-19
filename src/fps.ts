@@ -344,14 +344,14 @@ function ensureInterior(bld){
     wg.rotation.y=rotY,wg.position.set(px,floorZ,pz),wg.children.forEach(m=>m.renderOrder=ro),g.add(wg);
   };
   mkWall(half*2,0,0,-half),mkWall(half*2,0,0,half,!0),mkWall(half*2,Math.PI/2,-half,0),mkWall(half*2,Math.PI/2,half,0);
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(half*2-2,half*2-2),im.floor);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(half*2+2,half*2+2),im.floor);
   floor.rotation.x=-Math.PI/2,floor.position.y=floorZ+.3,floor.renderOrder=ro+1,g.add(floor);
   const baseH=6,baseband=(w,rotY,px,pz)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w-4,baseH),im.trim);m.rotation.y=rotY,m.position.set(px,floorZ+baseH/2,pz),m.renderOrder=ro,g.add(m)};
   baseband(half*2,0,0,-half+.3),baseband(half*2,0,0,half-.3),baseband(half*2,Math.PI/2,-half+.3,0),baseband(half*2,Math.PI/2,half-.3,0);
   if(tall){
-    const hw=half-8,gap=STAIR_GAP,zStart=hw-gap,cd=half-2+zStart;
-    const ceil=new THREE.Mesh(new THREE.PlaneGeometry(half*2-2,cd),im.ceil);
-    ceil.rotation.x=Math.PI/2,ceil.position.set(0,ceilZ,(zStart-(half-2))/2),ceil.renderOrder=ro+1,g.add(ceil);
+    const hw=half-8,gap=STAIR_GAP,zStart=hw-gap,cd=half+2+zStart;
+    const ceil=new THREE.Mesh(new THREE.PlaneGeometry(half*2+2,cd),im.ceil);
+    ceil.rotation.x=Math.PI/2,ceil.position.set(0,ceilZ,(zStart-(half+2))/2),ceil.renderOrder=ro+1,g.add(ceil);
     const steps=8,stepD=gap/steps,stepH=(ROOF_Z-floorZ)/steps;
     for(let i=0;i<steps;i++){
       const topY=(i+1)*stepH,z0=zStart+i*stepD,block=new THREE.Mesh(new THREE.BoxGeometry(16,topY,stepD+.15),im.trim);
@@ -372,7 +372,7 @@ function ensureInterior(bld){
     const mkPar=(w,rotY,px,pz)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,parH),im.trim);m.rotation.y=rotY,m.position.set(px,ROOF_Z+parH/2,pz),m.renderOrder=ro+1,g.add(m)};
     mkPar(rf*2,0,0,-rf),mkPar(rf*2,0,0,rf),mkPar(rf*2,Math.PI/2,-rf,0),mkPar(rf*2,Math.PI/2,rf,0);
   }else{
-    const ceil=new THREE.Mesh(new THREE.PlaneGeometry(half*2-2,half*2-2),im.ceil);
+    const ceil=new THREE.Mesh(new THREE.PlaneGeometry(half*2+2,half*2+2),im.ceil);
     ceil.rotation.x=Math.PI/2,ceil.position.y=ceilZ,ceil.renderOrder=ro+1,g.add(ceil);
   }
   bld.furnCols=furnishInterior(g,bld,half,floorZ,tall);
