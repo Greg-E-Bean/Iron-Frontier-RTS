@@ -398,7 +398,7 @@ declare global {
   const BTURRET_: AnyFn;
   function UMODEL(key: string, frame?: number, extra?: any): any;
   const UTURRET: AnyFn;
-  function BMODEL(key: string, fac: string, deployed?: number | boolean, colorName?: string, rot?: number, prod?: string | null, doorT?: number): any;
+  function BMODEL(key: string, fac: string, deployed?: number | boolean, cn?: number, rot?: number, prod?: string | null, doorT?: number): any;
   const BTURRET: AnyFn;
   function faceIdx(ang: number): number;
   const SPRITES: Map<string, any>;
@@ -738,6 +738,8 @@ declare global {
   function tickGates(dt: number): void;
   function quietKillBld(b: Building): void;
   function placeGatePair(g: Building): void;
+  function unitBob(u: Unit): number;
+  function gateNeighborBits(tx: number, ty: number, owner: number): number;
   function relinkGatePair(g: Building): void;
   function wallTileOk(tx: number, ty: number): boolean;
   const autoLinkWall: AnyFn;
