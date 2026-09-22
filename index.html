@@ -2076,7 +2076,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         }
         if ("amove" === e.order) return e.target && dist2(e.x, e.y, e.target.x, e.target.y) < effRange(e) * effRange(e) ? (e.moving = false, void faceAndShoot(e, e.target, t)) : (moveAlong(e, t), void ((!e.path || e.pi >= e.path.length) && !nextWaypoint(e) && (e.order = "idle")));
         if ("move" === e.order) return e.deployed ? void (e.order = "idle") : (moveAlong(e, t), void ((!e.path || e.pi >= e.path.length) && !nextWaypoint(e) && (e.order = "idle")));
-        e.target && inRange(e, e.target) && faceAndShoot(e, e.target, t), e.moving = false;
+        e.target && inRange(e, e.target) && faceAndShoot(e, e.target, t), e.moving = false, idleTurret(e, t);
       } else tickMiner(e, t);
       else tickGarrisonMove(e, t);
     } else tickChrono(e, t);
@@ -2092,6 +2092,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (r.credits < o) return;
       r.credits -= o, n.hp = Math.min(n.maxhp, n.hp + a), Math.random() < 0.12 && S.fx.push({ kind: "spark", x: n.x + rnd(-6, 6), y: n.y + rnd(-6, 6), z: 8, s: 0.45, c: "#7ef0a0", t: 0, life: 0.35 });
     });
+  }
+  function idleTurret(e, t) {
+    if (!e.d.turret || e.target && !e.target.dead || e.fps) return;
+    const aim = e.ang + (e.moving ? 0 : 0.6 * Math.sin(0.3 * S.time + 1.7 * e.id));
+    e.tang = angLerp(e.tang || 0, aim, Math.min(1, (e.moving ? 2.4 : 0.7) * t));
   }
   function faceAndShoot(e, t, r) {
     const w = heroWpn(e), n = Math.atan2(t.y - e.y, t.x - e.x);
@@ -2147,7 +2152,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     passableAt(g, y, e) || (passableAt(g, e.y, e) ? y = e.y : passableAt(e.x, y, e) ? g = e.x : (g = e.x, y = e.y, e.stuck += t));
     const x = Math.hypot(g - e.x, y - e.y);
-    x < 0.03 ? e.stuck += t : e.stuck = 0, e.stuck > 0.8 && (e.stuck = 0, repath(e), e.path || (e.order = "miner" === e.d.role ? "harvest" : "idle")), e.x = clamp(g, 6, 2938), e.y = clamp(y, 6, 2298), e.animT = (e.animT || 0) + x, e.moving = x > 0.12, e.d.turret || (e.tang = e.ang), e.moving && "inf" !== e.d.kind && (e.d.naval ? Math.random() < 0.15 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }) : (Math.random() < 0.025 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 2, s: 0.22, c: "#8a7f6a", t: 0, life: 0.45 }), (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.16, S.fx.push({ kind: "track", x: e.x - Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y + Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }), S.fx.push({ kind: "track", x: e.x + Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y - Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }))));
+    x < 0.03 ? e.stuck += t : e.stuck = 0, e.stuck > 0.8 && (e.stuck = 0, repath(e), e.path || (e.order = "miner" === e.d.role ? "harvest" : "idle")), e.x = clamp(g, 6, 2938), e.y = clamp(y, 6, 2298), e.animT = (e.animT || 0) + x, e.moving = x > 0.12, e.d.turret ? idleTurret(e, t) : e.tang = e.ang, e.moving && "inf" !== e.d.kind && (e.d.naval ? (Math.random() < 0.15 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }), !e.d.sub && (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.22, S.fx.push({ kind: "wake", x: e.x - Math.cos(e.ang) * 0.8 * e.d.radius, y: e.y - Math.sin(e.ang) * 0.8 * e.d.radius, s: e.d.radius, t: 0, life: 1.4 }))) : (Math.random() < 0.025 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 2, s: 0.22, c: "#8a7f6a", t: 0, life: 0.45 }), (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.16, S.fx.push({ kind: "track", x: e.x - Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y + Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }), S.fx.push({ kind: "track", x: e.x + Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y - Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }))));
   }
   function passableAt(e, t, r) {
     const n = Math.floor(e / 32), a = Math.floor(t / 32);
@@ -3488,7 +3493,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     legCount = legCount || 6;
     const perSide = legCount / 2, hipZ = 0.82 * n, spanX = 0.7 * t, step = perSide > 1 ? spanX / (perSide - 1) : 0;
     for (const side of [-1, 1]) for (let i = 0; i < perSide; i++) {
-      const hx = -spanX / 2 + i * step, hy = side * (0.5 * r - 0.5), phase = (i + (side > 0 ? 0 : 1)) % 2, lift = phase === ((a || 0) & 1) ? 2.4 : 0, kx = hx + side * 1.5, ky = side * (0.5 * r + 4), kz = 0.46 * hipZ + lift, fx = hx + side * 2.4, fy = side * (0.5 * r + 6), fz = 1.4 + 0.5 * lift;
+      const hx = -spanX / 2 + i * step, hy = side * (0.5 * r - 0.5), grp = (i + (side > 0 ? 0 : 1)) % 2, c = ((a || 0) & 3) + 2 * grp & 3, lift = 1 === c ? 2.8 : 0, sw = [-1, 0, 1, 0][c] * 0.08 * t, kx = hx + side * 1.5 + 0.5 * sw, ky = side * (0.5 * r + 4), kz = 0.46 * hipZ + lift, fx = hx + side * 2.4 + sw, fy = side * (0.5 * r + 6 - 0.6 * lift), fz = 1.4 + 0.55 * lift;
       e.push(P_(DOME(1.7, 1.3, 8), hx, hy, hipZ, "carapace2"));
       strut3(e, hx, hy, hipZ, kx, ky, kz, 1.15, "carapace");
       strut3(e, kx, ky, kz, fx, fy, fz, 0.78, "dark2");
@@ -3592,6 +3597,24 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       a.push(P_(CYL(0.16 * t, 1.3, 12), -0.14 * e, 0, th + 2, org ? "carapace2" : "trim"));
       a.push(P_(BOXM(0.12 * e, 0.09 * t, 0.7, 0.25), -0.22 * e, 0, th + 2.6, "gunmetal"));
     }
+    a.push(P_(SLAB(hullProfile(1.015 * e, 1.04 * t, n.fac), 1.1, 0.3, "bw" + e.toFixed(1) + t.toFixed(1) + (n.fac || "")), 0, 0, 0.4, org ? "bile2" : "dark2"));
+    bolts(a, -0.06 * e, -0.47 * t, 0.55 * th, 0.4 * e, 0, 6, org ? "psi" : "glassdark");
+    bolts(a, -0.06 * e, 0.47 * t, 0.55 * th, 0.4 * e, 0, 6, org ? "psi" : "glassdark");
+    if (org) {
+      for (let k = 0; k < 4; k++) a.push(P_(CONE(0.8, 0.1, 2.4, 6), -0.1 * e + k * 0.1 * e, 0, th + 1.6, "carapace2", { ty: -0.35 }));
+      a.push(P_(BOXM(0.5 * e, 0.3, 0.35, 0.1), 0.02 * e, -0.34 * t, th + 0.5, "psi", { e: 1 }));
+      a.push(P_(BOXM(0.5 * e, 0.3, 0.35, 0.1), 0.02 * e, 0.34 * t, th + 0.5, "psi", { e: 1 }));
+    } else {
+      for (const sy of [-1, 1]) {
+        a.push(P_(BOXM(0.62 * e, 0.25, 0.3, 0.1), -0.03 * e, sy * 0.4 * t, th + 2.1, "steel"));
+        for (let k = 0; k < 4; k++) a.push(P_(CYL(0.13, 1.4, 4), -0.3 * e + k * 0.18 * e, sy * 0.4 * t, th + 0.8, "steel"));
+      }
+      a.push(P_(BOXM(0.35, 0.4 * t, 1, 0.15), -0.2 * e + 0.1, 0, th + 3.5, "glass", { e: 1 }));
+      a.push(P_(BOXM(0.5, 0.34 * t, 0.3, 0.1), -0.32 * e, 0, th + 9.3, "gunmetal"));
+      a.push(P_(CONE(1.5, 0.3, 0.5, 10), -0.32 * e, 0, th + 11.2, "steel", { tx: 0.35 }));
+      for (const sy of [-1, 1]) a.push(P_(BOXM(1, 0.4, 0.8, 0.2), 0.4 * e, sy * 0.36 * t, 0.45 * th, "darkmetal"));
+      "soviet" === n.fac ? (a.push(P_(CYL(0.11 * t, 3.4, 10), -0.12 * e, 0, th + 1.8, "rust")), a.push(P_(CYL(0.12 * t, 0.6, 10), -0.12 * e, 0, th + 5.2, "black"))) : (a.push(P_(CYL(0.5, 1.6, 6), -0.12 * e, 0, th + 1.8, "gunmetal")), a.push(P_(DOME(1.4, 1.4, 10), -0.12 * e, 0, th + 3.4, "white")));
+    }
     return a;
   }
   function chinookModel() {
@@ -3664,15 +3687,35 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function subHull(e, t, r, n) {
     n = n || {};
-    const a = [], rad = 0.42 * t, org = "yuri" === n.fac;
-    a.push(P_(CYL(rad, 0.86 * e, 12), 0, 0, rad, "body", { ty: -PI2 }));
-    a.push(P_(CONE(rad, 0.25 * rad, 0.2 * e, 10), 0, 0, rad, org ? "carapace2" : "dark", { ty: PI2 }));
-    a.push(P_(CONE(rad, 0.15 * rad, 0.16 * e, 10), -0.86 * e, 0, rad, org ? "carapace2" : "dark", { ty: -PI2 }));
-    a.push(P_(org ? DOME(0.16 * e, 0.5 * rad, 10) : BOXM(0.14 * e, 0.22 * t, 1.3 * rad, 0.4), 0.04 * e, 0, rad + 0.9 * rad, org ? "carapace" : "armor2"));
-    a.push(P_(CYL(1.1, 0.7 * rad, 6), 0.04 * e, 0, rad + 1.6 * rad, org ? "psi" : "gunmetal", { e: org }));
-    a.push(P_(BOXM(0.05 * e, 0.5 * t, 0.35, 0.15), -0.44 * e, 0, rad, "dark"));
-    a.push(P_(BOXM(0.09 * e, 0.35, 0.32 * t, 0.15), -0.4 * e, 0.22 * t, rad, "dark"));
-    a.push(P_(BOXM(0.09 * e, 0.35, 0.32 * t, 0.15), -0.4 * e, -0.22 * t, rad, "dark"));
+    const a = [], rad = 0.42 * t, org = "yuri" === n.fac, sov = "soviet" === n.fac, zc = rad, L = e;
+    a.push(P_(CYL(rad, 0.8 * L, 16), 0.4 * L, 0, zc, "body", { ty: -PI2 }));
+    a.push(P_(CONE(rad, 0.28 * rad, 0.15 * L, 14), 0.4 * L, 0, zc, org ? "carapace2" : "dark", { ty: PI2 }));
+    a.push(P_(CONE(rad, 0.1 * rad, 0.17 * L, 14), -0.4 * L, 0, zc, org ? "carapace2" : "dark", { ty: -PI2 }));
+    a.push(P_(BOXM(0.62 * L, 0.9 * rad, 0.7, 0.25), 0.02 * L, 0, zc + 0.78 * rad, org ? "carapace" : "dark"));
+    for (const k of [-0.3, -0.1, 0.1, 0.3]) a.push(P_(CYL(1.04 * rad, 0.55, 16), k * L, 0, zc, org ? "carapace" : "trim", { ty: -PI2 }));
+    const sx = 0.12 * L, sb = zc + 0.85 * rad, sh2 = 1.5 * rad;
+    if (org) {
+      a.push(P_(DOME(0.13 * L, sh2, 12), sx, 0, sb, "carapace", { sy: 0.55 }));
+      a.push(P_(CONE(0.9, 0.15, 0.7 * rad, 7), sx, 0, sb + 0.9 * sh2, "psi", { e: 1 }));
+    } else if (sov) {
+      a.push(P_(BOXM(0.22 * L, 0.34 * t, sh2, 0.5), sx, 0, sb, "armor2"));
+      a.push(P_(BOXM(0.23 * L, 0.35 * t, 0.7, 0.2), sx, 0, sb + 0.55 * sh2, "rust"));
+      bolts(a, sx, -0.18 * t, sb + 0.3 * sh2, 0.08 * L, 0, 3, "steel");
+      bolts(a, sx, 0.18 * t, sb + 0.3 * sh2, 0.08 * L, 0, 3, "steel");
+    } else {
+      a.push(P_(SLAB(roundRectProfile(0.2 * L, 0.26 * t, 0.1 * t, 3), sh2, 0.8, "sbsA" + L.toFixed(1)), sx, 0, sb, "armor2"));
+      a.push(P_(BOXM(0.12 * L, 0.2 * t, 0.5, 0.2), sx + 0.02 * L, 0, sb + sh2, "glass", { e: 1 }));
+    }
+    if (!org) a.push(P_(BOXM(0.06 * L, 0.8 * t, 0.35, 0.15), sx + 0.03 * L, 0, sb + 0.6 * sh2, "dark"));
+    a.push(P_(CYL(0.32, 0.9 * rad, 6), sx + 0.04 * L, -0.06 * t, sb + sh2, "gunmetal"));
+    a.push(P_(CYL(0.14, 1.4 * rad, 5), sx - 0.04 * L, 0.06 * t, sb + sh2, "dark2"));
+    for (const sy of [-1, 1]) a.push(P_(CYL(0.22 * rad, 0.6, 8), 0.53 * L, sy * 0.32 * rad, zc - 0.25 * rad, "dark2", { ty: PI2 }));
+    a.push(P_(BOXM(0.08 * L, 0.35, 1.7 * rad, 0.15), -0.46 * L, 0, zc - 0.85 * rad, org ? "carapace2" : "dark"));
+    a.push(P_(BOXM(0.08 * L, 1.6 * t, 0.35, 0.15), -0.46 * L, 0, zc - 0.18, org ? "carapace2" : "dark"));
+    a.push(P_(CYL(0.3 * rad, 0.9, 10), -0.57 * L, 0, zc, "gunmetal", { ty: -PI2 }));
+    for (let k = 0; k < 4; k++) a.push(P_(BOXM(0.45, 0.55, 0.95 * rad, 0.1), -0.57 * L - 0.5, 0, zc, org ? "carapace2" : "steel", { tx: k * PI2 + ((r || 0) & 1) * 0.78 }));
+    a.push(P_(CYL(0.45, 0.6, 8), 0.2 * L, -0.46 * rad, zc + 0.7 * rad, "lightY", { e: 1 }));
+    a.push(P_(CYL(0.45, 0.6, 8), 0.2 * L, 0.46 * rad, zc + 0.7 * rad, "lightY", { e: 1 }));
     return a;
   }
   function tankHull(e, t, r, n) {
@@ -3943,26 +3986,55 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return t;
   }
   function bastionModel(e, fac) {
-    const t = [], r = 40, n = 16;
+    const t = [], r = 40, n = 16, hz = 5, hh = 6.5, top = hz + hh;
     trackUnit(t, r, n, 9, e, { trkW: 8, wheels: 6 });
-    t.push(P_(SLAB(hullProfile(0.9 * r, n + 2, fac), 6.5, 1.8, "bstH" + (fac || "")), 0, 0, 5, "armor2"));
+    t.push(P_(SLAB(hullProfile(0.92 * r, n + 2, fac), hh, 1.8, "bstH" + (fac || "")), 0, 0, hz, "armor2"));
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+      strut3(t, sx * 0.4 * r, sy * 0.3 * n, top - 1.2, sx * 0.56 * r, sy * 0.36 * n, 2.6, 1.05, "gunmetal");
+      t.push(P_(CYL(0.9, 1.4, 8), sx * 0.4 * r, sy * 0.3 * n, top - 1.8, "darkmetal"));
+      t.push(P_(CYL(2.2, 1, 10), sx * 0.56 * r, sy * 0.36 * n, 1.6, "darkmetal"));
+    }
     if ("soviet" === fac) {
-      t.push(P_(BOXM(1.2 * r, 13, 8, 0.4), 0, 0, 11, "concrete2"));
-      for (const s of [-1, 1]) t.push(P_(CYL(2.6, 4, 10), 0, s * 3.8, 19, "darkmetal"));
-      t.push(P_(CYL(4.2, 5, 12), 0, 0, 19, "gunmetal"));
-      t.push(P_(CYL(1.6, 16, 10), 20, 0, 21, "darkmetal", { ty: PI2 }));
-      t.push(P_(CYL(1.6, 1.8, 8), 0, 0, 24, "rust", { e: 1 }));
+      t.push(P_(BOXM(0.6 * r, 0.84 * n, 6.5, 0.5), -0.14 * r, 0, top, "concrete2"));
+      t.push(P_(BOXM(0.62 * r, 0.86 * n, 1.2, 0.2), -0.14 * r, 0, top + 2.4, "rust"));
+      bolts(t, -0.14 * r, -0.43 * n, top + 4.6, 0.28 * r, 0, 6, "steel");
+      bolts(t, -0.14 * r, 0.43 * n, top + 4.6, 0.28 * r, 0, 6, "steel");
+      t.push(P_(CYL(5, 2.4, 14), 0.26 * r, 0, top, "darkmetal"));
+      t.push(P_(BOXM(10, 8.4, 4.6, 0.6), 0.26 * r, 0, top + 2.2, "gunmetal"));
+      t.push(P_(CYL(1.6, 18, 10), 0.2 * r, 0, top + 5.6, "darkmetal", { ty: -PI2 }));
+      t.push(P_(CYL(2.1, 2.2, 10), 0.2 * r - 18, 0, top + 5.6, "gunmetal", { ty: -PI2 }));
+      t.push(P_(BOXM(1.6, 5, 1.2, 0.3), -0.3 * r, 0, top + 6.5, "rust"));
+      for (const sy of [-1, 1]) t.push(P_(CYL(1.5, 7.5, 10), -0.4 * r, sy * 0.24 * n, top, "rust")), t.push(P_(CYL(1.8, 1, 10), -0.4 * r, sy * 0.24 * n, top + 7.5, "darkmetal"));
+      for (const sy of [-1, 1]) t.push(P_(BOXM(1.4, 2.2, 1.2, 0.3), 0.45 * r, sy * 0.32 * n, top - 1.8, "lightY", { e: 1 }));
     } else if ("yuri" === fac) {
-      t.push(P_(DOME(9, 7, 14), 0, 0, 11, "carapace2"));
+      t.push(P_(DOME(0.36 * r, 8, 16), -0.06 * r, 0, top - 0.5, "carapace2", { sy: 0.62 }));
+      t.push(P_(DOME(0.22 * r, 5.5, 14), -0.1 * r, 0, top + 2, "carapace", { sy: 0.6 }));
       for (let i = 0; i < 5; i++) {
-        const a = i * PI2 / 5 + 0.3;
-        t.push(P_(CONE(1.9, 0.25, 5.5, 7), 4.3 * Math.cos(a), 4.3 * Math.sin(a), 16, "carapace"));
+        const x = -0.3 * r + i * 0.13 * r, hgt = [3.6, 5, 6, 5, 3.6][i];
+        t.push(P_(CONE(1.5, 0.2, hgt, 7), x, 0, top + 6.2 - Math.abs(i - 2) * 0.9, "carapace2"));
       }
-      t.push(P_(DOME(2.8, 2.6, 10), 0, 0, 18, "psi", { e: 1, a: { spin: 0.6 } }));
+      t.push(P_(DOME(3.4, 3.2, 12), 0.22 * r, 0, top + 2.2, "psi", { e: 1, a: { spin: 0.6 } }));
+      t.push(P_(CYL(3.6, 1.2, 12), 0.22 * r, 0, top + 1.4, "dark2"));
+      for (const sy of [-1, 1]) {
+        const bx = 0.1 * r, by = sy * 0.26 * n, bz = top + 3;
+        strut3(t, bx, by, bz, 0.34 * r, sy * 0.42 * n, top - 1, 0.9, "carapace");
+        strut3(t, 0.34 * r, sy * 0.42 * n, top - 1, 0.5 * r, sy * 0.3 * n, top - 3, 0.6, "dark2");
+        t.push(P_(DOME(0.9, 0.8, 7), 0.5 * r, sy * 0.3 * n, top - 3.4, "psi", { e: 1 }));
+        t.push(P_(DOME(2.4, 2, 9), -0.4 * r, sy * 0.2 * n, top, "bile", { e: 1 }));
+      }
     } else {
-      t.push(P_(BOXM(1.3 * r, 10, 7, 0.2), 0, 0, 11, "armor3"));
-      t.push(P_(CYL(3, 10, 10), -14, 0, 13, "gunmetal", { ty: PI2 })), t.push(P_(CYL(3, 10, 10), 14, 0, 13, "gunmetal", { ty: PI2 }));
-      t.push(P_(CYL(4, 6, 10), 0, 0, 14, "armor")), t.push(P_(DOME(2.4, 2, 10), 0, 0, 17.5, "glass", { e: 1 })), t.push(P_(CYL(1, 1.4, 10), 0, 0, 17, "tesla", { e: 1 }));
+      t.push(P_(SLAB(roundRectProfile(0.55 * r, 0.78 * n, 3, 3), 5.6, 1.4, "bstAc"), -0.18 * r, 0, top, "armor"));
+      t.push(P_(BOXM(1.4, 0.6 * n, 2.4, 0.3), 0.1 * r - 0.5, 0, top + 2.2, "glass", { e: 1 }));
+      t.push(P_(CYL(4.8, 2.2, 16), 0.26 * r, 0, top, "armor3"));
+      t.push(P_(BOXM(9, 7.4, 4, 0.9), 0.26 * r, 0, top + 2.2, "body"));
+      for (const sy of [-1, 1]) t.push(P_(CYL(0.85, 16, 10), 0.22 * r, sy * 2.2, top + 6.9, "gunmetal", { ty: -PI2 })), t.push(P_(CYL(1.2, 1.8, 10), 0.22 * r - 16, sy * 2.2, top + 6.9, "darkmetal", { ty: -PI2 }));
+      t.push(P_(BOXM(1.4, 7, 1.3, 0.3), -0.34 * r, 0, top + 5.6, "armor3"));
+      t.push(P_(BOXM(5.4, 5.4, 3.2, 0.5), -0.36 * r, 0.18 * n, top + 5.6, "armor2"));
+      for (const yy of [-1.2, 1.2]) t.push(P_(CYL(0.8, 0.9, 8), -0.36 * r + 2.7, 0.18 * n + yy, top + 7.2, "tesla", { e: 1, ty: PI2 }));
+      t.push(P_(CYL(0.35, 5, 6), -0.1 * r, -0.3 * n, top + 5.6, "darkmetal"));
+      t.push(P_(CONE(3, 0.5, 1.3, 12), -0.1 * r, -0.3 * n, top + 10.4, "steel", { tx: 0.5 }));
+      t.push(P_(CYL(1.2, 1.6, 8), 0.44 * r, -0.3 * n, top - 1, "lightY", { e: 1 }));
+      t.push(P_(CYL(1.2, 1.6, 8), 0.44 * r, 0.3 * n, top - 1, "lightY", { e: 1 }));
     }
     return t;
   }
@@ -4071,6 +4143,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.push(P_(CYL(1, 1.3, 8), gx, gy, gz - 0.65, "tesla", { e: 1 }));
     e.push(P_(CYL(0.5, 0.6, 6), 9, -5.5, hTop, "lightY", { e: 1 }));
     e.push(P_(CYL(0.5, 0.6, 6), 9, 5.5, hTop, "lightY", { e: 1 }));
+    strut3(e, 6, 0, armBase, 11, -3, armMidZ, 0.8, "gunmetal");
+    strut3(e, 11, -3, armMidZ, 15, -3, armEndZ, 0.6, "steel");
+    e.push(P_(CYL(1, 1.3, 8), 13, -3, gz - 0.65, "tesla", { e: 1 }));
+    e.push(P_(CYL(0.75, 1.3, 8), -5.5, 0, hTop + 5.6, 1 & (t || 0) ? "white" : "tesla", { e: 1 }));
+    for (const sy of [-1, 1]) e.push(P_(BOXM(7, 1.2, 2.4, 0.3), -3, sy * 6.8, hTop - 2.2, "darkmetal")), e.push(P_(BOXM(1.6, 1.4, 1.4, 0.2), -3 + sy * 2, sy * 6.8, hTop + 0.2, "lightY"));
+    e.push(P_(CYL(2.2, 1.3, 12), -12.2, 0, hTop - 0.8, "rubber", { ty: -PI2 }));
+    e.push(P_(CYL(0.9, 1.5, 8), -12.2, 0, hTop - 0.8, "steel", { ty: -PI2 }));
+    e.push(P_(CYL(0.12, 7, 5), -8, -4, hTop, "dark2"));
     return e;
   }
   function salvagerModel(t) {
@@ -4089,6 +4169,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const sgn of [-1, 1]) e.push(P_(CYL(0.5, 3, 6), -9, sgn * 3, hTop, "rust"));
     e.push(P_(CYL(0.5, 0.6, 6), 7, -5.5, hTop, "lightY", { e: 1 }));
     e.push(P_(CYL(0.5, 0.6, 6), 7, 5.5, hTop, "lightY", { e: 1 }));
+    for (const sy of [-1, 1]) strut3(e, -9, sy * 4.5, hTop, -13.5, 0, hTop + 10, 0.55, "rust");
+    e.push(P_(CYL(0.9, 1.2, 8), -13.5, 0, hTop + 9.6, "darkmetal"));
+    e.push(P_(CYL(0.1, 5, 4), -13.5, 0, hTop + 4.8, "dark2"));
+    e.push(P_(BOXM(1.6, 0.6, 1.2, 0.2), -13.5, 0, hTop + 3.6, "steel"));
+    e.push(P_(CYL(0.75, 1.3, 8), -6.5, 0, hTop + 5.4, 1 & (t || 0) ? "lightY" : "glow", { e: 1 }));
+    for (let k = 0; k < 3; k++) e.push(P_(BOXM(1.6, 1.2, 1, 0.2), -2 + k * 1.3, -4.2 + k * 0.9, hTop + 3.6 + 0.2 * k, k % 2 ? "rust" : "darkmetal", { r: 0.5 * k }));
     return e;
   }
   function cultivatorModel(t) {
@@ -4103,6 +4189,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       strut3(e, 0, 0, bz, tx, ty, tz, 0.5, "carapace2");
       e.push(P_(CYL(0.7, 0.9, 6), tx, ty, tz - 0.45, "psi", { e: 1 }));
     }
+    for (let i = 0; i < 3; i++) e.push(P_(CONE(1.1, 0.15, 3.4 - 0.6 * Math.abs(i - 1), 7), -3.5 + 3.5 * i, 0, hTop + 4.2 - 0.8 * Math.abs(i - 1), "carapace2"));
+    for (const sy of [-1, 1]) e.push(P_(DOME(2.1, 1.8, 9), -7, sy * 4.6, hTop - 0.6, "bile", { e: 1 }));
     return e;
   }
   function scaleN(e, f) {
@@ -4121,27 +4209,27 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function titanLegsMech(e, len, wid, standH, frame, legMat, jointMat, footMat) {
     const hipZ = standH, spanX = 0.3 * len, hipY = 0.5 * wid - 1;
     for (const side of [-1, 1]) for (const fb of [-1, 1]) {
-      const hx = fb * spanX, hy = side * hipY, phase = (fb > 0 ? 0 : 1) ^ (side > 0 ? 0 : 1), raised = phase === ((frame || 0) & 1) ? 2.6 : 0, kz = 0.55 * hipZ, fz = 2 + raised;
+      const hx = fb * spanX, hy = side * hipY, phase = (fb > 0 ? 0 : 1) ^ (side > 0 ? 0 : 1), c = ((frame || 0) & 3) + 2 * phase & 3, raised = 1 === c ? 3 : 0, sw = [-1, 0, 1, 0][c] * 0.07 * len, kx = hx + 0.5 * sw, fx = hx + sw, kz = 0.55 * hipZ + 0.4 * raised, fz = 2 + raised;
       titanHipSocket(e, hx, hy, hipZ, jointMat);
       e.push(P_(DOME(2.4, 1.9, 10), hx, hy, hipZ, jointMat));
-      strut3(e, hx, hy, hipZ, hx, hy, kz, 1.7, legMat);
-      e.push(P_(CYL(1.4, 2.1, 8), hx, hy, kz, jointMat, { e: 1 }));
-      strut3(e, hx, hy, kz, hx, hy, fz, 1.15, legMat);
-      e.push(P_(CYL(1.2, 1.6, 8), hx, hy, fz, jointMat, { e: 1 }));
-      e.push(P_(BOXM(5.2, 5.8, 2, 0.4), hx, hy, fz - 1.3, footMat));
+      strut3(e, hx, hy, hipZ, kx, hy, kz, 1.7, legMat);
+      e.push(P_(CYL(1.4, 2.1, 8), kx, hy, kz, jointMat, { e: 1 }));
+      strut3(e, kx, hy, kz, fx, hy, fz, 1.15, legMat);
+      e.push(P_(CYL(1.2, 1.6, 8), fx, hy, fz, jointMat, { e: 1 }));
+      e.push(P_(BOXM(5.2, 5.8, 2, 0.4), fx, hy, fz - 1.3, footMat));
     }
   }
   function titanLegsOrganic(e, len, wid, standH, frame, legMat, jointMat) {
     const hipZ = standH, spanX = 0.3 * len, hipY = 0.5 * wid - 1;
     for (const side of [-1, 1]) for (const fb of [-1, 1]) {
-      const hx = fb * spanX, hy = side * hipY, phase = (fb > 0 ? 0 : 1) ^ (side > 0 ? 0 : 1), raised = phase === ((frame || 0) & 1) ? 2.6 : 0, kz = 0.55 * hipZ, fz = 2 + raised;
+      const hx = fb * spanX, hy = side * hipY, phase = (fb > 0 ? 0 : 1) ^ (side > 0 ? 0 : 1), c = ((frame || 0) & 3) + 2 * phase & 3, raised = 1 === c ? 3 : 0, sw = [-1, 0, 1, 0][c] * 0.07 * len, kx = hx + 0.5 * sw, fx = hx + sw, kz = 0.55 * hipZ + 0.4 * raised, fz = 2 + raised;
       e.push(P_(DOME(3.1, 1.6, 10), hx, hy, hipZ + 0.6, legMat));
       e.push(P_(DOME(2.7, 2.2, 10), hx, hy, hipZ, legMat));
-      strut3(e, hx, hy, hipZ, hx, hy, kz, 1.6, legMat);
-      e.push(P_(CYL(1.3, 1.9, 8), hx, hy, kz, jointMat, { e: 1 }));
-      strut3(e, hx, hy, kz, hx, hy, fz, 1.05, legMat);
-      e.push(P_(DOME(1.8, 1.3, 8), hx, hy, fz, legMat));
-      e.push(P_(CYL(0.65, 1.1, 6), hx, hy, fz + 1.2, jointMat, { e: 1 }));
+      strut3(e, hx, hy, hipZ, kx, hy, kz, 1.6, legMat);
+      e.push(P_(CYL(1.3, 1.9, 8), kx, hy, kz, jointMat, { e: 1 }));
+      strut3(e, kx, hy, kz, fx, hy, fz, 1.05, legMat);
+      e.push(P_(DOME(1.8, 1.3, 8), fx, hy, fz, legMat));
+      e.push(P_(CYL(0.65, 1.1, 6), fx, hy, fz + 1.2, jointMat, { e: 1 }));
     }
   }
   function titanDugIn(e, rad, z) {
@@ -4541,20 +4629,30 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       return p.push(P_(BOXM(20, 0.4, 0.3, 0.1), -0.05 * 44, 0, th + 5.4, "psi", { e: 1 })), p;
     }
     if ("barracuda" === e) {
-      const p = subHull(38, 12, t, { fac: "allied" }), rad = 0.42 * 12;
-      p.push(P_(DOME(0.9, 0.7, 8), 0.04 * 38, 0, rad + 2.6 * rad, "glass", { e: 1 }));
-      for (const sgn of [-1, 1]) p.push(P_(BOXM(3, 1, 0.3, 0.1), -0.3 * 38, sgn * 2, rad, "armor2"));
+      const L = 38, p = subHull(L, 12, t, { fac: "allied" }), rad = 0.42 * 12;
+      p.push(P_(DOME(0.62 * rad, 0.5 * rad, 12), 0.52 * L, 0, rad, "glass", { e: 1, ty: PI2 }));
+      for (let k = 0; k < 4; k++) p.push(P_(BOXM(1.6, 1.6, 0.4, 0.2), -0.22 * L + k * 2.4, 0, rad + 0.78 * rad + 0.6, "darkmetal"));
+      p.push(P_(BOXM(0.3 * L, 0.3, 0.4, 0.1), -0.05 * L, -0.46 * rad, 1.7 * rad, "tesla", { e: 1 }));
+      p.push(P_(BOXM(0.3 * L, 0.3, 0.4, 0.1), -0.05 * L, 0.46 * rad, 1.7 * rad, "tesla", { e: 1 }));
       return p;
     }
     if ("nautilus" === e) {
-      const p = subHull(38, 12, t, { fac: "soviet" }), rad = 0.42 * 12;
-      for (const sgn of [-1, 1]) p.push(P_(BOXM(2.4, 1, 0.3, 0.1), -0.44 * 38, sgn * 1.6, rad, "darkmetal"));
-      return p.push(P_(CYL(0.3, 3.6, 6), -0.4 * 38, 0, rad + 1.4, "rust")), p;
+      const L = 38, p = subHull(L, 12, t, { fac: "soviet" }), rad = 0.42 * 12;
+      for (const sgn of [-1, 1]) p.push(P_(CYL(0.34 * rad, 0.34 * L, 10), 0.2 * L, sgn * (rad + 0.2), 0.7 * rad, "gunmetal", { ty: -PI2 })), p.push(P_(CONE(0.34 * rad, 0.1 * rad, 0.06 * L, 10), 0.2 * L, sgn * (rad + 0.2), 0.7 * rad, "rust", { ty: PI2 }));
+      p.push(P_(CYL(0.5, 1.8 * rad, 7), 0.1 * L, 0, 1.8 * rad, "rust"));
+      seams(p, 0.3 * L, 0.9 * rad, 1.78 * rad + 0.65, "rust");
+      return p;
     }
     if ("squid" === e) {
-      const p = subHull(38, 12, t, { fac: "yuri" }), rad = 0.42 * 12;
-      for (const sgn of [-1, 1]) p.push(P_(CONE(0.5, 0.08, 5, 6), -0.46 * 38, sgn * 1.5, rad, "carapace2", { ty: PI2 }));
-      return p.push(P_(DOME(0.5, 0.4, 7), 0.3 * 38, 0, rad + 0.6, "psi", { e: 1 })), p;
+      const L = 38, p = subHull(L, 12, t, { fac: "yuri" }), rad = 0.42 * 12, wv = (t || 0) & 1 ? 1 : -1;
+      for (const sgn of [-1, 0, 1]) {
+        const y0 = sgn * 0.35 * rad, z0 = rad, x1 = -0.62 * L, y1 = sgn * 0.9 * rad + wv * 0.6, x2 = -0.8 * L, y2 = sgn * 1.4 * rad - wv * 0.8;
+        strut3(p, -0.5 * L, y0, z0, x1, y1, z0 + 0.1, 0.5, "carapace2");
+        strut3(p, x1, y1, z0 + 0.1, x2, y2, z0, 0.32, "carapace");
+        p.push(P_(DOME(0.5, 0.4, 7), x2, y2, z0 - 0.2, "psi", { e: 1 }));
+      }
+      for (const sgn of [-1, 1]) p.push(P_(DOME(0.7, 0.6, 8), 0.5 * L, sgn * 0.4 * rad, 1.3 * rad, "psi", { e: 1 }));
+      return p;
     }
     if ("chinook" === e) return chinookModel();
     if ("skyhauler" === e) return skyhaulerModel();
@@ -6633,10 +6731,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return n;
   }
+  var GAIT4 = { lasher: 1, gattling: 1, mastermind: 1, shard: 1, spore: 1, cultivator: 1, titan_allied: 1, titan_soviet: 1, titan_yuri: 1 };
+  function unitBob(e) {
+    if ("inf" === e.d.kind) return 0;
+    const ph = 2.4 * (e.id % 7), T = S.time;
+    if (e.d.fly) return Math.sin(2.2 * T + ph) * 1.4;
+    if (e.d.naval) return Math.sin(1.7 * T + ph) * 1.1 + (e.moving ? 0.35 * Math.sin(5.5 * T + ph) : 0);
+    if ("hover" === e.key) return 1.6 + Math.sin(3.4 * T + ph) * 1.1;
+    if (GAIT4[e.key]) return e.moving ? 0.9 * Math.abs(Math.sin((e.animT || 0) * Math.PI / 12)) : 0.35 * Math.sin(1.6 * T + ph);
+    return Math.sin((e.moving ? 8 : 3) * T + ph) * (e.moving ? 1.6 : 0.55);
+  }
   function unitFrame(e) {
     if (e.d.fly) return 11 * S.time & 1;
     const t = e.animT || 0;
-    let r = e.moving ? "inf" === e.d.kind ? t / 9 & 3 : t / 7 & 1 : 0;
+    let r = e.moving ? "inf" === e.d.kind ? t / 9 & 3 : GAIT4[e.key] ? t / 6 & 3 : t / 7 & 1 : 0;
     return "miner" === e.d.role && e.cargo > 340 && (r |= 2, (e.blue || 0) > 0.45 * e.cargo && (r |= 4)), r;
   }
   function turretFrame(e) {
@@ -6654,7 +6762,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (n < -110 || a < -170 || n > CW + 110 || a > CH + 110) return;
     const o = palette(e.owner), s = faceIdx(e.ang), i = unitFrame(e), v3l = "v3" === e.key ? e.cool <= 0 : void 0, dep = !(!e.d.deploy || !e.deployed), fac = S.players[e.owner].fac, l = e.key + "|" + e.owner + "|" + i + ("v3" === e.key ? "|L" + (v3l ? 1 : 0) : "") + (e.d.deploy ? "|D" + (dep ? 1 : 0) : "") + "|", c = cachedSprite(l + s, () => makeSprite(UMODEL(e.key, i, { l: v3l, dep, fac }), faceAng(s), o, 2.5), s, l);
     r > 0 ? groundShadow(e.x, e.y, 0.9 * e.d.radius, 0.2) : groundShadow(e.x, e.y, 0.55 * e.d.radius, 0.26);
-    const d = e.d.fly || "inf" === e.d.kind ? 0 : Math.sin((e.moving ? 8 : 3) * S.time + 2.4 * (e.id % 7)) * (e.moving ? 1.6 : 0.55) * t;
+    const d = unitBob(e) * t;
     if (blit(c, n, a - d, t), hasTurret(e.key)) {
       const r2 = faceIdx(e.tang), s2 = turretFrame(e), i2 = e.key + "#t|" + e.owner + "|" + s2 + "|" + (e.d.deploy ? "D" + (dep ? 1 : 0) + "|" : ""), l2 = cachedSprite(i2 + r2, () => makeSprite(UTURRET(e.key, s2, { dep }), faceAng(r2), o, 2.5), r2, i2), c2 = 3.2 * (e.recoil || 0), f2 = -Math.cos(e.tang) * c2, h2 = -Math.sin(e.tang) * c2;
       blit(l2, n + (f2 - h2) * t, a - d + 0.5 * (f2 + h2) * t, t);
@@ -6744,7 +6852,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } else if ("spark" === e.kind) ctx.globalAlpha = 1 - r, ctx.fillStyle = e.c, ctx.beginPath(), ctx.arc(n, a, Math.max(0, 3 * t * (1 - 0.5 * r)), 0, 6.3), ctx.fill(), ctx.globalAlpha = 1;
     else if ("smoke" === e.kind) ctx.globalAlpha = 0.42 * (1 - r), ctx.fillStyle = e.c || "#888", ctx.beginPath(), ctx.arc(n, a - 20 * r * t, Math.max(0, (3 + 8 * r) * e.s * t), 0, 6.3), ctx.fill(), ctx.globalAlpha = 1;
     else if ("ring" === e.kind) ctx.globalAlpha = 1 - r, ctx.strokeStyle = e.c || "#fff", ctx.lineWidth = 2.5 * t, ctx.beginPath(), ctx.ellipse(n, a, (10 + r * e.s * 60) * t, 0.5 * (10 + r * e.s * 60) * t, 0, 0, 6.3), ctx.stroke(), ctx.globalAlpha = 1;
-    else if ("track" === e.kind) ctx.globalAlpha = 0.3 * (1 - r), ctx.fillStyle = "#2a2620", ctx.beginPath(), ctx.ellipse(n, a, e.l * t, e.w * t, e.ang, 0, 6.3), ctx.fill(), ctx.globalAlpha = 1;
+    else if ("wake" === e.kind) {
+      const k = Math.max(0, (3 + e.s * 1.3 * r) * t);
+      ctx.globalAlpha = 0.42 * (1 - r), ctx.strokeStyle = "#e8f6fa", ctx.lineWidth = 1.4 * t, ctx.beginPath(), ctx.ellipse(n, a, k, 0.5 * k, 0, 0, 6.3), ctx.stroke(), ctx.globalAlpha = 1;
+    } else if ("track" === e.kind) ctx.globalAlpha = 0.3 * (1 - r), ctx.fillStyle = "#2a2620", ctx.beginPath(), ctx.ellipse(n, a, e.l * t, e.w * t, e.ang, 0, 6.3), ctx.fill(), ctx.globalAlpha = 1;
     else if ("debris" === e.kind) {
       const g = 2 * e.vz / e.life, z = Math.max(0, e.vz * e.t - 0.5 * g * e.t * e.t), wx = e.x + e.vx * e.t, wy = e.y + e.vy * e.t, sx = w2sx(wx, wy, z), sy = w2sy(wx, wy, z), sc = fpsScale(wx, wy);
       ctx.save(), ctx.translate(sx, sy), ctx.rotate(e.rot + e.rotSpd * e.t), ctx.globalAlpha = Math.max(0, 1 - Math.max(0, r - 0.7) / 0.3), ctx.fillStyle = e.c, ctx.fillRect(-2.6 * sc, -2 * sc, 5.2 * sc, 4 * sc), ctx.restore(), ctx.globalAlpha = 1;
