@@ -1106,6 +1106,208 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     computeMtnShore();
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) G.elev[idx(x, y)] = heightAt(32 * x + 16, 32 * y + 16);
   }
+  function dressPath(sx, sy, tx, ty) {
+    const N = 6624, cost = new Float32Array(N).fill(1e9), prev = new Int32Array(N).fill(-1), done = new Uint8Array(N), H = [], push = (i, c) => {
+      H.push([c, i]);
+      let k = H.length - 1;
+      for (; k > 0; ) {
+        const p = k - 1 >> 1;
+        if (H[p][0] <= H[k][0]) break;
+        [H[p], H[k]] = [H[k], H[p]], k = p;
+      }
+    }, pop = () => {
+      const top = H[0], last = H.pop();
+      if (H.length) {
+        H[0] = last;
+        let k = 0;
+        for (; ; ) {
+          const l = 2 * k + 1, r = l + 1;
+          let m = k;
+          l < H.length && H[l][0] < H[m][0] && (m = l), r < H.length && H[r][0] < H[m][0] && (m = r);
+          if (m === k) break;
+          [H[m], H[k]] = [H[k], H[m]], k = m;
+        }
+      }
+      return top;
+    };
+    if (!inMap(sx, sy) || !inMap(tx, ty)) return null;
+    const s = idx(sx, sy), g = idx(tx, ty);
+    cost[s] = 0, push(s, 0);
+    for (; H.length; ) {
+      const [c, i] = pop();
+      if (done[i]) continue;
+      if (done[i] = 1, i === g) break;
+      const x = i % 92, y = i / 92 | 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        const nx = x + dx, ny = y + dy;
+        if (!inMap(nx, ny)) continue;
+        const j = idx(nx, ny), t = G.terr[j], dg = dx && dy;
+        if (dg && (2 === t || 2 === G.terr[idx(x + dx, y)] || 2 === G.terr[idx(x, y + dy)] || 3 === G.terr[idx(x + dx, y)] || 3 === G.terr[idx(x, y + dy)])) continue;
+        if (3 === t && G.elevOverride[j] > 0) continue;
+        let w = (2 === t ? 7 : 3 === t ? 11 : G.pave[j] ? 0.45 : 1) * (dg ? 1.414 : 1);
+        G.ore[j] > 0 && (w += 2.5), G.blk[j] && (w += 1.5), G.mtn[j] > 0.2 && (w += 3 * G.mtn[j]), w += 0.04 * Math.abs((G.elevOverride[j] || 0) - (G.elevOverride[i] || 0)) * 40;
+        const nc = c + w;
+        nc < cost[j] && (cost[j] = nc, prev[j] = i, push(j, nc));
+      }
+    }
+    if (prev[g] < 0 && g !== s) return null;
+    const path = [];
+    for (let i = g; i >= 0; i = prev[i]) path.push(i);
+    return path.reverse();
+  }
+  function dressRoad(path) {
+    if (!path) return;
+    G.pendingBridges = G.pendingBridges || [];
+    let run = [];
+    const flush = () => {
+      run.length && run.length <= 6 && G.pendingBridges.push(run.slice()), run = [];
+    };
+    for (let k = 0; k < path.length; k++) {
+      const i = path[k], x = i % 92, y = i / 92 | 0;
+      if (2 === G.terr[i]) {
+        const n = path[Math.min(path.length - 1, k + 1)], horiz = Math.abs(n % 92 - x) + Math.abs(path[Math.max(0, k - 1)] % 92 - x) > 0;
+        run.push([x, y, horiz]);
+        continue;
+      }
+      flush();
+      3 === G.terr[i] && (G.terr[i] = 1);
+      if (G.ore[i] > 0) continue;
+      G.pave[i] = 1, G.blk[i] = 0;
+      const nx = k + 1 < path.length ? path[k + 1] : path[k - 1] || i, ddx = nx % 92 - x, ddy = (nx / 92 | 0) - y;
+      for (const [sx, sy] of ddx && ddy ? [[x + ddx, y], [x, y + ddy]] : ddx ? [[x, y + 1]] : [[x + 1, y]]) {
+        if (!inMap(sx, sy)) continue;
+        const j = idx(sx, sy);
+        3 === G.terr[j] && !(G.elevOverride[j] > 0) && (G.terr[j] = 1), G.terr[j] < 2 && 0 === G.ore[j] && (G.pave[j] = 1, G.blk[j] = 0);
+      }
+    }
+    flush();
+  }
+  function buildPendingBridges() {
+    for (const run of G.pendingBridges || []) {
+      let ok = true;
+      for (const [x, y] of run) (!inMap(x, y) || 2 !== G.terr[idx(x, y)]) && (ok = false);
+      if (!ok) continue;
+      for (const [x, y, h] of run) {
+        const id = idx(x, y);
+        G.bridge[id] || (G.bridge[id] = 1, G.bridgeHp[id] = BRIDGE_MAX_HP, G.bridgeSite[id] = 1, G.bridgeHoriz[id] = h ? 1 : 0, G.props.push({ tx: x, ty: y, kind: "bridge", x: 32 * x + 16, y: 32 * y + 16, r: h ? 0 : Math.PI / 2, v: 0, s: 1 }));
+      }
+      const [x0, y0, h0] = run[0], c = { tx: Math.min(...run.map((r) => r[0])), ty: Math.min(...run.map((r) => r[1])), len: run.length, horiz: !!h0 };
+      placeBridgeHuts(c);
+      const end = run[run.length - 1], bx = h0 ? end[0] + 2 : end[0] + 1, by = h0 ? end[1] + 1 : end[1] + 2;
+      G.strategic = G.strategic || [], G.strategic.push([bx, by, "cannon"]);
+    }
+    G.pendingBridges = [];
+  }
+  function oreNear(x, y, r) {
+    let n = 0;
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      const tx = Math.round(x) + dx, ty = Math.round(y) + dy;
+      inMap(tx, ty) && dx * dx + dy * dy <= r * r && G.ore[idx(tx, ty)] > 0 && n++;
+    }
+    return n;
+  }
+  function landFrac(x, y, r) {
+    let l = 0, n = 0;
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      const tx = Math.round(x) + dx, ty = Math.round(y) + dy;
+      if (dx * dx + dy * dy > r * r) continue;
+      n++, inMap(tx, ty) && G.terr[idx(tx, ty)] < 2 && l++;
+    }
+    return n ? l / n : 0;
+  }
+  function buildPlateau(px, py, R, rampDirs) {
+    const H = 3.1;
+    px = Math.round(px), py = Math.round(py);
+    for (let dy = -R - 2; dy <= R + 2; dy++) for (let dx = -R - 2; dx <= R + 2; dx++) {
+      const x = px + dx, y = py + dy;
+      if (!inMap(x, y)) continue;
+      const i = idx(x, y), d = Math.hypot(dx, dy * 1.15);
+      if (2 === G.terr[i]) continue;
+      d <= R ? (G.terr[i] = G.terr[i] === 3 ? 1 : G.terr[i], G.elevOverride[i] = H, G.blk[i] = 0, G.ore[i] = 0, G.tib[i] = 0) : d <= R + 1.1 && (G.terr[i] = 3);
+    }
+    for (const ang of rampDirs) {
+      const ux = Math.cos(ang), uy = Math.sin(ang);
+      for (let s = R - 1; s <= R + 6; s += 0.5) {
+        const f = clamp((s - R + 0.5) / 6, 0, 1), hx = px + ux * s, hy = py + uy * s;
+        for (const w of [-1.4, -0.5, 0.5, 1.4]) {
+          const x = Math.round(hx - uy * w), y = Math.round(hy + ux * w);
+          if (!inMap(x, y)) continue;
+          const i = idx(x, y);
+          if (2 === G.terr[i]) continue;
+          G.terr[i] = 1, G.blk[i] = 0, G.elevOverride[i] = Math.max(G.elevOverride[i] || 0, H * (1 - f)), Math.abs(w) < 1 && (G.pave[i] = 1);
+        }
+      }
+    }
+    oreField(px + 2, py + 2, 1.8, 1600, 2), G.strategic = G.strategic || [], G.strategic.push([px - 2, py - 2, "cannon"]);
+  }
+  function mapDress(mk, spots, oreA, oreO) {
+    G.pendingBridges = [], G.strategic = [], G.townHints = [], G.expansions = [];
+    const cx = 46, cy = 36, C = spots.map((s) => [s[0] + 3, s[1] + 3]);
+    let water = 0;
+    for (let i = 0; i < 6624; i++) 2 === G.terr[i] && water++;
+    const wet = water / 6624 > 0.35, big = spots.length > 4;
+    for (const [sx, sy] of C) {
+      const a0 = Math.atan2(cy - sy, cx - sx);
+      if (oreNear(sx, sy, 13) < 40) for (const da of [0.7, -0.7, 1.2, -1.2, 0]) {
+        const ox = sx + Math.cos(a0 + da) * 10, oy = sy + Math.sin(a0 + da) * 10;
+        if (landFrac(ox, oy, 4) > 0.8 && !C.some(([qx, qy]) => dist(ox, oy, qx, qy) < 8)) {
+          clearArea(ox, oy, 5), oreField(ox, oy, 5, 2200, 1);
+          break;
+        }
+      }
+      const ex = sx + Math.cos(a0 + 0.45) * (big ? 16 : 22), ey = sy + Math.sin(a0 + 0.45) * (big ? 16 : 22);
+      if (inMap(Math.round(ex), Math.round(ey)) && landFrac(ex, ey, 4) > 0.7 && !C.some(([qx, qy]) => dist(ex, ey, qx, qy) < 12)) {
+        oreNear(ex, ey, 6) < 20 && (clearArea(ex, ey, 4), oreField(ex, ey, 4, 2e3, 1)), G.expansions.push([ex, ey]);
+      }
+    }
+    if (!wet && "city" !== mk) {
+      const plats = [];
+      for (const [sx, sy] of C) {
+        const a0 = Math.atan2(cy - sy, cx - sx), dd = dist(sx, sy, cx, cy), px = sx + Math.cos(a0 - 0.55) * dd * 0.55, py = sy + Math.sin(a0 - 0.55) * dd * 0.55;
+        if (!inMap(Math.round(px), Math.round(py))) continue;
+        if (C.some(([qx, qy]) => dist(px, py, qx, qy) < 15) || plats.some(([qx, qy]) => dist(px, py, qx, qy) < 14)) continue;
+        if (landFrac(px, py, 6) < 0.75) continue;
+        plats.push([px, py]), buildPlateau(px, py, big ? 4 : 5, [Math.atan2(sy - py, sx - px), Math.atan2(cy - py, cx - px)]);
+      }
+      G.plateaus = plats;
+    }
+    const targets = [[cx, cy]];
+    if (!wet) {
+      for (let k = 0; k < C.length; k++) {
+        const [sx, sy] = C[k];
+        dressRoad(dressPath(Math.round(sx), Math.round(sy) + 4, cx, cy));
+        for (const [ex, ey] of G.expansions) dist(ex, ey, sx, sy) < 26 && dressRoad(dressPath(Math.round(sx), Math.round(sy), Math.round(ex), Math.round(ey)));
+        for (const [px, py] of G.plateaus || []) dist(px, py, sx, sy) < 30 && dressRoad(dressPath(Math.round(sx), Math.round(sy), Math.round(px), Math.round(py)));
+        const [nx2, ny2] = C[(k + 1) % C.length], mx = (sx + nx2) / 2, my = (sy + ny2) / 2;
+        G.townHints.push([Math.round(mx + 0.3 * (cx - mx)), Math.round(my + 0.3 * (cy - my))]);
+      }
+    }
+  }
+  function placeStrategic(spots) {
+    const C = spots.map((s) => [s[0] + 3, s[1] + 3]), ok2 = (x, y) => {
+      for (let yy = y; yy < y + 2; yy++) for (let xx = x; xx < x + 2; xx++) {
+        if (!inMap(xx, yy)) return false;
+        const i = idx(xx, yy);
+        if (G.terr[i] >= 2 || G.ore[i] > 0 || G.blk[i] || G.bridge[i] || G.mtn[i] > 0.12 || G.shore[i] > 0.08) return false;
+      }
+      return !C.some(([qx, qy]) => dist(x, y, qx, qy) < 12) && !G.civ.some((c) => dist(x, y, c[0], c[1]) < 4) && !(G.special || []).some((c) => dist(x, y, c[0], c[1]) < 5);
+    }, near = (x, y, rr) => {
+      for (let r = 0; r <= rr; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (Math.max(Math.abs(dx), Math.abs(dy)) === r && ok2(x + dx, y + dy)) return [x + dx, y + dy];
+      return null;
+    };
+    let cannons = 0;
+    G.stratSpecial = [];
+    for (const [x, y, k] of G.strategic || []) {
+      if (cannons >= 6) break;
+      const p = near(x, y, 3);
+      p && (G.civ.push([p[0], p[1], k]), cannons++);
+    }
+    G.special = G.special || [];
+    for (const [ex, ey] of G.expansions || []) {
+      const p = near(Math.round(ex) + 4, Math.round(ey) + 3, 4);
+      p && G.stratSpecial.push([p[0], p[1], "oilDerek"]);
+    }
+  }
   function genMap(e, t) {
     G.seed = e;
     let r = t || "basin";
@@ -1181,23 +1383,30 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       n = n.concat([rot(n[0]), rot(n[1])]);
     }
     n.forEach((e2) => clearArea(e2[0] + 3, e2[1] + 3, 9)), G.spots = n, computeMtnShore(), a.forEach((e2) => {
-      oreField(e2[0], e2[1], 7, 2400, 1);
+      oreField(e2[0], e2[1], 6, 2400, 1);
     }), o.forEach((e2) => {
-      oreField(e2[0], e2[1], 5, 1600, 2);
-    }), "city" === r ? buildCityscape(n) : (scatterScenery(r, n), buildCities(r, n));
-    balanceSpawnRock(n), scatterBridges(n), ensureConnectivity(n.concat(o)), computeMtnShore();
+      oreField(e2[0], e2[1], 4, 1600, 2);
+    }), mapDress(r, n, a, o), computeMtnShore(), "city" === r ? buildCityscape(n) : (scatterScenery(r, n), buildCities(r, n));
+    buildPendingBridges(), balanceSpawnRock(n), scatterBridges(n), ensureConnectivity(n.concat(o)), computeMtnShore();
+    placeStrategic(n);
+    const roadTiles = [];
+    for (let i = 0; i < 6624; i++) G.pave[i] && roadTiles.push(i);
     for (let e2 = 0; e2 < 8; e2++) {
-      const e3 = irnd(6, 84), t2 = irnd(6, 64);
+      let e3 = irnd(6, 84), t2 = irnd(6, 64);
+      if (roadTiles.length) {
+        const ri = roadTiles[irnd(0, roadTiles.length - 1)];
+        e3 = ri % 92 + pick([-3, 2]), t2 = (ri / 92 | 0) + pick([-3, 2]);
+      }
       let r2 = true;
       for (let n2 = t2 - 1; n2 < t2 + 3 && r2; n2++) for (let t3 = e3 - 1; t3 < e3 + 3 && r2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.blk[idx(t3, n2)] || G.mtn[idx(t3, n2)] > 0.12 || G.shore[idx(t3, n2)] > 0.08) && (r2 = false);
       for (const a2 of n) dist(e3, t2, a2[0], a2[1]) < 14 && (r2 = false);
       r2 && G.civ.push([e3, t2, pick(["civ1", "civ2", "civ4", "civ6", "civ7", "civ8"])]);
     }
-    G.special = [];
+    G.special = (G.stratSpecial || []).slice();
     const SPECIAL_KEYS = ["oilDerek", "paradropHangar", "empTower", "rogueDen"];
     for (let si = 0; si < SPECIAL_KEYS.length; si++) {
       for (let tries = 0; tries < 70; tries++) {
-        const e2 = irnd(6, 84), t2 = irnd(6, 64);
+        const ang = si / 4 * 6.283 + 0.785 + 0.13 * (tries % 9), rad = 11 + 2 * (tries / 9 | 0), e2 = tries < 45 ? Math.round(46 + Math.cos(ang) * rad * 1.2) : irnd(6, 84), t2 = tries < 45 ? Math.round(36 + Math.sin(ang) * rad) : irnd(6, 64);
         let r2 = true;
         for (let n2 = t2 - 1; n2 < t2 + 3 && r2; n2++) for (let t3 = e2 - 1; t3 < e2 + 3 && r2; t3++) (!inMap(t3, n2) || G.terr[idx(t3, n2)] >= 2 || G.ore[idx(t3, n2)] > 0 || G.blk[idx(t3, n2)] || G.mtn[idx(t3, n2)] > 0.12 || G.shore[idx(t3, n2)] > 0.08) && (r2 = false);
         for (const a2 of n) dist(e2, t2, a2[0], a2[1]) < 12 && (r2 = false);
@@ -1313,7 +1522,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let e2 = 0; e2 < r; e2++) {
       let e3 = 0, r2 = 0, a = false;
       for (let o2 = 0; o2 < 40 && !a; o2++) {
-        e3 = irnd(14, 74), r2 = irnd(12, 56), a = true;
+        const TH = G.townHints || [];
+        o2 < TH.length ? (e3 = clamp(TH[o2][0], 14, 74), r2 = clamp(TH[o2][1], 12, 56)) : (e3 = irnd(14, 74), r2 = irnd(12, 56)), a = true;
         for (const n2 of t) dist(e3, r2, n2[0] + 2, n2[1] + 2) < 24 && (a = false);
         for (const t2 of n) dist(e3, r2, t2[0], t2[1]) < 26 && (a = false);
         if (a) {
@@ -8811,6 +9021,27 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return p;
   }
+  function tintCorner(cx, cy, c) {
+    const x = Math.min(91, Math.max(0, cx)), y = Math.min(71, Math.max(0, cy)), i = idx(x, y), land = G.terr[i] < 2;
+    let r = c[0], g = c[1], b = c[2];
+    const sh = G.shore ? G.shore[i] : 0;
+    if (land && sh > 0.1) {
+      const k = 0.8 * Math.min(1, 2.4 * (sh - 0.1));
+      r += (184 - r) * k, g += (168 - g) * k, b += (122 - b) * k;
+    }
+    const nn = cornerNormal(cx, cy), sl = 1 - nn[1];
+    if (sl > 0.12) {
+      const k = Math.min(1, 3.2 * (sl - 0.12));
+      r += (121 - r) * k, g += (114 - g) * k, b += (103 - b) * k;
+    }
+    const h = cornerBump(cx, cy);
+    if (land && h > 28) {
+      const k = Math.min(0.3, (h - 28) / 160);
+      r += (176 - r) * k, g += (162 - g) * k, b += (112 - b) * k;
+    }
+    const v = fbm(0.31 * cx + 7, 0.31 * cy - 3, 91) - 0.5, v2 = fbm(0.9 * cx - 11, 0.9 * cy + 5, 37) - 0.5;
+    return [r * (1 + 0.2 * v + 0.08 * v2), g * (1 + 0.26 * v + 0.08 * v2), b * (1 + 0.12 * v + 0.06 * v2)];
+  }
   function buildTerrainGL() {
     const e = [], t = [], r = [], n = [], a = (e2) => 0, PALS = [GRASS, DIRT, WATER, ROCK], colBlend = (a2, e2, t2) => {
       const o = 0.62 * tfbm(85e-4 * e2, 85e-4 * t2, 11) + 0.38 * tfbm(0.03 * e2, 0.03 * t2, 29), s2 = Math.max(0, Math.min(a2.length - 1.001, o * (a2.length - 1))), i2 = 0 | s2, l2 = Math.min(a2.length - 1, i2 + 1), c2 = s2 - i2, d2 = rgbOf(a2[i2]), f2 = rgbOf(a2[l2]);
@@ -8826,7 +9057,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const col = colBlend(PALS[nn], wx, wy);
         rr += col[0], gg += col[1], bb += col[2], cnt++;
       }
-      return cnt ? [rr / cnt, gg / cnt, bb / cnt] : [110, 110, 110];
+      const tc = tintCorner(cx, cy, cnt ? [rr / cnt, gg / cnt, bb / cnt] : [110, 110, 110]);
+      let pv = 0;
+      if (G.pave) for (let dy = -1; dy <= 0; dy++) for (let dx = -1; dx <= 0; dx++) {
+        const xx = cx + dx, yy = cy + dy;
+        xx >= 0 && yy >= 0 && xx < 92 && yy < 72 && G.pave[idx(xx, yy)] && pv++;
+      }
+      if (!pv) return tc;
+      const k = Math.min(1, pv / 2.5), n2 = fbm(0.7 * cx + 3, 0.7 * cy - 9, 55) - 0.5, ar = 86 + 14 * n2, ag = 88 + 14 * n2, ab = 86 + 12 * n2;
+      return [tc[0] + (ar - tc[0]) * k, tc[1] + (ag - tc[1]) * k, tc[2] + (ab - tc[2]) * k];
     }, CCR = new Float32Array(93 * 73), CCG = new Float32Array(93 * 73), CCB = new Float32Array(93 * 73);
     for (let cy = 0; cy < 73; cy++) for (let cx = 0; cx < 93; cx++) {
       const col = cornerColor(cx, cy), ci = 93 * cy + cx;
@@ -8844,7 +9083,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const r2 = idx(t2, e2), n2 = G.terr[r2];
       const l2 = a(n2);
       const paved = G.pave && G.pave[r2];
-      const flat = paved ? t2 + e2 & 1 ? "#585a58" : "#525451" : null;
+      const flat = null;
       const cTL = flat || getCorner(t2, e2), cBL = flat || getCorner(t2, e2 + 1), cBR = flat || getCorner(t2 + 1, e2 + 1), cTR = flat || getCorner(t2 + 1, e2);
       const c2 = 32 * t2, d2 = c2 + 32, f2 = 32 * e2, h = f2 + 32;
       const bTL = cornerBump(t2, e2), bBL = cornerBump(t2, e2 + 1), bBR = cornerBump(t2 + 1, e2 + 1), bTR = cornerBump(t2 + 1, e2);

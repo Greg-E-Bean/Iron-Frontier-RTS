@@ -272,6 +272,12 @@ export interface Player {
 
 /** The map/terrain data, one flat Uint8Array/Float32Array per channel over 92x72 tiles. */
 export interface MapData {
+  pendingBridges?: any[];
+  strategic?: any[];
+  townHints?: any[];
+  expansions?: any[];
+  plateaus?: any[];
+  stratSpecial?: any[];
   terr: Uint8Array;
   ore: Float32Array;
   tib: Uint8Array;
