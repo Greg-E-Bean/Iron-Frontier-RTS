@@ -739,6 +739,8 @@ declare global {
   function quietKillBld(b: Building): void;
   function placeGatePair(g: Building): void;
   function unitBob(u: Unit): number;
+  function dockNew(u: Unit, b: Building): void;
+  function airOrdered(u: Unit): void;
   function gateNeighborBits(tx: number, ty: number, owner: number): number;
   function relinkGatePair(g: Building): void;
   function wallTileOk(tx: number, ty: number): boolean;

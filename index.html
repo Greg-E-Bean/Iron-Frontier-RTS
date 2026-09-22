@@ -579,7 +579,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function U(e) {
     return Object.assign({ kind: "veh", armor: "veh", radius: 11, speed: 44, sight: 260, vsInf: 1, vsVeh: 1, vsBldg: 1, proj: "shell", rof: 1, dmg: 10, range: 130, from: "factory", tab: "veh" }, e);
   }
-  var UNITS = { mcv: U({ key: "mcv", name: "Mobile HQ", cost: 3200, hp: 600, speed: 30, radius: 27, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "mcv", tab: "veh", from: "factory", req: "repair" }), drone: U({ key: "drone", name: "Spore Drone", cost: 0, hp: 220, speed: 58, radius: 7, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "miner", from: "hive", tab: null }), hivetrans: U({ key: "hivetrans", name: "Reclaimer", cost: 2200, hp: 1100, speed: 26, radius: 18, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "hivetrans", from: "conyard", tab: null }), miner_allied: U({ key: "miner_allied", name: "Prospector", cost: 1400, hp: 1e3, speed: 50, radius: 13, dmg: 14, rof: 0.6, range: 130, vsInf: 1, vsVeh: 0.3, vsBldg: 0.15, proj: "bullet", turret: true, role: "miner", from: "factory" }), miner_soviet: U({ key: "miner_soviet", name: "Ore Hauler", cost: 1400, hp: 1200, speed: 42, radius: 13, dmg: 0, range: 0, teleport: 1, role: "miner", from: "factory" }), miner_yuri: U({ key: "miner_yuri", name: "Reclaimer", cost: 2e3, hp: 1100, speed: 44, radius: 13, dmg: 0, range: 0, mobileRefine: 1, role: "miner", from: "power" }), gi: U({ key: "gi", name: "Rifleman", cost: 200, hp: 125, kind: "inf", armor: "inf", radius: 7, speed: 40, dmg: 16, rof: 0.45, range: 120, vsInf: 1.4, vsVeh: 0.3, vsBldg: 0.4, proj: "bullet", from: "barracks", tab: "inf", deploy: true }), guardian: U({ key: "guardian", name: "Lancer", cost: 400, hp: 130, kind: "inf", armor: "inf", radius: 7, speed: 36, dmg: 45, rof: 1.1, range: 150, vsInf: 0.4, vsVeh: 1.6, vsBldg: 1, proj: "missile", from: "barracks", tab: "inf", req: "barracks", deploy: "turret" }), grizzly: U({ key: "grizzly", name: "Warden Tank", cost: 700, hp: 300, speed: 46, radius: 12, dmg: 42, rof: 1.1, range: 145, vsInf: 0.5, vsVeh: 1, vsBldg: 0.85, turret: true }), ifv: U({ key: "ifv", name: "Skirmisher", cost: 600, hp: 200, speed: 62, radius: 10, dmg: 32, rof: 0.7, range: 150, vsInf: 0.7, vsVeh: 1.2, vsBldg: 0.5, proj: "missile", turret: true, gunnerSlot: true, aa: true, aaBonus: 1.6 }), prism: U({ key: "prism", name: "Photon Tank", cost: 1200, hp: 220, speed: 38, radius: 12, dmg: 95, rof: 2.3, range: 215, vsInf: 1.1, vsVeh: 0.9, vsBldg: 1.5, proj: "prism", turret: true, req: "lab", deploy: "siege", siegeMul: 3 }), conscript: U({ key: "conscript", name: "Militia", cost: 150, hp: 120, kind: "inf", armor: "inf", radius: 7, speed: 42, dmg: 14, rof: 0.4, range: 110, vsInf: 1.4, vsVeh: 0.3, vsBldg: 0.5, proj: "bullet", from: "barracks", tab: "inf" }), flak: U({ key: "flak", name: "Flak Gunner", cost: 300, hp: 125, kind: "inf", armor: "inf", radius: 7, speed: 38, dmg: 22, rof: 0.35, range: 125, vsInf: 1.3, vsVeh: 0.8, vsBldg: 0.4, proj: "flak", aa: true, aaBonus: 1.8, from: "barracks", tab: "inf", req: "barracks" }), rhino: U({ key: "rhino", name: "Mauler Tank", cost: 900, hp: 400, speed: 38, radius: 12, dmg: 58, rof: 1.3, range: 145, vsInf: 0.5, vsVeh: 1.1, vsBldg: 0.9, turret: true }), v3: U({ key: "v3", name: "Ravager", cost: 800, hp: 180, speed: 34, radius: 12, dmg: 120, rof: 4.5, range: 330, minRange: 120, vsInf: 1, vsVeh: 0.8, vsBldg: 1.8, proj: "rocket", splash: 44, deploy: "siege", siegeMul: 2 }), interceptor: U({ key: "interceptor", name: "Interceptor Boat", cost: 550, hp: 200, speed: 64, radius: 11, sight: 280, dmg: 13, rof: 0.45, range: 160, vsInf: 1.5, vsVeh: 0.55, vsBldg: 0.3, proj: "bullet", from: "navalyard", naval: true, tab: "sea" }), frigate: U({ key: "frigate", name: "Frigate", cost: 1400, hp: 440, speed: 36, radius: 15, sight: 320, dmg: 65, rof: 1.5, range: 270, vsInf: 0.6, vsVeh: 1.15, vsBldg: 1.2, proj: "prism", splash: 18, from: "navalyard", naval: true, tab: "sea", req: "lab" }), barracuda: U({ key: "barracuda", name: "Barracuda", cost: 1300, hp: 380, speed: 40, radius: 12, sight: 260, dmg: 55, rof: 1.3, range: 200, vsInf: 0.5, vsVeh: 1.3, vsBldg: 0.8, proj: "missile", from: "navalyard", naval: true, tab: "sea", sub: true, req: "lab" }), riverine: U({ key: "riverine", name: "Riverine Gunboat", cost: 550, hp: 260, speed: 52, radius: 11, sight: 270, dmg: 16, rof: 0.55, range: 145, vsInf: 1.7, vsVeh: 0.65, vsBldg: 0.35, proj: "bullet", from: "navalyard", naval: true, tab: "sea" }), destroyer: U({ key: "destroyer", name: "Destroyer", cost: 1400, hp: 560, speed: 30, radius: 16, sight: 310, dmg: 78, rof: 1.8, range: 250, vsInf: 0.8, vsVeh: 1.15, vsBldg: 1.35, proj: "shell", splash: 22, from: "navalyard", naval: true, tab: "sea", req: "lab" }), nautilus: U({ key: "nautilus", name: "Nautilus", cost: 1300, hp: 420, speed: 36, radius: 13, sight: 250, dmg: 60, rof: 1.4, range: 190, vsInf: 0.5, vsVeh: 1.35, vsBldg: 0.85, proj: "missile", from: "navalyard", naval: true, tab: "sea", sub: true, req: "lab" }), polyp: U({ key: "polyp", name: "Polyp", cost: 550, hp: 230, speed: 56, radius: 11, sight: 270, dmg: 14, rof: 0.5, range: 150, vsInf: 1.6, vsVeh: 0.6, vsBldg: 0.3, proj: "flame", from: "navalyard", naval: true, tab: "sea" }), kraken: U({ key: "kraken", name: "Kraken", cost: 1450, hp: 500, speed: 32, radius: 15, sight: 315, dmg: 72, rof: 1.6, range: 255, vsInf: 0.9, vsVeh: 1.05, vsBldg: 1.25, proj: "rocket", splash: 24, from: "navalyard", naval: true, tab: "sea", req: "lab" }), squid: U({ key: "squid", name: "Squid", cost: 1300, hp: 360, speed: 42, radius: 12, sight: 265, dmg: 50, rof: 1.2, range: 195, vsInf: 0.6, vsVeh: 1.25, vsBldg: 0.75, proj: "missile", from: "navalyard", naval: true, tab: "sea", sub: true, req: "lab" }), chinook: U({ key: "chinook", name: "Chinook", cost: 950, hp: 280, speed: 78, radius: 12, fly: true, alt: 56, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "airfield", tab: "air", transport: true, cargoSlots: 6, vehSlots: 1 }), skyhauler: U({ key: "skyhauler", name: "Skyhauler", cost: 950, hp: 320, speed: 70, radius: 12, fly: true, alt: 56, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "airfield", tab: "air", transport: true, cargoSlots: 6, vehSlots: 1 }), gullet: U({ key: "gullet", name: "Gullet", cost: 950, hp: 260, speed: 74, radius: 12, fly: true, alt: 56, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "airfield", tab: "air", transport: true, cargoSlots: 6, vehSlots: 1 }), lst: U({ key: "lst", name: "Landing Craft", cost: 1200, hp: 500, speed: 30, radius: 16, sight: 260, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "navalyard", naval: true, tab: "sea", transport: true, cargoSlots: 20, vehCost: 4 }), barge: U({ key: "barge", name: "Troop Barge", cost: 1200, hp: 560, speed: 26, radius: 16, sight: 250, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "navalyard", naval: true, tab: "sea", transport: true, cargoSlots: 20, vehCost: 4 }), maw: U({ key: "maw", name: "Maw", cost: 1200, hp: 480, speed: 32, radius: 16, sight: 255, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "navalyard", naval: true, tab: "sea", transport: true, cargoSlots: 20, vehCost: 4 }), apoc: U({ key: "apoc", name: "Colossus", cost: 1750, hp: 800, speed: 26, radius: 15, dmg: 75, rof: 1.5, range: 165, vsInf: 0.6, vsVeh: 1.4, vsBldg: 1.1, turret: true, req: "lab" }), initiate: U({ key: "initiate", name: "Acolyte", cost: 250, hp: 130, kind: "inf", armor: "inf", radius: 7, speed: 40, dmg: 26, rof: 0.6, range: 95, vsInf: 1.6, vsVeh: 0.4, vsBldg: 0.9, proj: "flame", from: "barracks", tab: "inf" }), virus: U({ key: "virus", name: "Vector", cost: 600, hp: 110, kind: "inf", armor: "inf", radius: 7, speed: 38, dmg: 70, rof: 1.8, range: 210, vsInf: 2.2, vsVeh: 0.1, vsBldg: 0.1, proj: "bullet", from: "barracks", tab: "inf", req: "lab" }), lasher: U({ key: "lasher", name: "Fang Tank", cost: 700, hp: 320, speed: 44, radius: 12, dmg: 44, rof: 1.1, range: 140, vsInf: 0.5, vsVeh: 1, vsBldg: 0.85, turret: true }), gattling: U({ key: "gattling", name: "Stinger", cost: 600, hp: 280, speed: 48, radius: 11, dmg: 11, rof: 0.11, range: 135, vsInf: 1.7, vsVeh: 0.5, vsBldg: 0.2, proj: "bullet", turret: true }), mastermind: U({ key: "mastermind", name: "Dominator", cost: 1750, hp: 500, speed: 30, radius: 14, dmg: 0, rof: 0.5, range: 180, role: "mind", proj: "psi", turret: true, req: "lab" }) };
+  var UNITS = { mcv: U({ key: "mcv", name: "Mobile HQ", cost: 3200, hp: 600, speed: 30, radius: 30, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "mcv", tab: "veh", from: "factory", req: "repair" }), drone: U({ key: "drone", name: "Spore Drone", cost: 0, hp: 220, speed: 58, radius: 7, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "miner", from: "hive", tab: null }), hivetrans: U({ key: "hivetrans", name: "Reclaimer", cost: 2200, hp: 1100, speed: 26, radius: 18, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "hivetrans", from: "conyard", tab: null }), miner_allied: U({ key: "miner_allied", name: "Prospector", cost: 1400, hp: 1e3, speed: 50, radius: 13, dmg: 14, rof: 0.6, range: 130, vsInf: 1, vsVeh: 0.3, vsBldg: 0.15, proj: "bullet", turret: true, role: "miner", from: "factory" }), miner_soviet: U({ key: "miner_soviet", name: "Ore Hauler", cost: 1400, hp: 1200, speed: 42, radius: 13, dmg: 0, range: 0, teleport: 1, role: "miner", from: "factory" }), miner_yuri: U({ key: "miner_yuri", name: "Reclaimer", cost: 2e3, hp: 1100, speed: 44, radius: 13, dmg: 0, range: 0, mobileRefine: 1, role: "miner", from: "power" }), gi: U({ key: "gi", name: "Rifleman", cost: 200, hp: 125, kind: "inf", armor: "inf", radius: 7, speed: 40, dmg: 16, rof: 0.45, range: 120, vsInf: 1.4, vsVeh: 0.3, vsBldg: 0.4, proj: "bullet", from: "barracks", tab: "inf", deploy: true }), guardian: U({ key: "guardian", name: "Lancer", cost: 400, hp: 130, kind: "inf", armor: "inf", radius: 7, speed: 36, dmg: 45, rof: 1.1, range: 150, vsInf: 0.4, vsVeh: 1.6, vsBldg: 1, proj: "missile", from: "barracks", tab: "inf", req: "barracks", deploy: "turret" }), grizzly: U({ key: "grizzly", name: "Warden Tank", cost: 700, hp: 300, speed: 46, radius: 12, dmg: 42, rof: 1.1, range: 145, vsInf: 0.5, vsVeh: 1, vsBldg: 0.85, turret: true }), ifv: U({ key: "ifv", name: "Skirmisher", cost: 600, hp: 200, speed: 62, radius: 10, dmg: 32, rof: 0.7, range: 150, vsInf: 0.7, vsVeh: 1.2, vsBldg: 0.5, proj: "missile", turret: true, gunnerSlot: true, aa: true, aaBonus: 1.6 }), prism: U({ key: "prism", name: "Photon Tank", cost: 1200, hp: 220, speed: 38, radius: 12, dmg: 95, rof: 2.3, range: 215, vsInf: 1.1, vsVeh: 0.9, vsBldg: 1.5, proj: "prism", turret: true, req: "lab", deploy: "siege", siegeMul: 3 }), conscript: U({ key: "conscript", name: "Militia", cost: 150, hp: 120, kind: "inf", armor: "inf", radius: 7, speed: 42, dmg: 14, rof: 0.4, range: 110, vsInf: 1.4, vsVeh: 0.3, vsBldg: 0.5, proj: "bullet", from: "barracks", tab: "inf" }), flak: U({ key: "flak", name: "Flak Gunner", cost: 300, hp: 125, kind: "inf", armor: "inf", radius: 7, speed: 38, dmg: 22, rof: 0.35, range: 125, vsInf: 1.3, vsVeh: 0.8, vsBldg: 0.4, proj: "flak", aa: true, aaBonus: 1.8, from: "barracks", tab: "inf", req: "barracks" }), rhino: U({ key: "rhino", name: "Mauler Tank", cost: 900, hp: 400, speed: 38, radius: 12, dmg: 58, rof: 1.3, range: 145, vsInf: 0.5, vsVeh: 1.1, vsBldg: 0.9, turret: true }), v3: U({ key: "v3", name: "Ravager", cost: 800, hp: 180, speed: 34, radius: 12, dmg: 120, rof: 4.5, range: 330, minRange: 120, vsInf: 1, vsVeh: 0.8, vsBldg: 1.8, proj: "rocket", splash: 44, deploy: "siege", siegeMul: 2 }), interceptor: U({ key: "interceptor", name: "Interceptor Boat", cost: 550, hp: 200, speed: 64, radius: 11, sight: 280, dmg: 13, rof: 0.45, range: 160, vsInf: 1.5, vsVeh: 0.55, vsBldg: 0.3, proj: "bullet", from: "navalyard", naval: true, tab: "sea" }), frigate: U({ key: "frigate", name: "Frigate", cost: 1400, hp: 440, speed: 36, radius: 15, sight: 320, dmg: 65, rof: 1.5, range: 270, vsInf: 0.6, vsVeh: 1.15, vsBldg: 1.2, proj: "prism", splash: 18, from: "navalyard", naval: true, tab: "sea", req: "lab" }), barracuda: U({ key: "barracuda", name: "Barracuda", cost: 1300, hp: 380, speed: 40, radius: 12, sight: 260, dmg: 55, rof: 1.3, range: 200, vsInf: 0.5, vsVeh: 1.3, vsBldg: 0.8, proj: "missile", from: "navalyard", naval: true, tab: "sea", sub: true, req: "lab" }), riverine: U({ key: "riverine", name: "Riverine Gunboat", cost: 550, hp: 260, speed: 52, radius: 11, sight: 270, dmg: 16, rof: 0.55, range: 145, vsInf: 1.7, vsVeh: 0.65, vsBldg: 0.35, proj: "bullet", from: "navalyard", naval: true, tab: "sea" }), destroyer: U({ key: "destroyer", name: "Destroyer", cost: 1400, hp: 560, speed: 30, radius: 16, sight: 310, dmg: 78, rof: 1.8, range: 250, vsInf: 0.8, vsVeh: 1.15, vsBldg: 1.35, proj: "shell", splash: 22, from: "navalyard", naval: true, tab: "sea", req: "lab" }), nautilus: U({ key: "nautilus", name: "Nautilus", cost: 1300, hp: 420, speed: 36, radius: 13, sight: 250, dmg: 60, rof: 1.4, range: 190, vsInf: 0.5, vsVeh: 1.35, vsBldg: 0.85, proj: "missile", from: "navalyard", naval: true, tab: "sea", sub: true, req: "lab" }), polyp: U({ key: "polyp", name: "Polyp", cost: 550, hp: 230, speed: 56, radius: 11, sight: 270, dmg: 14, rof: 0.5, range: 150, vsInf: 1.6, vsVeh: 0.6, vsBldg: 0.3, proj: "flame", from: "navalyard", naval: true, tab: "sea" }), kraken: U({ key: "kraken", name: "Kraken", cost: 1450, hp: 500, speed: 32, radius: 15, sight: 315, dmg: 72, rof: 1.6, range: 255, vsInf: 0.9, vsVeh: 1.05, vsBldg: 1.25, proj: "rocket", splash: 24, from: "navalyard", naval: true, tab: "sea", req: "lab" }), squid: U({ key: "squid", name: "Squid", cost: 1300, hp: 360, speed: 42, radius: 12, sight: 265, dmg: 50, rof: 1.2, range: 195, vsInf: 0.6, vsVeh: 1.25, vsBldg: 0.75, proj: "missile", from: "navalyard", naval: true, tab: "sea", sub: true, req: "lab" }), chinook: U({ key: "chinook", name: "Chinook", cost: 950, hp: 280, speed: 78, radius: 12, fly: true, alt: 56, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "airfield", tab: "air", transport: true, cargoSlots: 6, vehSlots: 1 }), skyhauler: U({ key: "skyhauler", name: "Skyhauler", cost: 950, hp: 320, speed: 70, radius: 12, fly: true, alt: 56, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "airfield", tab: "air", transport: true, cargoSlots: 6, vehSlots: 1 }), gullet: U({ key: "gullet", name: "Gullet", cost: 950, hp: 260, speed: 74, radius: 12, fly: true, alt: 56, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "airfield", tab: "air", transport: true, cargoSlots: 6, vehSlots: 1 }), lst: U({ key: "lst", name: "Landing Craft", cost: 1200, hp: 500, speed: 30, radius: 16, sight: 260, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "navalyard", naval: true, tab: "sea", transport: true, cargoSlots: 20, vehCost: 4 }), barge: U({ key: "barge", name: "Troop Barge", cost: 1200, hp: 560, speed: 26, radius: 16, sight: 250, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "navalyard", naval: true, tab: "sea", transport: true, cargoSlots: 20, vehCost: 4 }), maw: U({ key: "maw", name: "Maw", cost: 1200, hp: 480, speed: 32, radius: 16, sight: 255, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, from: "navalyard", naval: true, tab: "sea", transport: true, cargoSlots: 20, vehCost: 4 }), apoc: U({ key: "apoc", name: "Colossus", cost: 1750, hp: 800, speed: 26, radius: 15, dmg: 75, rof: 1.5, range: 165, vsInf: 0.6, vsVeh: 1.4, vsBldg: 1.1, turret: true, req: "lab" }), initiate: U({ key: "initiate", name: "Acolyte", cost: 250, hp: 130, kind: "inf", armor: "inf", radius: 7, speed: 40, dmg: 26, rof: 0.6, range: 95, vsInf: 1.6, vsVeh: 0.4, vsBldg: 0.9, proj: "flame", from: "barracks", tab: "inf" }), virus: U({ key: "virus", name: "Vector", cost: 600, hp: 110, kind: "inf", armor: "inf", radius: 7, speed: 38, dmg: 70, rof: 1.8, range: 210, vsInf: 2.2, vsVeh: 0.1, vsBldg: 0.1, proj: "bullet", from: "barracks", tab: "inf", req: "lab" }), lasher: U({ key: "lasher", name: "Fang Tank", cost: 700, hp: 320, speed: 44, radius: 12, dmg: 44, rof: 1.1, range: 140, vsInf: 0.5, vsVeh: 1, vsBldg: 0.85, turret: true }), gattling: U({ key: "gattling", name: "Stinger", cost: 600, hp: 280, speed: 48, radius: 11, dmg: 11, rof: 0.11, range: 135, vsInf: 1.7, vsVeh: 0.5, vsBldg: 0.2, proj: "bullet", turret: true }), mastermind: U({ key: "mastermind", name: "Dominator", cost: 1750, hp: 500, speed: 30, radius: 14, dmg: 0, rof: 0.5, range: 180, role: "mind", proj: "psi", turret: true, req: "lab" }) };
   var HERO_MODES = { sniper: { range: 280, dmg: 130, rof: 1.4, vsInf: 3.4, vsVeh: 0.1, vsBldg: 0.1, proj: "bullet" }, mg: { range: 150, dmg: 16, rof: 0.15, vsInf: 1.6, vsVeh: 0.1, vsBldg: 0.1, proj: "bullet" } };
   Object.assign(UNITS, { bastion: U({ key: "bastion", name: "Bastion Rig", names: { allied: "Sentinel Rig", soviet: "Rampart Rig", yuri: "Carapace Rig" }, cost: 2600, hp: 520, speed: 24, radius: 16, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "bastionRig", from: "factory", req: "lab", tab: null }), titan_allied: U({ key: "titan_allied", name: "Paladin Walker", cost: 3e3, hp: 4750, speed: 20, radius: 36, sight: 280, dmg: 78, rof: 1.4, range: 170, vsInf: 1.1, vsVeh: 1.3, vsBldg: 1.3, proj: "beam", turret: true, aa: true, aaBonus: 1.6, req: "lab", limit: 2, deploy: "garrison" }), titan_soviet: U({ key: "titan_soviet", name: "Juggernaut Walker", cost: 3e3, hp: 5250, speed: 18, radius: 36, sight: 270, dmg: 85, rof: 1.5, range: 165, vsInf: 1.15, vsVeh: 1.35, vsBldg: 1.4, proj: "shell", turret: true, aa: true, aaBonus: 1.5, req: "lab", limit: 2, deploy: "garrison" }), titan_yuri: U({ key: "titan_yuri", name: "Devourer Walker", cost: 3e3, hp: 4400, speed: 22, radius: 36, sight: 290, dmg: 72, rof: 1.3, range: 175, vsInf: 1.2, vsVeh: 1.2, vsBldg: 1.25, proj: "beam", turret: true, aa: true, aaBonus: 1.8, req: "lab", limit: 2, deploy: "garrison" }), rogue: U({ key: "rogue", name: "Rogue", cost: 0, hp: 80, kind: "inf", armor: "inf", radius: 7, speed: 40, dmg: 16, rof: 0.6, range: 34, vsInf: 1, vsVeh: 0.2, vsBldg: 0.15, proj: "melee", from: null, tab: null, garrison: false }), engineer: U({ key: "engineer", name: "Technician", cost: 500, hp: 100, kind: "inf", armor: "inf", radius: 7, speed: 42, dmg: 0, range: 0, role: "engineer", from: "barracks", tab: "inf" }), tanya: U({ key: "tanya", name: "Ghost", cost: 1e3, hp: 200, kind: "inf", armor: "inf", radius: 7, speed: 48, dmg: 130, rof: 1.4, range: 280, vsInf: 3.4, vsVeh: 0.1, vsBldg: 0.1, proj: "bullet", from: "barracks", tab: "inf", req: "lab", limit: 1, c4: true, garrison: true, modes: HERO_MODES }), reaper: U({ key: "reaper", name: "Reaper", cost: 1e3, hp: 200, kind: "inf", armor: "inf", radius: 7, speed: 48, dmg: 130, rof: 1.4, range: 280, vsInf: 3.4, vsVeh: 0.1, vsBldg: 0.1, proj: "bullet", from: "barracks", tab: "inf", req: "lab", limit: 1, c4: true, garrison: true, modes: HERO_MODES }), phantom: U({ key: "phantom", name: "Phantom", cost: 1e3, hp: 200, kind: "inf", armor: "inf", radius: 7, speed: 48, dmg: 130, rof: 1.4, range: 280, vsInf: 3.4, vsVeh: 0.1, vsBldg: 0.1, proj: "bullet", from: "barracks", tab: "inf", req: "lab", limit: 1, c4: true, garrison: true, modes: HERO_MODES }), chrono: U({ key: "chrono", name: "Phase Trooper", cost: 1500, hp: 125, kind: "inf", armor: "inf", radius: 7, speed: 30, dmg: 0, rof: 0.5, range: 185, role: "chrono", proj: "beam", from: "barracks", tab: "inf", req: "lab" }), desolator: U({ key: "desolator", name: "Caustic Trooper", cost: 600, hp: 150, kind: "inf", armor: "inf", radius: 7, speed: 32, dmg: 34, rof: 0.8, range: 125, vsInf: 2.4, vsVeh: 0.6, vsBldg: 0.4, proj: "flame", from: "barracks", tab: "inf", req: "lab", deploy: "rad" }), brute: U({ key: "brute", name: "Brood", cost: 500, hp: 340, kind: "inf", armor: "inf", radius: 8, speed: 46, dmg: 60, rof: 1.1, range: 45, vsInf: 1.6, vsVeh: 1.3, vsBldg: 1.1, proj: "melee", from: "barracks", tab: "inf", garrison: false }), terror: U({ key: "terror", name: "Tick Drone", cost: 500, hp: 160, speed: 96, radius: 8, dmg: 0, rof: 0.5, range: 26, role: "terror", from: "factory", tab: "veh" }), rocketeer: U({ key: "rocketeer", name: "Skyjack", cost: 600, hp: 130, speed: 96, radius: 9, fly: true, alt: 44, dmg: 26, rof: 0.45, range: 135, vsInf: 1.1, vsVeh: 0.8, vsBldg: 0.4, proj: "missile", aa: true, from: "barracks", tab: "air" }), harrier: U({ key: "harrier", name: "Hornet", cost: 1200, hp: 130, speed: 150, radius: 11, fly: true, alt: 62, dmg: 110, rof: 0.55, range: 120, vsInf: 0.8, vsVeh: 1.2, vsBldg: 1.7, proj: "bomb", splash: 34, ammo: 3, from: "airfield", tab: "air", req: "airfield" }), eagle: U({ key: "eagle", name: "Vulture", cost: 1400, hp: 145, speed: 160, radius: 11, fly: true, alt: 62, dmg: 130, rof: 0.55, range: 120, vsInf: 0.8, vsVeh: 1.3, vsBldg: 1.9, proj: "bomb", splash: 36, ammo: 3, from: "airfield", tab: "air", req: "airfield" }), kirov: U({ key: "kirov", name: "Leviathan", cost: 3e3, hp: 2e3, speed: 24, radius: 20, fly: true, alt: 74, dmg: 230, rof: 2.6, range: 70, vsInf: 1, vsVeh: 1.2, vsBldg: 2.2, proj: "bomb", splash: 58, from: "airfield", tab: "air", req: "airfield" }), disc: U({ key: "disc", name: "Wisp", cost: 1750, hp: 420, speed: 62, radius: 12, fly: true, alt: 52, dmg: 62, rof: 1.1, range: 165, vsInf: 0.9, vsVeh: 1.2, vsBldg: 1.4, proj: "beam", aa: true, from: "airfield", tab: "air", req: "lab" }), locust: U({ key: "locust", name: "Locust", cost: 1100, hp: 115, speed: 170, radius: 10, fly: true, alt: 60, dmg: 35, rof: 0.35, range: 150, vsInf: 0, vsVeh: 1.2, vsBldg: 0, proj: "beam", ammo: 10, aa: true, aaBonus: 1.6, airOnly: true, from: "airfield", tab: "air", req: "airfield" }), kestrel: U({ key: "kestrel", name: "Kestrel", cost: 1e3, hp: 130, speed: 180, radius: 10, fly: true, alt: 58, dmg: 14, rof: 0.15, range: 140, vsInf: 0, vsVeh: 1.3, vsBldg: 0, proj: "bullet", ammo: 8, aa: true, aaBonus: 1.4, airOnly: true, from: "airfield", tab: "air", req: "airfield" }), jackal: U({ key: "jackal", name: "Jackal", cost: 1e3, hp: 140, speed: 175, radius: 10, fly: true, alt: 58, dmg: 15, rof: 0.15, range: 140, vsInf: 0, vsVeh: 1.3, vsBldg: 0, proj: "bullet", ammo: 8, aa: true, aaBonus: 1.3, airOnly: true, from: "airfield", tab: "air", req: "airfield" }) }), Object.assign(UNITS, { marksman: U({ key: "marksman", name: "Sky Guard", cost: 350, hp: 115, kind: "inf", armor: "inf", radius: 7, speed: 38, dmg: 20, rof: 0.4, range: 160, vsInf: 1, vsVeh: 0.6, vsBldg: 0.1, proj: "flak", aa: true, aaBonus: 2.4, from: "barracks", tab: "inf", req: "barracks" }), vindicator: U({ key: "vindicator", name: "Vindicator", cost: 550, hp: 120, kind: "inf", armor: "inf", radius: 7, speed: 40, dmg: 38, rof: 0.7, range: 150, vsInf: 2.3, vsVeh: 0.3, vsBldg: 0.3, proj: "beam", from: "barracks", tab: "inf", req: "lab" }), hover: U({ key: "hover", name: "Skimmer", cost: 850, hp: 240, speed: 78, radius: 11, dmg: 30, rof: 0.5, range: 160, vsInf: 0.6, vsVeh: 1, vsBldg: 0.4, proj: "missile", turret: true, aa: true, ammo: 3, sub: true, req: "factory" }), bulwark: U({ key: "bulwark", name: "Bulwark", cost: 1500, hp: 760, speed: 28, radius: 14, dmg: 70, rof: 1.6, range: 150, vsInf: 0.7, vsVeh: 1.3, vsBldg: 1.4, turret: true, deploy: "turret", req: "lab" }), bombard: U({ key: "bombard", name: "Bombardier", cost: 450, hp: 140, kind: "inf", armor: "inf", radius: 7, speed: 34, dmg: 52, rof: 1.5, range: 165, vsInf: 0.5, vsVeh: 1.5, vsBldg: 1.2, proj: "rocket", splash: 22, from: "barracks", tab: "inf", req: "barracks", deploy: "turret" }), hound: U({ key: "hound", name: "Warhound", cost: 450, hp: 190, speed: 92, radius: 10, dmg: 16, rof: 0.18, range: 120, vsInf: 1.5, vsVeh: 0.4, vsBldg: 0.2, proj: "bullet", turret: true, aa: true, aaBonus: 1.6 }), sledge: U({ key: "sledge", name: "Sledge", cost: 1150, hp: 420, speed: 30, radius: 13, dmg: 150, rof: 3.4, range: 300, minRange: 90, vsInf: 1.2, vsVeh: 0.9, vsBldg: 1.6, proj: "shell", splash: 52, turret: true, deploy: "turret", req: "lab" }), longbow: U({ key: "longbow", name: "Longbow", cost: 1300, hp: 260, speed: 32, radius: 13, dmg: 110, rof: 2.8, range: 290, minRange: 80, vsInf: 0.5, vsVeh: 1.3, vsBldg: 1.9, proj: "shell", splash: 38, turret: true, req: "lab" }), rift: U({ key: "rift", name: "Rift", cost: 1300, hp: 250, speed: 32, radius: 13, dmg: 100, rof: 2.6, range: 300, minRange: 85, vsInf: 0.6, vsVeh: 1.2, vsBldg: 1.8, proj: "shell", splash: 36, turret: true, req: "lab", deploy: "siege", siegeMul: 2 }), leech: U({ key: "leech", name: "Leech", cost: 400, hp: 150, kind: "inf", armor: "inf", radius: 7, speed: 44, dmg: 28, rof: 0.8, range: 145, vsInf: 0.9, vsVeh: 0.55, vsBldg: 0.3, proj: "beam", aa: true, aaBonus: 2.2, from: "barracks", tab: "inf", drain: true }), shard: U({ key: "shard", name: "Shard Walker", cost: 1250, hp: 560, speed: 32, radius: 13, dmg: 64, rof: 1.4, range: 155, vsInf: 0.9, vsVeh: 1.2, vsBldg: 1.2, proj: "prism", turret: true, deploy: "turret", req: "lab" }), spore: U({ key: "spore", name: "Spore Lobber", cost: 900, hp: 260, speed: 34, radius: 12, dmg: 110, rof: 3.6, range: 290, minRange: 100, vsInf: 1.8, vsVeh: 0.5, vsBldg: 0.9, proj: "rocket", splash: 46, req: "lab" }), piercer: U({ key: "piercer", name: "Piercer", cost: 450, hp: 130, kind: "inf", armor: "inf", radius: 7, speed: 36, dmg: 40, rof: 1.1, range: 150, vsInf: 0.4, vsVeh: 1.6, vsBldg: 0.7, proj: "rocket", splash: 14, from: "barracks", tab: "inf", req: "lab" }), restorer: U({ key: "restorer", name: "Restorer", cost: 900, hp: 220, speed: 50, radius: 12, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "medic", from: "factory", req: "repair", tab: "veh" }), salvager: U({ key: "salvager", name: "Salvager", cost: 900, hp: 260, speed: 38, radius: 12, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "medic", from: "factory", req: "repair", tab: "veh" }), cultivator: U({ key: "cultivator", name: "Cultivator", cost: 900, hp: 240, speed: 36, radius: 12, dmg: 0, rof: 0, range: 0, vsInf: 0, vsVeh: 0, vsBldg: 0, role: "medic", from: "factory", req: "repair", tab: "veh" }) }), ["flak", "gattling", "guardian", "rocketeer", "disc", "hover", "bombard"].forEach((e) => UNITS[e].aa = true), ["gi", "conscript", "initiate", "guardian", "flak", "virus", "tanya", "desolator", "marksman", "bombard", "leech"].forEach((e) => UNITS[e].garrison = true), ["desolator", "virus", "initiate"].forEach((e) => UNITS[e].tibProof = true);
   var FACTIONS = { allied: { key: "allied", name: "Vanguard", color: "#4a6b78", dark: "#28383f", tint: "#a8c2c8", units: ["miner_allied", "gi", "engineer", "guardian", "marksman", "vindicator", "tanya", "chrono", "grizzly", "ifv", "hover", "prism", "bulwark", "titan_allied", "longbow", "rocketeer", "harrier", "kestrel", "chinook", "interceptor", "frigate", "barracuda", "lst", "mcv", "bastion", "restorer"], miner: "miner_allied", base: "gi", main: "grizzly", anti: "guardian", elite: "prism", air: "harrier", hero: "tanya" }, soviet: { key: "soviet", name: "Legion", color: "#7a4530", dark: "#40261a", tint: "#c49a7c", units: ["miner_soviet", "conscript", "engineer", "flak", "bombard", "desolator", "hound", "rhino", "terror", "v3", "sledge", "apoc", "titan_soviet", "eagle", "jackal", "kirov", "skyhauler", "riverine", "destroyer", "nautilus", "barge", "mcv", "bastion", "reaper", "salvager"], miner: "miner_soviet", base: "conscript", main: "rhino", anti: "flak", elite: "apoc", air: "kirov", hero: "reaper" }, yuri: { key: "yuri", name: "Syndicate", color: "#5f4a6b", dark: "#312638", tint: "#a99bb2", units: ["miner_yuri", "initiate", "engineer", "leech", "brute", "virus", "lasher", "gattling", "spore", "shard", "rift", "mastermind", "titan_yuri", "disc", "locust", "hivetrans", "gullet", "polyp", "kraken", "squid", "maw", "mcv", "bastion", "phantom", "piercer", "cultivator"], miner: "miner_yuri", base: "initiate", main: "lasher", anti: "gattling", elite: "mastermind", air: "disc", hero: "phantom" } };
@@ -1815,7 +1815,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const wfn = r.naval ? walkableW : walkable, i = nearestFree(Math.floor(o / 32), Math.floor(s / 32), wfn);
     i && (o = 32 * i[0] + 16, s = 32 * i[1] + 16);
     const l = addUnit(e.id, t, o, s);
-    l && (r.fly && (l.alt = 0, l.ammo = r.ammo || 0, l.home = "airfield" === a.key ? a : null), "miner" === r.role ? l.order = "harvest" : a.rally && cmdMove([l], a.rally.x, a.rally.y), e.isAI || sfx("unit"));
+    l && (r.fly && (l.alt = 0, l.ammo = r.ammo || 0, l.home = "airfield" === a.key ? a : null, "airfield" === a.key && "kirov" !== t && dockNew(l, a)), "miner" === r.role ? l.order = "harvest" : a.rally && cmdMove([l], a.rally.x, a.rally.y), e.isAI || sfx("unit"));
   }
   function placeReady(e, kind, t, r) {
     const n = e.ready[kind];
@@ -1841,13 +1841,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         (e2.queue = e2.queue || []).push({ x: a, y: c, amove: !!n });
         continue;
       }
-      queue || (e2.queue = []), e2.deployed && toggleDeploy(e2), e2.order = n ? "amove" : "move", e2.target = null, e2.ore = null, e2.tx = a, e2.ty = c, e2.d.fly ? (e2.path = null, e2.state = null) : repath(e2);
+      queue || (e2.queue = []), e2.deployed && toggleDeploy(e2), e2.order = n ? "amove" : "move", e2.target = null, e2.ore = null, e2.tx = a, e2.ty = c, e2.d.fly ? (e2.path = null, airOrdered(e2)) : repath(e2);
     }
   }
   function nextWaypoint(e) {
     if (!e.queue || !e.queue.length) return false;
     const t = e.queue.shift();
-    return e.order = t.amove ? "amove" : "move", e.target = null, e.ore = null, e.tx = t.x, e.ty = t.y, e.d.fly ? (e.path = null, e.state = null) : repath(e), true;
+    return e.order = t.amove ? "amove" : "move", e.target = null, e.ore = null, e.tx = t.x, e.ty = t.y, e.d.fly ? (e.path = null, airOrdered(e)) : repath(e), true;
   }
   function cmdAttack(e, t) {
     smartOrder(e, t) && (e = e.filter((e2) => "capture" !== e2.order && "garrison" !== e2.order && "load" !== e2.order));
@@ -2917,7 +2917,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const engaged = ("attack" === u.order || "amove" === u.order) && u.target && !u.target.dead;
       if (engaged && !u.deployed && "b" !== u.target.e && u.hp < (pz.retreatHp || 0.3) * u.maxhp) {
         const b = !u.d.fly && repairBld || aiBaseCenter(e);
-        u.order = "move", u.tx = clamp(b.x + rnd(-60, 60), 8, 2936), u.ty = clamp(b.y + rnd(-60, 60), 8, 2296), u.target = null, u.ore = null, u.retreatT = 8, u.d.fly ? (u.path = null, u.state = null) : repath(u);
+        u.order = "move", u.tx = clamp(b.x + rnd(-60, 60), 8, 2936), u.ty = clamp(b.y + rnd(-60, 60), 8, 2296), u.target = null, u.ore = null, u.retreatT = 8, u.d.fly ? (u.path = null, airOrdered(u)) : repath(u);
         continue;
       }
       if (engaged && !u.deployed && u.d.dmg > 0 && "b" !== u.target.e) {
@@ -4049,44 +4049,88 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return t;
   }
   function mcvModel(e, fac) {
-    const t = [], len = 44, wid = 22;
-    trackUnit(t, len, wid, 11, e, { trkW: 9, wheels: 6 });
-    const hw = 0.5 * (wid + 4);
-    t.push(P_(SLAB(hullProfile(0.9 * len, wid + 4, fac), 7.5, 2.2, "mcvH" + (fac || "")), 0, 0, 6, "armor2"));
-    t.push(P_(BOXM(0.5 * len, 0.86 * (wid + 4), 7.5, 0.6), -4, 0, 13.5, "armor"));
+    const t = [], L = 64, W = 22, hw = W / 2;
     if ("soviet" === fac) {
-      t.push(P_(BOXM(0.4 * len, 0.72 * (wid + 4), 4.8, 0.5), -4, 0, 19.8, "concrete2"));
-      t.push(P_(BOXM(0.26 * len, 0.56 * (wid + 4), 3.2, 0.4), -4, 0, 23.8, "armor3"));
-      for (const sgn of [-1, 1]) t.push(P_(CYL(1.8, 6, 10), -0.28 * len, sgn * 0.3 * hw, 27, "rust")), t.push(P_(CYL(2.1, 1.2, 10), -0.28 * len, sgn * 0.3 * hw, 33, "darkmetal"));
-      t.push(P_(BOXM(2.4, 2.4, 16, 0.3), 0.3 * len, 0.55 * hw, 11, "gunmetal", { ty: 1.1 }));
-      t.push(P_(BOXM(2.2, 2.2, 2, 0.3), 0.44 * len, 0.55 * hw, 24, "darkmetal"));
-      t.push(P_(CYL(1.6, 4.5, 10), 0.3 * len, -0.55 * hw, 14, "darkmetal"));
-      t.push(P_(CYL(1.8, 1.1, 10), 0.3 * len, -0.55 * hw, 19, "gold"));
-      hazard(t, -4, -0.72 * hw, 4.5, 0.5 * len, 0);
-      bolts(t, -4, -0.6 * hw, 14, 0.5 * len, 0, 7, "steel");
-      bolts(t, -4, 0.6 * hw, 14, 0.5 * len, 0, 7, "steel");
+      trackUnit(t, L, W, 12, e, { trkW: 10, wheels: 8 });
+      const hz = 6, top = 13;
+      t.push(P_(SLAB(hullProfile(0.94 * L, W + 4, "soviet"), 7, 1.8, "mcvSH"), 0, 0, hz, "armor2"));
+      t.push(P_(BOXM(0.16 * L, W, 8, 0.6), 0.38 * L, 0, top, "concrete2"));
+      t.push(P_(WEDGE(0.08 * L, W, 7, 2.5), 0.5 * L, 0, hz + 1, "armor3"));
+      for (const sy of [-1, 0, 1]) t.push(P_(BOXM(0.4, 4.4, 1.2, 0.1), 0.46 * L + 0.1, sy * 6, top + 5, "glassdark", { e: 1 }));
+      t.push(P_(BOXM(0.5, 2.4, 2.4, 0.1), 0.46 * L + 0.2, 0, top + 1.8, "red", { e: 1 }));
+      for (const sy of [-1, 1]) t.push(P_(CYL(1.3, 1.4, 10), 0.54 * L, sy * 7, hz + 4, "lightY", { e: 1, ty: PI2 }));
+      for (const cx of [0.14 * L, -0.2 * L]) t.push(P_(BOXM(3, W - 3, 5, 0.4), cx, 0, top, "darkmetal"));
+      t.push(P_(CYL(6.6, 0.42 * L, 18), 0.2 * L, 0, top + 6.6, "concrete2", { ty: -PI2 }));
+      for (let k = 0; k < 4; k++) t.push(P_(CYL(6.95, 1.3, 18), 0.16 * L - k * 0.11 * L, 0, top + 6.6, "rust", { ty: -PI2 }));
+      t.push(P_(CYL(5, 1.6, 16), -0.22 * L, 0, top + 6.6, "darkmetal", { ty: -PI2 }));
+      t.push(P_(CYL(1.8, 1.6, 10), -0.22 * L - 1.6, 0, top + 6.6, "red", { e: 1, ty: -PI2 }));
+      for (const sy of [-1, 1]) stack(t, -0.42 * L, sy * 5.5, top, 1.9, 15, "rust");
+      bolts(t, 0, -(hw + 1.5), top - 1.2, 0.8 * L, 0, 14, "steel");
+      bolts(t, 0, hw + 1.5, top - 1.2, 0.8 * L, 0, 14, "steel");
+      const dx = 0.28 * L, dy = -0.3 * W;
+      strut3(t, dx - 3, dy - 2, top, dx, dy, top + 17, 0.7, "rust");
+      strut3(t, dx + 3, dy - 2, top, dx, dy, top + 17, 0.7, "rust");
+      strut3(t, dx, dy, top + 17, dx + 10, dy, top + 14, 0.55, "rust");
+      t.push(P_(CYL(0.12, 7, 5), dx + 10, dy, top + 7, "dark2"));
+      t.push(P_(BOXM(1.4, 1.4, 1.6, 0.2), dx + 10, dy, top + 5.6, "steel"));
+      pipeRun(t, -0.3 * L, 0.33 * W, 0.1 * L, 0.33 * W, top + 1.5, 1.2, "rust");
+      hazard(t, -0.47 * L, 0, hz + 2, W, PI2);
+      for (let k = 0; k < 5; k++) t.push(P_(BOXM(2.2, 0.8, 1.4, 0.2), -0.3 * L + k * 4, -(hw + 5.4), hz + 1.6, "tread"));
     } else if ("yuri" === fac) {
-      t.push(P_(DOME(0.28 * len, 6, 14), -4, 0, 20, "carapace2"));
-      t.push(P_(DOME(0.16 * len, 3.6, 12), -4, 0, 26, "carapace"));
-      t.push(P_(DOME(3.2, 2.8, 10), -4, 0, 29.6, "psi", { e: 1, a: { spin: 0.5 } }));
-      for (let i = 0; i < 4; i++) {
-        const ang = i * PI2 / 2 + 0.4;
-        t.push(P_(CONE(1.6, 0.2, 7, 7), -4 + 6 * Math.cos(ang), 6 * Math.sin(ang), 18, "carapace2", { r: ang }));
+      legWalker(t, 0.9 * L, W, 9, e, 10);
+      const hz = 4.5, top = 12;
+      t.push(P_(SLAB(hullProfile(0.9 * L, W + 2, "yuri"), 7.5, 2, "mcvYH"), 0, 0, hz, "dark2"));
+      for (let k = 0; k < 5; k++) {
+        const x = 0.3 * L - k * 0.155 * L, rr = 10 - 0.6 * Math.abs(k - 1.5);
+        t.push(P_(DOME(rr, 6.5, 14), x, 0, top - 1, "carapace2", { sy: 0.85 }));
+        t.push(P_(CONE(1.4, 0.2, 4.5 - 0.5 * Math.abs(k - 2), 7), x, 0, top + 5, "carapace", { ty: -0.3 }));
+        t.push(P_(BOXM(1, 0.8 * W, 0.6, 0.2), x - 0.075 * L, 0, top + 1, "psi", { e: 1 }));
       }
-      t.push(P_(CYL(0.7, 10, 6), 0.32 * len, 0.55 * hw, 13, "dark2", { ty: PI2, r: 0.3 }));
-      t.push(P_(DOME(1.4, 1.1, 8), 0.32 * len + 9.5, 0.55 * hw + 2.8, 13, "bile", { e: 1 }));
+      t.push(P_(DOME(7, 6, 12), 0.46 * L, 0, hz + 3, "carapace"));
+      for (const sy of [-1, 1]) t.push(P_(DOME(1.4, 1.2, 8), 0.5 * L + 2, sy * 3, hz + 7, "psi", { e: 1 })), t.push(P_(CONE(1.6, 0.2, 6, 7), 0.5 * L + 3, sy * 3.5, hz + 2.2, "bone", { ty: 1.35, r: -sy * 0.35 }));
+      t.push(P_(DOME(8.5, 9, 14), -0.02 * L, 0, top + 3.5, "carapace"));
+      t.push(P_(DOME(4.6, 4.2, 12), -0.02 * L, 0, top + 11, "psi", { e: 1 }));
+      for (let k = 0; k < 6; k++) {
+        const a = 1.047 * k;
+        t.push(P_(CONE(1.1, 0.15, 6, 6), -0.02 * L + 7 * Math.cos(a), 7 * Math.sin(a), top + 6, "carapace2", { r: a, ty: 0.5 }));
+      }
+      veins(t, -0.02 * L, 0, top + 4, 8.8, 3, 8, "psi");
+      t.push(P_(DOME(5.5, 5, 12), -0.48 * L, 0, hz + 2, "bile", { e: 1 }));
+      t.push(P_(DOME(3, 3, 10), -0.54 * L, 0, hz + 3, "bile2", { e: 1 }));
     } else {
-      t.push(P_(DOME(0.24 * len, 5.5, 14), -4, 0, 20, "armor3"));
-      t.push(P_(DOME(4, 3.4, 12), -4, 0, 25.5, "glass", { e: 1 }));
-      t.push(P_(CYL(0.55, 7, 8), -4, 0, 29, "tesla", { e: 1 }));
-      for (const sgn of [-1, 1]) t.push(P_(CYL(0.42, 8, 6), -4 + 2.6 * sgn, sgn * 0.55 * hw, 20, "darkmetal", { r: sgn * 0.22 }));
-      t.push(P_(CYL(1.5, 4.5, 10), 0.3 * len, -0.55 * hw, 14, "darkmetal"));
-      t.push(P_(CYL(1.7, 1, 10), 0.3 * len, -0.55 * hw, 19, "tesla", { e: 1 }));
-      seams(t, 0.4 * len, 0.7 * hw, 20, "dark");
+      const z0 = 4.4, top = z0 + 3.2;
+      for (let k = 0; k < 6; k++) {
+        const x = -0.4 * L + k * 0.16 * L;
+        for (const sy of [-1, 1]) t.push(P_(CYL(4.3, 3.6, 14), x, sy * (hw + 0.4) + 1.8, 4.3, "rubber", { tx: PI2 })), t.push(P_(CYL(2.2, 3.9, 10), x, sy * (hw + 0.4) + 1.95, 4.3, "steel", { tx: PI2 }));
+      }
+      for (const sy of [-1, 1]) t.push(P_(BOXM(0.86 * L, 3.8, 0.8, 0.2), 0, sy * (hw + 0.4), 8.8, "armor3"));
+      t.push(P_(SLAB(roundRectProfile(0.97 * L, W - 2, 3, 3), 3.2, 0.8, "mcvAc"), 0, 0, z0, "darkmetal"));
+      t.push(P_(BOXM(0.17 * L, W - 1, 9, 1.2), 0.4 * L, 0, top, "body"));
+      t.push(P_(WEDGE(0.07 * L, W - 2, 6, 2), 0.52 * L, 0, top, "body"));
+      t.push(P_(BOXM(0.6, W - 5, 3.2, 0.2), 0.485 * L, 0, top + 5.2, "glassdark", { e: 1 }));
+      for (const sy of [-1, 1]) t.push(P_(BOXM(6, 0.5, 2.8, 0.1), 0.4 * L, sy * (hw - 0.3), top + 5.4, "glassdark", { e: 1 })), t.push(P_(CYL(1.2, 1, 10), 0.56 * L, sy * 7, top + 1.2, "lightY", { e: 1, ty: PI2 }));
+      t.push(P_(BOXM(1.2, W - 2, 3, 0.3), 0.57 * L, 0, z0 + 1, "darkmetal"));
+      for (let k = 0; k < 4; k++) t.push(P_(BOXM(1.2, 1.2, 0.8, 0.2), 0.38 * L, -6 + 4 * k, top + 9, "lightY", { e: 1 }));
+      t.push(P_(CYL(0.15, 9, 5), 0.34 * L, -8, top + 9, "dark2"));
+      t.push(P_(BOXM(0.46 * L, W - 3, 7, 0.8), -0.02 * L, 0, top, "armor"));
+      for (const sy of [-1, 1]) for (let k = 0; k < 3; k++) t.push(P_(BOXM(6, 1, 3.4, 0.3), -0.14 * L + k * 0.12 * L, sy * (hw - 0.6), top + 1.2, "darkmetal"));
+      t.push(P_(DOME(0.12 * L, 5.5, 14), 0.04 * L, 0, top + 7, "armor3"));
+      t.push(P_(DOME(3.4, 3, 12), 0.04 * L, 0, top + 12.2, "glass", { e: 1 }));
+      t.push(P_(CYL(0.5, 6, 8), 0.04 * L, 0, top + 14.5, "tesla", { e: 1 }));
+      t.push(P_(BOXM(0.2 * L, W - 4, 6, 0.6), -0.38 * L, 0, top, "darkmetal"));
+      vent(t, -0.38 * L, 4, top + 6, 8, 6, "steel");
+      for (const sy of [-1, 1]) t.push(P_(CYL(1.1, 7, 10), -0.46 * L, sy * 6.5, top, "gunmetal")), t.push(P_(CYL(1.3, 1, 10), -0.46 * L, sy * 6.5, top + 7, "black"));
+      for (const cx of [-0.34 * L, -0.15 * L]) t.push(P_(BOXM(2, 6, 4.5, 0.3), cx, 0, top + 6.5, "armor3"));
+      t.push(P_(CYL(3, 0.4 * L, 12), -0.08 * L, 0, top + 12.6, "armor2", { ty: -PI2 }));
+      t.push(P_(CONE(3, 0.6, 6, 12), -0.48 * L, 0, top + 12.6, "armor2", { ty: -PI2 }));
+      t.push(P_(CONE(1.2, 0.1, 3, 8), -0.48 * L - 6, 0, top + 12.6, "tesla", { e: 1, ty: -PI2 }));
+      t.push(P_(CYL(2.4, 2, 12), 0.26 * L, -5, top, "steel"));
+      t.push(P_(CYL(0.8, 0.36 * L, 8), 0.26 * L, -5, top + 2.8, "steel", { ty: -PI2, r: -0.12 }));
+      dish(t, -0.38 * L, -5, top + 6, 3.4);
+      hazard(t, -0.5 * L, 0, z0 + 1, W - 4, PI2);
+      for (const sy of [-1, 1]) t.push(P_(BOXM(0.6, 2, 1, 0.1), -0.49 * L, sy * 7, z0 + 3.5, "red", { e: 1 }));
     }
-    t.push(P_(CYL(1.2, 1.6, 8), 0.34 * len, 0.55 * hw + 2, 7, "lightY", { e: 1 }));
-    t.push(P_(CYL(1.2, 1.6, 8), 0.34 * len, -0.55 * hw - 2, 7, "lightY", { e: 1 }));
-    return scaleN(t, 1.7);
+    return scaleN(t, 1.5);
   }
   function weaponRig(e, t, r, n, a) {
     const o = 7.4 + r, s = -2.1;
@@ -4112,7 +4156,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function jetNozzle(n, x, y, z, r, lit, glow) {
     n.push(P_(CYL(r, 1.8, 12), x, y, z, "gunmetal", { ty: -PI2 }));
     n.push(P_(CYL(0.8 * r, 0.4, 12), x - 1.8, y, z, "black", { ty: -PI2 }));
-    n.push(P_(CONE(0.75 * r, 0.1, lit ? 5 : 3.2, 10), x - 1.9, y, z, glow, { e: 1, ty: -PI2 }));
+    n.push(P_(CONE(0.75 * r, 0.1, 1 & lit ? 5 : 3.2, 10), x - 1.9, y, z, glow, { e: 1, ty: -PI2 }));
+  }
+  function jetGear(n, lit, nx, mx, my, topN, topM) {
+    if (!(2 & lit)) return;
+    for (const [gx, gy, top] of [[nx, 0, topN], [mx, my, topM], [mx, -my, topM]]) {
+      n.push(P_(CYL(0.26, top + 0.8, 6), gx, gy, -0.8, "steel"));
+      n.push(P_(CYL(0.85, 0.8, 10), gx, gy + 0.4, -0.8, "rubber", { tx: PI2 }));
+      n.push(P_(BOXM(1.4, 0.3, 1.6, 0.1), gx + 0.9, gy + (gy > 0 ? 0.9 : gy < 0 ? -0.9 : 0.8), top - 1.2, "body"));
+    }
   }
   function jetStore(n, x, y, z, len, rad, mat, tip) {
     n.push(P_(CYL(rad, len, 8), x, y, z, mat, { ty: PI2 }));
@@ -4135,6 +4187,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     jetNozzle(n, -12, 0, z, 1.35, lit, "tesla");
     n.push(P_(CYL(0.4, 0.5, 8), -6, 0, z - 2.2, "lightY", { e: 1 }));
+    jetGear(n, lit, 7, -4, 2.4, 1, 1.2);
     return n;
   }
   function jackalModel(lit) {
@@ -4153,6 +4206,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       n.push(P_(BOXM(8, 0.5, 0.25, 0.05), -4, sy * 1.9, z + 1.9, "rust"));
     }
     jetNozzle(n, -12.5, 0, z, 1.45, lit, "glow");
+    jetGear(n, lit, 7, -5, 2.5, 1.1, 1.2);
     return n;
   }
   function harrierModel(lit) {
@@ -4172,6 +4226,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     n.push(P_(BOXM(9, 2.6, 0.4, 0.1), -2, 0, z - 2.8, "darkmetal"));
     n.push(P_(CYL(0.45, 0.5, 8), -4, 0, z - 3.1, "lightY", { e: 1 }));
+    jetGear(n, lit, 8, -5.5, 5.8, 1.2, 2.1);
     return n;
   }
   function eagleModel(lit) {
@@ -4192,6 +4247,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     n.push(P_(BOXM(12, 3.2, 0.35, 0.1), -1, 0, z - 3.1, "darkmetal"));
     bolts(n, -1, 0, z - 2.7, 10, 0, 6, "steel");
+    jetGear(n, lit, 9, -4, 3, 1.1, 0.6);
     return n;
   }
   function locustModel(t) {
@@ -7063,14 +7119,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function unitBob(e) {
     if ("inf" === e.d.kind) return 0;
     const ph = 2.4 * (e.id % 7), T = S.time;
-    if (e.d.fly) return Math.sin(2.2 * T + ph) * 1.4;
+    if (e.d.fly) return (e.alt || 0) < 12 ? 0 : Math.sin(2.2 * T + ph) * 1.4;
     if (e.d.naval) return Math.sin(1.7 * T + ph) * 1.1 + (e.moving ? 0.35 * Math.sin(5.5 * T + ph) : 0);
     if ("hover" === e.key) return 1.6 + Math.sin(3.4 * T + ph) * 1.1;
     if (GAIT4[e.key]) return e.moving ? 0.9 * Math.abs(Math.sin((e.animT || 0) * Math.PI / 12)) : 0.35 * Math.sin(1.6 * T + ph);
     return Math.sin((e.moving ? 8 : 3) * T + ph) * (e.moving ? 1.6 : 0.55);
   }
   function unitFrame(e) {
-    if (e.d.fly) return 11 * S.time & 1;
+    if (e.d.fly) return 11 * S.time & 1 | (AIR_JET[e.key] && (e.alt || 0) < 16 ? 2 : 0);
     const t = e.animT || 0;
     let r = e.moving ? "inf" === e.d.kind ? t / 9 & 3 : GAIT4[e.key] ? t / 6 & 3 : t / 7 & 1 : 0;
     return "miner" === e.d.role && e.cargo > 340 && (r |= 2, (e.blue || 0) > 0.45 * e.cargo && (r |= 4)), r;
@@ -7839,9 +7895,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     bld.pads || (bld.pads = [null, null, null, null]);
     for (let i = 0; i < 4; i++) {
       const u = bld.pads[i];
-      if (!u || u.dead) return i;
+      if (!u || u.dead || u.padHome !== bld || u.padIdx !== i) return i;
     }
     return -1;
+  }
+  function airOrdered(u) {
+    "docked" === u.state || "land" === u.state ? u.state = "takeoff" : "takeoff" !== u.state && (u.state = null, releasePad(u));
   }
   function releasePad(u) {
     u.padHome && u.padHome.pads && null != u.padIdx && u.padHome.pads[u.padIdx] === u && (u.padHome.pads[u.padIdx] = null), u.padHome = null, u.padIdx = null;
@@ -7871,8 +7930,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function airPose(e, t, a0, z0) {
     if (t <= 0) return;
     const k = e.key, jet = AIR_JET[k], heli = AIR_HELI[k], yr = ((e.ang - a0 + 3 * Math.PI) % (2 * Math.PI) - Math.PI) / t, climb = ((e.alt || 0) - z0) / t;
-    let bT = clamp(yr * (jet ? 0.4 : heli ? 0.22 : "kirov" === k ? 0.12 : 0.2), -0.7, 0.7), pT = 0;
-    jet ? pT = clamp(8e-3 * climb, -0.35, 0.35) : heli || "disc" === k ? pT = e.moving ? -0.14 : 0 : "rocketeer" === k ? pT = e.moving ? -0.3 : 0 : 0;
+    const dk = "land" === e.state || "docked" === e.state || "takeoff" === e.state;
+    let bT = dk ? 0 : clamp(yr * (jet ? 0.4 : heli ? 0.22 : "kirov" === k ? 0.12 : 0.2), -0.7, 0.7), pT = 0;
+    dk ? pT = jet && "takeoff" === e.state && (e.alt || 0) > 12 ? 0.14 : jet && "land" === e.state ? 0.05 : 0 : jet ? pT = clamp(8e-3 * climb, -0.35, 0.35) : heli || "disc" === k ? pT = e.moving ? -0.14 : 0 : "rocketeer" === k ? pT = e.moving ? -0.3 : 0 : 0;
     e.bank = (e.bank || 0) + (bT - (e.bank || 0)) * Math.min(1, 3.5 * t), e.pitchA = (e.pitchA || 0) + (pT - (e.pitchA || 0)) * Math.min(1, 3 * t);
     if (jet && e.moving && (e.alt || 0) > 8 && (e.trailT = (e.trailT || 0) - t) <= 0) {
       e.trailT = 0.06;
@@ -7891,31 +7951,69 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const L = e.loit;
     L.a += 0.5 * e.d.speed * t / R, e.x = clamp(L.cx + R * Math.cos(L.a), 4, 2940), e.y = clamp(L.cy + R * Math.sin(L.a), 4, 2300), e.ang = L.a + Math.PI / 2, e.tang = e.ang, e.animT = (e.animT || 0) + 0.5 * e.d.speed * t, e.moving = true;
   }
+  var LAND_ALT = { chinook: 4.3, skyhauler: 4.6, gullet: 5.2, locust: 6.6, disc: 6.8, kirov: 5 };
+  function landAlt(e) {
+    return LAND_ALT[e.key] || 5.8;
+  }
+  function padHeading(b, i) {
+    const q = PAD_OFFSETS[i];
+    return Math.atan2(q[1], q[0]);
+  }
+  function dockNew(u, b) {
+    const i = freePad(b);
+    if (i < 0) return;
+    b.pads[i] = u, u.padHome = b, u.padIdx = i;
+    const pp = padWorldPos(b, i);
+    u.x = pp.x, u.y = pp.y, u.ang = u.tang = padHeading(b, i), u.alt = landAlt(u), u.reload = 0, u.state = u.d.ammo ? "docked" : "takeoff";
+  }
+  function airIdle(e, t) {
+    const r = e.d;
+    if (r.ammo && (e.idleT = (e.idleT || 0) + t) > 2.5) {
+      e.idleT = 0;
+      const b = dockAt(e);
+      if (b && null != e.padIdx) return e.state = "rtb", void (e.rtb = b);
+    }
+    AIR_JET[e.key] && (e.alt || 0) > 0.7 * r.alt ? airLoiter(e, t) : e.moving = false;
+  }
   function tickAirCore(e, t) {
     const r = e.d;
     e.rotorSpin = (e.rotorSpin || 0) + 18 * t;
     e.cool > 0 && (e.cool -= t), e.muzzle > 0 && (e.muzzle -= t);
-    const n = "land" === e.state ? 0 : r.transport && S.units.some((u) => "load" === u.order && u.target === e) ? 0 : r.alt;
-    if (e.alt = void 0 === e.alt ? r.alt : e.alt + clamp(n - e.alt, -70 * t, 70 * t), r.ammo && e.ammo <= 0 && "land" !== e.state && "rtb" !== e.state) {
-      const t2 = dockAt(e);
-      t2 && (e.state = "rtb", e.rtb = t2);
+    const st = e.state, dock = "land" === st || "docked" === st || "takeoff" === st, n = "land" === st || "docked" === st ? landAlt(e) : r.transport && S.units.some((u) => "load" === u.order && u.target === e) ? 0 : r.alt, rate = "land" === st ? 26 : "takeoff" === st ? 24 : 70;
+    if (e.alt = void 0 === e.alt ? r.alt : e.alt + clamp(n - e.alt, -rate * t, rate * t), r.ammo && e.ammo <= 0 && !dock && "rtb" !== st) {
+      const b = dockAt(e);
+      b && (e.state = "rtb", e.rtb = b);
     }
     if ("rtb" === e.state) {
-      const r2 = e.rtb;
-      if (r2 && !r2.dead) {
-        const pp = padWorldPos(r2, e.padIdx);
-        return flyTo(e, pp.x, pp.y, t), void (dist2(e.x, e.y, pp.x, pp.y) < 324 && (e.state = "land", e.reload = 6));
+      const b = e.rtb;
+      if (!b || b.dead || "idle" !== e.order && (!r.ammo || e.ammo > 0)) e.state = null, releasePad(e);
+      else {
+        if (null == e.padIdx) {
+          const b2 = dockAt(e);
+          b2 && (e.rtb = b2);
+        }
+        if (null == e.padIdx) return void (dist2(e.x, e.y, b.x, b.y) > 8100 ? flyTo(e, b.x, b.y, t) : airLoiter(e, t));
+        const pp = padWorldPos(e.rtb, e.padIdx);
+        return void (dist2(e.x, e.y, pp.x, pp.y) < 400 ? (e.state = "land", e.reload = r.ammo && e.ammo < r.ammo ? 6 : 0, e.loit = null) : flyTo(e, pp.x, pp.y, t));
       }
-      e.state = null, releasePad(e);
     }
-    if ("land" === e.state) {
-      e.reload -= t, e.reload <= 0 && (e.ammo = r.ammo);
-      const p = S.players[e.owner];
-      if (e.hp < e.maxhp && p) {
-        const cost = 0.25 * r.cost * t / 6;
-        p.credits >= cost && (p.credits -= cost, e.hp = Math.min(e.maxhp, e.hp + e.maxhp * t / 6));
+    if ("land" === e.state || "docked" === e.state || "takeoff" === e.state) {
+      const b = e.padHome;
+      if (!b || b.dead || null == e.padIdx) e.state = null, releasePad(e);
+      else {
+        const pp = padWorldPos(b, e.padIdx);
+        if (e.x += (pp.x - e.x) * Math.min(1, 5 * t), e.y += (pp.y - e.y) * Math.min(1, 5 * t), e.moving = false, "takeoff" !== e.state && (e.ang = angLerp(e.ang, padHeading(b, e.padIdx), 2.6 * t), e.tang = e.ang), "land" === e.state && e.alt <= landAlt(e) + 0.25 && (e.state = "docked", 2 === visAt(e.x, e.y) && S.fx.push({ kind: "ring", x: e.x, y: e.y, z: 4, s: 0.7, c: "#cfc6b0", t: 0, life: 0.55 })), "docked" === e.state) {
+          e.reload > 0 && (e.reload -= t) <= 0 && (e.ammo = r.ammo || 0);
+          const p = S.players[e.owner];
+          if (e.hp < e.maxhp && p) {
+            const cost = 0.25 * r.cost * t / 6;
+            p.credits >= cost && (p.credits -= cost, e.hp = Math.min(e.maxhp, e.hp + e.maxhp * t / 6));
+          }
+          const want = "attack" === e.order && e.target && !e.target.dead, resume = "idle" === e.order && e.lastTarget && !e.lastTarget.dead;
+          ("move" === e.order || "amove" === e.order || e.reload <= 0 && (want || resume)) && (!want && resume && (e.target = e.lastTarget, e.order = "attack"), e.state = "takeoff");
+        }
+        return void ("takeoff" === e.state && e.alt >= Math.min(r.alt, 26) - 0.5 && (e.state = null, releasePad(e)));
       }
-      return void (e.alt < 2 && e.reload <= 0 && (e.state = null, releasePad(e), e.lastTarget && !e.lastTarget.dead ? (e.target = e.lastTarget, e.order = "attack") : e.order = "idle"));
     }
     if (!("idle" !== e.order && "amove" !== e.order || e.target && canTarget(e, e.target) && e.target.owner !== e.owner)) {
       let t2 = null, n2 = 1e9;
@@ -7952,10 +8050,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       return;
     }
     if ("move" === e.order || "amove" === e.order) return flyTo(e, e.tx, e.ty, t), void (dist2(e.x, e.y, e.tx, e.ty) < 676 && !nextWaypoint(e) && (e.order = "idle"));
-    AIR_JET[e.key] && (e.alt || 0) > 0.7 * r.alt ? airLoiter(e, t) : e.moving = false;
+    airIdle(e, t);
   }
   function flyTo(e, t, r, n, a) {
-    e.loit = null;
+    e.loit = null, e.idleT = 0;
     const o = t - e.x, s = r - e.y, i = Math.hypot(o, s) || 1;
     if (a && i < 10) return void (e.moving = false);
     const l = e.d.speed, c = Math.min(l * n, i);
@@ -8065,6 +8163,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    airOrdered,
+    dockNew,
     unitBob,
     diamond,
     th2,
