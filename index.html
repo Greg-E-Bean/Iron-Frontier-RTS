@@ -520,7 +520,12 @@ body.sidebar #mmWrap{right:0;transform:none;width:var(--sbw,280px);box-sizing:bo
 body.sidebar #fpsPrompt,body.sidebar #deployPrompt,body.sidebar #rotatePrompt,body.sidebar #weaponPrompt{right:calc(var(--sbw,280px) + 10px)}
 body.sidebar #cardinfo{left:auto;right:calc(100% + 8px);bottom:auto;top:0;max-width:min(360px,calc(100vw - var(--sbw,280px) - 20px))}
 body.sidebar #hint{left:calc((100% - var(--sbw,280px))/2)}
+body.fps.sidebar #side{display:none}
+body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:auto}
 @media (max-height:500px){
+  body.sidebar #ctrls{grid-template-columns:repeat(6,1fr);gap:2px;padding:3px}
+  body.sidebar .cbtn[data-s]{font-size:0}
+  body.sidebar .cbtn[data-s]:after{content:attr(data-s);font-size:8px}
   body.sidebar .card{height:66px}
   body.sidebar .card canvas{transform:scale(.7);transform-origin:top center;top:1px}
   body.sidebar .card .nm{height:14px;font-size:7.5px}
@@ -592,8 +597,8 @@ body.sidebar #hint{left:calc((100% - var(--sbw,280px))/2)}
   <div id="cards"></div>
   <div id="ctrls">
     <div class="cbtn icon" id="bSel" title="Box Select"><svg class="ico"><use href="#i-select"></use></svg></div>
-    <div class="cbtn" id="bAll">ALL UNITS</div>
-    <div class="cbtn" id="bStop">STOP</div>
+    <div class="cbtn" id="bAll" data-s="ALL">ALL UNITS</div>
+    <div class="cbtn" id="bStop" data-s="STOP">STOP</div>
     <div class="cbtn icon" id="bDeselect" title="Deselect"><svg class="ico"><use href="#i-x"></use></svg></div>
     <div class="cbtn icon" id="bSell" title="Sell"><svg class="ico"><use href="#i-coin"></use></svg></div>
     <div class="cbtn icon" id="bRepair" title="Repair"><svg class="ico"><use href="#i-wrench"></use></svg></div>
