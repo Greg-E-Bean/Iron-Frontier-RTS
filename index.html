@@ -3560,15 +3560,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return fanCap(i, s, r, true), i;
   }
   function cylMesh(e, t, r, n) {
-    const a = circleProfile(e, Math.max(r || 22, 18)), o = wallMesh(a, 0, t, 1, 1, true);
+    const a = circleProfile(e, LOWPOLY ? Math.min(Math.max(r || 8, 4), 9) : Math.max(r || 22, 18)), o = wallMesh(a, 0, t, 1, 1, true);
     return false !== n && (fanCap(o, a, t, true), fanCap(o, a, 0, false)), o;
   }
   function coneMesh(e, t, r, n) {
-    const a = circleProfile(1, Math.max(n || 20, 18)), o = wallMesh(a, 0, r, e, t, true);
+    const a = circleProfile(1, LOWPOLY ? Math.min(Math.max(n || 8, 4), 9) : Math.max(n || 20, 18)), o = wallMesh(a, 0, r, e, t, true);
     return t > 0.05 && fanCap(o, a.map((e2) => [e2[0] * t, e2[1] * t]), r, true), e > 0.05 && fanCap(o, a.map((t2) => [t2[0] * e, t2[1] * e]), 0, false), o;
   }
   function domeMesh(e, t, r, n) {
-    r = Math.max(r || 22, 18), n = Math.max(n || 10, 8);
+    LOWPOLY ? (r = Math.min(Math.max(r || 8, 5), 9), n = 4) : (r = Math.max(r || 22, 18), n = Math.max(n || 10, 8));
     const a = [];
     for (let o = 0; o < n; o++) {
       const s = o / n * (Math.PI / 2), i = (o + 1) / n * (Math.PI / 2), l = Math.cos(s) * e, c = Math.cos(i) * e, d = Math.sin(s) * t, f = Math.sin(i) * t;
@@ -3640,7 +3640,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return filletPoly([[r, 0], [0.74 * r, 0.82 * n], [-0.5 * r, n], [-r, 0.78 * n], [-r, -0.78 * n], [-0.5 * r, -n], [0.74 * r, -0.82 * n]], 0.09 * Math.min(e, t), 4);
   }
   var MESHC = /* @__PURE__ */ new Map();
+  var LOWPOLY = 0;
+  var lowPoly = (f) => (...a) => {
+    const o = LOWPOLY;
+    LOWPOLY = 1;
+    try {
+      return f(...a);
+    } finally {
+      LOWPOLY = o;
+    }
+  };
   function meshOf(e, t) {
+    LOWPOLY && (e = "L" + e);
     let r = MESHC.get(e);
     return r || (r = t(), MESHC.set(e, r)), r;
   }
@@ -3971,6 +3982,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return e;
   }
   function crystalModel(e, t, v) {
+    if (!LOWPOLY) return lowPoly(crystalModel)(e, t, v);
     v = v || 0;
     const r = [], gem = 2 === e, cG = gem ? "tibB" : "tibG", cL = gem ? "tibBlit" : "tibGlit", frac = (t + 1) / 6, H = (k) => {
       const x = Math.sin(12.9898 * k + 78.233 * (v + 1) + e * 7.7) * 43758.5453;
@@ -3999,6 +4011,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return r;
   }
   function blossomModel(e) {
+    if (!LOWPOLY) return lowPoly(blossomModel)(e);
     const t = [], r = 2 === e ? "tibBlit" : "tibGlit", n = 2 === e ? "tibB" : "tibG";
     t.push(P_(CONE(15, 11, 7, 9), 0, 0, 0, "rock2")), t.push(P_(CONE(11, 7, 9, 8), 1.5, -1, 7, "rock2", { r: 0.7 })), t.push(P_(CONE(7, 3, 8, 8), -2, 2, 14, "rock2", { r: 1.9 })), t.push(P_(CONE(4.5, 1.2, 7, 7), 0.5, 0, 20, n)), t.push(P_(CONE(2.2, 0.3, 5, 6), 0.5, 0, 26, r, { e: 1 }));
     for (let e2 = 0; e2 < 5; e2++) {
@@ -5998,7 +6011,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return t;
   }
+  var LOWPROP = { tree: 1, grass: 1, flower: 1, rock: 1, scrub: 1, stone: 1, crater: 1 };
   function PROPMODEL(e, t) {
+    if (LOWPROP[e] && !LOWPOLY) return lowPoly(PROPMODEL)(e, t);
     const _a = getAssetModel(e);
     if (_a) return _a;
     return "tree" === e ? treeModel(t) : "grass" === e ? grassModel(t) : "flower" === e ? flowerModel(t) : "rock" === e ? rockModel(t) : "scrub" === e ? scrubModel(t) : "lamp" === e ? lampModel() : "fall" === e ? fallModel(t) : "tower" === e ? towerModel(t) : "crater" === e ? craterModel(t) : "wreck" === e ? wreckModel(t) : "rubble" === e ? rubbleModel(t) : "bridge" === e ? bridgeModel(t) : "monument" === e ? monumentModel(t) : "stall" === e ? stallModel(t) : stoneModel(t);
