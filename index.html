@@ -3231,7 +3231,27 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (r) return r;
     return S.units.find((t2) => t2.owner === e.id && !t2.dead) || { x: 1472, y: 1152 };
   }
+  function aiFreeDrill(e) {
+    const c = aiBaseCenter(e);
+    if (!c || !G.oreSpots) return null;
+    const refs = S.blds.filter((b) => b.owner === e.id && !b.dead && ("refinery" === b.key || "hive" === b.key || "conyard" === b.key));
+    let best = null, bd = 1e9;
+    for (const sp of G.oreSpots) {
+      if (!canPlace("orerig", sp.x - 1, sp.y - 1, e.id)) continue;
+      const wx = 32 * sp.x + 16, wy = 32 * sp.y + 16;
+      let d = dist(wx, wy, c.x, c.y);
+      for (const r of refs) d = Math.min(d, dist(wx, wy, r.x, r.y));
+      if (d > 1100) continue;
+      if (S.blds.some((b) => b.owner !== e.id && !b.dead && b.owner !== NEUTRAL && dist(wx, wy, b.x, b.y) < 520)) continue;
+      d < bd && (bd = d, best = sp);
+    }
+    return best;
+  }
   function aiFindSpot(e, t) {
+    if (BLD[t].drillRig) {
+      const sp = aiFreeDrill(e);
+      return sp ? [sp.x - 1, sp.y - 1] : null;
+    }
     const r = aiBaseCenter(e), n = BLD[t].size, a = Math.floor(r.x / 32), o = Math.floor(r.y / 32), s = "def1" === t || "def2" === t || "triturret" === t;
     for (let r2 = s ? 3 : 2; r2 < 12; r2++) {
       const i = [];
@@ -3258,7 +3278,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function aiNextBld(e) {
     const t = (t2) => countBld(e.id, t2), y = "yuri" === e.f.key, rk = "refinery", pz = aiPersonality(e);
-    return e.drain + 25 > e.power ? "power" : !y && t(rk) < 1 ? rk : y && t("hive") < 1 && !S.units.some((u) => u.owner === e.id && !u.dead && "hivetrans" === u.key) ? "hive" : t("barracks") < 1 ? "barracks" : t("factory") < 1 ? "factory" : !y && t(rk) < 2 ? rk : t("def1") < Math.round(2 * pz.defMul) && t("barracks") > 0 ? "def1" : t("aa") < 1 && enemyAir(e) ? "aa" : t("lab") < 1 ? "lab" : t("silo") < 1 && (y ? t(rk) >= 1 : t(rk) > 1) ? "silo" : t("repair") < 1 && e.credits > 2200 ? "repair" : t("super") < 1 && t("lab") > 0 && e.credits > 5200 && aiWantsSuper(e) ? "super" : t("airfield") < 1 && e.credits > 2500 ? "airfield" : t("navalyard") < 1 && e.credits > 2200 && aiHasCoast(e) ? "navalyard" : t("aa") < 3 && enemyAir(e) ? "aa" : !y && t(rk) < Math.round(5 * pz.refMul) && e.credits > 4e3 ? rk : y && t("hive") < Math.round(3 * pz.refMul) && e.credits > 4e3 ? "hive" : t("def2") < Math.round(4 * pz.defMul) && t("lab") > 0 ? "def2" : t("factory") < 4 && e.credits > 5e3 ? "factory" : t("barracks") < 4 && e.credits > 4e3 ? "barracks" : t("airfield") < 3 && e.credits > 4500 ? "airfield" : t("navalyard") < 3 && e.credits > 4500 && aiHasCoast(e) ? "navalyard" : t("def1") < Math.round(10 * pz.defMul) && e.credits > 3e3 ? "def1" : null;
+    return e.drain + 25 > e.power ? "power" : !y && t(rk) < 1 ? rk : y && t("hive") < 1 && !S.units.some((u) => u.owner === e.id && !u.dead && "hivetrans" === u.key) ? "hive" : t("barracks") < 1 ? "barracks" : t("factory") < 1 ? "factory" : !y && t(rk) < 2 ? rk : t("def1") < Math.round(2 * pz.defMul) && t("barracks") > 0 ? "def1" : t("aa") < 1 && enemyAir(e) ? "aa" : t("lab") < 1 ? "lab" : t("silo") < 1 && (y ? t(rk) >= 1 : t(rk) > 1) ? "silo" : aiFreeDrill(e) && t("orerig") < Math.min(4, 1 + Math.floor(S.time / 200)) && e.credits > 1500 && (t(rk) > 0 || t("hive") > 0) ? "orerig" : t("repair") < 1 && e.credits > 2200 ? "repair" : t("super") < 1 && t("lab") > 0 && e.credits > 5200 && aiWantsSuper(e) ? "super" : t("airfield") < 1 && e.credits > 2500 ? "airfield" : t("navalyard") < 1 && e.credits > 2200 && aiHasCoast(e) ? "navalyard" : t("aa") < 3 && enemyAir(e) ? "aa" : !y && t(rk) < Math.round(5 * pz.refMul) && e.credits > 4e3 ? rk : y && t("hive") < Math.round(3 * pz.refMul) && e.credits > 4e3 ? "hive" : t("def2") < Math.round(4 * pz.defMul) && t("lab") > 0 ? "def2" : t("factory") < 4 && e.credits > 5e3 ? "factory" : t("barracks") < 4 && e.credits > 4e3 ? "barracks" : t("airfield") < 3 && e.credits > 4500 ? "airfield" : t("navalyard") < 3 && e.credits > 4500 && aiHasCoast(e) ? "navalyard" : t("def1") < Math.round(10 * pz.defMul) && e.credits > 3e3 ? "def1" : null;
   }
   function enemyAir(e) {
     return S.units.some((t) => !t.dead && t.owner !== e.id && t.owner !== NEUTRAL && t.d.fly);
@@ -3435,6 +3455,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    aiFreeDrill,
+    aiFindSpot,
     aiBaseCenter,
     tickAI,
     aiMicro,
@@ -6730,6 +6752,129 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return n;
   }
+  function winRow(n, x0, x1, y, z, h, face, mat) {
+    const cnt = Math.max(1, Math.round(Math.abs(x1 - x0) / 7));
+    for (let k = 0; k < cnt; k++) {
+      const x = x0 + (x1 - x0) * (k + 0.5) / cnt;
+      if ("x" === face) n.push(P_(BOXM(0.5, 3, h, 0.1), y, x, z, mat || "glassdark")), n.push(P_(BOXM(0.8, 3.8, 0.5, 0.1), y, x, z - 0.5, "concrete"));
+      else n.push(P_(BOXM(3, 0.5, h, 0.1), x, y, z, mat || "glassdark")), n.push(P_(BOXM(3.8, 0.8, 0.5, 0.1), x, y, z - 0.5, "concrete"));
+    }
+  }
+  function gableRoof(n, cx, cy, z, w, d, h, mat, alongX) {
+    if (alongX) {
+      n.push(P_(WEDGE(w, d / 2, 0.2, h), cx, cy - d / 4, z, mat, { r: Math.PI / 2 })), n.push(P_(WEDGE(w, d / 2, 0.2, h), cx, cy + d / 4, z, mat, { r: -Math.PI / 2 }));
+    } else {
+      n.push(P_(WEDGE(w / 2, d, 0.2, h), cx - w / 4, cy, z, mat)), n.push(P_(WEDGE(w / 2, d, 0.2, h), cx + w / 4, cy, z, mat, { r: Math.PI }));
+    }
+  }
+  function workshopModel(r, l) {
+    const n = [], w = 0.8 * r, d = 0.56 * r, h = 16;
+    n.push(P_(BOXM(w, d, h, 0.6), 0, -0.06 * r, l, "neutral"));
+    for (let k = 0; k < 4; k++) {
+      const x = -w / 2 + w * (k + 0.5) / 4;
+      n.push(P_(WEDGE(w / 4, d, 0.5, 7), x, -0.06 * r, l + h, "roof", { r: 0 })), n.push(P_(BOXM(0.6, d - 1, 5.4, 0.1), x + w / 8 - 0.4, -0.06 * r, l + h + 0.4, "glassdark"));
+    }
+    n.push(P_(BOXM(14, 0.8, 11, 0.3), -0.12 * r, d / 2 - 0.06 * r, l, "darkmetal"));
+    for (let k = 0; k < 8; k++) n.push(P_(BOXM(13.4, 0.9, 0.35, 0.1), -0.12 * r, d / 2 - 0.06 * r + 0.1, l + 1.2 + 1.3 * k, "steel"));
+    n.push(P_(BOXM(15, 1.2, 1.4, 0.2), -0.12 * r, d / 2 - 0.06 * r, l + 11, "red"));
+    winRow(n, 0.1 * r, 0.36 * r, d / 2 - 0.06 * r + 0.3, l + 6, 4, "y");
+    n.push(P_(BOXM(0.24 * r, 0.3 * r, 9, 0.4), 0.36 * r, 0.24 * r, l, "concrete2")), n.push(P_(WEDGE(0.24 * r, 0.3 * r, 9.4, 7), 0.36 * r, 0.24 * r, l + 9, "rust"));
+    n.push(P_(CYL(1.6, 26, 10), -0.32 * r, -0.24 * r, l, "rust")), n.push(P_(CYL(1.9, 1.2, 10), -0.32 * r, -0.24 * r, l + 26, "darkmetal"));
+    for (let k = 0; k < 3; k++) n.push(P_(CYL(1.6, 3, 10), 0.18 * r + 3.4 * k, 0.38 * r, l, k % 2 ? "rust" : "steel"));
+    crate(n, -0.36 * r, 0.34 * r, l, 5, "wood", 0.2), crate(n, -0.3 * r, 0.36 * r, l, 4, "wood", 0.6), n.push(P_(BOXM(8, 3.6, 0.6, 0.2), 0.04 * r, 0.4 * r, l + 3.6, "wood")), n.push(P_(BOXM(0.6, 3, 3.6, 0.1), 0.04 * r - 3.6, 0.4 * r, l, "wood")), n.push(P_(BOXM(0.6, 3, 3.6, 0.1), 0.04 * r + 3.6, 0.4 * r, l, "wood"));
+    for (const [x, y] of [[-0.4 * r, 0.1 * r], [-0.4 * r, 0.18 * r]]) n.push(P_(CYL(2.4, 1.2, 12), x, y, l + 0.2, "rubber", { tx: Math.PI / 2 }));
+    n.push(P_(BOXM(0.8 * r, 0.8, 0.8, 0.2), 0, -0.06 * r, l + h - 0.4, "dark2"));
+    return n;
+  }
+  function terraceModel(r, l) {
+    const n = [], cols = ["#8e5a44", "#a9927a", "#6f7f8c"], w = 0.28 * r, d = 0.5 * r, h = 22;
+    for (let k = 0; k < 3; k++) {
+      const x = (-0.3 + 0.3 * k) * r;
+      n.push(P_(BOXM(w, d, h, 0.4), x, -0.06 * r, l, cols[k])), gableRoof(n, x, -0.06 * r, l + h, w + 2, d + 2, 9, "roof", true), n.push(P_(BOXM(2.4, 2.4, 6, 0.3), x + w * 0.3, -0.2 * r, l + h + 3, "#7a4a3a")), n.push(P_(CYL(0.15, 6, 5), x - w * 0.3, -0.1 * r, l + h + 6, "dark2"));
+      const fy = d / 2 - 0.06 * r;
+      for (const zz of [4.5, 13]) for (const xx of [-0.25, 0.25]) n.push(P_(BOXM(3.6, 0.5, 4.4, 0.1), x + xx * w, fy + 0.2, l + zz, "glassdark")), n.push(P_(BOXM(4.4, 0.9, 0.5, 0.1), x + xx * w, fy + 0.4, l + zz - 0.4, "white"));
+      n.push(P_(BOXM(3.4, 0.6, 7, 0.2), x, fy + 0.3, l, "#3b2a20")), n.push(P_(BOXM(4.6, 2, 0.8, 0.2), x, fy + 1.3, l, "concrete")), n.push(P_(BOXM(w - 2, 5, 0.4, 0.1), x, fy + 4.6, l, "green2")), n.push(P_(BOXM(w - 2, 0.8, 2.4, 0.4), x, fy + 7.2, l, "green2")), n.push(P_(BOXM(1.2, 1.2, 1.2, 0.2), x - w * 0.3, fy + 5, l + 0.4, "red"));
+    }
+    n.push(P_(BOXM(0.9 * r, 0.6, 1, 0.2), 0, -0.06 * r + d / 2, l + h - 1, "concrete2"));
+    return n;
+  }
+  function bridgeHutModel(r, l) {
+    const n = [];
+    n.push(P_(BOXM(20, 16, 11, 0.6), -2, 0, l, "concrete2")), gableRoof(n, -2, 0, l + 11, 22, 18, 6, "roof", false), winRow(n, -8, 4, 8.2, l + 5, 3.4, "y"), n.push(P_(BOXM(3, 0.6, 7, 0.2), 6, 8.1, l, "wood"));
+    n.push(P_(BOXM(6, 6, 8, 0.3), 7, -5, l + 11, "concrete2")), n.push(P_(BOXM(6.6, 6.6, 0.6, 0.2), 7, -5, l + 19, "roof"));
+    for (const [x, y] of [[4.2, -7.8], [9.8, -7.8], [4.2, -2.2], [9.8, -2.2]]) n.push(P_(CYL(0.3, 4, 6), x, y, l + 19.6, "darkmetal"));
+    n.push(P_(BOXM(7, 7, 0.8, 0.2), 7, -5, l + 23.6, "roof")), n.push(P_(CYL(0.7, 1, 8), 7, -5, l + 24.4, "lightY", { e: 1, a: { spin: 3 } }));
+    n.push(P_(BOXM(2, 2, 5, 0.3), 14, 6, l, "darkmetal")), n.push(P_(BOXM(20, 1, 1, 0.2), 24, 6, l + 4.4, "white", { a: { bob: 0.3, ba: 0.4 } }));
+    for (let k = 0; k < 4; k++) n.push(P_(BOXM(2.4, 1.1, 1.1, 0.2), 17 + 5 * k, 6, l + 4.35, "red", { a: { bob: 0.3, ba: 0.4 } }));
+    sandbagRing(n, 14, l);
+    n.push(P_(CYL(0.3, 10, 6), -12, -8, l, "darkmetal")), n.push(P_(BOXM(4, 0.2, 2.6, 0.05), -9.8, -8, l + 7, "red", { a: { orbit: 2.4, amp: 0.3, pvx: -12, pvy: -8 } }));
+    return n;
+  }
+  function oilDerrickModel(r, l) {
+    const n = [];
+    ell(n, 4, 6, l - 0.2, 9, 7, 0.3, "black");
+    const px = -6, pb = { bob: 1.4, ba: 3 };
+    n.push(P_(BOXM(4, 4, 1.4, 0.3), px, 0, l, "concrete2")), n.push(P_(BOXM(2.2, 3.6, 13, 0.3), px, 0, l + 1.4, "darkmetal"));
+    n.push(P_(BOXM(26, 2, 2.2, 0.3), px, 0, l + 14, "#c9a227", { a: pb })), n.push(P_(BOXM(4.4, 3.2, 7, 0.4), px + 13, 0, l + 10, "#c9a227", { a: pb })), n.push(P_(CYL(0.3, 11, 6), px + 14.5, 0, l + 1, "steel", { a: { bob: 1.4, ba: 2.2 } })), n.push(P_(BOXM(5, 5, 5, 0.5), px - 12, 0, l + 11, "darkmetal", { a: pb })), n.push(P_(BOXM(7, 5, 5, 0.6), px - 9, 0, l, "armor3")), n.push(P_(CYL(2.4, 1, 10), px - 9, -3, l + 2.4, "darkmetal", { tx: Math.PI / 2, a: { spin: 3 } }));
+    n.push(P_(CYL(2, 3, 10), px + 14.5, 0, l, "darkmetal"));
+    n.push(P_(CYL(9, 14, 18), 14, -12, l, "#b6ae9c")), n.push(P_(DOME(9, 2.4, 18), 14, -12, l + 14, "#9c9484")), n.push(P_(BOXM(0.6, 18.2, 0.5, 0.1), 14, -12, l + 7, "red", { r: 0.8 }));
+    for (let k = 0; k < 4; k++) n.push(P_(BOXM(0.4, 0.4, 14, 0.1), 14 + 9 * Math.cos(k * 1.57), -12 + 9 * Math.sin(k * 1.57), l, "darkmetal"));
+    n.push(P_(CYL(0.7, 20, 8), px + 14.5, 1, l + 2, "steel", { ty: 1.2, r: -0.9 }));
+    pipeRun(n, px + 14.5, 1, 14, -3, l + 1.4, 0.7, "steel");
+    n.push(P_(BOXM(8, 5, 6, 0.4), -16, 14, l, "concrete")), n.push(P_(WEDGE(8, 5, 0.3, 2.4), -16, 14, l + 6, "rust")), n.push(P_(BOXM(1.6, 0.4, 2.4, 0.1), -16, 16.6, l + 2, "glassdark"));
+    for (let k = 0; k < 3; k++) barrel(n, -4 + 3 * k, 16, l);
+    return n;
+  }
+  function paraHangarModel(r, l) {
+    const n = [], hw = 0.3 * r, hd = 0.38 * r;
+    n.push(P_(CYL(hw, hd * 2, 24), -hd, 0, l - 0.6, "armor2", { ty: Math.PI / 2 }));
+    for (let k = 0; k < 7; k++) n.push(P_(CYL(hw + 0.35, 1, 24), -hd + 1 + k * (hd * 2 - 2) / 6, 0, l - 0.6, "armor3", { ty: Math.PI / 2 }));
+    n.push(P_(CYL(hw - 0.6, 0.6, 24), hd - 0.2, 0, l - 0.6, "dark2", { ty: Math.PI / 2 }));
+    n.push(P_(CYL(hw + 0.2, 0.8, 24), -hd - 0.6, 0, l - 0.6, "armor3", { ty: Math.PI / 2 }));
+    for (let k = 0; k < 3; k++) n.push(P_(BOXM(0.6, 2.8, 2.2, 0.1), -hd - 0.9, (k - 1) * 6, l + 3, "glass", { e: 1 }));
+    n.push(P_(CYL(1.8, 14, 10), hd - 10, 0, l + 2.4, "white", { ty: Math.PI / 2 })), n.push(P_(CONE(1.8, 0.4, 3.6, 10), hd + 4, 0, l + 2.4, "white", { ty: Math.PI / 2 })), n.push(P_(BOXM(3, 16, 0.4, 0.1), hd - 3, 0, l + 3.2, "white")), n.push(P_(BOXM(1.6, 0.3, 2.4, 0.1), hd + 0.6, 0, l + 3.6, "glassdark"));
+    n.push(P_(BOXM(0.12 * r, 0.12 * r, 6, 0.5), 0.4 * r, 0.36 * r, l, "concrete2")), n.push(P_(BOXM(0.13 * r, 0.13 * r, 1, 0.2), 0.4 * r, 0.36 * r, l + 6, "roof")), n.push(P_(BOXM(0.12 * r + 0.2, 1.2, 2, 0.1), 0.4 * r, 0.36 * r + 0.06 * r, l + 3, "glass", { e: 1 }));
+    n.push(P_(CYL(0.25, 14, 5), -0.42 * r, 0.4 * r, l, "darkmetal")), n.push(P_(CONE(1.4, 0.5, 5, 8), -0.42 * r, 0.4 * r, l + 13, "lightY", { ty: Math.PI / 2, a: { orbit: 0.8, amp: 0.6, pvx: -0.42 * r, pvy: 0.4 * r } }));
+    for (let k = 0; k < 3; k++) {
+      crate(n, 0.3 * r + 5 * k, -0.4 * r, l, 4, "olive", 0.3 * k);
+      n.push(P_(DOME(1.8, 1.4, 8), 0.3 * r + 5 * k, -0.4 * r, l + 4, "white"));
+    }
+    return n;
+  }
+  function empSpireModel(r, l) {
+    const n = [];
+    n.push(P_(CYL(0.3 * r, 3, 16), 0, 0, l, "concrete2"));
+    for (let k = 0; k < 4; k++) {
+      const a = k * 1.571 + 0.78, x = Math.cos(a) * 0.26 * r, y = Math.sin(a) * 0.26 * r;
+      n.push(P_(BOXM(5, 5, 7, 0.4), x, y, l + 3, "armor3")), n.push(P_(CYL(1.2, 3, 8), x, y, l + 10, "tesla", { e: 1 })), strut3(n, x, y, l + 3, 0, 0, l + 44, 0.6, "darkmetal");
+    }
+    n.push(P_(CYL(4, 40, 12), 0, 0, l + 3, "darkmetal"));
+    for (let k = 0; k < 5; k++) n.push(P_(CYL(7.5 - 0.8 * k, 1.4, 16), 0, 0, l + 10 + 7 * k, "tesla", { e: 1, a: { bob: 1.2 + 0.25 * k, ba: 0.8 } }));
+    n.push(P_(CYL(5, 3, 14), 0, 0, l + 43, "steel")), n.push(P_(DOME(4.6, 4, 14), 0, 0, l + 46, "crystal", { e: 1 })), n.push(P_(BOXM(12, 0.6, 0.6, 0.1), 0, 0, l + 48, "tesla", { e: 1, a: { spin: 2.4 } })), n.push(P_(BOXM(0.6, 12, 0.6, 0.1), 0, 0, l + 48, "tesla", { e: 1, a: { spin: 2.4 } }));
+    return n;
+  }
+  function rogueDenModel(r, l) {
+    const n = [];
+    n.push(P_(BOXM(20, 14, 10, 0.3), -8, -6, l, "rust")), n.push(P_(WEDGE(21, 15, 1, 4), -8, -6, l + 10, "steel"));
+    for (let k = 0; k < 5; k++) n.push(P_(BOXM(0.3, 14.2, 10, 0.05), -17 + 4.5 * k, -6, l, "darkmetal"));
+    n.push(P_(BOXM(6, 0.4, 7, 0.1), -4, 1.2, l, "black")), n.push(P_(BOXM(8, 0.3, 3, 0.1), -12, 1.3, l + 5, "#b0402a"));
+    n.push(P_(BOXM(12, 10, 8, 0.3), 12, -10, l, "#6f6555")), n.push(P_(WEDGE(13, 11, 0.4, 3), 12, -10, l + 8, "rust"));
+    n.push(P_(BOXM(16, 10, 0.3, 0.05), 6, 8, l + 8, "#7a8a5a", { tx: 0.12 }));
+    for (const [x, y] of [[-1, 3.5], [13, 3.5], [-1, 12.5], [13, 12.5]]) n.push(P_(CYL(0.3, 8, 5), x, y, l, "wood"));
+    ell(n, 6, 8, l, 3, 3, 0.6, "rock3");
+    for (let k = 0; k < 6; k++) {
+      const a = k * 1.047;
+      n.push(P_(DOME(0.8, 0.6, 6), 6 + Math.cos(a) * 3, 8 + Math.sin(a) * 3, l, "rock2"));
+    }
+    n.push(P_(CONE(1.8, 0.2, 3.6, 6), 6, 8, l + 0.5, "glow", { e: 1, a: { bob: 3.4, ba: 0.35 } })), n.push(P_(CONE(1.1, 0.1, 2.6, 6), 6.6, 7.6, l + 0.5, "lightY", { e: 1, a: { bob: 4.1, ba: 0.4 } }));
+    for (let k = 0; k < 4; k++) barrel(n, -16 + 3 * k, 10, l);
+    crate(n, 16, 6, l, 5, "wood", 0.4);
+    n.push(P_(BOXM(12, 5.4, 4, 0.8), 12, 14, l, "#5a2a24")), n.push(P_(BOXM(6, 4.8, 2.4, 0.6), 13, 14, l + 4, "#5a2a24")), n.push(P_(BOXM(4, 4.8, 1.8, 0.2), 10, 14, l + 4.2, "glassdark"));
+    for (const x of [8, 16]) for (const y of [11.6, 16.4]) n.push(P_(CYL(1.4, 1.2, 10), x, y, l + 0.6, "rubber", { tx: Math.PI / 2 }));
+    n.push(P_(CYL(0.2, 9, 5), -17, -12, l + 10, "darkmetal")), n.push(P_(BOXM(0.2, 4, 2.4, 0.05), -17, -10, l + 16, "black", { a: { orbit: 2, amp: 0.3, pvx: -17, pvy: -12 } }));
+    return n;
+  }
+  var CIVX = { civ7: workshopModel, civ9: terraceModel, bridgehut: bridgeHutModel, oilDerek: oilDerrickModel, paradropHangar: paraHangarModel, empTower: empSpireModel, rogueDen: rogueDenModel };
   var _bFac = null;
   function BMODEL_(e, t, dep, cn, rot, prod, doorT = 0) {
     cn = cn || 0;
@@ -6738,6 +6883,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const s = 0.3 * r, i = 0.24 * r, l = 3.6, c = l + s;
     const riseBucket = hasStagedBuild(e) ? Math.round(4 * Math.max(0, Math.min(1, +dep || 0))) : 4;
     if ("orerig" === e) return oreRigModel(t || "allied", l);
+    if (CIVX[e]) return CIVX[e](r, l, t);
     switch (e) {
       case "triturret": {
         const fac = a ? "allied" : o ? "soviet" : "yuri", mat = a ? "armor" : o ? "concrete2" : "carapace", accent = a ? "armor3" : o ? "rust" : "carapace2", plw = 0.92 * r, pld = 0.62 * r, ph = 0.14 * r, rs = 16, taper = 0.92;
@@ -8917,7 +9063,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function garrisonable(e, t) {
     return e && !e.dead && e.d.civ && (e.owner === NEUTRAL || e.owner === t) && (e.garrison || []).length < garrisonCap(e);
   }
-  var FPS_ROOMY = { airfield: 1, barracks: 1, conyard: 1, factory: 1, hive: 1, lab: 1, navalyard: 1, power: 1, refinery: 1, repair: 1, silo: 1, super: 1 };
+  var FPS_ROOMY = { paradropHangar: 1, empTower: 1, rogueDen: 1, bridgehut: 1, oilDerek: 1, airfield: 1, barracks: 1, conyard: 1, factory: 1, hive: 1, lab: 1, navalyard: 1, power: 1, refinery: 1, repair: 1, silo: 1, super: 1 };
   function fpsEnterable(e) {
     return !(!e || e.dead) && (!!e.d.civ || !!FPS_ROOMY[e.key]);
   }
@@ -11313,6 +11459,132 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       });
     }
   }
+  var CIV_INT = {
+    civ1: (c) => {
+      const { box, cyl, sph, emisMat, metalMat, im, half: H, floorZ: F, anims } = c;
+      box(20, 8, 8, -H + 14, -H + 6, F, 4474679, im.trim);
+      const sc = [];
+      for (let k = 0; k < 3; k++) sc.push(box(5, 0.6, 4, -H + 8 + 6 * k, -H + 2.6, F + 9, 8971743, emisMat(8971743)));
+      anims.push((t) => sc.forEach((m, k) => m.material.emissiveIntensity = 0.5 + 0.35 * Math.sin(3 * t + k * 1.7)));
+      for (let k = 0; k < 2; k++) box(18, 7, 4, H - 11, -10 + 16 * k, F + 3, 6053456, im.trim), box(18, 7, 4, H - 11, -10 + 16 * k, F + 12, 6053456, im.trim);
+      for (const [x, z] of [[H - 19, -13], [H - 3, -13], [H - 19, 9], [H - 3, 9]]) cyl(0.5, 20, x, z, F, 3355443, metalMat(3355443));
+      box(14, 10, 6, -8, 6, F, 6309413, im.trim);
+      box(12, 8, 0.3, -8, 6, F + 6.1, 12893352);
+      for (let k = 0; k < 3; k++) box(14, 4, 2.4, -H + 11, H - 5, F + 2.4 * k, 7236176, im.trim);
+      const rack = box(1.4, 14, 14, -H + 1.2, -4, F + 4, 5263440, im.trim);
+      for (let k = 0; k < 5; k++) box(0.8, 1, 11, -H + 2, -10 + 3 * k, F + 5, 1710618, metalMat(1710618));
+    },
+    civ7: (c) => {
+      const { box, cyl, sph, emisMat, metalMat, propMat, im, half: H, floorZ: F, anims, g } = c;
+      const lift = [box(30, 20, 1.2, 0, -4, F, 15251968, metalMat(15251968)), box(22, 10, 5, 0, -4, F + 3.4, 9127187, metalMat(9127187)), box(13, 9, 4, -1, -4, F + 8.4, 9127187, metalMat(9127187)), box(12.4, 8.6, 3, -1, -4, F + 8.6, 9420504, im.trim)];
+      for (const [x, z] of [[-7, -9.6], [7, -9.6], [-7, 1.6], [7, 1.6]]) lift.push(cyl(2.2, 1.4, x, z, F + 1.4, 1315860));
+      for (const [x, z] of [[-14, -13], [14, -13], [-14, 5], [14, 5]]) cyl(0.8, 18, x, z, F, 3355443, metalMat(3355443));
+      const base = lift.map((m) => m.position.y);
+      anims.push((t) => {
+        const u = 7 * Math.max(0, Math.min(1, 0.5 + 0.8 * Math.sin(0.35 * t)));
+        lift.forEach((m, k) => m.position.y = base[k] + u);
+      });
+      box(24, 7, 8, -H + 16, H - 6, F, 7228205, im.trim);
+      for (let k = 0; k < 6; k++) box(1, 1, 4, -H + 8 + 3 * k, H - 6, F + 8, 3355443, metalMat(3355443));
+      const sp = sph(1, -H + 14, H - 6, F + 9.5, 16775388, emisMat(16775388));
+      anims.push((t) => {
+        sp.visible = Math.sin(13 * t) > 0, sp.scale.setScalar(0.5 + Math.random());
+      });
+      for (let k = 0; k < 4; k++) cyl(3.4, 1.6, H - 6, H - 6, F + 1.6 * k, 1315860);
+      for (let k = 0; k < 3; k++) cyl(2.4, 7, H - 6 - 5 * k, -H + 5, F, k % 2 ? 9127187 : 3947580, metalMat(3947580));
+      box(4, 16, 26, -H + 2, -10, F, 4868682, im.trim);
+      for (let k = 0; k < 4; k++) box(4, 16, 0.6, -H + 2.4, -10, F + 6 * k, 6316646);
+    },
+    civ9: (c) => {
+      const { box, cyl, sph, emisMat, metalMat, propMat, im, half: H, floorZ: F, anims, g } = c;
+      const rug = box(26, 20, 0.3, -10, -8, F, 7084852);
+      box(20, 7, 6, -10, -18, F, 4876938, im.trim), box(20, 2, 5, -10, -21, F + 6, 4876938, im.trim);
+      box(7, 7, 6, -24, -6, F, 4876938, im.trim);
+      box(10, 6, 3.6, -10, -7, F, 6309413, im.trim);
+      const tv = box(14, 1, 8, -10, 4, F + 6, 1052688);
+      const scr = box(12, 0.4, 6.6, -10, 3.4, F + 6.7, 9420504, emisMat(9420504));
+      box(16, 5, 6, -10, 5, F, 4868682, im.trim);
+      anims.push((t) => {
+        scr.material.emissiveIntensity = 0.35 + 0.3 * Math.abs(Math.sin(2.1 * t) * Math.sin(5.3 * t)), scr.material.color.setHSL(0.55 + 0.1 * Math.sin(0.7 * t), 0.4, 0.6);
+      });
+      box(14, 9, 6, H - 14, -12, F, 6309413, im.trim);
+      for (const [x, z] of [[H - 20, -12], [H - 8, -12], [H - 14, -18], [H - 14, -6]]) box(3.4, 3.4, 4, x, z, F, 4868682, im.trim);
+      box(6, 22, 9, H - 4, 12, F, 13421772, im.trim);
+      box(6, 8, 16, H - 4, -H + 6, F, 14277081, metalMat(14277081));
+      for (let k = 0; k < 3; k++) box(4, 22, 0.6, -H + 2, H - 16, F + 6 + 7 * k, 6309413), box(4, 20, 5, -H + 2, H - 16, F + 6.6 + 7 * k, [9127187, 3947580, 7361622][k]);
+      cyl(0.4, 18, -24, 12, F, 3355443, metalMat(3355443));
+      const lamp = sph(2, -24, 12, F + 18, 16767134, emisMat(16767134));
+      anims.push((t) => lamp.material.emissiveIntensity = 0.8 + 0.05 * Math.sin(9 * t));
+    },
+    paradropHangar: (c) => {
+      const { box, cyl, sph, emisMat, metalMat, propMat, im, half: H, floorZ: F, anims } = c;
+      for (let k = 0; k < 3; k++) for (let j = 0; j < 2; j++) box(8, 8, 6, -H + 8 + 10 * k, -H + 8, F + 6 * j, 7361622, im.trim);
+      for (let k = 0; k < 4; k++) sph(3, -H + 8 + 8 * k, -H + 18, F + 22, 15592941, propMat(15592941)), cyl(0.1, 8, -H + 8 + 8 * k, -H + 18, F + 14, 3355443);
+      for (const sx of [-1, 1]) box(3, 30, 4, sx * (H - 6), 4, F, 5263440, im.trim);
+      box(2, 6, 12, H - 2, -18, F + 8, 3355443, im.trim);
+      const lr = sph(1.4, H - 3, -20, F + 18, 16734780, emisMat(16734780)), lg = sph(1.4, H - 3, -16, F + 18, 4250176, emisMat(4250176));
+      anims.push((t) => {
+        const on = Math.sin(1.2 * t) > 0;
+        lr.visible = !on, lg.visible = on;
+      });
+      box(16, 1, 10, 0, -H + 1, F + 14, 12893352, im.trim);
+      for (let k = 0; k < 5; k++) box(2, 0.6, 2, -5 + 2.5 * k, -H + 1.6, F + 16 + k % 2 * 3, 16734780);
+    },
+    empTower: (c) => {
+      const { box, cyl, sph, emisMat, metalMat, im, half: H, floorZ: F, rh, anims } = c;
+      const core = cyl(5, rh - 6, 0, -6, F, 9427199, emisMat(9427199));
+      const rings = [];
+      for (let k = 0; k < 4; k++) rings.push(cyl(8, 1.2, 0, -6, F + 8 + 10 * k, 9427199, emisMat(9427199)));
+      c.cols.length -= 4;
+      anims.push((t) => {
+        core.material.emissiveIntensity = 0.6 + 0.4 * Math.abs(Math.sin(4 * t)), rings.forEach((m, k) => {
+          m.position.y = F + 8 + 10 * k + 2 * Math.sin(2 * t + k);
+        });
+      });
+      for (let k = 0; k < 4; k++) {
+        const a = k * 1.571 + 0.78;
+        box(6, 6, 14, Math.cos(a) * (H - 10), -6 + Math.sin(a) * (H - 14), F, 3355443, im.trim);
+        sph(1.2, Math.cos(a) * (H - 10), -6 + Math.sin(a) * (H - 14), F + 14, 9427199, emisMat(9427199));
+      }
+      for (const sx of [-1, 1]) box(12, 6, 9, sx * 16, H - 8, F, 2960939, im.trim), box(10, 0.5, 5, sx * 16, H - 11.2, F + 9.5, 9427199, emisMat(9427199));
+    },
+    rogueDen: (c) => {
+      const { box, cyl, sph, emisMat, metalMat, propMat, im, half: H, floorZ: F, anims } = c;
+      cyl(3, 6, 0, -4, F, 3947580, metalMat(3947580));
+      const fire2 = sph(2.4, 0, -4, F + 5, 16753920, emisMat(16753920));
+      anims.push((t) => {
+        fire2.scale.setScalar(0.8 + 0.3 * Math.random()), fire2.material.emissiveIntensity = 0.7 + 0.4 * Math.random();
+      });
+      for (let k = 0; k < 3; k++) box(14, 7, 2, -H + 10, -H + 8 + 10 * k, F, 6572845, im.trim);
+      box(12, 12, 6, H - 12, -H + 12, F, 6309413, im.trim);
+      for (let k = 0; k < 4; k++) box(2.4, 3.4, 0.2, H - 15 + 2 * k, -H + 12, F + 6.1, [16777215, 13378082, 16753920, 16777215][k]);
+      for (const [x, z] of [[H - 12, -H + 4], [H - 4, -H + 12]]) box(3, 3, 4, x, z, F, 4868682, im.trim);
+      for (let k = 0; k < 5; k++) cyl(2, 5, -H + 5 + 4.5 * k, H - 5, F, k % 2 ? 9127187 : 3947580, metalMat(3947580));
+      box(30, 0.6, 14, 4, -H + 0.6, F + 10, 13378082, emisMat(13378082)).material.emissiveIntensity = 0.25;
+      box(1.2, 14, 12, H - 1.2, 8, F + 4, 5263440, im.trim);
+    },
+    bridgehut: (c) => {
+      const { box, cyl, sph, emisMat, metalMat, im, half: H, floorZ: F, anims } = c;
+      box(12, 6, 7, -H + 8, -H + 5, F, 5263440, im.trim);
+      const rad = box(4, 3, 3, -H + 6, -H + 5, F + 7, 3355443, metalMat(3355443));
+      const led = sph(0.6, -H + 8, -H + 4, F + 10.5, 4250176, emisMat(4250176));
+      anims.push((t) => led.visible = Math.sin(5 * t) > 0);
+      box(4, 4, 5, H - 6, -H + 6, F, 6309413, im.trim);
+      cyl(2.4, 6, H - 6, H - 6, F, 3947580, metalMat(3947580));
+    },
+    oilDerek: (c) => {
+      const { box, cyl, sph, emisMat, metalMat, im, half: H, floorZ: F, anims, g } = c;
+      for (let k = 0; k < 3; k++) cyl(2, H * 1.6, -H + 6 + 10 * k, 0, F + 3, 6316646, metalMat(6316646)), c.cols.pop();
+      box(22, 8, 10, 0, -H + 6, F, 3355443, im.trim);
+      const gs = [];
+      for (let k = 0; k < 4; k++) gs.push(box(3, 0.5, 3, -8 + 5.4 * k, -H + 10.3, F + 11, 16766814, emisMat(16766814)));
+      anims.push((t) => gs.forEach((m, k) => m.material.emissiveIntensity = 0.4 + 0.4 * Math.abs(Math.sin(1.3 * t + k))));
+      const wh = cyl(4, 1, H - 8, H - 8, F + 12, 13378082, metalMat(13378082));
+      anims.push((t) => wh.rotation.y = 0.8 * t);
+      cyl(1, 12, H - 8, H - 8, F, 3355443, metalMat(3355443));
+      for (let k = 0; k < 3; k++) cyl(3, 8, -H + 6 + 7 * k, H - 8, F, 1315860);
+    }
+  };
   function furnishInterior(g, bld, half, floorZ, tall) {
     const ro = -1e4, im = ensureInteriorMats(), cols = [];
     const propMat = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8, metalness: 0.05 }), metalMat = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.4, metalness: 0.7 }), emisMat = (c) => new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.85, roughness: 0.4 });
@@ -11410,6 +11682,26 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const a = Math.PI / 3 * i, cx = 8 * Math.cos(a), cz = 8 * Math.sin(a);
         cyl(0.5, 4, cx, cz, floorZ + 28, 2631203, metalMat(2631203)), cyl(0.7, 2, cx, cz, floorZ + 32, 15774800, emisMat(15774800));
       }
+    } else if (CIV_INT[key]) {
+      {
+        const WB = { civ1: [5067832, 9087064, 4012609], civ7: [7031354, 12088115, 3813674], civ9: [9203546, 14540253, 5913642], paradropHangar: [4871520, 9152703, 3552822], empTower: [3095112, 9427199, 2105376], rogueDen: [5913130, 13378082, 3155231], bridgehut: [5918792, 11119017, 3552822], oilDerek: [3815994, 16766814, 2631720] }[key];
+        if (WB) {
+          const H = half, rhh = tall ? ROOM_H : ROOM_H_SHORT;
+          for (const [w, ry, px, pz] of [[H * 2 - 2, 0, 0, -H + 0.5], [H * 2 - 2, Math.PI / 2, -H + 0.5, 0], [H * 2 - 2, Math.PI / 2, H - 0.5, 0]]) {
+            const m = new THREE.Mesh(new THREE.PlaneGeometry(w, 18), new THREE.MeshStandardMaterial({ color: WB[0], roughness: 0.8, metalness: 0.1, side: THREE.DoubleSide }));
+            m.rotation.y = ry, m.position.set(px, floorZ + 9, pz), m.renderOrder = ro + 1, g.add(m);
+            const st = new THREE.Mesh(new THREE.PlaneGeometry(w, 1), new THREE.MeshStandardMaterial({ color: WB[1], roughness: 0.6, side: THREE.DoubleSide }));
+            st.rotation.y = ry, st.position.set(px + (ry ? px < 0 ? 0.1 : -0.1 : 0), floorZ + 18.4, pz + (ry ? 0 : 0.1)), st.renderOrder = ro + 1, g.add(st);
+          }
+          const fl = new THREE.Mesh(new THREE.PlaneGeometry(H * 2 - 6, H * 2 - 6), new THREE.MeshStandardMaterial({ color: WB[2], roughness: 0.9 }));
+          fl.rotation.x = -Math.PI / 2, fl.position.set(0, floorZ + 0.4, 0), fl.renderOrder = ro + 1, g.add(fl);
+          for (let k = -1; k <= 1; k++) {
+            const bm = new THREE.Mesh(new THREE.BoxGeometry(H * 2, 2.4, 2.4), new THREE.MeshStandardMaterial({ color: WB[2], roughness: 0.7 }));
+            bm.position.set(0, floorZ + rhh - 2, k * H * 0.6), bm.renderOrder = ro + 1, g.add(bm);
+          }
+        }
+      }
+      CIV_INT[key]({ g, half, floorZ, rh: tall ? ROOM_H : ROOM_H_SHORT, box, cyl, sph, emisMat, metalMat, propMat, im, anims: g.userData.anims || (g.userData.anims = []), cols });
     } else if (tall) {
       for (const [px, pz] of [[-half + 13, -half + 13], [half - 13, -half + 13], [-half + 13, half - 13], [half - 13, half - 13]]) box(8, 8, ROOM_H - 4, px, pz, floorZ, 4210752, im.trim);
       box(16, 10, 10, 0, -half + 14, floorZ, 5333596), box(14, 20, 3, 0, half - 16, floorZ, 6250335);
