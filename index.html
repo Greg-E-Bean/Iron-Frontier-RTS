@@ -4668,7 +4668,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function bastionModel(e, fac) {
     const t = [], r = 40, n = 16, hz = 5, hh = 6.5, top = hz + hh;
     "yuri" === fac ? (legWalker(t, r, n, 9.5, e, 8), ell(t, 0, 0, hz + 0.4, 0.46 * r, 0.5 * n + 1.5, 2.4, "flesh", { tx: Math.PI }), [0, 1, 2, 3, 4].forEach((k) => ell(t, (0.34 - 0.17 * k) * r, 0, hz, 0.12 * r, 0.5 * n + 1.8, hh + 0.4, k % 2 ? "carapace" : "carapace2"))) : (trackUnit(t, r, n, 9, e, { trkW: 8, wheels: 6 }), t.push(P_(SLAB(hullProfile(0.92 * r, n + 2, fac), hh, 1.8, "bstH" + (fac || "")), 0, 0, hz, "armor2")));
-    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) if ("yuri" === fac) {
+      const x0 = sx * 0.36 * r, y0 = sy * 0.34 * n, x1 = sx * 0.5 * r, y1 = sy * 0.56 * n, z1 = top + 2.6, x2 = sx * 0.6 * r, y2 = sy * 0.5 * n;
+      t.push(P_(DOME(2.4, 2, 9), x0, y0, top - 2.2, "flesh"));
+      taper3(t, x0, y0, top - 1, x1, y1, z1, 1.7, 1.2, "carapace");
+      taper3(t, x0, y0 + sy * 0.3, top - 0.2, x1, y1 + sy * 0.3, z1 + 0.7, 0.24, 0.2, "psi", { e: 1 });
+      t.push(P_(DOME(1.4, 1.2, 8), x1, y1, z1 - 0.6, "flesh"));
+      t.push(P_(CONE(0.7, 0.06, 2.6, 6), x1, y1, z1 + 0.6, "bone", { ty: 0.4 * sx }));
+      taper3(t, x1, y1, z1, x2, y2, 2.4, 1.15, 0.55, "carapace2");
+      t.push(P_(DOME(1.8, 1, 8), x2, y2, 0.6, "flesh"));
+      for (const a of [-0.7, 0, 0.7]) t.push(P_(CONE(0.5, 0.05, 2.6, 6), x2 + Math.cos(a) * sx * 1.2, y2 + Math.sin(a) * 1.2, 0.4, "bone", { ty: PI2 * sx + 0.2, r: a }));
+    } else {
       strut3(t, sx * 0.4 * r, sy * 0.3 * n, top - 1.2, sx * 0.56 * r, sy * 0.36 * n, 2.6, 1.05, "gunmetal");
       t.push(P_(CYL(0.9, 1.4, 8), sx * 0.4 * r, sy * 0.3 * n, top - 1.8, "darkmetal"));
       t.push(P_(CYL(2.2, 1, 10), sx * 0.56 * r, sy * 0.36 * n, 1.6, "darkmetal"));
@@ -4693,11 +4703,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         t.push(P_(CONE(1.5, 0.2, hgt, 7), x, 0, top + 6.2 - Math.abs(i - 2) * 0.9, "carapace2"));
       }
       t.push(P_(DOME(3.4, 3.2, 12), 0.22 * r, 0, top + 2.2, "psi", { e: 1, a: { spin: 0.6 } }));
-      t.push(P_(CYL(3.6, 1.2, 12), 0.22 * r, 0, top + 1.4, "dark2"));
+      t.push(P_(CYL(3.6, 1.2, 12), 0.22 * r, 0, top + 1.4, "flesh"));
       for (const sy of [-1, 1]) {
         const bx = 0.1 * r, by = sy * 0.26 * n, bz = top + 3;
         strut3(t, bx, by, bz, 0.34 * r, sy * 0.42 * n, top - 1, 0.9, "carapace");
-        strut3(t, 0.34 * r, sy * 0.42 * n, top - 1, 0.5 * r, sy * 0.3 * n, top - 3, 0.6, "dark2");
+        strut3(t, 0.34 * r, sy * 0.42 * n, top - 1, 0.5 * r, sy * 0.3 * n, top - 3, 0.6, "carapace2");
         t.push(P_(DOME(0.9, 0.8, 7), 0.5 * r, sy * 0.3 * n, top - 3.4, "psi", { e: 1 }));
         t.push(P_(DOME(2.4, 2, 9), -0.4 * r, sy * 0.2 * n, top, "bile", { e: 1 }));
       }
@@ -5056,22 +5066,6 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       e.push(P_(BOXM(2.6, 1.5, 1.1, 0.4), ax - 2.3, ay, fz - 0.3, footMat));
     }
   }
-  function titanLegsOrganic(e, len, wid, standH, frame, legMat, jointMat) {
-    const hipZ = standH, spanX = 0.3 * len, hipY = 0.5 * wid - 1;
-    for (const side of [-1, 1]) for (const fb of [-1, 1]) {
-      const hx = fb * spanX, hy = side * hipY, phase = (fb > 0 ? 0 : 1) ^ (side > 0 ? 0 : 1), c = ((frame || 0) & 3) + 2 * phase & 3, raised = 1 === c ? 3 : 0, sw = [-1, 0, 1, 0][c] * 0.07 * len, kx = hx + 0.5 * sw, fx = hx + sw, kz = 0.55 * hipZ + 0.4 * raised, fz = 2 + raised;
-      e.push(P_(DOME(3.1, 1.6, 10), hx, hy, hipZ + 0.6, legMat));
-      e.push(P_(DOME(2.7, 2.2, 10), hx, hy, hipZ, legMat));
-      strut3(e, hx, hy, hipZ, kx, hy, kz, 1.6, legMat);
-      e.push(P_(CYL(1.3, 1.9, 8), kx, hy, kz, jointMat, { e: 1 }));
-      strut3(e, kx, hy, kz, fx, hy, fz, 1.05, legMat);
-      e.push(P_(DOME(1.8, 1.3, 8), fx, hy, fz, legMat));
-      e.push(P_(CYL(0.65, 1.1, 6), fx, hy, fz + 1.2, jointMat, { e: 1 }));
-      for (const a of [-0.6, 0, 0.6]) e.push(P_(CONE(0.7, 0.08, 3.4, 6), fx + Math.cos(a) * 1.2, hy + Math.sin(a) * 1.2, fz - 0.4, "bone", { ty: PI2 - 0.2, r: a }));
-      strut3(e, hx, hy + 0.9 * Math.sign(hy), hipZ + 0.4, kx, hy + 0.9 * Math.sign(hy), kz + 0.4, 0.28, jointMat);
-      e.push(P_(CONE(0.8, 0.1, 3, 6), kx, hy, kz + 1.4, "bone", { ty: -0.5 }));
-    }
-  }
   function titanDugIn(e, rad, z) {
     sandbagRing(e, rad, z);
   }
@@ -5169,37 +5163,54 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return scale2(a);
   }
   function titanYuri(t, dep) {
-    const e = [], len = 33, wid = 19, standH = dep ? TITAN_DEP : TITAN_STAND, hullH = 8.5;
-    dep ? e.push(P_(DOME(0.62 * len, 2.2, 14), 0, 0, 0, "carapace2")) : titanLegsOrganic(e, len, wid, standH, t, "carapace2", "psi");
-    const hullBotZ = standH, hullTopZ = hullBotZ + hullH, hullCZ = hullBotZ + hullH / 2;
-    e.push(P_(DOME(0.46 * len, hullH, 14), 0, 0, hullBotZ, "carapace"));
-    e.push(P_(DOME(0.3 * len, 3, 12), -0.05 * len, 0, hullTopZ, "carapace2"));
-    for (let i = 0; i < 3; i++) e.push(P_(DOME(1.4, 1.3, 8), -0.12 * len + 0.13 * len * i, 0, hullTopZ + 2.4, "carapace", { e: 0 }));
-    for (const sgn of [-1, 1]) e.push(P_(DOME(0.9, 0.7, 8), -0.2 * len, sgn * 0.24 * wid, hullTopZ + 1.4, "bile", { e: 1 }));
-    const headX = 0.42 * len + 3;
-    e.push(P_(DOME(4.6, 4.4, 12), headX, 0, hullCZ, "carapace"));
-    e.push(P_(DOME(2.2, 2, 10), headX + 1.6, 0, hullCZ + 1.4, "psi", { e: 1 }));
-    const chinX = headX + 2.6, chinZ = hullBotZ + 2.4;
-    e.push(P_(DOME(2.4, 2, 10), chinX, 0, chinZ, "carapace2"));
-    e.push(P_(CYL(0.45, 5.6, 7), chinX + 1, -1.1, chinZ, "dark2", { ty: PI2 }));
-    e.push(P_(CYL(0.45, 5.6, 7), chinX + 1, 1.1, chinZ, "dark2", { ty: PI2 }));
-    e.push(P_(DOME(0.5, 0.6, 6), chinX + 6.4, -1.1, chinZ, "bile", { e: 1 }));
-    e.push(P_(DOME(0.5, 0.6, 6), chinX + 6.4, 1.1, chinZ, "bile", { e: 1 }));
-    for (const sgn of [-1, 1]) {
-      const by = sgn * (0.5 * wid + 1), mx = 6, my = sgn * (0.5 * wid + 6), mz = hullCZ + 2.4, tx = 11, ty2 = sgn * (0.5 * wid + 9), tz = hullCZ + 1;
-      e.push(P_(DOME(3, 2.6, 10), 1, by, hullCZ, "carapace2"));
-      strut3(e, 1, by, hullCZ, mx, my, mz, 1.3, "carapace");
-      strut3(e, mx, my, mz, tx, ty2, tz, 0.8, "carapace2");
-      e.push(P_(DOME(1.3, 1.1, 8), tx, ty2, tz, "psi", { e: 1 }));
-      const cx2 = tx + 4, cy2 = ty2 + sgn * 1.5, cz2 = tz - 2.4;
-      strut3(e, tx, ty2, tz, cx2, cy2, cz2, 0.55, "carapace");
-      for (const cl of [-0.5, 0.5]) e.push(P_(CONE(0.5, 0.05, 2.6, 6), cx2, cy2 + cl, cz2, "bone", { ty: PI2 + 0.5, r: cl * 0.6 }));
-      for (let k = 0; k < 4; k++) e.push(P_(BOXM(0.16 * len, 0.28, 0.35, 0.1), (-0.3 + 0.17 * k) * len, sgn * (0.44 * len * 0.62 + (k % 2 ? 0.4 : 0)), hullBotZ + 2.2 + 0.9 * (k % 2), "psi", { e: 1, r: sgn * (k % 2 ? 0.25 : -0.25) }));
+    const e = [], len = 34, wid = 20, standH = dep ? TITAN_DEP : TITAN_STAND, br = 16 & (t || 0) ? 1 : 0, bs = 1 + 0.06 * br, bz = standH, cz = bz + 0.5, L = (a, b, k) => a + (b - a) * k;
+    for (const side of [-1, 1]) for (const fb of [-1, 1]) {
+      const hx2 = fb * 0.3 * len, hy = side * (0.5 * wid - 1), hipZ = bz + 2.2, phase = (fb > 0 ? 0 : 1) ^ (side > 0 ? 0 : 1), c = ((t || 0) & 3) + 2 * phase & 3, raised = dep ? 0 : 1 === c ? 3 : 0, sw = dep ? 0 : [-1, 0, 1, 0][c] * 0.07 * len, kx = dep ? hx2 + fb * 3 : hx2 + fb * 0.12 * len + 0.5 * sw, ky = hy + side * (dep ? 5.5 : 7), kz = dep ? hipZ + 3.4 : hipZ + 5 + raised, fx = dep ? hx2 + fb * 6 : hx2 + fb * 0.06 * len + sw, fy = hy + side * (dep ? 9 : 10.5), fz = 0.4 + raised, mx = L(kx, fx, 0.5), my = L(ky, fy, 0.5) + side, mz = L(kz, fz, 0.5) + (dep ? 1 : 2.2);
+      e.push(P_(DOME(3.8, 3, 10), hx2, hy, hipZ - 1.6, "flesh"));
+      ell(e, hx2, hy + side * 0.6, hipZ - 0.6, 3.2, 3, 2.4, "carapace2");
+      taper3(e, hx2, hy, hipZ, kx, ky, kz, 3, 2.2, "carapace");
+      taper3(e, L(hx2, kx, 0.2), L(hy, ky, 0.2) + side * 0.5, L(hipZ, kz, 0.2) + 0.6, L(hx2, kx, 0.72), L(hy, ky, 0.72) + side * 0.5, L(hipZ, kz, 0.72) + 0.6, 3.3, 2.5, "body");
+      taper3(e, L(hx2, kx, 0.1), L(hy, ky, 0.1) + side * 1.2, L(hipZ, kz, 0.1) + 1.6, L(hx2, kx, 0.85), L(hy, ky, 0.85) + side * 1.2, L(hipZ, kz, 0.85) + 1.4, 0.35, 0.3, "psi", { e: 1 });
+      e.push(P_(DOME(2.5, 2.1, 9), kx, ky, kz - 1, "flesh"));
+      for (const a of [-0.4, 0.4]) e.push(P_(CONE(1, 0.08, 3.6, 7), kx + a * 2, ky, kz + 0.6, "bone", { ty: -0.3 * side + a * 0.4, r: PI2 * side }));
+      e.push(P_(DOME(0.8, 0.7, 7), kx, ky + side * 1.8, kz - 0.2, "psi", { e: 1 }));
+      taper3(e, kx, ky, kz, mx, my, mz, 2.1, 1.6, "carapace2");
+      e.push(P_(DOME(1.6, 1.4, 8), mx, my, mz - 0.6, "flesh"));
+      e.push(P_(CONE(0.7, 0.06, 2.6, 6), mx, my, mz + 0.4, "bone", { ty: 0.5 * side, r: PI2 * side }));
+      taper3(e, mx, my, mz, fx, fy, fz + 1.2, 1.5, 0.7, "carapace");
+      e.push(P_(DOME(2.4, 1.3, 9), fx, fy, fz - 0.2, "flesh"));
+      for (const a of [-0.8, 0, 0.8]) e.push(P_(CONE(0.7, 0.06, 3.6, 6), fx + Math.cos(a) * fb * 1.4, fy + Math.sin(a) * 1.4, fz, "bone", { ty: PI2 * fb + 0.25, r: a * fb }));
     }
-    for (let k = 0; k < 5; k++) e.push(P_(CONE(0.9 - 0.08 * k, 0.1, 3.6 - 0.4 * k, 7), (-0.3 + 0.1 * k) * len, 0, hullTopZ + 2.2, "bone", { ty: -0.35 }));
-    e.push(P_(DOME(3.2, 3, 14), headX - 0.6, 0, hullCZ + 2.6, "glass", { e: 1 }));
-    e.push(P_(DOME(2.3, 2.1, 12), headX - 0.6, 0, hullCZ + 2.8, "flesh"));
-    e.push(P_(BOXM(0.3, 3.4, 0.3, 0.1), headX + 1.8, 0, hullCZ + 4, "psi", { e: 1 }));
+    ell(e, 0, 0, cz + 1.2, 0.46 * len, 0.46 * wid, 3.4, "flesh", { tx: Math.PI });
+    for (let k = 0; k < 3; k++) {
+      const x = (0.2 - 0.19 * k) * len;
+      ell(e, x - 0.02 * len, 0, cz, 0.2 * len, 0.58 * wid, 8.4 - 0.6 * k, "carapace");
+      ell(e, x, 0, cz + 0.7, 0.18 * len, 0.53 * wid, 9.4 - 0.8 * k + 0.4 * br * (k % 2), "body");
+      for (const sy of [-1, 1]) e.push(P_(BOXM(0.14 * len, 0.3, 0.35, 0.1), x, sy * 0.57 * wid, cz + 3.4, "psi", { e: 1, r: sy * 0.2 }));
+    }
+    for (let k = 0; k < 6; k++) e.push(P_(CONE(1.3 - 0.12 * k, 0.1, 4.4 - 0.45 * k, 7), (-0.14 - 0.07 * k) * len, 0, cz + 9.6 - 0.9 * k, "bone", { ty: -0.5 }));
+    const hx = 0.5 * len;
+    ell(e, hx, 0, cz + 1.4, 0.15 * len, 0.32 * wid, 6.6, "carapace2");
+    ell(e, hx + 0.02 * len, 0, cz + 1, 0.13 * len, 0.27 * wid, 2.6, "flesh", { tx: Math.PI });
+    ell(e, hx - 0.04 * len, 0, cz + 5.6, 0.1 * len, 0.24 * wid, 2.6, "body");
+    for (const [ey, ez, er] of [[0, 6.2, 1.5], [-0.12, 5.2, 1.1], [0.12, 5.2, 1.1], [-0.2, 3.8, 0.9], [0.2, 3.8, 0.9], [-0.08, 3, 0.6], [0.08, 3, 0.6]]) e.push(P_(DOME(er, er * 0.85, 9), hx + 0.13 * len, ey * wid, cz + ez, "psi", { e: 1 }));
+    for (const sy of [-1, 1]) {
+      e.push(P_(CONE(1.5, 0.1, 7.5, 8), hx + 0.12 * len, sy * 0.12 * wid, cz + 1.4, "bone", { ty: PI2 + 0.25, r: -sy * 0.45 }));
+      e.push(P_(CONE(0.8, 0.06, 4, 6), hx + 0.1 * len, sy * 0.24 * wid, cz + 2.8, "bone", { ty: PI2 - 0.15, r: -sy * 0.8 }));
+      const sx0 = 0.24 * len, sy0 = sy * 0.5 * wid, sz0 = cz + 6, p1 = [0.42 * len, sy * (0.5 * wid + 6), cz + 8.4], p2 = [0.62 * len, sy * (0.5 * wid + 7), cz + 5], p3 = [0.78 * len, sy * (0.5 * wid + 4), cz + 3.4];
+      e.push(P_(DOME(2.2, 1.9, 9), sx0, sy0, sz0 - 1, "flesh"));
+      taper3(e, sx0, sy0, sz0, p1[0], p1[1], p1[2], 1.6, 1.2, "carapace");
+      taper3(e, p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], 1.2, 0.85, "carapace2");
+      taper3(e, p2[0], p2[1], p2[2], p3[0], p3[1], p3[2], 0.85, 0.45, "carapace");
+      e.push(P_(DOME(1.1, 1, 8), p1[0], p1[1], p1[2] - 0.4, "flesh"));
+      e.push(P_(DOME(0.9, 0.8, 8), p2[0], p2[1], p2[2] - 0.3, "flesh"));
+      for (const a of [-0.5, 0.5]) e.push(P_(CONE(0.55, 0.05, 3, 6), p3[0], p3[1], p3[2], "bone", { ty: PI2 + a * 0.6, r: -sy * 0.3 + a * 0.5 }));
+      e.push(P_(DOME(0.8, 0.7, 7), p3[0], p3[1], p3[2] - 0.2, "psi", { e: 1 }));
+    }
+    const ax = -0.5 * len;
+    ell(e, ax, 0, cz + 0.6, 0.2 * len * bs, 0.36 * wid * bs, 7.6 * bs, "flesh");
+    ell(e, ax - 0.03 * len, 0, cz + 1.4, 0.16 * len, 0.3 * wid, 7, "carapace2");
+    for (const [dx, dy, dz, r] of [[-0.08, -0.16, 5.6, 2.4], [-0.08, 0.16, 5.6, 2.4], [-0.16, 0, 4.4, 2], [-0.02, 0, 7.2, 1.8]]) e.push(P_(DOME(r * bs, r * 0.9 * bs, 10), ax + dx * len, dy * wid, cz + dz, "bile", { e: 1 }));
     return scale2(e);
   }
   function titanTurretYuri(dep) {
@@ -6866,7 +6877,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
       case "factory": {
         const bw = 0.8 * r, bd = 0.5 * r, bh = 0.26 * r, hw = bw / 2, hd = bd / 2, doorW = 0.64 * r, doorH = 0.9 * bh, doorY = hd + 0.3, z2 = l + bh;
-        const facMat = a ? { body: "armor", trim: "armor3", accent: "glow", frame: "gunmetal", dark: "dark2" } : o ? { body: "concrete", trim: "concrete2", accent: "red", frame: "rust", dark: "dark2" } : { body: "carapace2", trim: "bone", accent: "psi", frame: "flesh", dark: "dark2" };
+        const facMat = a ? { body: "armor", trim: "armor3", accent: "glow", frame: "gunmetal", dark: "dark2" } : o ? { body: "concrete", trim: "concrete2", accent: "red", frame: "rust", dark: "dark2" } : { body: "carapace2", trim: "carapace", accent: "psi", frame: "bile2", dark: "dark2" };
         n.push(P_(SLAB(roundRectProfile(0.95 * r, 0.95 * r, 3, 3), 1.1, 0.5, "fcpad"), 0, 0, l, "asphalt"));
         const ridgeH = 0.34 * r, eaveH = 0.08 * r, archH = hw, archMinH = 0.22 * archH;
         const archAt = (x) => archMinH + (archH - archMinH) * Math.sqrt(Math.max(0, 1 - x / hw * (x / hw))), pitchAt = (x) => ridgeH + (eaveH - ridgeH) * ((x + hw) / bw);
@@ -7305,9 +7316,64 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function UTURRET(e, t, extra) {
     return UTURRET_(e, t || 0, extra);
   }
+  var YREMAP = { steel: "bone", metal: "carapace", darkmetal: "carapace2", gunmetal: "carapace2", concrete: "carapace", concrete2: "carapace2", rust: "flesh", armor: "carapace", armor2: "carapace", armor3: "carapace2", lightY: "psi", glass: "psi", glassdark: "carapace2", roof: "carapace2", tread: "carapace2", rubber: "flesh", wood: "bone", olive: "carapace2", red: "flesh", tesla: "psi", glow: "psi", crystal: "psi", white: "bone", nose: "carapace", gold: "bile" };
+  var YDRESS_SKIP = { wall: 1, gate: 1 };
+  function yuriDress(n, key) {
+    const B = BLD[key];
+    if (!B) return n;
+    const r = 32 * B.size;
+    let h = 6;
+    for (const q of n) q && !q.a && q.z > h && q.z < 120 && (h = q.z);
+    h = Math.min(h + 2, 0.9 * r);
+    const out = n.map((q) => {
+      if (!q) return q;
+      if (YREMAP[q.c]) return Object.assign({}, q, { c: YREMAP[q.c] });
+      if ("string" == typeof q.c && "#" === q.c[0] && 7 === q.c.length) {
+        const [R, G, Bc] = rgbOf(q.c), l = (R + G + Bc) / 3;
+        return Object.assign({}, q, { c: q.e ? "psi" : R > G + 40 && R > Bc + 30 ? "flesh" : l < 70 ? "carapace2" : l < 150 ? "carapace" : "bone" });
+      }
+      return q;
+    });
+    if (YDRESS_SKIP[key] || B.size < 2) return out;
+    for (let k = 0; k < 7; k++) {
+      const a = k / 7 * 6.283 + 0.3, x0 = Math.cos(a) * 0.4 * r, y0 = Math.sin(a) * 0.4 * r, x1 = Math.cos(a + 0.15) * 0.6 * r, y1 = Math.sin(a + 0.15) * 0.6 * r;
+      taper3(out, x0, y0, 2.6, x1, y1, 0.3, 1.7, 0.35, "flesh");
+      taper3(out, x0, y0, 3.2, x1, y1, 0.8, 0.22, 0.12, "psi", { e: 1 });
+      out.push(P_(DOME(1.8, 1.2, 8), x0, y0, 0.2, "carapace2"));
+    }
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+      out.push(P_(CONE(1.6, 0.1, 0.3 * h + 3, 7), sx * 0.44 * r, sy * 0.44 * r, 0.4 * h, "bone", { ty: 0.35 * sx, r: Math.atan2(sy, sx) }));
+      out.push(P_(DOME(2.6, 2.2, 10), sx * 0.4 * r, sy * 0.36 * r, 0.28 * h, "bile", { e: 1, a: { bob: 1.3 + 0.4 * (sx + 2) * (sy + 3) * 0.1, ba: 0.55 } }));
+    }
+    if ("factory" === key) {
+      const hd = 0.25 * r, top = h;
+      for (let i = 0; i < 5; i++) {
+        const x = (-0.34 + 0.17 * i) * r;
+        taper3(out, x, -hd - 1, 0.55 * top, x, -0.5 * hd, top + 4, 1.2, 1, "bone");
+        taper3(out, x, -0.5 * hd, top + 4, x, 0.5 * hd, top + 5.5, 1, 1, "bone");
+        taper3(out, x, 0.5 * hd, top + 5.5, x, hd + 1, 0.55 * top, 1, 1.2, "bone");
+      }
+      for (const sy of [-1, 1]) taper3(out, -0.36 * r, sy * 0.2 * r, top + 2, 0.36 * r, sy * 0.2 * r, top + 2, 0.25, 0.25, "psi", { e: 1 });
+    }
+    for (let k = 0; k < 3; k++) {
+      const g = k * 2.094 + 0.5, x0 = Math.cos(g) * 0.24 * r, y0 = Math.sin(g) * 0.24 * r, z0 = h - 1, A = { orbit: 0.6 + 0.23 * k, amp: 0.28, pvx: x0, pvy: y0 };
+      let px = x0, py = y0, pz = z0;
+      const segs = [[1.5 * Math.cos(g), 1.5 * Math.sin(g), 4.4], [2.4 * Math.cos(g + 0.6), 2.4 * Math.sin(g + 0.6), 3.6], [1.6 * Math.cos(g + 1.2), 1.6 * Math.sin(g + 1.2), 2.6]];
+      out.push(P_(DOME(1.6, 1.2, 8), x0, y0, z0 - 0.4, "flesh"));
+      segs.forEach(([dx, dy, dz], i) => {
+        const nx = px + dx, ny = py + dy, nz = pz + dz, dh = Math.hypot(dx, dy), L = Math.hypot(dh, dz);
+        out.push(P_(CONE(1.1 - 0.3 * i, 0.8 - 0.3 * i, L, 8), px, py, pz, i % 2 ? "carapace2" : "carapace", { ty: Math.atan2(dh, dz), r: Math.atan2(dy, dx), a: A }));
+        px = nx, py = ny, pz = nz;
+      });
+      out.push(P_(DOME(0.7, 0.6, 7), px, py, pz - 0.2, "psi", { e: 1, a: A }));
+    }
+    return out;
+  }
   function BMODEL(e, t, d, cn, rot, prod = null, doorT = 0) {
     const _a = getAssetModel(e, t);
-    return _a || BMODEL_(e, t, d, cn, rot, prod, doorT);
+    if (_a) return "yuri" === t ? yuriDress(_a, e) : _a;
+    const m = BMODEL_(e, t, d, cn, rot, prod, doorT);
+    return "yuri" === t ? yuriDress(m, e) : m;
   }
   function BTURRET(e, t, r) {
     return BTURRET_(e, t, r || 0);
@@ -7910,7 +7976,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (GAIT4[e.key]) return e.moving ? 0.9 * Math.abs(Math.sin((e.animT || 0) * Math.PI / 12)) : 0.35 * Math.sin(1.6 * T + ph);
     return Math.sin((e.moving ? 8 : 3) * T + ph) * (e.moving ? 1.6 : 0.55);
   }
-  var YORG = { lasher: 1, gattling: 1, shard: 1, mastermind: 1, rift: 1 };
+  var YORG = { lasher: 1, gattling: 1, shard: 1, mastermind: 1, rift: 1, titan_yuri: 1 };
   function unitFrame(e) {
     if (e.d.fly) return 11 * S.time & 1 | (AIR_JET[e.key] && (e.alt || 0) < 16 ? 2 : 0);
     const t = e.animT || 0;
