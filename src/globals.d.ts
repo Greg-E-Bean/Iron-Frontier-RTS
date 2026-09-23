@@ -455,6 +455,7 @@ declare global {
   function drawMarker(): void;
   function buildMMCache(): void;
   function drawMM(): void;
+  function radarOnline(): boolean;
   function viewInsets(): { l: number; r: number; t: number; b: number };
   function fc(owner: number): string;
   const iconFor: AnyFn;

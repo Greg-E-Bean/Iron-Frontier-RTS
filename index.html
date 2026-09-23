@@ -17,7 +17,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;color:#c4d0d8;
   font-family:"Trebuchet MS",Tahoma,system-ui,sans-serif}
-:root{--hud:#11171c;--hud2:#0b1015;--edge:#2c3d47;--amber:#f0a72c;--amber2:#ffcb62;
+:root{--hud:#11171c;--hud2:#0b1015;--edge:#2c3d47;--amber:#f0a72c;--amber2:#ffcb62;--accrgb:240 167 44;--pan1:#151d23;--pan2:#0a0f13;--pan3:#080c0f;--card1:#212c34;--card2:#161e24;
   --tib:#5ad044;--tib2:#a9ff72;--danger:#e0473a;--txt:#c4d0d8;--dim:#7d8f9a;
   --ease:cubic-bezier(.2,.8,.3,1.1);--sh1:0 1px 0 #ffffff14 inset,0 -1px 0 #00000055 inset;--sh2:0 3px 10px #0009,0 1px 0 #ffffff10 inset}
 .ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;pointer-events:none;filter:drop-shadow(0 1px 1px #0006)}
@@ -31,7 +31,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 /* ---------- Top bar ---------- */
 #top{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:center;gap:10px;
   padding:0 10px;padding-top:env(safe-area-inset-top);
-  background:linear-gradient(180deg,#161e24 0%,#0c1216 100%);
+  background:linear-gradient(180deg,var(--pan1) 0%,var(--pan2) 100%);
   border-bottom:1px solid var(--edge);box-shadow:0 2px 0 #000a, inset 0 -1px 0 #ffffff08;
   z-index:10;font-size:13px}
 #top:after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:2px;
@@ -39,7 +39,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #top .stat{display:flex;align-items:center;gap:5px;white-space:nowrap}
 #top .lab{color:var(--dim);font-size:9px;letter-spacing:1.4px;text-transform:uppercase}
 #credits{color:var(--amber2);font-weight:bold;font-variant-numeric:tabular-nums;
-  font-family:"Courier New",monospace;letter-spacing:1px;text-shadow:0 0 8px #f0a72c66}
+  font-family:"Courier New",monospace;letter-spacing:1px;text-shadow:0 0 8px rgb(var(--accrgb) / 40%)}
 #power{font-weight:bold}
 .pbar{width:56px;height:8px;background:#070b0e;border:1px solid var(--edge);overflow:hidden;
   clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)}
@@ -63,7 +63,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 
 /* ---------- Sidebar ---------- */
 #side{position:fixed;left:0;right:0;bottom:0;z-index:12;
-  background:linear-gradient(180deg,#151d23 0%,#0a0f13 42%,#080c0f 100%);
+  background:linear-gradient(180deg,var(--pan1) 0%,var(--pan2) 42%,var(--pan3) 100%);
   border-top:1px solid var(--edge);box-shadow:0 -3px 16px #000b, inset 0 1px 0 #ffffff10;
   padding-bottom:env(safe-area-inset-bottom)}
 #side:before{content:'';position:absolute;left:0;right:0;top:-2px;height:2px;
@@ -81,7 +81,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   transition:transform .1s var(--ease),background .15s,color .15s}
 .tab:active{transform:translateY(1px) scale(.96)}
 .tab.on{background:linear-gradient(160deg,#324352 0%,#182026 100%);color:var(--amber2);
-  box-shadow:inset 0 -2px 0 var(--amber),0 -2px 10px #f0a72c26}
+  box-shadow:inset 0 -2px 0 var(--amber),0 -2px 10px rgb(var(--accrgb) / 15%)}
 .tab.locked{opacity:.35;pointer-events:none}
 #cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px;padding:6px;
   max-height:104px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;
@@ -90,7 +90,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #cards::-webkit-scrollbar{width:4px}
 #cards::-webkit-scrollbar-thumb{background:#3b5474;border-radius:3px}
 .card{position:relative;height:92px;overflow:hidden;
-  background:linear-gradient(165deg,#212c34 0%,#161e24 45%,#0a0f12 100%);border:1px solid var(--edge);
+  background:linear-gradient(165deg,var(--card1) 0%,var(--card2) 45%,#0a0f12 100%);border:1px solid var(--edge);
   box-shadow:var(--sh1);
   clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
   display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:3px;
@@ -109,7 +109,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   border-radius:3px;padding:1px 4px;color:#fff;display:none}
 .card .role{position:absolute;bottom:35px;left:3px;font-size:7px;font-weight:bold;line-height:1;
   padding:1px 3px;border-radius:3px;color:#0a0f12;letter-spacing:.2px;pointer-events:none}
-.card.head{border-color:var(--amber);box-shadow:0 0 10px #f0a72c55, inset 0 0 14px #f0a72c1a,var(--sh1)}
+.card.head{border-color:var(--amber);box-shadow:0 0 10px rgb(var(--accrgb) / 33%), inset 0 0 14px rgb(var(--accrgb) / 10%),var(--sh1)}
 .card.rdy{border-color:var(--tib);box-shadow:0 0 10px #5ad04466, inset 0 0 14px #5ad04422,var(--sh1);animation:cardPulse 1.4s ease-in-out infinite}
 .card.rdy .nm{color:var(--tib2)}
 @keyframes cardPulse{0%,100%{box-shadow:0 0 10px #5ad04466, inset 0 0 14px #5ad04422,var(--sh1)}50%{box-shadow:0 0 18px #5ad044aa, inset 0 0 18px #5ad04440,var(--sh1)}}
@@ -168,7 +168,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   transition:transform .12s var(--ease),filter .15s,box-shadow .15s,border-color .15s}
 .cbtn:active{transform:scale(.93);filter:brightness(1.22)}
 .cbtn.on{background:linear-gradient(155deg,#4a3a16 0%,#2e230d 60%,#1b1508 100%);border-color:var(--amber);color:var(--amber2);
-  box-shadow:0 0 10px #f0a72c44,var(--sh1)}
+  box-shadow:0 0 10px rgb(var(--accrgb) / 27%),var(--sh1)}
 .cbtn.icon{font-size:17px;line-height:1;padding:7px 6px}
 
 /* ---------- Overlays ---------- */
@@ -177,7 +177,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   background:#05080bd8;border:1px solid var(--amber);padding:6px 14px;font-size:12px;
   color:var(--amber2);pointer-events:none;opacity:0;transition:opacity .25s;letter-spacing:.4px;
   clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
-  box-shadow:0 0 18px #f0a72c22}
+  box-shadow:0 0 18px rgb(var(--accrgb) / 13%)}
 #hint.show{opacity:1}
 #tutorialPanel{position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:9;
   max-width:260px;background:#05080bd8;border:1px solid var(--amber);border-radius:8px;padding:10px 12px;
@@ -241,7 +241,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   transition:transform .12s var(--ease),filter .15s,box-shadow .15s}
 .opt:active{transform:scale(.94);filter:brightness(1.2)}
 .opt.on{border-color:var(--amber);background:linear-gradient(160deg,#3d3012 0%,#1d180a 100%);color:var(--amber2);
-  box-shadow:0 0 12px #f0a72c44,var(--sh1)}
+  box-shadow:0 0 12px rgb(var(--accrgb) / 27%),var(--sh1)}
 .opt small{display:block;font-size:9px;color:#8fa3bb;margin-top:2px}
 .opt.on small{color:#bcd6f2}
 .opts.wrap{flex-wrap:wrap}
@@ -560,14 +560,45 @@ body.sidebar .cbtn.icon[data-l]:after{font-size:8px}
 
 /* ---- per-card queue display ---- */
 .card .qn{top:2px;left:3px;min-width:14px;text-align:center;background:#c2801eee;font-family:"Courier New",monospace}
-.card .qx{position:absolute;top:36px;right:4px;font-size:11px;font-weight:bold;color:#fff;background:#000b;border:1px solid #f0a72c88;
-  border-radius:3px;padding:0 4px;line-height:14px;pointer-events:none;font-family:"Courier New",monospace}
+.card .qx{position:absolute;bottom:3px;right:3px;z-index:2;font-size:10.5px;font-weight:bold;color:#fff;background:#000c;border:1px solid var(--amber);
+  padding:0 4px;line-height:14px;pointer-events:none;font-family:"Courier New",monospace;
+  clip-path:polygon(3px 0,100% 0,100% 100%,0 100%,0 3px)}
+.card .pz{position:absolute;left:50%;top:26px;width:26px;height:26px;margin-left:-13px;border-radius:50%;z-index:2;pointer-events:none;display:none;
+  background:radial-gradient(circle,#0d1418e6 60%,#0d141800 72%);box-shadow:0 0 0 1.5px #cfe0eecc,0 0 10px #000}
+.card .pz:before,.card .pz:after{content:"";position:absolute;top:8px;width:3px;height:10px;border-radius:2px;background:#e6f0f8}
+.card .pz:before{left:9px}.card .pz:after{right:9px}
+.card.paused .pz{display:block}
+.card.paused .badge{display:none!important}
 .card.queued .prog{background:#000a}
 .card.paused .prog{background:#000c}
 .card.paused{border-color:#8fa3bb}
-.card.paused .badge{background:#8fa3bbdd;color:#0a0f12}
 .tab .tc.pz{background:#8fa3bb}
-@media (max-height:500px){.card .qx{top:26px;font-size:10px;line-height:12px}}
+@media (max-height:500px){.card .qx{font-size:9.5px;line-height:12px}.card .pz{top:18px;transform:scale(.8)}}
+
+/* ---- portrait: command row fits ---- */
+@media (max-width:620px){
+  body:not(.sidebar) #ctrls{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:4px 5px 5px;overflow:visible}
+  body:not(.sidebar) .cbtn{min-width:0;padding:8px 1px;font-size:9px;letter-spacing:.2px}
+  body:not(.sidebar) .cbtn[data-s]{font-size:0}
+  body:not(.sidebar) .cbtn[data-s]:after{content:attr(data-s);font-size:9.5px;letter-spacing:.4px}
+  body:not(.sidebar) .cbtn.icon .ico{width:18px;height:18px}
+}
+
+/* ---- faction UI themes ---- */
+body[data-fac=allied]{--amber:#4fb3ff;--amber2:#a6ddff;--accrgb:79 179 255;--edge:#2b4459;--dim:#7f97aa;
+  --pan1:#13212d;--pan2:#0a121a;--pan3:#070c12;--card1:#1d2d3b;--card2:#142230}
+body[data-fac=soviet]{--amber:#e5533b;--amber2:#ff9f80;--accrgb:229 83 59;--edge:#50302a;--dim:#9a8580;
+  --pan1:#24160f;--pan2:#140c08;--pan3:#0d0806;--card1:#33211a;--card2:#241712}
+body[data-fac=yuri]{--amber:#b57bff;--amber2:#ddb9ff;--accrgb:181 123 255;--edge:#40305a;--dim:#9486a8;
+  --pan1:#1d1428;--pan2:#100b18;--pan3:#0a0710;--card1:#2a1f3a;--card2:#1d152b}
+body[data-fac=soviet] #top .lab,body[data-fac=soviet] .tab span{letter-spacing:2px;font-weight:bold}
+body[data-fac=soviet] .card{clip-path:polygon(11px 0,100% 0,100% calc(100% - 11px),calc(100% - 11px) 100%,0 100%,0 11px)}
+body[data-fac=yuri] .card,body[data-fac=yuri] .cbtn,body[data-fac=yuri] #prodstrip .pc{clip-path:none;border-radius:9px}
+body[data-fac=yuri] .tab,body[data-fac=yuri] #more{clip-path:none;border-radius:10px 10px 0 0}
+body[data-fac=yuri] #mmWrap{clip-path:none;border-radius:14px}
+body[data-fac=allied] .card{clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+body[data-fac=allied] .card.head,body[data-fac=allied] .tab.on{box-shadow:inset 0 -2px 0 var(--amber),0 0 12px rgb(var(--accrgb) / 30%)}
+body[data-fac] #top .stat #credits{color:var(--amber2)}
 </style>
 </head>
 <body>
@@ -2165,6 +2196,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       c <= 0 && a.paid < s ? a.hold = true : (a.hold = false, e.credits -= c, a.paid += c, a.prog = Math.min(1, a.paid / s), a.prog >= 1 && ("bld" === n || "def" === n ? (e.ready[n] = o, e.isAI || (hint(bname(o, e.fac) + " ready \u2014 tap it, then tap the map"), sfx("ready"))) : (spawnUnit(e, o), a.list.shift(), a.prog = 0, a.paid = 0, a.list.length || (e.queues[n] = null))));
     }
   }
+  function titanStep(e) {
+    const g = Math.floor(e.animT / 6) & 3;
+    if (g === e._gait) return;
+    e._gait = g;
+    if (1 & g) return;
+    const c = Math.cos(e.ang), sn = Math.sin(e.ang), yuri = "titan_yuri" === e.key;
+    for (const [fx, fy] of g ? [[1, 1], [-1, -1]] : [[1, -1], [-1, 1]]) {
+      const lx = fx * 21, ly = fy * 23, wx = e.x + c * lx - sn * ly, wy = e.y + sn * lx + c * ly;
+      for (let k = 0; k < 3; k++) S.fx.push({ kind: "smoke", x: wx + rnd(-5, 5), y: wy + rnd(-5, 5), z: 1, s: 0.55 + 0.3 * Math.random(), c: yuri ? "#6f5a78" : "#8a7c62", t: 0, life: 0.7 + 0.4 * Math.random() });
+      S.fx.push({ kind: "ring", x: wx, y: wy, z: 1, s: 0.35, c: yuri ? "#b98cff" : "#d8c9a0", t: 0, life: 0.4 });
+    }
+  }
   function spawnUnit(e, t) {
     const r = UNITS[t], own = FACTIONS[e.f.key].units.includes(t), ff = own ? null : unitFacOwner(t), n = S.blds.filter((b) => b.owner === e.id && !b.dead && b.key === r.from && (own || b.capturedFac === ff));
     if (!n.length) return;
@@ -2310,11 +2353,27 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const c = r.proj || "shell";
     if (e.muzzle = 0.09, e.recoil = 1, "beam" === c || "prism" === c || "tesla" === c || "psi" === c) return S.fx.push({ kind: c, x: e.x + Math.cos(o) * l * 0.8, y: e.y + Math.sin(o) * l * 0.8, z: "u" === e.e && "inf" !== e.d.kind ? 16 : 10, x2: t.x, y2: t.y, t: 0, life: "tesla" === c ? 0.25 : 0.18, c: "prism" === c ? "#7ff0ff" : "tesla" === c ? "#bfe8ff" : "#e08cff" }), "psi" !== c && damage(t, i, e.owner, e), void sfx("tesla" === c ? "tesla" : "beam");
     if ("bullet" === c || "flak" === c || "flame" === c) {
-      const r2 = "flame" === c ? 240 : 900;
-      return S.projs.push({ x: e.x + Math.cos(o) * l, y: e.y + Math.sin(o) * l, z: (e.alt || 0) + ("u" === e.e && "inf" !== e.d.kind ? 15 : 9), tgt: t, dmg: i, owner: e.owner, by: e, sp: r2, kind: c, ang: o, life: 2.5, splash: "flak" === c ? 18 : 0 }), void sfx("flame" === c ? "flame" : "gun");
+      const r2 = "flame" === c ? 240 : 900, bz = (e.alt || 0) + ("u" === e.e && "inf" !== e.d.kind ? 15 : 9), bx = e.x + Math.cos(o) * l, by = e.y + Math.sin(o) * l;
+      if (S.projs.push({ x: bx, y: by, z: bz, tgt: t, dmg: i, owner: e.owner, by: e, sp: r2, kind: c, ang: o, life: 2.5, splash: "flak" === c ? 18 : 0 }), "bullet" === c && "u" === e.e) {
+        for (const k of [1, 2]) S.projs.push({ x: bx, y: by, z: bz, tgt: t, dmg: 0, vis: 1, owner: e.owner, by: e, sp: r2 * (1 - 0.13 * k), kind: c, ang: o + rnd(-0.03, 0.03), life: 2.5, splash: 0 });
+        "inf" === e.d.kind && S.fx.push({ kind: "spark", x: e.x - Math.sin(o) * 4, y: e.y + Math.cos(o) * 4, s: 0.18, c: "#e8c060", t: 0, life: 0.25 });
+      }
+      return void sfx("flame" === c ? "flame" : "gun");
     }
-    const d = "missile" === c ? 330 : "rocket" === c ? 260 : "bomb" === c ? 200 : "aamissile" === c ? 420 : 520, pz0 = (e.alt || 0) + ("bomb" === c ? -4 : "u" === e.e && "inf" !== e.d.kind ? 15 : 9);
-    S.projs.push({ x: e.x + Math.cos(o) * l, y: e.y + Math.sin(o) * l, z: pz0, z0: pz0, t0: 0, dur: Math.max(0.4, a / d), tgt: t, dmg: i, owner: e.owner, by: e, sp: d, kind: c, ang: o, life: 6, splash: r.splash || ("shell" === c ? 14 : 20), arc: "rocket" === c ? 1 : 0, fall: "bomb" === c ? 1 : 0, tx0: t.x, ty0: t.y, d0: a }), sfx("rocket" === c ? "rocket" : "cannon");
+    const d = "missile" === c ? 330 : "rocket" === c ? 260 : "bomb" === c ? 200 : "aamissile" === c ? 420 : 520;
+    let pz0 = (e.alt || 0) + ("bomb" === c ? -4 : "u" === e.e && "inf" !== e.d.kind ? 15 : 9), ox = e.x + Math.cos(o) * l, oy = e.y + Math.sin(o) * l;
+    const rk = "missile" === c || "rocket" === c || "aamissile" === c;
+    if ("u" === e.e && e.d.fly && rk) {
+      const sd = e.podSide = -(e.podSide || 1), pw = Math.min(12, 0.45 * (e.d.radius || 14));
+      ox = e.x + Math.cos(e.ang) * 4 - Math.sin(e.ang) * pw * sd, oy = e.y + Math.sin(e.ang) * 4 + Math.cos(e.ang) * pw * sd, pz0 = (e.alt || 0) - 3;
+      S.fx.push({ kind: "spark", x: ox, y: oy, z: pz0, s: 0.4, c: "#ffd27a", t: 0, life: 0.15 });
+      for (let k = 0; k < 2; k++) S.fx.push({ kind: "smoke", x: ox - Math.cos(e.ang) * (4 + 5 * k), y: oy - Math.sin(e.ang) * (4 + 5 * k), z: pz0, s: 0.45, c: "#d6d2c8", t: 0, life: 0.7 });
+    } else if ("u" === e.e && !e.d.fly && "inf" !== e.d.kind && "shell" === c) {
+      S.fx.push({ kind: "spark", x: ox, y: oy, z: 14, s: 0.6, c: "#ffe08a", t: 0, life: 0.14 });
+      S.fx.push({ kind: "ring", x: ox, y: oy, z: 12, s: 0.22, c: "#ffd9a0", t: 0, life: 0.22 });
+      for (let k = 0; k < 3; k++) S.fx.push({ kind: "smoke", x: ox + Math.cos(o) * 4 * k + rnd(-3, 3), y: oy + Math.sin(o) * 4 * k + rnd(-3, 3), z: 14, s: 0.55 + 0.15 * k, c: "#9c968a", t: 0, life: 0.8 + 0.2 * k });
+    }
+    S.projs.push({ x: ox, y: oy, z: pz0, z0: pz0, t0: 0, dur: Math.max(0.4, a / d), tgt: t, dmg: i, owner: e.owner, by: e, sp: d, kind: c, ang: o, life: 6, splash: r.splash || ("shell" === c ? 14 : 20), arc: "rocket" === c ? 1 : 0, fall: "bomb" === c ? 1 : 0, tx0: t.x, ty0: t.y, d0: a }), sfx("rocket" === c ? "rocket" : "cannon");
   }
   function tickProjectiles(e) {
     for (const t of S.projs) {
@@ -2324,7 +2383,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const a = Math.atan2(n - t.y, r - t.x);
       t.ang = "missile" === t.kind || "rocket" === t.kind ? angLerp(t.ang, a, 0.18) : a;
       const o = t.sp * e;
-      if (t.x += Math.cos(t.ang) * o, t.y += Math.sin(t.ang) * o, t.fall ? t.z = Math.max(4, (t.z || 0) - 90 * e) : "rocket" === t.kind ? (t.t0 = (t.t0 || 0) + e, t.z = (t.z0 || 9) + 130 * Math.sin(3.1416 * Math.min(1, t.t0 / (t.dur || 1)))) : "grenade" === t.kind && (t.t0 = (t.t0 || 0) + e, t.z = (t.z0 || 9) + 42 * Math.sin(3.1416 * Math.min(1, t.t0 / (t.dur || 1)))), "flame" === t.kind && Math.random() < 0.6 && S.fx.push({ kind: "smoke", x: t.x, y: t.y, s: 0.5, c: "#ff9a3c", t: 0, life: 0.3 }), dist2(t.x, t.y, r, n) < 144 || t.life <= 0) {
+      if (t.x += Math.cos(t.ang) * o, t.y += Math.sin(t.ang) * o, t.fall ? t.z = Math.max(4, (t.z || 0) - 90 * e) : "rocket" === t.kind ? (t.t0 = (t.t0 || 0) + e, t.z = (t.z0 || 9) + 130 * Math.sin(3.1416 * Math.min(1, t.t0 / (t.dur || 1)))) : "grenade" === t.kind && (t.t0 = (t.t0 || 0) + e, t.z = (t.z0 || 9) + 42 * Math.sin(3.1416 * Math.min(1, t.t0 / (t.dur || 1)))), "flame" === t.kind && Math.random() < 0.6 && S.fx.push({ kind: "smoke", x: t.x, y: t.y, s: 0.5, c: "#ff9a3c", t: 0, life: 0.3 }), ("missile" === t.kind || "rocket" === t.kind || "aamissile" === t.kind) && Math.random() < 0.55 && S.fx.push({ kind: "smoke", x: t.x, y: t.y, z: t.z, s: 0.3, c: "#cfcac0", t: 0, life: 0.55 }), dist2(t.x, t.y, r, n) < 144 || t.life <= 0) {
+        if (t.vis) {
+          t.dead = true;
+          continue;
+        }
         if (t.dead = true, t.splash > 0) {
           boom(t.x, t.y, t.splash / 30, "#ffb03a"), damageBridgesAt(t.x, t.y, t.splash, t.dmg);
           for (const e2 of S.units) {
@@ -2515,7 +2578,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     passableAt(g, y, e) || (passableAt(g, e.y, e) ? y = e.y : passableAt(e.x, y, e) ? g = e.x : (g = e.x, y = e.y, e.stuck += t));
     const x = Math.hypot(g - e.x, y - e.y);
-    x < 0.03 ? e.stuck += t : e.stuck = 0, e.stuck > 0.8 && (e.stuck = 0, repath(e), e.path || (e.order = "miner" === e.d.role ? "harvest" : "idle")), e.x = clamp(g, 6, 2938), e.y = clamp(y, 6, 2298), e.animT = (e.animT || 0) + x, e.moving = x > 0.12, e.d.turret ? idleTurret(e, t) : e.tang = e.ang, e.moving && "inf" !== e.d.kind && (e.d.naval ? (Math.random() < 0.15 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }), !e.d.sub && (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.22, S.fx.push({ kind: "wake", x: e.x - Math.cos(e.ang) * 0.8 * e.d.radius, y: e.y - Math.sin(e.ang) * 0.8 * e.d.radius, s: e.d.radius, t: 0, life: 1.4 }))) : (Math.random() < 0.025 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 2, s: 0.22, c: "#8a7f6a", t: 0, life: 0.45 }), (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.16, S.fx.push({ kind: "track", x: e.x - Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y + Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }), S.fx.push({ kind: "track", x: e.x + Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y - Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }))));
+    x < 0.03 ? e.stuck += t : e.stuck = 0, e.stuck > 0.8 && (e.stuck = 0, repath(e), e.path || (e.order = "miner" === e.d.role ? "harvest" : "idle")), e.x = clamp(g, 6, 2938), e.y = clamp(y, 6, 2298), e.animT = (e.animT || 0) + x, e.moving = x > 0.12, e.key.startsWith("titan_") && titanStep(e), e.d.turret ? idleTurret(e, t) : e.tang = e.ang, e.moving && "inf" !== e.d.kind && (e.d.naval ? (Math.random() < 0.15 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }), !e.d.sub && (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.22, S.fx.push({ kind: "wake", x: e.x - Math.cos(e.ang) * 0.8 * e.d.radius, y: e.y - Math.sin(e.ang) * 0.8 * e.d.radius, s: e.d.radius, t: 0, life: 1.4 }))) : (Math.random() < 0.025 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 2, s: 0.22, c: "#8a7f6a", t: 0, life: 0.45 }), (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.16, S.fx.push({ kind: "track", x: e.x - Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y + Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }), S.fx.push({ kind: "track", x: e.x + Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y - Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }))));
   }
   function passableAt(e, t, r) {
     const n = Math.floor(e / 32), a = Math.floor(t / 32);
@@ -4801,21 +4864,26 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var TITAN_STAND = 13;
   var TITAN_DEP = 1.5;
   var TITAN_DROP = TITAN_STAND - TITAN_DEP;
-  function titanHipSocket(e, hx, hy, hipZ, jointMat) {
-    e.push(P_(CYL(3.2, 2.6, 10), hx, hy, hipZ + 1.1, jointMat));
-    e.push(P_(CYL(2.5, 1, 10), hx, hy, hipZ, "dark2"));
-  }
-  function titanLegsMech(e, len, wid, standH, frame, legMat, jointMat, footMat) {
-    const hipZ = standH, spanX = 0.3 * len, hipY = 0.5 * wid - 1;
+  function titanLegsMech(e, len, wid, standH, frame, legMat, jointMat, footMat, glow, armMat) {
+    glow = glow || "tesla", armMat = armMat || "body";
+    const hipZ = standH - 0.6, spanX = 0.3 * len, hipY = 0.5 * wid + 0.4, L = (a, b, t) => a + (b - a) * t;
     for (const side of [-1, 1]) for (const fb of [-1, 1]) {
-      const hx = fb * spanX, hy = side * hipY, phase = (fb > 0 ? 0 : 1) ^ (side > 0 ? 0 : 1), c = ((frame || 0) & 3) + 2 * phase & 3, raised = 1 === c ? 3 : 0, sw = [-1, 0, 1, 0][c] * 0.07 * len, kx = hx + 0.5 * sw, fx = hx + sw, kz = 0.55 * hipZ + 0.4 * raised, fz = 2 + raised;
-      titanHipSocket(e, hx, hy, hipZ, jointMat);
-      e.push(P_(DOME(2.4, 1.9, 10), hx, hy, hipZ, jointMat));
-      strut3(e, hx, hy, hipZ, kx, hy, kz, 1.7, legMat);
-      e.push(P_(CYL(1.4, 2.1, 8), kx, hy, kz, jointMat, { e: 1 }));
-      strut3(e, kx, hy, kz, fx, hy, fz, 1.15, legMat);
-      e.push(P_(CYL(1.2, 1.6, 8), fx, hy, fz, jointMat, { e: 1 }));
-      e.push(P_(BOXM(5.2, 5.8, 2, 0.4), fx, hy, fz - 1.3, footMat));
+      const hx = fb * spanX, hy = side * hipY, phase = (fb > 0 ? 0 : 1) ^ (side > 0 ? 0 : 1), c = ((frame || 0) & 3) + 2 * phase & 3, raised = 1 === c ? 2.8 : 0, sw = [-1, 0, 1, 0][c] * 0.07 * len, out = side * 2.4, kx = hx + fb * 0.12 * len + 0.5 * sw, ky = hy + out, kz = 0.68 * hipZ + raised, ax = hx + fb * 0.03 * len + sw, ay = hy + 1.25 * out, az = 3 + raised, fz = 0.5 + raised;
+      strut3(e, hx, hy - side * 2.2, hipZ, hx, hy + side * 1.6, hipZ, 2.7, jointMat);
+      e.push(P_(DOME(1.5, 0.8, 10), hx, hy + side * 1.7, hipZ - 0.9, glow, { e: 1 }));
+      strut3(e, hx, hy, hipZ, kx, ky, kz, 1.9, legMat);
+      strut3(e, L(hx, kx, 0.12), L(hy, ky, 0.12), L(hipZ, kz, 0.12), L(hx, kx, 0.72), L(hy, ky, 0.72), L(hipZ, kz, 0.72), 2.5, armMat);
+      strut3(e, hx - fb * 1.2, hy + side * 2.3, hipZ - 1.2, kx - fb * 0.6, ky + side * 1.9, kz + 1.4, 0.5, "steel");
+      strut3(e, hx - fb * 1.2, hy + side * 2.3, hipZ - 1.2, L(hx - fb * 1.2, kx, 0.45), L(hy + side * 2.3, ky + side * 1.9, 0.45), L(hipZ - 1.2, kz + 1.4, 0.45), 0.8, "darkmetal");
+      strut3(e, kx, ky - side * 1.9, kz, kx, ky + side * 1.9, kz, 1.75, jointMat);
+      e.push(P_(DOME(0.9, 0.6, 8), kx + fb * 1.1, ky + side * 1.4, kz + 0.9, glow, { e: 1 }));
+      strut3(e, kx, ky, kz, ax, ay, az, 1.35, legMat);
+      strut3(e, L(kx, ax, 0.08), L(ky, ay, 0.08), L(kz, az, 0.08), L(kx, ax, 0.66), L(ky, ay, 0.66), L(kz, az, 0.66), 1.85, armMat);
+      e.push(P_(DOME(1.6, 1.4, 10), ax, ay, az - 0.9, jointMat));
+      strut3(e, ax, ay, az, ax, ay, fz + 0.6, 1, "darkmetal");
+      e.push(P_(CYL(2.2, 0.9, 10), ax, ay, fz - 0.4, footMat));
+      for (const a of [-0.55, 0, 0.55]) e.push(P_(BOXM(4.4, 1.3, 1.2, 0.45), ax + Math.cos(a) * 2.9, ay + Math.sin(a) * 2.9, fz - 0.3, footMat, { r: a })), e.push(P_(CONE(0.7, 0.1, 1.4, 6), ax + Math.cos(a) * 5.1, ay + Math.sin(a) * 5.1, fz - 0.3, "steel", { ty: PI2, r: a }));
+      e.push(P_(BOXM(2.6, 1.5, 1.1, 0.4), ax - 2.3, ay, fz - 0.3, footMat));
     }
   }
   function titanLegsOrganic(e, len, wid, standH, frame, legMat, jointMat) {
@@ -4829,6 +4897,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       strut3(e, kx, hy, kz, fx, hy, fz, 1.05, legMat);
       e.push(P_(DOME(1.8, 1.3, 8), fx, hy, fz, legMat));
       e.push(P_(CYL(0.65, 1.1, 6), fx, hy, fz + 1.2, jointMat, { e: 1 }));
+      for (const a of [-0.6, 0, 0.6]) e.push(P_(CONE(0.7, 0.08, 3.4, 6), fx + Math.cos(a) * 1.2, hy + Math.sin(a) * 1.2, fz - 0.4, "bone", { ty: PI2 - 0.2, r: a }));
+      strut3(e, hx, hy + 0.9 * Math.sign(hy), hipZ + 0.4, kx, hy + 0.9 * Math.sign(hy), kz + 0.4, 0.28, jointMat);
+      e.push(P_(CONE(0.8, 0.1, 3, 6), kx, hy, kz + 1.4, "bone", { ty: -0.5 }));
     }
   }
   function titanDugIn(e, rad, z) {
@@ -4836,33 +4907,36 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function titanAllied(t, dep) {
     const e = [], len = 34, wid = 19, standH = dep ? TITAN_DEP : TITAN_STAND, hullH = 8.5;
-    dep ? titanDugIn(e, 0.62 * len, 1.4) : titanLegsMech(e, len, wid, standH, t, "armor2", "steel", "dark2");
-    const hullBotZ = standH, hullTopZ = hullBotZ + hullH, hullCZ = hullBotZ + hullH / 2;
-    e.push(P_(BOXM(0.86 * len, wid, hullH, 1.2), 0, 0, hullCZ, "body"));
-    e.push(P_(BOXM(0.7 * len, 0.86 * wid, 3, 0.7), -0.03 * len, 0, hullTopZ + 1.5, "trim"));
-    vent(e, -0.16 * len, 0.3 * wid, hullTopZ + 3.1, 6, 4, "darkmetal");
-    vent(e, -0.16 * len, -0.3 * wid, hullTopZ + 3.1, 6, 4, "darkmetal");
-    ladder(e, -0.42 * len, 0.5 * wid, hullBotZ + 2, hullH + 2.5, 0);
-    const headX = 0.5 * len + 3;
-    e.push(P_(DOME(4.6, 4.2, 12), headX, 0, hullCZ, "armor3"));
-    e.push(P_(BOXM(2, 7, 2, 0.3), headX + 2.2, 0, hullCZ + 0.6, "glass", { e: 1 }));
-    e.push(P_(CYL(1.2, 2.4, 8), headX - 2.5, 0, hullCZ - 3.4, "darkmetal"));
-    const chinX = headX + 3, chinZ = hullBotZ + 2;
-    e.push(P_(BOXM(3.4, 4.4, 2.2, 0.4), chinX, 0, chinZ, "gunmetal"));
-    e.push(P_(CYL(0.4, 6, 8), chinX + 2, -1, chinZ, "dark2", { ty: PI2 }));
-    e.push(P_(CYL(0.4, 6, 8), chinX + 2, 1, chinZ, "dark2", { ty: PI2 }));
-    e.push(P_(CYL(0.55, 1, 8), chinX + 7.8, -1, chinZ, "glow", { ty: PI2, e: 1 }));
-    e.push(P_(CYL(0.55, 1, 8), chinX + 7.8, 1, chinZ, "glow", { ty: PI2, e: 1 }));
+    dep ? titanDugIn(e, 0.62 * len, 1.4) : titanLegsMech(e, len, wid, standH, t, "armor2", "gunmetal", "dark2", "tesla", "body");
+    const bz = standH, top = bz + hullH, cz = bz + hullH / 2;
+    e.push(P_(BOXM(0.6 * len, 0.6 * wid, 2, 0.6), 0, 0, bz - 1.6, "dark2"));
+    e.push(P_(SLAB(hullProfile(0.92 * len, wid, "allied"), 0.58 * hullH, 2.2, "tiA1"), 0, 0, bz, "body"));
+    e.push(P_(SLAB(hullProfile(0.76 * len, 0.84 * wid, "allied"), 0.42 * hullH + 0.1, 1.7, "tiA2"), -0.04 * len, 0, bz + 0.58 * hullH, "armor2"));
+    e.push(P_(SLAB(roundRectProfile(0.5 * len, 0.62 * wid, 2.6, 2), 3, 0.9, "tiA3"), -0.06 * len, 0, top, "trim"));
     for (const sgn of [-1, 1]) {
-      const sy = sgn * (0.5 * wid + 2.4);
-      e.push(P_(BOXM(9, 4.4, 4.6, 0.6), 1, sy, hullCZ, "armor3"));
-      e.push(P_(CYL(1.5, 11, 10), 3, sy, hullCZ, "gunmetal", { ty: PI2 }));
-      e.push(P_(CYL(1.9, 2, 10), 8, sy, hullCZ, "darkmetal", { ty: PI2 }));
-      e.push(P_(CYL(2.2, 1.2, 10), 8.6, sy, hullCZ, "crystal", { ty: PI2, e: 1 }));
-      dep || e.push(P_(WEDGE(6, 4, 0.4, 2.4), -0.36 * len, sgn * (0.5 * wid + 1), hullTopZ, "trim", { r: sgn * 0.32 }));
-      acUnit(e, 0.1 * len, sgn * (0.36 * wid), hullTopZ + 3, 4, 3, 0);
+      e.push(P_(BOXM(0.56 * len, 0.3, 0.45, 0.1), -0.02 * len, sgn * (0.5 * wid + 0.08), bz + 0.46 * hullH, "tesla", { e: 1 })), e.push(P_(BOXM(0.34 * len, 0.3, 0.35, 0.1), -0.1 * len, sgn * (0.42 * wid + 0.1), top + 0.2, "tesla", { e: 1 }));
+      const sy = sgn * (0.5 * wid + 3);
+      e.push(P_(BOXM(10.5, 4.8, 4.6, 1.4), 1.5, sy, cz, "armor3"));
+      for (let k = 0; k < 3; k++) e.push(P_(BOXM(0.55, 4.4, 1.1, 0.2), -1.5 + 2.2 * k, sy, cz + 2.8, "darkmetal"));
+      e.push(P_(CYL(1.05, 12.5, 10), 5.5, sy, cz, "gunmetal", { ty: PI2 }));
+      for (const dz of [-1.3, 1.3]) e.push(P_(BOXM(11, 0.5, 0.45, 0.12), 11.5, sy, cz + dz, "tesla", { e: 1 }));
+      e.push(P_(CYL(1.7, 1.4, 10), 17.2, sy, cz, "darkmetal", { ty: PI2 }));
+      e.push(P_(CYL(1.2, 0.4, 10), 18.6, sy, cz, "crystal", { ty: PI2, e: 1 }));
+      e.push(P_(CYL(2.1, 4.4, 14), -0.46 * len - 1, sgn * 0.22 * wid, cz + 1.2, "darkmetal", { ty: -PI2 }));
+      e.push(P_(CYL(1.55, 0.5, 12), -0.46 * len - 5.3, sgn * 0.22 * wid, cz + 1.2, "tesla", { ty: -PI2, e: 1 }));
+      acUnit(e, 0.08 * len, sgn * 0.34 * wid, top + 3, 4, 3, 0);
     }
-    seams(e, 0.6 * len, 0.7 * wid, hullBotZ + 1, "dark");
+    const hx = 0.5 * len + 2.2;
+    e.push(P_(SLAB(hullProfile(10, 9.6, "allied"), 4.6, 1.8, "tiAh"), hx, 0, bz + 1.6, "armor3"));
+    e.push(P_(WEDGE(7, 8, 2.6, 0.8), hx - 0.6, 0, bz + 6.2, "armor2"));
+    e.push(P_(DOME(2.6, 1.8, 12), hx - 1.2, 0, bz + 7.4, "glass", { e: 1 }));
+    e.push(P_(BOXM(0.9, 7.8, 1.1, 0.2), hx + 4.6, 0, bz + 4.3, "tesla", { e: 1 }));
+    const chx = hx + 3.4, chz = bz + 1;
+    e.push(P_(BOXM(3.6, 4.6, 2.2, 0.5), chx, 0, chz, "gunmetal"));
+    for (const dy of [-1, 1]) e.push(P_(CYL(0.42, 6.4, 8), chx + 1.8, dy, chz + 0.3, "dark2", { ty: PI2 })), e.push(P_(CYL(0.55, 0.9, 8), chx + 8, dy, chz + 0.3, "glow", { ty: PI2, e: 1 }));
+    e.push(P_(CYL(0.18, 8, 5), -0.32 * len, 0.3 * wid, top + 3, "dark2")), e.push(P_(DOME(0.4, 0.35, 6), -0.32 * len, 0.3 * wid, top + 11, "red", { e: 1 }));
+    ladder(e, -0.44 * len, 0.5 * wid, bz + 1.5, hullH + 2.5, 0);
+    seams(e, 0.6 * len, 0.7 * wid, bz + 1, "dark");
     return scale2(e);
   }
   function titanTurretAllied(dep) {
@@ -4877,39 +4951,41 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function titanSoviet(t, dep) {
     const e = [], len = 35, wid = 20, standH = dep ? TITAN_DEP : TITAN_STAND, hullH = 9;
-    dep ? titanDugIn(e, 0.62 * len, 1.4) : titanLegsMech(e, len, wid, standH, t, "armor3", "rust", "dark2");
-    const hullBotZ = standH, hullTopZ = hullBotZ + hullH, hullCZ = hullBotZ + hullH / 2;
-    e.push(P_(BOXM(0.88 * len, wid, hullH, 0.5), 0, 0, hullCZ, "body"));
-    e.push(P_(BOXM(0.72 * len, 0.9 * wid, 3.4, 0.4), -0.04 * len, 0, hullTopZ + 1.7, "trim"));
-    bolts(e, 0, 0.42 * wid, hullCZ, 0.7 * len, 0, 6, "steel");
-    bolts(e, 0, -0.42 * wid, hullCZ, 0.7 * len, 0, 6, "steel");
-    vent(e, -0.14 * len, 0.32 * wid, hullTopZ + 3.4, 6.5, 4.2, "rust");
-    vent(e, -0.14 * len, -0.32 * wid, hullTopZ + 3.4, 6.5, 4.2, "rust");
-    ladder(e, -0.44 * len, 0.52 * wid, hullBotZ + 2, hullH + 2.8, 0);
-    pipeRun(e, 0.1 * len, 0.46 * wid, -0.2 * len, 0.46 * wid, hullTopZ + 0.5, 0.7, "rust");
-    const headX = 0.5 * len + 2.6;
-    e.push(P_(BOXM(7, 9.5, 7, 0.5), headX, 0, hullCZ, "armor2"));
-    e.push(P_(BOXM(1.8, 6.4, 1.6, 0.2), headX + 3.2, 0, hullCZ + 0.8, "glow", { e: 1 }));
-    e.push(P_(BOXM(6, 8, 1, 0.2), headX, 0, hullCZ + 3.6, "dark2"));
-    const chinX = headX + 2.6, chinZ = hullBotZ + 2;
-    e.push(P_(BOXM(3.6, 5, 2.6, 0.3), chinX, 0, chinZ, "gunmetal"));
-    e.push(P_(CYL(0.5, 6.4, 8), chinX + 2, -1.2, chinZ, "darkmetal", { ty: PI2 }));
-    e.push(P_(CYL(0.5, 6.4, 8), chinX + 2, 1.2, chinZ, "darkmetal", { ty: PI2 }));
+    dep ? titanDugIn(e, 0.62 * len, 1.4) : titanLegsMech(e, len, wid, standH, t, "armor3", "rust", "dark2", "glow", "body");
+    const bz = standH, top = bz + hullH, cz = bz + hullH / 2;
+    e.push(P_(BOXM(0.62 * len, 0.62 * wid, 2, 0.4), 0, 0, bz - 1.6, "dark2"));
+    e.push(P_(BOXM(0.9 * len, wid, 0.6 * hullH, 0.5), 0, 0, bz, "body"));
+    e.push(P_(WEDGE(0.2 * len, 0.94 * wid, 0.6 * hullH, 0.25 * hullH), 0.5 * len, 0, bz, "body"));
+    e.push(P_(BOXM(0.74 * len, 0.88 * wid, 0.4 * hullH, 0.4), -0.05 * len, 0, bz + 0.6 * hullH, "armor2"));
+    e.push(P_(BOXM(0.52 * len, 0.66 * wid, 3.4, 0.4), -0.06 * len, 0, top, "trim"));
     for (const sgn of [-1, 1]) {
-      const sy = sgn * (0.5 * wid + 2.6);
-      e.push(P_(BOXM(9.5, 4.8, 5, 0.4), 1, sy, hullCZ, "armor2"));
-      e.push(P_(CYL(1.7, 10, 4), 3, sy, hullCZ, "darkmetal", { ty: PI2 }));
-      e.push(P_(CYL(2.1, 2.4, 4), 7.5, sy, hullCZ, "rust", { ty: PI2 }));
-      e.push(P_(CYL(2.4, 1.3, 4), 8.2, sy, hullCZ, "glow", { ty: PI2, e: 1 }));
+      for (let k = 0; k < 6; k++) e.push(P_(BOXM(0.12 * len, 0.7, 2.2, 0.2), (-0.36 + 0.14 * k) * len, sgn * (0.5 * wid + 0.35), bz + 1.6, k % 2 ? "armor3" : "armor2"));
+      e.push(P_(BOXM(0.5 * len, 0.3, 0.45, 0.1), 0, sgn * (0.44 * wid + 0.2), bz + 0.6 * hullH + 0.2, "glow", { e: 1 }));
+      bolts(e, 0, sgn * 0.42 * wid, top - 0.5, 0.7 * len, 0, 6, "steel");
+      const sy = sgn * (0.5 * wid + 3.2);
+      e.push(P_(BOXM(10.5, 5.4, 5.6, 0.4), 1, sy, cz, "armor2"));
+      e.push(P_(BOXM(10.5, 1, 5.8, 0.2), 1, sy + sgn * 2.8, cz, "armor3"));
+      e.push(P_(CYL(1.6, 12, 6), 5, sy, cz, "darkmetal", { ty: PI2 }));
+      e.push(P_(BOXM(2.6, 3.8, 2.6, 0.3), 17.5, sy, cz, "rust"));
+      e.push(P_(BOXM(0.5, 3.9, 0.9, 0.1), 18.2, sy, cz, "dark2"));
+      e.push(P_(CYL(1, 0.6, 6), 19, sy, cz, "glow", { ty: PI2, e: 1 }));
+      const sx = -0.42 * len;
+      e.push(P_(CYL(1.7, 6, 10), sx, sgn * 0.26 * wid, top + 0.5, "rust"));
+      e.push(P_(CYL(2, 1.1, 10), sx, sgn * 0.26 * wid, top + 6.5, "darkmetal"));
+      e.push(P_(CYL(1.1, 0.8, 8), sx, sgn * 0.26 * wid, top + 7.4, "glow", { e: 1 }));
     }
-    const stackX = -0.4 * len, stackZ = hullTopZ + 1.7;
-    e.push(P_(CYL(1.6, 5, 10), stackX, 0.28 * wid, stackZ, "rust"));
-    e.push(P_(CYL(1.6, 5, 10), stackX, -0.28 * wid, stackZ, "rust"));
-    e.push(P_(CYL(1.9, 1, 10), stackX, 0.28 * wid, stackZ + 5, "darkmetal"));
-    e.push(P_(CYL(1.9, 1, 10), stackX, -0.28 * wid, stackZ + 5, "darkmetal"));
-    e.push(P_(CYL(1, 0.8, 8), stackX, 0.28 * wid, stackZ + 6, "glow", { e: 1 }));
-    e.push(P_(CYL(1, 0.8, 8), stackX, -0.28 * wid, stackZ + 6, "glow", { e: 1 }));
-    seams(e, 0.6 * len, 0.7 * wid, hullBotZ + 1, "dark2");
+    const hx = 0.5 * len + 2.6;
+    e.push(P_(BOXM(8, 10, 7.4, 0.6), hx, 0, bz + 1.4, "armor2"));
+    e.push(P_(WEDGE(3, 10.2, 7.4, 4.6), hx + 5.3, 0, bz + 1.4, "armor3"));
+    e.push(P_(BOXM(1.2, 7.4, 1.3, 0.2), hx + 6.4, 0, bz + 5.2, "glow", { e: 1 }));
+    e.push(P_(BOXM(6.6, 8.6, 1.2, 0.3), hx - 0.4, 0, bz + 8.8, "dark2"));
+    e.push(P_(BOXM(0.35, 2.6, 2.6, 0.1), hx + 6.9, 0, bz + 2.2, "red", { e: 1 }));
+    const chx = hx + 3.6, chz = bz + 1;
+    e.push(P_(BOXM(4, 5.4, 2.6, 0.3), chx, 0, chz, "gunmetal"));
+    for (const dy of [-1.3, 1.3]) e.push(P_(CYL(0.55, 7, 8), chx + 2, dy, chz + 0.4, "darkmetal", { ty: PI2 })), e.push(P_(BOXM(1.4, 1.4, 1.4, 0.2), chx + 9.2, dy, chz + 0.4, "rust"));
+    ladder(e, -0.45 * len, 0.52 * wid, bz + 1.5, hullH + 2.8, 0);
+    pipeRun(e, 0.1 * len, 0.46 * wid, -0.2 * len, 0.46 * wid, top + 0.5, 0.7, "rust");
+    seams(e, 0.6 * len, 0.7 * wid, bz + 1, "dark2");
     return scale2(e);
   }
   function titanTurretSoviet(dep) {
@@ -4945,7 +5021,15 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       strut3(e, 1, by, hullCZ, mx, my, mz, 1.3, "carapace");
       strut3(e, mx, my, mz, tx, ty2, tz, 0.8, "carapace2");
       e.push(P_(DOME(1.3, 1.1, 8), tx, ty2, tz, "psi", { e: 1 }));
+      const cx2 = tx + 4, cy2 = ty2 + sgn * 1.5, cz2 = tz - 2.4;
+      strut3(e, tx, ty2, tz, cx2, cy2, cz2, 0.55, "carapace");
+      for (const cl of [-0.5, 0.5]) e.push(P_(CONE(0.5, 0.05, 2.6, 6), cx2, cy2 + cl, cz2, "bone", { ty: PI2 + 0.5, r: cl * 0.6 }));
+      for (let k = 0; k < 4; k++) e.push(P_(BOXM(0.16 * len, 0.28, 0.35, 0.1), (-0.3 + 0.17 * k) * len, sgn * (0.44 * len * 0.62 + (k % 2 ? 0.4 : 0)), hullBotZ + 2.2 + 0.9 * (k % 2), "psi", { e: 1, r: sgn * (k % 2 ? 0.25 : -0.25) }));
     }
+    for (let k = 0; k < 5; k++) e.push(P_(CONE(0.9 - 0.08 * k, 0.1, 3.6 - 0.4 * k, 7), (-0.3 + 0.1 * k) * len, 0, hullTopZ + 2.2, "bone", { ty: -0.35 }));
+    e.push(P_(DOME(3.2, 3, 14), headX - 0.6, 0, hullCZ + 2.6, "glass", { e: 1 }));
+    e.push(P_(DOME(2.3, 2.1, 12), headX - 0.6, 0, hullCZ + 2.8, "flesh"));
+    e.push(P_(BOXM(0.3, 3.4, 0.3, 0.1), headX + 1.8, 0, hullCZ + 4, "psi", { e: 1 }));
     return scale2(e);
   }
   function titanTurretYuri(dep) {
@@ -7665,7 +7749,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       else if (e.target && !e.target.dead) {
         r |= 4;
         const rf = e.w && e.w.rof || e.d.rof || 1;
-        e.cool > 0.8 * rf && (r |= 8);
+        e.cool > 0.62 * rf && (24 * S.time | 0) & 1 && (r |= 8);
       }
     }
     return "miner" === e.d.role && (e.cargo > 340 && (r |= 2, (e.blue || 0) > 0.45 * e.cargo && (r |= 4)), e.unload > 0 && (r |= 8)), r;
@@ -7866,8 +7950,28 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     t.putImageData(r, 0, 0), mmCache = e;
   }
+  function radarOnline() {
+    if (S.mission && S.mission.hero) return true;
+    const p = S.players[0];
+    return !!p && hasActiveBld(0, "lab") && !(p.drain > p.power);
+  }
+  var _radarWas = null;
+  var _radarT = -9;
+  function drawMMOffline(w, h, lowPower) {
+    mctx.fillStyle = "#05080a", mctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 260; i++) {
+      const v = 40 + Math.random() * 70 | 0;
+      mctx.fillStyle = "rgb(" + v + "," + (v + 6) + "," + (v + 10) + ")", mctx.fillRect(Math.random() * w, Math.random() * h, 1 + 2 * Math.random(), 1);
+    }
+    const y = S.time * 40 % (h + 20) - 10;
+    mctx.fillStyle = "rgba(160,190,210,.08)", mctx.fillRect(0, y, w, 6), mctx.fillStyle = "rgba(5,8,10,.72)", mctx.fillRect(0, h / 2 - 19, w, 38), mctx.textAlign = "center", mctx.fillStyle = lowPower ? "#ff8a6a" : "#c8d6e0", mctx.font = "bold 11px Tahoma,sans-serif", mctx.fillText(lowPower ? "RADAR \u2014 LOW POWER" : "RADAR OFFLINE", w / 2, h / 2 - 3), mctx.fillStyle = "#8fa3bb", mctx.font = "9px Tahoma,sans-serif", mctx.fillText(lowPower ? "Build more power" : "Build a " + bname("lab", S.players[0].fac), w / 2, h / 2 + 11), mctx.textAlign = "left";
+  }
   function drawMM() {
-    const e = mm.width / DPR, t = mm.height / DPR;
+    const e = mm.width / DPR, t = mm.height / DPR, on = radarOnline();
+    if (on !== _radarWas) {
+      null !== _radarWas && (on ? (hint("Radar online"), sfx("place"), _radarT = S.time) : hint("Radar offline")), _radarWas = on;
+    }
+    if (!on) return void drawMMOffline(e, t, hasActiveBld(0, "lab"));
     mmCache || buildMMCache(), mctx.imageSmoothingEnabled = false, mctx.drawImage(mmCache, 0, 0, e, t);
     const r = e / 92, n = t / 72;
     for (let e2 = 0; e2 < 6624; e2++) G.ore[e2] > 0 && (!FOG_ON || G.vis[e2] > 0) && (mctx.fillStyle = 2 === G.tib[e2] ? "#8fd8e8" : "#d0a03a", mctx.fillRect(e2 % 92 * r, (e2 / 92 | 0) * n, Math.max(1, r), Math.max(1, n)));
@@ -8744,6 +8848,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     drawRads,
     drawLightning,
     drawVignette,
+    radarOnline,
     render,
     fpsHUD,
     drawOverlay,
@@ -9592,7 +9697,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (!seen(e2)) continue;
       const hitFlash = e2.hitT > 0 && "inf" === e2.d.kind, t2 = hitFlash ? { body: "#ffffff", dark: "#ddb8b0", trim: "#ffffff" } : palette(e2.owner), r2 = unitFrame(e2), gy = (e2.d.naval ? 0.8 : heightAt(e2.x, e2.y)) + (FPS.on && e2 === FPS.u ? 0 : unitBob(e2)), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
       let gt, tt;
-      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : "") + (hitFlash ? "|H" : "") + (e2.heroMode ? "|" + e2.heroMode : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac, heroMode: e2.heroMode }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang, void 0, void 0, (gt = groundTilt(e2, e2.ang)) ? gt[0] : e2.bank || 0, gt ? gt[1] : e2.pitchA || 0), hasTurret(e2.key) && (tt = gt && groundTilt(e2, e2.tang, 1), c("UT" + e2.key + (e2.gunKey ? "_" + e2.gunKey : "") + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }), t2, e2.x, e2.y, gy + (e2.alt || 0) + turRise, e2.tang, void 0, void 0, tt ? tt[0] : 0, tt ? tt[1] : 0)), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), "chinook" === e2.key ? c("UTR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, -(e2.rotorSpin || 0)) : c("UTRV" + e2.key + "|" + e2.owner, heliTailRotorV, t2, e2.x - 28 * Math.cos(e2.ang) - 2.2 * Math.sin(e2.ang), e2.y - 28 * Math.sin(e2.ang) + 2.2 * Math.cos(e2.ang), gy + (e2.alt || 0) + 16, e2.ang, void 0, void 0, 0, 1.4 * (+e2.rotorSpin || 0))), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
+      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : "") + (hitFlash ? "|H" : "") + (e2.heroMode ? "|" + e2.heroMode : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac, heroMode: e2.heroMode }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang, void 0, void 0, (gt = groundTilt(e2, e2.ang)) ? gt[0] : e2.bank || 0, gt ? gt[1] : e2.pitchA || 0), hasTurret(e2.key) && (tt = gt && groundTilt(e2, e2.tang, 1), c("UT" + e2.key + (e2.gunKey ? "_" + e2.gunKey : "") + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }), t2, e2.x - Math.cos(e2.tang) * 2.8 * (e2.recoil || 0), e2.y - Math.sin(e2.tang) * 2.8 * (e2.recoil || 0), gy + (e2.alt || 0) + turRise, e2.tang, void 0, void 0, tt ? tt[0] : 0, (tt ? tt[1] : 0) + 0.1 * (e2.recoil || 0))), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), "chinook" === e2.key ? c("UTR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, -(e2.rotorSpin || 0)) : c("UTRV" + e2.key + "|" + e2.owner, heliTailRotorV, t2, e2.x - 28 * Math.cos(e2.ang) - 2.2 * Math.sin(e2.ang), e2.y - 28 * Math.sin(e2.ang) + 2.2 * Math.cos(e2.ang), gy + (e2.alt || 0) + 16, e2.ang, void 0, void 0, 0, 1.4 * (+e2.rotorSpin || 0))), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
     }
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
     if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind);
@@ -11719,6 +11824,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       c.className = "qn", r.appendChild(c);
       const qx = document.createElement("div");
       qx.className = "qx", qx.style.display = "none", r.appendChild(qx);
+      const pzg = document.createElement("div");
+      pzg.className = "pz", r.appendChild(pzg);
       if ("bld" !== t.kind && "def" !== t.kind && "ability" !== t.kind) {
         const rt = unitRoleTag(t.key);
         if (rt) {
@@ -11825,6 +11932,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   var _tabEls = null;
   function updateCards() {
     const e = P();
+    document.body.dataset.fac !== e.fac && (document.body.dataset.fac = e.fac);
     const tabsEl = _tabEls || (_tabEls = document.querySelectorAll(".tab"));
     let curLocked = false;
     tabsEl.forEach((el) => {
@@ -11854,7 +11962,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
       const r2 = e.queues[t2.it.kind], n = qCount(e, t2.it.kind, t2.it.key), a = r2 && r2.list.length && r2.list[0] === t2.it.key, isBld = "bld" === t2.it.kind || "def" === t2.it.kind, o = isBld && e.ready[t2.it.kind] === t2.it.key, s = isBld ? canBuildBld(e, t2.it.key) : canBuildUnit(e, t2.it.key);
       const pz = !!(a && r2.paused && !o), pos = n ? r2.list.indexOf(t2.it.key) + 1 : 0;
-      t2.el.classList.toggle("dis", !s && !n && !o), t2.el.classList.toggle("rdy", !!o), t2.el.classList.toggle("head", !!a && !o && !pz), t2.el.classList.toggle("paused", pz), t2.el.classList.toggle("queued", !!n && !a), t2.pg.style.transform = "scaleY(" + (o ? 0 : a ? pz ? 1 : 1 - (r2.prog || 0) : n ? 1 : 0) + ")", pos && !o ? (t2.qn.style.display = "block", t2.qn.textContent = String(pos)) : t2.qn.style.display = "none", n > 1 ? (t2.qx.style.display = "block", t2.qx.textContent = "\xD7" + n) : t2.qx.style.display = "none", o ? (t2.bd.style.display = "", t2.bd.textContent = "PLACE") : pz ? (t2.bd.style.display = "", t2.bd.textContent = "\u275A\u275A") : a && r2.hold ? (t2.bd.style.display = "", t2.bd.textContent = "$") : a ? (t2.bd.style.display = "", t2.bd.textContent = Math.round(100 * (r2.prog || 0)) + "%") : t2.bd.style.display = "none";
+      t2.el.classList.toggle("dis", !s && !n && !o), t2.el.classList.toggle("rdy", !!o), t2.el.classList.toggle("head", !!a && !o && !pz), t2.el.classList.toggle("paused", pz), t2.el.classList.toggle("queued", !!n && !a), t2.pg.style.transform = "scaleY(" + (o ? 0 : a ? pz ? 1 : 1 - (r2.prog || 0) : n ? 1 : 0) + ")", pos && !o ? (t2.qn.style.display = "block", t2.qn.textContent = String(pos)) : t2.qn.style.display = "none", n > 1 ? (t2.qx.style.display = "block", t2.qx.textContent = "\xD7" + n) : t2.qx.style.display = "none", o ? (t2.bd.style.display = "", t2.bd.textContent = "PLACE") : a && r2.hold ? (t2.bd.style.display = "", t2.bd.textContent = "$") : a ? (t2.bd.style.display = "", t2.bd.textContent = Math.round(100 * (r2.prog || 0)) + "%") : t2.bd.style.display = "none";
     }
     updateTabCounts(), ((ps) => {
       selProducer(S.tab);
@@ -12206,6 +12314,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     e.preventDefault();
     camZTarget = clamp(camZTarget * (e.deltaY > 0 ? 0.9 : 1.1), 0.3, 2.3), zoomPivot = { sx: e.clientX, sy: e.clientY };
   }, { passive: false }), cv.addEventListener("contextmenu", (e) => e.preventDefault()), mm.addEventListener("pointerdown", (e) => {
+    if (!radarOnline()) return e.stopPropagation(), void hint("Radar offline \u2014 build a " + bname("lab", P().fac));
     const t = mm.getBoundingClientRect();
     cam.x = (e.clientX - t.left) / t.width * 2944, cam.y = (e.clientY - t.top) / t.height * 2304, clampCam(), e.stopPropagation();
   }), window.addEventListener("keydown", (e) => {

@@ -17,7 +17,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;color:#c4d0d8;
   font-family:"Trebuchet MS",Tahoma,system-ui,sans-serif}
-:root{--hud:#11171c;--hud2:#0b1015;--edge:#2c3d47;--amber:#f0a72c;--amber2:#ffcb62;
+:root{--hud:#11171c;--hud2:#0b1015;--edge:#2c3d47;--amber:#f0a72c;--amber2:#ffcb62;--accrgb:240 167 44;--pan1:#151d23;--pan2:#0a0f13;--pan3:#080c0f;--card1:#212c34;--card2:#161e24;
   --tib:#5ad044;--tib2:#a9ff72;--danger:#e0473a;--txt:#c4d0d8;--dim:#7d8f9a;
   --ease:cubic-bezier(.2,.8,.3,1.1);--sh1:0 1px 0 #ffffff14 inset,0 -1px 0 #00000055 inset;--sh2:0 3px 10px #0009,0 1px 0 #ffffff10 inset}
 .ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;pointer-events:none;filter:drop-shadow(0 1px 1px #0006)}
@@ -31,7 +31,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 /* ---------- Top bar ---------- */
 #top{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:center;gap:10px;
   padding:0 10px;padding-top:env(safe-area-inset-top);
-  background:linear-gradient(180deg,#161e24 0%,#0c1216 100%);
+  background:linear-gradient(180deg,var(--pan1) 0%,var(--pan2) 100%);
   border-bottom:1px solid var(--edge);box-shadow:0 2px 0 #000a, inset 0 -1px 0 #ffffff08;
   z-index:10;font-size:13px}
 #top:after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:2px;
@@ -39,7 +39,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #top .stat{display:flex;align-items:center;gap:5px;white-space:nowrap}
 #top .lab{color:var(--dim);font-size:9px;letter-spacing:1.4px;text-transform:uppercase}
 #credits{color:var(--amber2);font-weight:bold;font-variant-numeric:tabular-nums;
-  font-family:"Courier New",monospace;letter-spacing:1px;text-shadow:0 0 8px #f0a72c66}
+  font-family:"Courier New",monospace;letter-spacing:1px;text-shadow:0 0 8px rgb(var(--accrgb) / 40%)}
 #power{font-weight:bold}
 .pbar{width:56px;height:8px;background:#070b0e;border:1px solid var(--edge);overflow:hidden;
   clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)}
@@ -63,7 +63,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 
 /* ---------- Sidebar ---------- */
 #side{position:fixed;left:0;right:0;bottom:0;z-index:12;
-  background:linear-gradient(180deg,#151d23 0%,#0a0f13 42%,#080c0f 100%);
+  background:linear-gradient(180deg,var(--pan1) 0%,var(--pan2) 42%,var(--pan3) 100%);
   border-top:1px solid var(--edge);box-shadow:0 -3px 16px #000b, inset 0 1px 0 #ffffff10;
   padding-bottom:env(safe-area-inset-bottom)}
 #side:before{content:'';position:absolute;left:0;right:0;top:-2px;height:2px;
@@ -81,7 +81,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   transition:transform .1s var(--ease),background .15s,color .15s}
 .tab:active{transform:translateY(1px) scale(.96)}
 .tab.on{background:linear-gradient(160deg,#324352 0%,#182026 100%);color:var(--amber2);
-  box-shadow:inset 0 -2px 0 var(--amber),0 -2px 10px #f0a72c26}
+  box-shadow:inset 0 -2px 0 var(--amber),0 -2px 10px rgb(var(--accrgb) / 15%)}
 .tab.locked{opacity:.35;pointer-events:none}
 #cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px;padding:6px;
   max-height:104px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;
@@ -90,7 +90,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #cards::-webkit-scrollbar{width:4px}
 #cards::-webkit-scrollbar-thumb{background:#3b5474;border-radius:3px}
 .card{position:relative;height:92px;overflow:hidden;
-  background:linear-gradient(165deg,#212c34 0%,#161e24 45%,#0a0f12 100%);border:1px solid var(--edge);
+  background:linear-gradient(165deg,var(--card1) 0%,var(--card2) 45%,#0a0f12 100%);border:1px solid var(--edge);
   box-shadow:var(--sh1);
   clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
   display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:3px;
@@ -109,7 +109,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   border-radius:3px;padding:1px 4px;color:#fff;display:none}
 .card .role{position:absolute;bottom:35px;left:3px;font-size:7px;font-weight:bold;line-height:1;
   padding:1px 3px;border-radius:3px;color:#0a0f12;letter-spacing:.2px;pointer-events:none}
-.card.head{border-color:var(--amber);box-shadow:0 0 10px #f0a72c55, inset 0 0 14px #f0a72c1a,var(--sh1)}
+.card.head{border-color:var(--amber);box-shadow:0 0 10px rgb(var(--accrgb) / 33%), inset 0 0 14px rgb(var(--accrgb) / 10%),var(--sh1)}
 .card.rdy{border-color:var(--tib);box-shadow:0 0 10px #5ad04466, inset 0 0 14px #5ad04422,var(--sh1);animation:cardPulse 1.4s ease-in-out infinite}
 .card.rdy .nm{color:var(--tib2)}
 @keyframes cardPulse{0%,100%{box-shadow:0 0 10px #5ad04466, inset 0 0 14px #5ad04422,var(--sh1)}50%{box-shadow:0 0 18px #5ad044aa, inset 0 0 18px #5ad04440,var(--sh1)}}
@@ -168,7 +168,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   transition:transform .12s var(--ease),filter .15s,box-shadow .15s,border-color .15s}
 .cbtn:active{transform:scale(.93);filter:brightness(1.22)}
 .cbtn.on{background:linear-gradient(155deg,#4a3a16 0%,#2e230d 60%,#1b1508 100%);border-color:var(--amber);color:var(--amber2);
-  box-shadow:0 0 10px #f0a72c44,var(--sh1)}
+  box-shadow:0 0 10px rgb(var(--accrgb) / 27%),var(--sh1)}
 .cbtn.icon{font-size:17px;line-height:1;padding:7px 6px}
 
 /* ---------- Overlays ---------- */
@@ -177,7 +177,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   background:#05080bd8;border:1px solid var(--amber);padding:6px 14px;font-size:12px;
   color:var(--amber2);pointer-events:none;opacity:0;transition:opacity .25s;letter-spacing:.4px;
   clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
-  box-shadow:0 0 18px #f0a72c22}
+  box-shadow:0 0 18px rgb(var(--accrgb) / 13%)}
 #hint.show{opacity:1}
 #tutorialPanel{position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:9;
   max-width:260px;background:#05080bd8;border:1px solid var(--amber);border-radius:8px;padding:10px 12px;
@@ -241,7 +241,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   transition:transform .12s var(--ease),filter .15s,box-shadow .15s}
 .opt:active{transform:scale(.94);filter:brightness(1.2)}
 .opt.on{border-color:var(--amber);background:linear-gradient(160deg,#3d3012 0%,#1d180a 100%);color:var(--amber2);
-  box-shadow:0 0 12px #f0a72c44,var(--sh1)}
+  box-shadow:0 0 12px rgb(var(--accrgb) / 27%),var(--sh1)}
 .opt small{display:block;font-size:9px;color:#8fa3bb;margin-top:2px}
 .opt.on small{color:#bcd6f2}
 .opts.wrap{flex-wrap:wrap}
@@ -560,14 +560,45 @@ body.sidebar .cbtn.icon[data-l]:after{font-size:8px}
 
 /* ---- per-card queue display ---- */
 .card .qn{top:2px;left:3px;min-width:14px;text-align:center;background:#c2801eee;font-family:"Courier New",monospace}
-.card .qx{position:absolute;top:36px;right:4px;font-size:11px;font-weight:bold;color:#fff;background:#000b;border:1px solid #f0a72c88;
-  border-radius:3px;padding:0 4px;line-height:14px;pointer-events:none;font-family:"Courier New",monospace}
+.card .qx{position:absolute;bottom:3px;right:3px;z-index:2;font-size:10.5px;font-weight:bold;color:#fff;background:#000c;border:1px solid var(--amber);
+  padding:0 4px;line-height:14px;pointer-events:none;font-family:"Courier New",monospace;
+  clip-path:polygon(3px 0,100% 0,100% 100%,0 100%,0 3px)}
+.card .pz{position:absolute;left:50%;top:26px;width:26px;height:26px;margin-left:-13px;border-radius:50%;z-index:2;pointer-events:none;display:none;
+  background:radial-gradient(circle,#0d1418e6 60%,#0d141800 72%);box-shadow:0 0 0 1.5px #cfe0eecc,0 0 10px #000}
+.card .pz:before,.card .pz:after{content:"";position:absolute;top:8px;width:3px;height:10px;border-radius:2px;background:#e6f0f8}
+.card .pz:before{left:9px}.card .pz:after{right:9px}
+.card.paused .pz{display:block}
+.card.paused .badge{display:none!important}
 .card.queued .prog{background:#000a}
 .card.paused .prog{background:#000c}
 .card.paused{border-color:#8fa3bb}
-.card.paused .badge{background:#8fa3bbdd;color:#0a0f12}
 .tab .tc.pz{background:#8fa3bb}
-@media (max-height:500px){.card .qx{top:26px;font-size:10px;line-height:12px}}
+@media (max-height:500px){.card .qx{font-size:9.5px;line-height:12px}.card .pz{top:18px;transform:scale(.8)}}
+
+/* ---- portrait: command row fits ---- */
+@media (max-width:620px){
+  body:not(.sidebar) #ctrls{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:4px 5px 5px;overflow:visible}
+  body:not(.sidebar) .cbtn{min-width:0;padding:8px 1px;font-size:9px;letter-spacing:.2px}
+  body:not(.sidebar) .cbtn[data-s]{font-size:0}
+  body:not(.sidebar) .cbtn[data-s]:after{content:attr(data-s);font-size:9.5px;letter-spacing:.4px}
+  body:not(.sidebar) .cbtn.icon .ico{width:18px;height:18px}
+}
+
+/* ---- faction UI themes ---- */
+body[data-fac=allied]{--amber:#4fb3ff;--amber2:#a6ddff;--accrgb:79 179 255;--edge:#2b4459;--dim:#7f97aa;
+  --pan1:#13212d;--pan2:#0a121a;--pan3:#070c12;--card1:#1d2d3b;--card2:#142230}
+body[data-fac=soviet]{--amber:#e5533b;--amber2:#ff9f80;--accrgb:229 83 59;--edge:#50302a;--dim:#9a8580;
+  --pan1:#24160f;--pan2:#140c08;--pan3:#0d0806;--card1:#33211a;--card2:#241712}
+body[data-fac=yuri]{--amber:#b57bff;--amber2:#ddb9ff;--accrgb:181 123 255;--edge:#40305a;--dim:#9486a8;
+  --pan1:#1d1428;--pan2:#100b18;--pan3:#0a0710;--card1:#2a1f3a;--card2:#1d152b}
+body[data-fac=soviet] #top .lab,body[data-fac=soviet] .tab span{letter-spacing:2px;font-weight:bold}
+body[data-fac=soviet] .card{clip-path:polygon(11px 0,100% 0,100% calc(100% - 11px),calc(100% - 11px) 100%,0 100%,0 11px)}
+body[data-fac=yuri] .card,body[data-fac=yuri] .cbtn,body[data-fac=yuri] #prodstrip .pc{clip-path:none;border-radius:9px}
+body[data-fac=yuri] .tab,body[data-fac=yuri] #more{clip-path:none;border-radius:10px 10px 0 0}
+body[data-fac=yuri] #mmWrap{clip-path:none;border-radius:14px}
+body[data-fac=allied] .card{clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+body[data-fac=allied] .card.head,body[data-fac=allied] .tab.on{box-shadow:inset 0 -2px 0 var(--amber),0 0 12px rgb(var(--accrgb) / 30%)}
+body[data-fac] #top .stat #credits{color:var(--amber2)}
 </style>
 </head>
 <body>
