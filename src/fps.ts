@@ -23,148 +23,14 @@ function fpsReload(){const vm=FPS.vm;if(!vm||!FPS.u||FPS.u.dead)return;const mag
 function fpsShoot(e){if(e.cool>0)return;const vm=FPS.vm,magSize=vm&&MAG_SIZE[vm.userData.magFamily];if(magSize&&vm.userData.reloadT>0)return;if(magSize&&null==vm.userData.mag)vm.userData.mag=magSize;const t=e.d,w=heroWpn(e),n=Math.cos(FPS.yaw),a=Math.sin(FPS.yaw),r=1.05*(w.range||120)*(FPS.aiming?1.2:1),o=fpsAimTarget(e);FPS.viewKick=Math.min(.09,(FPS.viewKick||0)+.028),o?(e.cool=w.rof*vRof(e),"mind"!==t.role?fire(e,o,w):mindTick(e,o)):"mind"!==t.role&&w.dmg>0&&(e.cool=w.rof*vRof(e),fire(e,{x:e.x+n*r,y:e.y+a*r,e:"u",d:{armor:"veh"},dead:!1} as any,w));magSize&&(vm.userData.akimbo&&(vm.userData.altFire=!vm.userData.altFire),spawnShell(vm),vm.userData.mag--,vm.userData.mag<=0&&(vm.userData.reloadT=RELOAD_DUR,vm.userData.mag=0))}
 const FPS_ABILITIES={bullet:{name:"FRAG\nGRENADE",cd:9},flame:{name:"FLAME\nBURST",cd:7},missile:{name:"DIG\nIN",cd:1.5},rocket:{name:"DIG\nIN",cd:1.5}};
 function fpsAbilityInfo(e){return e&&"inf"===e.d.kind?FPS_ABILITIES[e.d.proj]||null:null}
-function throwGrenade(e){const n=Math.cos(FPS.yaw),a=Math.sin(FPS.yaw),range=150,tx=e.x+n*range,ty=e.y+a*range,sp=230;spark(e.x+n*16,e.y+a*16,"#ffb060"),S.projs.push({x:e.x+n*14,y:e.y+a*14,z:9,z0:9,t0:0,dur:Math.max(.4,range/sp),tgt:null,dmg:42,owner:e.owner,by:e,sp,kind:"grenade",ang:FPS.yaw,life:3,splash:55,tx0:tx,ty0:ty,d0:range})}
+function throwGrenade(e){fpsViewmodelThrow();const n=Math.cos(FPS.yaw),a=Math.sin(FPS.yaw),range=150,tx=e.x+n*range,ty=e.y+a*range,sp=230;spark(e.x+n*16,e.y+a*16,"#ffb060"),S.projs.push({x:e.x+n*14,y:e.y+a*14,z:9,z0:9,t0:0,dur:Math.max(.4,range/sp),tgt:null,dmg:42,owner:e.owner,by:e,sp,kind:"grenade",ang:FPS.yaw,life:3,splash:55,tx0:tx,ty0:ty,d0:range})}
 function flameNova(e){const radius=70,dmg=28;boom(e.x,e.y,2.2,"#ff8a3c");for(const u of S.units){if(u.dead||u===e||u.owner===e.owner||teamOf(u.owner)===teamOf(e.owner))continue;const d=dist(u.x,u.y,e.x,e.y);d<radius&&damage(u,dmg*(1-d/radius),e.owner,e)}sfx("flame"),textFx(e.x,e.y-24,"FLAME BURST","#ff8a3c")}
 function fpsAbility(){const e=FPS.u;if(!e||e.dead)return;const info=fpsAbilityInfo(e);if(!info)return void hint("No special ability for this unit");if(e.abilityCD>0)return;const kind=e.d.proj;"bullet"===kind?throwGrenade(e):"flame"===kind?flameNova(e):("missile"===kind||"rocket"===kind)&&e.d.deploy&&toggleDeploy(e),e.abilityCD=info.cd}
 function fpsToggleWeapon(){const e=FPS.u;e&&e.d.modes&&(toggleHeroWeapon(e),hint("sniper"===e.heroMode?"SNIPER MODE":"MACHINE GUN MODE"),sfx("sel"))}
 function fpsAbilityDown(){const e=FPS.u,info=e&&fpsAbilityInfo(e);info&&!(e.abilityCD>0)&&"bullet"===e.d.proj?FPS.chargingGrenade=!0:fpsAbility()}
-function fpsAbilityUp(){FPS.chargingGrenade&&(FPS.chargingGrenade=!1,fpsAbility())}function buildViewmodel(kind){
-const g=new THREE.Group,mat=(c,r,mm)=>new THREE.MeshStandardMaterial({color:c,roughness:null==r?.55:r,metalness:null==mm?.4:mm}),
-mesh=(geo,m,x?,y?,z?,rx?,ry?,rz?)=>{const o=new THREE.Mesh(geo,m);return o.position.set(x||0,y||0,z||0),rx&&(o.rotation.x=rx),ry&&(o.rotation.y=ry),rz&&(o.rotation.z=rz),g.add(o),o};
-g.userData.kind=kind;
-if("melee"===kind||!kind){
-mesh(new THREE.CylinderGeometry(.014,.017,.11,8),mat("#3a2420",.7,.15),.05,-.09,-.05,0,0,1.15);
-mesh(new THREE.BoxGeometry(.06,.012,.012),mat("#4a4a4a",.4,.7),.05,-.045,-.09,0,0,1.15);
-mesh(new THREE.BoxGeometry(.028,.006,.19),mat("#c8ccd0",.25,.85),.05,-.03,-.2,0,0,1.15);
-mesh(new THREE.ConeGeometry(.014,.045,8),mat("#c8ccd0",.25,.85),.05,-.03,-.31,-Math.PI/2,0,1.15);
-return g.visible=!1,g}
-const dark=mat("#20262a",.5,.5),metal=mat("#626a70",.32,.78),grip=mat("#2c2318",.75,.12),accent=mat("#b8863c",.4,.6);
-const addMuzzleLight=flash=>{const l=new THREE.PointLight(16755610,0,1.3,2);l.position.copy(flash.position),g.add(l),g.userData.muzzleLight=l};
-if("rocket"===kind||"missile"===kind){
-const big="rocket"===kind,tr=big?.062:.05,tl=big?.62:.5,dark2=mat("#232a2e",.55,.4),warhead=mat("#7a2a20",.5,.4),ox=.16,oy=.09,capZ=-.18-tl/2;
-mesh(new THREE.CylinderGeometry(tr,tr+.006,tl,10),metal,ox,oy,-.18,Math.PI/2);
-mesh(new THREE.CylinderGeometry(tr+.02,tr+.02,.05,12),dark2,ox,oy,capZ-.02,Math.PI/2);
-mesh(new THREE.ConeGeometry(tr+.008,.13,10),warhead,ox,oy,capZ-.09,-Math.PI/2);
-mesh(new THREE.TorusGeometry(tr+.006,.01,6,12),accent,ox,oy,-.18-tl*.15,Math.PI/2);
-mesh(new THREE.CylinderGeometry(tr+.02,tr+.02,.05,12),dark2,ox,oy,-.18+tl/2+.02,Math.PI/2);
-mesh(new THREE.BoxGeometry(.06,.09,.16),grip,ox-.03,oy-.12,.05,.14);
-mesh(new THREE.BoxGeometry(.08,.1,.22),dark,ox-.02,oy-.02,.32,.06);
-mesh(new THREE.CylinderGeometry(.02,.023,.22,8),dark,ox,oy+tr+.03,-.1,Math.PI/2);
-mesh(new THREE.CylinderGeometry(.017,.017,.015,10),metal,ox,oy+tr+.03,-.19);
-const flash=mesh(new THREE.ConeGeometry(.05,.13,6),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}),ox,oy,capZ-.14,Math.PI/2);
-return flash.visible=!1,g.userData.flash=flash,addMuzzleLight(flash),g.visible=!1,g}
-if("pistol"===kind){
-mesh(new THREE.BoxGeometry(.04,.065,.16),metal,.065,-.03,-.12);
-mesh(new THREE.BoxGeometry(.032,.05,.1),grip,.065,-.09,-.02,.35);
-mesh(new THREE.BoxGeometry(.043,.02,.05),dark,.065,.005,-.05);
-mesh(new THREE.TorusGeometry(.017,.004,6,10),metal,.065,-.058,-.04,Math.PI/2);
-mesh(new THREE.BoxGeometry(.03,.006,.03),dark,.065,-.09,-.055);
-mesh(new THREE.BoxGeometry(.04,.065,.16),metal,-.065,-.03,-.12);
-mesh(new THREE.BoxGeometry(.032,.05,.1),grip,-.065,-.09,-.02,.35);
-mesh(new THREE.BoxGeometry(.043,.02,.05),dark,-.065,.005,-.05);
-mesh(new THREE.TorusGeometry(.017,.004,6,10),metal,-.065,-.058,-.04,Math.PI/2);
-mesh(new THREE.BoxGeometry(.03,.006,.03),dark,-.065,-.09,-.055);
-const flash=mesh(new THREE.ConeGeometry(.03,.08,6),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}),.065,-.03,-.21,Math.PI/2);
-const flash2=mesh(new THREE.ConeGeometry(.03,.08,6),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}),-.065,-.03,-.21,Math.PI/2);
-flash2.visible=!1,g.userData.flash2=flash2;
-const l2=new THREE.PointLight(16755610,0,1.3,2);l2.position.copy(flash2.position),g.add(l2),g.userData.muzzleLight2=l2;
-return flash.visible=!1,g.userData.flash=flash,g.userData.magFamily="pistol",g.userData.akimbo=!0,addMuzzleLight(flash),g.visible=!1,g}
-if("tool"===kind){
-mesh(new THREE.CylinderGeometry(.03,.034,.22,10),mat("#b8863c",.5,.65),0,-.03,-.16,Math.PI/2);
-mesh(new THREE.BoxGeometry(.055,.06,.08),grip,0,-.09,-.02,.2);
-mesh(new THREE.SphereGeometry(.026,10,8),new THREE.MeshStandardMaterial({color:"#8fe0ff",emissive:"#3fa8d8",emissiveIntensity:1.2,roughness:.25}),0,-.03,-.28);
-return g.visible=!1,g}
-mesh(new THREE.BoxGeometry(.065,.088,.34),dark,0,0,-.06);
-mesh(new THREE.BoxGeometry(.05,.05,.15),grip,0,-.075,.09,.3);
-mesh(new THREE.BoxGeometry(.022,.03,.055),metal,0,.052,-.09);
-mesh(new THREE.BoxGeometry(.012,.05,.012),metal,0,.078,-.09);
-mesh(new THREE.BoxGeometry(.05,.03,.16),dark,0,.05,-.2);
-mesh(new THREE.BoxGeometry(.01,.028,.07),metal,.037,.015,-.1);
-mesh(new THREE.BoxGeometry(.05,.052,.15),dark,0,-.008,.14,.045);
-mesh(new THREE.BoxGeometry(.052,.02,.045),mat("#141414",.6,.2),0,-.045,.21,.045);
-mesh(new THREE.TorusGeometry(.024,.005,6,10),metal,0,-.096,.05,Math.PI/2);
-mesh(new THREE.BoxGeometry(.007,.024,.01),metal,0,-.086,.048);
-let frontZ=-.32;
-if("flame"===kind){
-mesh(new THREE.CylinderGeometry(.05,.06,.32,10),metal,0,-.02,-.34,Math.PI/2);
-mesh(new THREE.ConeGeometry(.048,.1,10),accent,0,-.02,-.53,Math.PI/2);
-mesh(new THREE.CylinderGeometry(.045,.045,.24,10),mat("#7a3a1c",.6,.3),.08,-.05,.03,0,0,.15);
-mesh(new THREE.TorusGeometry(.046,.006,6,12),dark,.055,-.05,-.06,0,.15,Math.PI/2);
-mesh(new THREE.TorusGeometry(.046,.006,6,12),dark,.1,-.05,.11,0,.15,Math.PI/2);
-mesh(new THREE.CylinderGeometry(.012,.012,.05,8),mat("#8a8f94",.4,.6),.08,-.02,-.09);
-frontZ=-.5
-}else if("sniper"===kind){
-mesh(new THREE.CylinderGeometry(.013,.015,.58,8),metal,0,.014,-.42,Math.PI/2);
-mesh(new THREE.CylinderGeometry(.026,.026,.14,10),dark,0,.058,-.3);
-mesh(new THREE.CylinderGeometry(.019,.019,.02,10),metal,0,.058,-.23,Math.PI/2);
-mesh(new THREE.CylinderGeometry(.019,.019,.02,10),metal,0,.058,-.37,Math.PI/2);
-const bolt=mesh(new THREE.CylinderGeometry(.008,.008,.05,8),metal,.032,.02,-.16,0,0,Math.PI/2);
-g.userData.bolt=bolt;
-mesh(new THREE.CylinderGeometry(.006,.006,.13,6),dark,-.03,-.06,-.5,0,0,.5);
-mesh(new THREE.CylinderGeometry(.006,.006,.13,6),dark,.03,-.06,-.5,0,0,-.5);
-frontZ=-.72,g.userData.magFamily="sniper"
-}else if("flak"===kind){
-mesh(new THREE.CylinderGeometry(.023,.023,.42,8),metal,-.032,0,-.35,Math.PI/2);
-mesh(new THREE.CylinderGeometry(.023,.023,.42,8),metal,.032,0,-.35,Math.PI/2);
-mesh(new THREE.BoxGeometry(.1,.08,.1),dark,0,-.02,-.06);
-mesh(new THREE.BoxGeometry(.045,.17,.06),dark,0,-.14,-.05,-.2);
-mesh(new THREE.BoxGeometry(.03,.09,.05),dark,.07,-.06,-.14,0,0,-.15);
-mesh(new THREE.BoxGeometry(.09,.02,.05),metal,0,.05,-.08);
-mesh(new THREE.BoxGeometry(.015,.03,.015),accent,-.032,.07,-.12);
-mesh(new THREE.BoxGeometry(.015,.03,.015),accent,.032,.07,-.12);
-frontZ=-.54,g.userData.magFamily="flak"
-}else if(0===kind.indexOf("beam")){
-const beamCol="beam_temporal"===kind?"#eaf7ff":"beam_drain"===kind?"#c98cff":"#7ff0ff",
-  beamEmis="beam_temporal"===kind?"#bfe8ff":"beam_drain"===kind?"#9a4fe0":"#3fd8ff";
-mesh(new THREE.CylinderGeometry(.026,.03,.38,8),mat("#3a4a52",.3,.8),0,0,-.34,Math.PI/2);
-mesh(new THREE.OctahedronGeometry(.045,0),new THREE.MeshStandardMaterial({color:beamCol,emissive:beamEmis,emissiveIntensity:1.5,roughness:.2}),0,0,-.55);
-mesh(new THREE.TorusGeometry(.034,.008,6,10),"beam_temporal"===kind?mat(beamEmis,.3,.6):accent,0,0,-.4,Math.PI/2);
-"beam_drain"===kind&&mesh(new THREE.TorusGeometry(.05,.006,6,12),mat(beamEmis,.3,.4),0,0,-.5,Math.PI/2);
-mesh(new THREE.CylinderGeometry(.03,.03,.1,8),new THREE.MeshStandardMaterial({color:beamCol,emissive:beamEmis,emissiveIntensity:.9,roughness:.3}),0,-.09,-.04);
-mesh(new THREE.BoxGeometry(.05,.014,.16),mat("#3a4a52",.3,.8),0,.06,-.2);
-frontZ=-.55
-}else{
-mesh(new THREE.CylinderGeometry(.014,.016,.4,8),metal,0,.012,-.34,Math.PI/2);
-mesh(new THREE.CylinderGeometry(.021,.021,.03,8),dark,0,.012,-.53,Math.PI/2);
-mesh(new THREE.BoxGeometry(.045,.13,.045),grip,0,-.09,-.11,-.22);
-mesh(new THREE.CylinderGeometry(.017,.017,.04,10),dark,0,.068,-.26);
-frontZ=-.53,g.userData.magFamily="rifle"
-}
-mesh(new THREE.BoxGeometry(.012,.05,.012),metal,0,.05,frontZ+.02);
-mesh(new THREE.BoxGeometry(.026,.045,.075),grip,0,-.058,frontZ*.5,.08);
-"rifle"===g.userData.magFamily&&mesh(new THREE.BoxGeometry(.028,.1,.05),dark,0,-.115,-.06,.16);
-"sniper"===g.userData.magFamily&&mesh(new THREE.BoxGeometry(.022,.05,.035),dark,0,-.09,-.15,.1);
-const flash=mesh(new THREE.ConeGeometry(.038,.1,6),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}),0,.012,frontZ-.02,Math.PI/2);
-flash.visible=!1,g.userData.flash=flash,addMuzzleLight(flash);
-return g.visible=!1,g}
-function ensureViewmodel(kind){return FPS.vm&&FPS.vm.userData.kind===kind?FPS.vm:(FPS.vm&&FPS.cam.remove(FPS.vm),FPS.vm=buildViewmodel(kind),FPS.cam.add(FPS.vm),FPS.vm)}
-function buildVehicleViewmodel(e){
-  const g=new THREE.Group,dark=new THREE.MeshStandardMaterial({color:2371630,roughness:.55,metalness:.55}),
-    metal=new THREE.MeshStandardMaterial({color:5658466,roughness:.35,metalness:.75}),
-    scale=clamp((e.d.radius||14)/14,.75,2.1),armed=e.d.dmg>0&&"psi"!==e.d.proj;
-  g.userData.kind=e.key,g.userData.scale=scale;
-  const naval=!!e.d.naval,fly=!!e.d.fly;
-  const rimY=fly?-.5:naval?-.46:-.42;
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.5,.05,.5),dark)).position.set(0,rimY,-.55);
-  const cowlL=new THREE.Mesh(new THREE.BoxGeometry(.16,.22,.4),dark);cowlL.position.set(-.62,rimY+.12,-.55),g.add(cowlL);
-  const cowlR=new THREE.Mesh(new THREE.BoxGeometry(.16,.22,.4),dark);cowlR.position.set(.62,rimY+.12,-.55),g.add(cowlR);
-  let flash=null;
-  if(armed){
-    const barrelLen=.55*scale,barrelR=.045*scale,ox=hasTurret(e.key)?0:.14;
-    const barrel=new THREE.Mesh(new THREE.CylinderGeometry(barrelR,barrelR*1.15,barrelLen,10),metal);
-    barrel.rotation.x=Math.PI/2,barrel.position.set(ox,rimY+.16,-.4-barrelLen/2);
-    g.add(barrel);
-    const collar=new THREE.Mesh(new THREE.CylinderGeometry(barrelR*1.4,barrelR*1.4,.08*scale,10),dark);
-    collar.rotation.x=Math.PI/2,collar.position.set(ox,rimY+.16,-.42),g.add(collar);
-    flash=new THREE.Mesh(new THREE.ConeGeometry(barrelR*2.2,.24*scale,8),new THREE.MeshBasicMaterial({color:"#ffe9a0",transparent:!0,opacity:.95,depthWrite:!1}));
-    flash.rotation.x=Math.PI/2,flash.position.set(ox,rimY+.16,-.4-barrelLen-.05*scale),flash.visible=!1,g.add(flash);
-    const l=new THREE.PointLight(16755610,0,1.6,2);l.position.copy(flash.position),g.add(l),g.userData.muzzleLight=l;
-  }
-  g.userData.flash=flash;
-  return g;
-}
-function ensureVehicleViewmodel(e){return FPS.vvm&&FPS.vvm.userData.kind===e.key?FPS.vvm:(FPS.vvm&&FPS.cam.remove(FPS.vvm),FPS.vvm=buildVehicleViewmodel(e),FPS.cam.add(FPS.vvm),FPS.vvm)}
-function spawnShell(vm){const flash=vm.userData.akimbo&&vm.userData.altFire?vm.userData.flash2:vm.userData.flash;if(!flash)return;const bx=flash.position.x+.03,by=flash.position.y-.01,bz=flash.position.z+.15,m=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.018,6),new THREE.MeshStandardMaterial({color:14071847,roughness:.3,metalness:.8}));m.position.set(bx,by,bz),m.userData.t0=S.time,m.userData.bx=bx,m.userData.by=by,m.userData.bz=bz,m.userData.dx=.22+.18*Math.random(),m.userData.dy=.3+.2*Math.random(),m.userData.dz=.12*(Math.random()-.5),vm.add(m),(vm.userData.shells=vm.userData.shells||[]).push(m)}
+function fpsAbilityUp(){FPS.chargingGrenade&&(FPS.chargingGrenade=!1,fpsAbility())}function ensureViewmodel(kind){const u=FPS.u,vk=kind+"|"+(u&&u.key)+"|"+(u&&u.owner);if(FPS.vm&&FPS.vm.userData.vk===vk)return FPS.vm;FPS.vm&&FPS.vm.parent&&FPS.vm.parent.remove(FPS.vm);FPS.vm=fpsBuildViewmodel(kind,u);FPS.vm.userData.vk=vk;return FPS.vm}
+function ensureVehicleViewmodel(e){const vk=e.key+"|"+e.owner;if(FPS.vvm&&FPS.vvm.userData.vk===vk)return FPS.vvm;FPS.vvm&&FPS.vvm.parent&&FPS.vvm.parent.remove(FPS.vvm);FPS.vvm=fpsBuildCockpit(e);FPS.vvm.userData.vk=vk;return FPS.vvm}
+function spawnShell(vm){const ej=vm.userData.eject;if(!ej)return;vm.updateMatrixWorld(!0);const p=ej.getWorldPosition(new THREE.Vector3());vm.worldToLocal(p);const bx=p.x,by=p.y,bz=p.z,m=new THREE.Mesh(new THREE.CylinderGeometry(.0045,.0045,.02,8),new THREE.MeshStandardMaterial({color:14071847,roughness:.3,metalness:.85}));m.position.set(bx,by,bz),m.userData.t0=S.time,m.userData.bx=bx,m.userData.by=by,m.userData.bz=bz,m.userData.dx=.35+.2*Math.random(),m.userData.dy=.28+.2*Math.random(),m.userData.dz=.1+.1*Math.random(),vm.add(m),(vm.userData.shells=vm.userData.shells||[]).push(m)}
 function tickShells(vm){const shells=vm.userData.shells;if(!shells||!shells.length)return;for(let i=shells.length-1;i>=0;i--){const s=shells[i],dt=S.time-s.userData.t0;if(dt>.45){vm.remove(s),shells.splice(i,1);continue}s.position.set(s.userData.bx+s.userData.dx*dt,s.userData.by+s.userData.dy*dt-2.4*dt*dt,s.userData.bz+s.userData.dz*dt),s.rotation.x=16*dt,s.rotation.z=11*dt}}
 const VM_KEY={marksman:"sniper",engineer:"tool",chrono:"beam_temporal",vindicator:"beam_plasma",leech:"beam_drain"};
 function unitViewmodelKind(e){return e.heroMode?("sniper"===e.heroMode?"sniper":"rifle"):VM_KEY[e.key]||e.d.proj||"rifle"}
@@ -506,22 +372,22 @@ function syncInteriorFigures(bld){
   const figMap=bld.interior.userData.figMap||(bld.interior.userData.figMap=new Map),list=(bld.garrison||[]).filter(u=>u!==FPS.u&&!u.dead),floorZ=bld.d.roof?FLOOR_Z:0;
   list.forEach((u,idx)=>{
     let f=figMap.get(u);
-    f||(f=humanFigure(palette(u.owner).body||"#888"),f.userData.seed=Math.random()*6.283,bld.interior.add(f),figMap.set(u,f));
+    f||(f=GL&&QUALITY>=1?fpsInteriorFig(u,bld.interior):humanFigure(palette(u.owner).body||"#888"),f.userData.seed=Math.random()*6.283,f.parent||bld.interior.add(f),figMap.set(u,f));
     const pos=interiorSlotPos(bld,idx,list.length),sway=Math.sin(S.time*1.6+f.userData.seed);
-    f.position.set(pos.x-bld.x,floorZ+.3*Math.abs(sway),pos.y-bld.y),f.rotation.y=-(u.ang||0);
+    f.userData.F?(f.position.set(pos.x-bld.x,floorZ,pos.y-bld.y),f.rotation.y=-(u.ang||0),fpsPoseFig(f.userData.F)):(f.position.set(pos.x-bld.x,floorZ+.3*Math.abs(sway),pos.y-bld.y),f.rotation.y=-(u.ang||0));
     f.userData.armL&&(f.userData.armL.rotation.x=.05*sway,f.userData.armR.rotation.x=-.05*sway);
   });
   for(const[u,f]of figMap)list.includes(u)||(bld.interior.remove(f),figMap.delete(u));
 }function tpCameraDist(e,desired,camY){const dx=-Math.cos(FPS.yaw),dy=-Math.sin(FPS.yaw),step=5,MIN=22;for(let d=step;d<=desired;d+=step){const wx=e.x+dx*d,wy=e.y+dy*d,tx=Math.floor(wx/32),ty=Math.floor(wy/32),blocked=inMap(tx,ty)&&(G.occ[idx(tx,ty)]||G.blk[idx(tx,ty)]);if(blocked||heightAt(wx,wy)>camY-8)return Math.max(MIN,d-step)}return desired}
-function fpsRender(){const e=FPS.u,t=FPS.cam;t.aspect!==CW/CH&&(t.aspect=CW/CH);if(e.dead){const dt=Math.min(1,(FPS.deathT||0)/1.4),gy=heightAt(e.x,e.y)+(e.alt||0),r=gy+fpsEyeH(e)*(1-.85*dt),fall=1.25*dt,roll=.5*dt;return t.fov=68,t.position.set(e.x,r,e.y),t.up.set(Math.sin(roll),Math.cos(roll),0),t.lookAt(e.x+Math.cos(FPS.yaw)*Math.cos(fall)*50,r-50*Math.sin(fall),e.y+Math.sin(FPS.yaw)*Math.cos(fall)*50),FPS.vm&&(FPS.vm.visible=!1),FPS.vvm&&(FPS.vvm.visible=!1),void 0}t.up.set(.05*(FPS.shakeX||0),1,0),t.up.normalize();const kp=FPS.pitch+(FPS.viewKick||0)+.05*(FPS.shakeY||0),a=Math.cos(kp);if(FPS.thirdPerson){const backH=52,gy=heightAt(e.x,e.y)+(e.alt||0),eyeY=gy+fpsEyeH(e)+(FPS.jumpZ||0),camY=eyeY+backH,rawDist=tpCameraDist(e,105,camY);FPS.tpDist=null==FPS.tpDist?rawDist:FPS.tpDist+(rawDist-FPS.tpDist)*.25;const dist=FPS.tpDist,camWx=e.x-Math.cos(FPS.yaw)*dist,camWy=e.y-Math.sin(FPS.yaw)*dist,finalY=Math.max(camY,heightAt(camWx,camWy)+8);t.position.set(camWx,finalY,camWy),t.lookAt(e.x+Math.cos(FPS.yaw)*a*120,eyeY+140*Math.sin(kp),e.y+Math.sin(FPS.yaw)*a*120),t.fov=FPS.aiming?50:68}else{const r=fpsEyeH(e)+(e.alt||0)+heightAt(e.x,e.y)+(FPS.jumpZ||0)-(FPS.swimming?10:0),n=.1*-e.d.radius;t.position.set(e.x+Math.cos(FPS.yaw)*n,r,e.y+Math.sin(FPS.yaw)*n),t.lookAt(t.position.x+Math.cos(FPS.yaw)*a*100,t.position.y+100*Math.sin(kp),t.position.z+Math.sin(FPS.yaw)*a*100),t.fov=FPS.aiming?46:74}
+function fpsRender(){const e=FPS.u,t=FPS.cam;t.aspect!==CW/CH&&(t.aspect=CW/CH);if(e.dead){const dt=Math.min(1,(FPS.deathT||0)/1.4),gy=heightAt(e.x,e.y)+(e.alt||0),r=gy+fpsEyeH(e)*(1-.85*dt),fall=1.25*dt,roll=.5*dt;return t.fov=68,t.position.set(e.x,r,e.y),t.up.set(Math.sin(roll),Math.cos(roll),0),t.lookAt(e.x+Math.cos(FPS.yaw)*Math.cos(fall)*50,r-50*Math.sin(fall),e.y+Math.sin(FPS.yaw)*Math.cos(fall)*50),FPS.vm&&(FPS.vm.visible=!1),FPS.vvm&&(FPS.vvm.visible=!1),void 0}t.up.set(.05*(FPS.shakeX||0),1,0),t.up.normalize();const kp=FPS.pitch+(FPS.viewKick||0)+.05*(FPS.shakeY||0),a=Math.cos(kp);if(FPS.thirdPerson){const backH=52,gy=heightAt(e.x,e.y)+(e.alt||0),eyeY=gy+fpsEyeH(e)+(FPS.jumpZ||0),camY=eyeY+backH,rawDist=tpCameraDist(e,105,camY);FPS.tpDist=null==FPS.tpDist?rawDist:FPS.tpDist+(rawDist-FPS.tpDist)*.25;const dist=FPS.tpDist,camWx=e.x-Math.cos(FPS.yaw)*dist,camWy=e.y-Math.sin(FPS.yaw)*dist,finalY=Math.max(camY,heightAt(camWx,camWy)+8);t.position.set(camWx,finalY,camWy),t.lookAt(e.x+Math.cos(FPS.yaw)*a*120,eyeY+140*Math.sin(kp),e.y+Math.sin(FPS.yaw)*a*120),t.fov=FPS.aiming?50:68}else{const r=fpsEyeH(e)+(e.alt||0)+heightAt(e.x,e.y)+(FPS.jumpZ||0)-(FPS.swimming?10:0),n=.1*-e.d.radius;t.position.set(e.x+Math.cos(FPS.yaw)*n,r,e.y+Math.sin(FPS.yaw)*n),t.lookAt(t.position.x+Math.cos(FPS.yaw)*a*100,t.position.y+100*Math.sin(kp),t.position.z+Math.sin(FPS.yaw)*a*100),t.fov=FPS.aiming?"inf"===e.d.kind?46:28:74}
 if(FPS.chargingGrenade&&"inf"===e.d.kind&&!e.inside){const line=ensureGrenadeArc(),n=Math.cos(FPS.yaw),a=Math.sin(FPS.yaw),range=150,N=14,arr=line.geometry.attributes.position.array;for(let i=0;i<N;i++){const s=i/(N-1),wx=e.x+n*range*s,wy=e.y+a*range*s,wz=9+42*Math.sin(Math.PI*s)+heightAt(wx,wy);arr[3*i]=wx,arr[3*i+1]=wz,arr[3*i+2]=wy}line.geometry.attributes.position.needsUpdate=!0,line.computeLineDistances(),line.visible=!0}else grenadeArc&&(grenadeArc.visible=!1);
-e.inside&&(ensureInterior(e.inside),syncInteriorFigures(e.inside),syncBombProp(e.inside),(e.inside.interior.userData.anims||[]).forEach(f=>f(S.time)));if(!FPS.thirdPerson&&"inf"===e.d.kind&&(e.d.dmg>0||"engineer"===e.d.role||"chrono"===e.d.role)){const vm=ensureViewmodel(unitViewmodelKind(e));vm.visible=!0;const aim=FPS.aiming,tx=aim?0:.26,ty=aim?-.075:-.3,tz=aim?-.95:-.95,kick=e.muzzle>0?.07*(e.muzzle/.09):0,maxCool=Math.max(.01,e.d.rof*vRof(e)),recoilP=e.cool>0?Math.min(1,e.cool/maxCool):0,reloadT=vm.userData.reloadT||0,reloading=reloadT>0,reloadArc=reloading?Math.sin(Math.PI*Math.min(1,1-reloadT/RELOAD_DUR)):0;let px=tx,py=ty;const idleT=S.time+37*(e.id||0);if(aim){const breathAmp="sniper"===vm.userData.magFamily?.017:.009,sway=e.moving?1.7:1;px+=breathAmp*sway*Math.sin(.6*idleT),py+=.55*breathAmp*sway*Math.sin(.83*idleT+1.3)}if(!aim&&e.moving){const bobT=.14*(e.animT||0);px+=.01*Math.sin(bobT),py+=.008*Math.abs(Math.cos(bobT))}else if(!aim&&!e.moving&&!reloading){px+=.006*Math.sin(.9*idleT),py+=.0035*Math.sin(1.4*idleT+1.1)}py-=.045*recoilP+.24*reloadArc,vm.position.set(px,py,tz+.22*kick),vm.rotation.x=-1.15*kick-.22*recoilP-.65*reloadArc,vm.rotation.z=(e.deployed?.14:0)-.55*reloadArc;const firing=e.muzzle>0&&!reloading,useAlt=vm.userData.akimbo&&vm.userData.altFire,fl=vm.userData.flash,fl2=vm.userData.flash2,ml=vm.userData.muzzleLight,ml2=vm.userData.muzzleLight2;fl&&(fl.visible=firing&&!useAlt,fl.scale.setScalar(.6+2.4*(e.muzzle/.09)));fl2&&(fl2.visible=firing&&useAlt,fl2.scale.setScalar(.6+2.4*(e.muzzle/.09)));ml&&(ml.intensity=firing&&!useAlt?2.2*(e.muzzle/.09):0);ml2&&(ml2.intensity=firing&&useAlt?2.2*(e.muzzle/.09):0);vm.userData.bolt&&(vm.userData.bolt.position.x=.032-.045*Math.sin(Math.PI*Math.min(1,reloadArc*1.3)));tickShells(vm),FPS.vvm&&(FPS.vvm.visible=!1)}else if(!FPS.thirdPerson&&"inf"!==e.d.kind){FPS.vm&&(FPS.vm.visible=!1);const vvm=ensureVehicleViewmodel(e);vvm.visible=!0;const kick=e.muzzle>0?.05*(e.muzzle/.09):0;vvm.position.set(0,-.02*kick,.15*kick),vvm.rotation.x=-.5*kick;const fl=vvm.userData.flash;fl&&(fl.visible=e.muzzle>0,fl.scale.setScalar(.6+2.4*(e.muzzle/.09)));const ml=vvm.userData.muzzleLight;ml&&(ml.intensity=e.muzzle>0?2.4*(e.muzzle/.09):0)}else{FPS.vm&&(FPS.vm.visible=!1),FPS.vvm&&(FPS.vvm.visible=!1)}return t.updateProjectionMatrix(),t}
+e.inside&&(ensureInterior(e.inside),syncInteriorFigures(e.inside),syncBombProp(e.inside),(e.inside.interior.userData.anims||[]).forEach(f=>f(S.time)));if(!FPS.thirdPerson&&"inf"===e.d.kind){const vm=ensureViewmodel(unitViewmodelKind(e));vm.visible=!0,fpsViewmodelAnimate(vm,e),FPS.vvm&&(FPS.vvm.visible=!1)}else if(!FPS.thirdPerson&&"inf"!==e.d.kind){FPS.vm&&(FPS.vm.visible=!1);const vvm=ensureVehicleViewmodel(e);vvm.visible=!0,fpsCockpitAnimate(vvm,e)}else{FPS.vm&&(FPS.vm.visible=!1),FPS.vvm&&(FPS.vvm.visible=!1)}return t.updateProjectionMatrix(),t}
 
 Object.assign(window, {
   projModel, fpsEyeH, fpsReload, fpsEnterDoor, fpsDoorExit, furnishTheme, enterFPS, exitFPS, fpsTick, leaveGarrison, fpsInteract, fpsBeingTargeted,
   fpsAimTarget, fpsUpdateAim, fpsShoot, fpsAbilityInfo, throwGrenade, flameNova,
   fpsAbility, fpsAbilityDown, fpsAbilityUp, fpsJump, fpsPassable, fpsDeathTick, fpsToggleWeapon,
-  buildViewmodel, ensureViewmodel, buildVehicleViewmodel, ensureVehicleViewmodel, unitViewmodelKind, interiorHalf,
+  ensureViewmodel, ensureVehicleViewmodel, unitViewmodelKind, interiorHalf,
   panelWall, furnishInterior, ensureInterior, interiorSlotPos, interiorFigurePos,
   humanFigure, syncInteriorFigures, fpsRender,
   fpsCanPlantBomb, fpsPlantBomb, bombProp, syncBombProp,

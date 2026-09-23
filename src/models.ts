@@ -1389,6 +1389,7 @@ function renderThumbInto(imgEl, key, kind, faction, size?) {
 }
 
 Object.assign(window, {
+  DOME, BOXM, ell, taper3, lowPoly, SLAB, TSLAB, INF_FAC,
   cv, mm, cam, ctx, mctx, CYL, CONE, isoX, isoY, faceAng, PI2, ZH, MINE_TOOL, MINE_DEFAULT,
   roundRectProfile, circleProfile, polyProfile, triN, pushTri, fanCap, nrm3, wallMeshSG, wallMesh,
   boxMesh, cylMesh, coneMesh, domeMesh, slabMesh, wedgeMesh, taperSlabMesh, hexProfile, filletPoly,
