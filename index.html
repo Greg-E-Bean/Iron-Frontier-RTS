@@ -5884,7 +5884,28 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return t;
   }
+  function organicCrane(e, cx, cy, z, h, arm) {
+    const mast = Math.max(h, 20), jib = Math.max(arm, 22), sw = { orbit: 0.35, amp: 0.35, pvx: cx, pvy: cy };
+    e.push(P_(DOME(5.4, 3.4, 12), cx, cy, z, "flesh"));
+    for (let k = 0; k < 5; k++) {
+      const a = k * 1.2566;
+      taper3(e, cx + Math.cos(a) * 3, cy + Math.sin(a) * 3, z + 1.6, cx + Math.cos(a) * 7.5, cy + Math.sin(a) * 7.5, z, 1.3, 0.35, "flesh");
+    }
+    const P = [[cx, cy, z + 2], [cx + 0.6, cy, z + 0.45 * mast], [cx + 1.6, cy, z + 0.85 * mast], [cx + 0.2 * jib, cy, z + mast + 4], [cx + 0.5 * jib, cy, z + mast + 3], [cx + 0.72 * jib, cy, z + mast - 0.5]];
+    for (let k = 0; k < P.length - 1; k++) {
+      const A = k >= 2 ? { a: sw } : {};
+      taper3(e, P[k][0], P[k][1], P[k][2], P[k + 1][0], P[k + 1][1], P[k + 1][2], 2.6 - 0.35 * k, 2.3 - 0.35 * k, k % 2 ? "carapace2" : "carapace", A);
+      e.push(P_(DOME(2.6 - 0.35 * k, 2 - 0.3 * k, 9), P[k + 1][0], P[k + 1][1], P[k + 1][2] - 0.8, "flesh", A));
+      k < 4 && e.push(P_(CONE(0.6, 0.05, 2.4, 6), P[k + 1][0], P[k + 1][1] + 1.8, P[k + 1][2], "bone", Object.assign({ ty: 0.6 }, A)));
+    }
+    taper3(e, cx + 0.1, cy + 1.9, z + 3, P[3][0], P[3][1] + 1.4, P[3][2] - 0.6, 0.3, 0.25, "psi", { e: 1 });
+    const hx = P[5][0], hz = P[5][2];
+    taper3(e, hx, cy, hz, hx, cy, hz - 0.35 * mast, 0.5, 0.35, "carapace2", { a: sw });
+    for (const a of [-0.6, 0.6]) e.push(P_(CONE(0.6, 0.05, 3.6, 6), hx + a * 1.2, cy, hz - 0.35 * mast, "bone", { tx: Math.PI + a * 0.5, a: sw }));
+    e.push(P_(DOME(1.5, 1.6, 10), hx, cy, hz - 0.35 * mast - 2.8, "psi", { e: 1, a: sw }));
+  }
   function crane(e, cx, cy, z, h, arm, mat) {
+    if ("yuri" === _bFac) return organicCrane(e, cx, cy, z, h, arm);
     mat = mat || "gunmetal";
     const mast = Math.max(h, 20), jib = Math.max(arm, 24);
     e.push(P_(BOXM(7, 7, 1.6, 0.45), cx, cy, z, "darkmetal"));
@@ -6481,9 +6502,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
       case "repair": {
         const cr = { patrol: 0.12, pw: 28, ph: 0 };
-        n.push(P_(BOXM(4, 40, 1.6, 0.2), 14, 0, 31.5, "gunmetal", { a: cr }));
-        n.push(P_(CYL(0.18, 9, 5), 14, 0, 22.5, "dark2", { a: { patrol: 0.12, pw: 28, ph: 7 } }));
-        n.push(P_(BOXM(2.2, 2.2, 1.4, 0.2), 14, 0, 21.2, "lightY", { a: { patrol: 0.12, pw: 28, ph: 7 } }));
+        if (Y) {
+          const cp = { patrol: 0.12, pw: 28, ph: 6 };
+          n.push(P_(DOME(2.2, 1.8, 9), 14, 0, 29.2, "flesh", { a: cr }));
+          n.push(P_(CONE(0.7, 0.45, 8, 7), 14, 0, 21.4, "carapace2", { a: cp }));
+          for (const a of [-0.6, 0.6]) n.push(P_(CONE(0.5, 0.05, 3, 6), 14 + a, 0, 21.4, "bone", { tx: Math.PI + a * 0.6, a: cp }));
+          n.push(P_(DOME(1.1, 1.2, 8), 14, 0, 19.2, "psi", { e: 1, a: cp }));
+        } else {
+          n.push(P_(BOXM(4, 40, 1.6, 0.2), 14, 0, 31.5, "gunmetal", { a: cr }));
+          n.push(P_(CYL(0.18, 9, 5), 14, 0, 22.5, "dark2", { a: { patrol: 0.12, pw: 28, ph: 7 } }));
+          n.push(P_(BOXM(2.2, 2.2, 1.4, 0.2), 14, 0, 21.2, "lightY", { a: { patrol: 0.12, pw: 28, ph: 7 } }));
+        }
         for (const sy of [-19.2, 19.2]) spinBeacon(n, -21.8, sy, 25.6, Y ? "psi" : "lightY");
         break;
       }
@@ -6498,8 +6527,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
     }
   }
+  var _bFac = null;
   function BMODEL_(e, t, dep, cn, rot, prod, doorT = 0) {
     cn = cn || 0;
+    _bFac = t;
     const r = 32 * BLD[e].size, n = [], a = "allied" === t, o = "soviet" === t, d = false !== dep;
     const s = 0.3 * r, i = 0.24 * r, l = 3.6, c = l + s;
     const riseBucket = hasStagedBuild(e) ? Math.round(4 * Math.max(0, Math.min(1, +dep || 0))) : 4;
@@ -6784,30 +6815,47 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       case "hive": {
         const hl = 1.02 * r, hw = 0.46 * r, hh = 0.3 * s;
         n.push(P_(SLAB(roundRectProfile(0.58 * r, 0.42 * r, 3, 3), 1, 0.4, "hvpad"), 0, 0, l, "asphalt"));
-        const hprof = [[-0.48, 0.2], [-0.32, 0.6], [-0.1, 0.9], [0.12, 0.9], [0.32, 0.58], [0.48, 0.18]];
-        for (let i2 = 0; i2 < hprof.length - 1; i2++) {
-          const x0 = hprof[i2][0] * hl, r0 = hprof[i2][1], x1 = hprof[i2 + 1][0] * hl, r1 = hprof[i2 + 1][1], cx = (x0 + x1) / 2, rm = (r0 + r1) / 2;
-          n.push(P_(BOXM(x1 - x0 + 0.5, rm * 2 * hw, rm * hh, 0.16 * rm * hh), cx, 0, l + 0.5 * rm * hh, "carapace2"));
+        const hprof = [[-0.46, 0.24], [-0.3, 0.62], [-0.1, 0.9], [0.12, 0.92], [0.3, 0.66], [0.44, 0.34]];
+        hprof.forEach(([fx, fr], i2) => {
+          const x = fx * hl, ry = fr * hw, rz = fr * hh * 1.55;
+          ell(n, x, 0, l + 0.4, 0.13 * hl, ry * 1.06, rz * 0.8, "flesh");
+          ell(n, x, 0, l + 0.8, 0.12 * hl, ry, rz, i2 % 2 ? "carapace" : "carapace2");
+          i2 > 0 && i2 < hprof.length - 1 && n.push(P_(CONE(0.05 * r, 0.012 * r, 0.14 * r, 6), x, 0, l + 0.8 + rz - 0.02 * r, "bone", { ty: -0.3 }));
+        });
+        for (const sy of [-1, 1]) for (let k = 0; k < 4; k++) n.push(P_(BOXM(0.16 * hl, 0.3, 0.35, 0.1), (-0.3 + 0.2 * k) * hl, sy * (0.72 * hw + 0.3 * (k % 2)), l + 0.6 * hh, "psi", { e: 1, r: sy * (k % 2 ? 0.25 : -0.25) }));
+        const mx = 0.5 * hl;
+        ell(n, mx, 0, l + 0.6, 0.07 * r, 0.17 * r, 0.15 * r, "flesh");
+        ell(n, mx + 0.02 * r, 0, l + 1.2, 0.04 * r, 0.11 * r, 0.1 * r, "black");
+        n.push(P_(DOME(0.05 * r, 0.05 * r, 10), mx + 0.01 * r, 0, l + 0.04 * r, "psi", { e: 1, a: { bob: 1.8, ba: 0.4 } }));
+        for (let k = 0; k < 7; k++) {
+          const g = -1.3 + k * 0.43;
+          n.push(P_(CONE(0.012 * r, 2e-3 * r, 0.05 * r, 5), mx + 0.05 * r, Math.sin(g) * 0.13 * r, l + 1 + 0.13 * r * (0.55 + 0.45 * Math.cos(g)), "bone", { ty: PI2 + 0.4 * Math.cos(g), r: -0.5 * Math.sin(g) }));
         }
-        n.push(P_(BOXM(0.62 * hl, 0.42 * hw, 0.1 * hh, 0.04 * hh), 0.02 * hl, 0, l + 0.9 * hh, "gunmetal"));
-        for (const side of [-1, 1]) for (let i2 = 0; i2 < 2; i2++) n.push(P_(CYL(0.075 * r, 0.1 * r, 10), (-0.28 + 0.5 * i2) * hl, side * 0.56 * hw, l + 0.075 * r, "darkmetal", { r: 1.5708 }));
-        for (let i2 = 0; i2 < 5; i2++) {
-          const sx = (-0.36 + 0.18 * i2) * hl;
-          n.push(P_(CONE(0.06 * r, 0.015 * r, 0.16 * r, 6), sx, 0, l + 0.85 * hh, "carapace2"));
+        for (const [cx, cy] of [[-0.12 * hl, 0.18 * hw], [0.12 * hl, -0.2 * hw]]) for (let k = 0; k < 4; k++) {
+          const g = k * 1.57 + 0.4;
+          n.push(P_(DOME(0.028 * r, 0.034 * r, 9), cx + Math.cos(g) * 0.03 * r, cy + Math.sin(g) * 0.03 * r, l + 0.8 + 0.9 * hh * 1.55 - 0.01 * r, "bile", { e: 1, a: { bob: 1.1 + 0.3 * k, ba: 0.5 } }));
+        }
+        for (const sy of [-1, 1]) {
+          const x0 = -0.26 * hl, y0 = sy * 0.26 * hw, z0 = l + 0.8 + 0.5 * hh * 1.55;
+          taper3(n, x0, y0, z0, x0 - 0.02 * r, y0 + sy * 0.02 * r, z0 + 0.16 * r, 0.035 * r, 0.022 * r, "flesh");
+          n.push(P_(CONE(0.03 * r, 0.034 * r, 0.02 * r, 8), x0 - 0.02 * r, y0 + sy * 0.02 * r, z0 + 0.16 * r, "carapace2"));
+          n.push(P_(DOME(0.018 * r, 0.014 * r, 8), x0 - 0.02 * r, y0 + sy * 0.02 * r, z0 + 0.175 * r, "psi", { e: 1 }));
+        }
+        for (const side of [-1, 1]) for (let i2 = 0; i2 < 2; i2++) {
+          const x = (-0.28 + 0.5 * i2) * hl, y = side * 0.6 * hw;
+          ell(n, x, y, l + 0.4, 0.06 * r, 0.05 * r, 0.07 * r, "flesh");
+          n.push(P_(DOME(0.022 * r, 0.018 * r, 8), x, y + side * 0.045 * r, l + 0.05 * r, "psi", { e: 1 }));
         }
         veins(n, 0.02 * hl, 0, l + 0.55 * hh, 0.16 * hl, 0.22 * hh, 8, "psi");
         if (d) {
-          n.push(P_(WEDGE(0.4 * r, 0.24 * r, 0, 0.9 * hh), -0.72 * r, 0, l, "darkmetal"));
-          n.push(P_(BOXM(0.4 * r, 0.018 * r, 0.018 * r, 7e-3), -0.72 * r, -0.11 * r, l + 0.01, "gunmetal"));
-          n.push(P_(BOXM(0.4 * r, 0.018 * r, 0.018 * r, 7e-3), -0.72 * r, 0.11 * r, l + 0.01, "gunmetal"));
-          for (const sx of [-1, 1]) n.push(P_(DOME(0.11 * r, 0.1 * r, 12), sx * 0.2 * hl, 0, l + 0.9 * hh, "carapace"));
-          n.push(P_(CONE(0.7, 0.12, 2, 7), 0.04 * hl, 0, l + 0.9 * hh + 0.14 * r + 0.7, "psi", { e: 1 }));
-          n.push(P_(DOME(0.09 * r, 0.08 * r, 10), 0, 0, l + 0.9 * hh + 0.02 * r, "psi", { e: 1, a: { spin: 0.6 } }));
+          ell(n, -0.7 * r, 0, l + 0.2, 0.2 * r, 0.1 * r, 0.04 * r, "flesh");
+          for (const sy of [-1, 1]) taper3(n, -0.9 * r, sy * 0.1 * r, l + 0.4, -0.5 * r, sy * 0.1 * r, l + 0.6, 0.012 * r, 0.012 * r, "bone");
+          for (let k = 0; k < 4; k++) n.push(P_(BOXM(0.012 * r, 0.2 * r, 0.01 * r, 5e-3), (-0.84 + 0.1 * k) * r, 0, l + 0.04 * r, "psi", { e: 1 }));
+          for (const sx of [-1, 1]) n.push(P_(DOME(0.11 * r, 0.1 * r, 12), sx * 0.2 * hl, 0, l + 0.8 + 0.8 * hh * 1.55, "carapace"));
+          n.push(P_(DOME(0.09 * r, 0.08 * r, 10), 0, 0, l + 0.8 + 0.95 * hh * 1.55, "psi", { e: 1, a: { spin: 0.6 } }));
         } else {
-          for (const sx of [-1, 1]) n.push(P_(DOME(0.12 * r, 0.1 * r, 10), sx * 0.18 * hl, 0, l + 0.9 * hh, "carapace2"));
-          n.push(P_(CONE(0.4, 0.08, 1, 6), 0.04 * hl, 0, l + 0.9 * hh + 0.1 * r, "psi", { e: 1, ty: 0.1 }));
+          for (const sx of [-1, 1]) n.push(P_(DOME(0.12 * r, 0.1 * r, 10), sx * 0.18 * hl, 0, l + 0.8 + 0.8 * hh * 1.55, "carapace2"));
         }
-        crate(n, -0.1 * r, 0.32 * r, l, 3.6, "carapace2", 0.18);
         break;
       }
       case "barracks": {
@@ -7127,7 +7175,28 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           const e2 = a ? "armor" : "concrete";
           for (const t2 of [-1, 1]) n.push(P_(BOXM(0.14 * r, 0.14 * r, 0.34 * r, 1.6), t2 * r * 0.34, 0.3 * -r, l, e2)), n.push(P_(BOXM(0.14 * r, 0.14 * r, 0.34 * r, 1.6), t2 * r * 0.34, 0.3 * r, l, e2));
         } else for (const t2 of [-1, 1]) for (const u of [-1, 1]) hive(n, { x: t2 * r * 0.34, y: u * 0.3 * r, z: l, r: 0.07 * r, h: 0.3 * r, crown: 0.045 * r, seg: 6, crest: false, vein: "psi" });
-        n.push(P_(BOXM(0.8 * r, 0.1 * r, 0.09 * r, 1), 0, 0.3 * -r, l + 0.34 * r, "steel")), n.push(P_(BOXM(0.8 * r, 0.1 * r, 0.09 * r, 1), 0, 0.3 * r, l + 0.34 * r, "steel")), n.push(P_(CYL(0.06 * r, 0.06 * r, 14), 0, 0, l + 0.38 * r, "darkmetal")), n.push(P_(BOXM(0.52 * r, 0.09 * r, 0.07 * r, 0.9), 0.14 * r, 0, l + 0.42 * r, "steel")), n.push(P_(BOXM(0.1 * r, 0.14 * r, 0.12 * r, 0.7), 0.36 * r, 0, l + 0.34 * r, "gold")), n.push(P_(CYL(1.4, 1.4, 10), 0.36 * r, 0, l + 0.3 * r, "glow", { e: 1 })), crate(n, 0.3 * -r, 0.28 * r, l, 6.5, "olive", 0.3), barrel(n, 0.3 * r, 0.3 * r, l);
+        if (a || o) n.push(P_(BOXM(0.8 * r, 0.1 * r, 0.09 * r, 1), 0, 0.3 * -r, l + 0.34 * r, "steel")), n.push(P_(BOXM(0.8 * r, 0.1 * r, 0.09 * r, 1), 0, 0.3 * r, l + 0.34 * r, "steel")), n.push(P_(CYL(0.06 * r, 0.06 * r, 14), 0, 0, l + 0.38 * r, "darkmetal")), n.push(P_(BOXM(0.52 * r, 0.09 * r, 0.07 * r, 0.9), 0.14 * r, 0, l + 0.42 * r, "steel")), n.push(P_(BOXM(0.1 * r, 0.14 * r, 0.12 * r, 0.7), 0.36 * r, 0, l + 0.34 * r, "gold")), n.push(P_(CYL(1.4, 1.4, 10), 0.36 * r, 0, l + 0.3 * r, "glow", { e: 1 })), crate(n, 0.3 * -r, 0.28 * r, l, 6.5, "olive", 0.3), barrel(n, 0.3 * r, 0.3 * r, l);
+        else {
+          const zt = l + 0.3 * r;
+          for (const sy of [-1, 1]) {
+            const y = sy * 0.3 * r, pts = [[-0.34 * r, zt], [-0.2 * r, zt + 0.1 * r], [0, zt + 0.15 * r], [0.2 * r, zt + 0.1 * r], [0.34 * r, zt]];
+            for (let k = 0; k < 4; k++) {
+              taper3(n, pts[k][0], y, pts[k][1], pts[k + 1][0], y, pts[k + 1][1], 2.6 - 0.25 * Math.abs(k - 1.5), 2.4 - 0.25 * Math.abs(k - 1.5), "bone");
+              n.push(P_(CONE(0.7, 0.05, 2.6, 6), pts[k + 1][0], y, pts[k + 1][1] + 1.4, "bone", { ty: 0.3 * sy }));
+            }
+            taper3(n, -0.3 * r, y + sy * 1.6, zt + 1, 0.3 * r, y + sy * 1.6, zt + 1, 0.3, 0.3, "psi", { e: 1 });
+          }
+          for (let k = 0; k < 5; k++) {
+            const x = (-0.24 + 0.12 * k) * r;
+            taper3(n, x, -0.3 * r, zt + 0.08 * r + 1.2 * Math.cos((k - 2) * 0.5), x, 0.3 * r, zt + 0.08 * r + 1.2 * Math.cos((k - 2) * 0.5), 0.9, 0.9, k % 2 ? "carapace2" : "carapace");
+          }
+          ell(n, 0, 0, zt + 0.1 * r, 0.3 * r, 0.26 * r, 1.2, "flesh", { tx: Math.PI });
+          n.push(P_(DOME(0.07 * r, 0.06 * r, 12), 0, 0, zt + 0.02 * r, "flesh"));
+          for (let k = 0; k < 5; k++) {
+            const a2 = k * 1.2566;
+            n.push(P_(DOME(1.8, 1.4, 8), Math.cos(a2) * 0.3 * r, Math.sin(a2) * 0.3 * r, 5.4, "bile", { e: 1 }));
+          }
+        }
         break;
       }
       case "super":
@@ -7318,13 +7387,45 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var YREMAP = { steel: "bone", metal: "carapace", darkmetal: "carapace2", gunmetal: "carapace2", concrete: "carapace", concrete2: "carapace2", rust: "flesh", armor: "carapace", armor2: "carapace", armor3: "carapace2", lightY: "psi", glass: "psi", glassdark: "carapace2", roof: "carapace2", tread: "carapace2", rubber: "flesh", wood: "bone", olive: "carapace2", red: "flesh", tesla: "psi", glow: "psi", crystal: "psi", white: "bone", nose: "carapace", gold: "bile" };
   var YDRESS_SKIP = { wall: 1, gate: 1 };
+  var _mbox = /* @__PURE__ */ new WeakMap();
+  function meshBox(m) {
+    let b = _mbox.get(m);
+    if (b) return b;
+    b = [1e9, 1e9, 1e9, -1e9, -1e9, -1e9];
+    for (const t of m) for (const p of t.p) for (let i = 0; i < 3; i++) p[i] < b[i] && (b[i] = p[i]), p[i] > b[i + 3] && (b[i + 3] = p[i]);
+    return _mbox.set(m, b), b;
+  }
+  function heightField(n) {
+    const boxes = [];
+    for (const q of n) {
+      if (!q || !q.m || q.a || !q.m.length) continue;
+      const b = meshBox(q.m), g = q.sx || 1, yy = q.sy || 1, zz = q.sz || 1, ct = Math.cos(q.tx || 0), st = Math.sin(q.tx || 0), cy = Math.cos(q.ty || 0), sy = Math.sin(q.ty || 0), co = Math.cos(q.r || 0), so = Math.sin(q.r || 0);
+      let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, z1 = -1e9;
+      for (const X of [b[0], b[3]]) for (const Y of [b[1], b[4]]) for (const Z of [b[2], b[5]]) {
+        let P = X * g, k = Y * yy, S2 = Z * zz;
+        if (q.tx) {
+          const e = k * st + S2 * ct;
+          k = k * ct - S2 * st, S2 = e;
+        }
+        if (q.ty) {
+          const e = -P * sy + S2 * cy;
+          P = P * cy + S2 * sy, S2 = e;
+        }
+        const wx = P * co - k * so + (q.x || 0), wy = P * so + k * co + (q.y || 0), wz = S2 + (q.z || 0);
+        wx < x0 && (x0 = wx), wx > x1 && (x1 = wx), wy < y0 && (y0 = wy), wy > y1 && (y1 = wy), wz > z1 && (z1 = wz);
+      }
+      (x1 - x0) * (y1 - y0) > 4 && boxes.push([x0, y0, x1, y1, z1]);
+    }
+    return (x, y) => {
+      let h = 0;
+      for (const B of boxes) x >= B[0] && x <= B[2] && y >= B[1] && y <= B[3] && B[4] > h && (h = B[4]);
+      return h;
+    };
+  }
   function yuriDress(n, key) {
     const B = BLD[key];
     if (!B) return n;
     const r = 32 * B.size;
-    let h = 6;
-    for (const q of n) q && !q.a && q.z > h && q.z < 120 && (h = q.z);
-    h = Math.min(h + 2, 0.9 * r);
     const out = n.map((q) => {
       if (!q) return q;
       if (YREMAP[q.c]) return Object.assign({}, q, { c: YREMAP[q.c] });
@@ -7335,38 +7436,63 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       return q;
     });
     if (YDRESS_SKIP[key] || B.size < 2) return out;
-    for (let k = 0; k < 7; k++) {
-      const a = k / 7 * 6.283 + 0.3, x0 = Math.cos(a) * 0.4 * r, y0 = Math.sin(a) * 0.4 * r, x1 = Math.cos(a + 0.15) * 0.6 * r, y1 = Math.sin(a + 0.15) * 0.6 * r;
-      taper3(out, x0, y0, 2.6, x1, y1, 0.3, 1.7, 0.35, "flesh");
-      taper3(out, x0, y0, 3.2, x1, y1, 0.8, 0.22, 0.12, "psi", { e: 1 });
-      out.push(P_(DOME(1.8, 1.2, 8), x0, y0, 0.2, "carapace2"));
+    const H = heightField(n), base = 6.5, walls = [];
+    for (let k = 0; k < 8; k++) {
+      const a = k / 8 * 6.283 + 0.39, c = Math.cos(a), sn = Math.sin(a);
+      let wx = 0, wy = 0, wh = 0;
+      for (let d = 2; d <= 0.62 * r; d += 1) {
+        const h = H(c * d, sn * d);
+        h > base + 3 && (wx = c * d, wy = sn * d, wh = h);
+      }
+      wh && walls.push([wx, wy, wh, a]);
     }
-    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
-      out.push(P_(CONE(1.6, 0.1, 0.3 * h + 3, 7), sx * 0.44 * r, sy * 0.44 * r, 0.4 * h, "bone", { ty: 0.35 * sx, r: Math.atan2(sy, sx) }));
-      out.push(P_(DOME(2.6, 2.2, 10), sx * 0.4 * r, sy * 0.36 * r, 0.28 * h, "bile", { e: 1, a: { bob: 1.3 + 0.4 * (sx + 2) * (sy + 3) * 0.1, ba: 0.55 } }));
+    let top = 0;
+    for (const q of n) q && !q.a && q.m && (top = Math.max(top, q.z + meshBox(q.m)[5] * (q.sz || 1)));
+    walls.forEach(([wx, wy, wh, a], k) => {
+      const c = Math.cos(a), sn = Math.sin(a), ox = wx - c * 0.8, oy = wy - sn * 0.8, ex = wx + c * 0.34 * r, ey = wy + sn * 0.34 * r;
+      const el = Math.min(0.64 * r, Math.hypot(ex, ey));
+      const fx = Math.cos(a + 0.12) * el, fy = Math.sin(a + 0.12) * el;
+      taper3(out, ox, oy, 4.6, fx, fy, 0.4, 1.8, 0.35, "flesh");
+      taper3(out, ox, oy, 5.2, fx, fy, 0.9, 0.22, 0.12, "psi", { e: 1 });
+      out.push(P_(DOME(2, 1.3, 8), ox, oy, 3.8, "carapace2"));
+      if (k % 2) out.push(P_(CONE(1.5, 0.1, Math.min(0.35 * wh, 14) + 3, 7), wx - c * 0.4, wy - sn * 0.4, 4, "bone", { ty: 0.35, r: a }));
+      else out.push(P_(DOME(2.6, 2.2, 10), wx + c * 0.6, wy + sn * 0.6, 3.2, "bile", { e: 1, a: { bob: 1.3 + 0.23 * k, ba: 0.45 } }));
+    });
+    const cand = [];
+    for (let k = 0; k < 10; k++) {
+      const a = k / 10 * 6.283 + 0.2;
+      for (const rr of [0.08, 0.16, 0.24]) {
+        const x = Math.cos(a) * rr * r, y = Math.sin(a) * rr * r, h = H(x, y);
+        h > base + 6 && cand.push([x, y, h]);
+      }
+    }
+    cand.sort((p, q) => q[2] - p[2]);
+    const picks = [];
+    for (const c of cand) {
+      if (picks.length >= 3) break;
+      picks.every((p) => Math.hypot(p[0] - c[0], p[1] - c[1]) > 0.18 * r) && c[2] < top + 1 && picks.push(c);
     }
     if ("factory" === key) {
-      const hd = 0.25 * r, top = h;
+      const hd = 0.25 * r, tp = H(0, 0);
       for (let i = 0; i < 5; i++) {
-        const x = (-0.34 + 0.17 * i) * r;
-        taper3(out, x, -hd - 1, 0.55 * top, x, -0.5 * hd, top + 4, 1.2, 1, "bone");
-        taper3(out, x, -0.5 * hd, top + 4, x, 0.5 * hd, top + 5.5, 1, 1, "bone");
-        taper3(out, x, 0.5 * hd, top + 5.5, x, hd + 1, 0.55 * top, 1, 1.2, "bone");
+        const x = (-0.34 + 0.17 * i) * r, h0 = Math.max(H(x, -hd + 1), base);
+        taper3(out, x, -hd - 1, h0 - 1, x, -0.5 * hd, tp + 4, 1.2, 1, "bone");
+        taper3(out, x, -0.5 * hd, tp + 4, x, 0.5 * hd, tp + 5.5, 1, 1, "bone");
+        taper3(out, x, 0.5 * hd, tp + 5.5, x, hd + 1, h0 - 1, 1, 1.2, "bone");
       }
-      for (const sy of [-1, 1]) taper3(out, -0.36 * r, sy * 0.2 * r, top + 2, 0.36 * r, sy * 0.2 * r, top + 2, 0.25, 0.25, "psi", { e: 1 });
     }
-    for (let k = 0; k < 3; k++) {
-      const g = k * 2.094 + 0.5, x0 = Math.cos(g) * 0.24 * r, y0 = Math.sin(g) * 0.24 * r, z0 = h - 1, A = { orbit: 0.6 + 0.23 * k, amp: 0.28, pvx: x0, pvy: y0 };
+    picks.forEach(([x0, y0, h0], k) => {
+      const g = Math.atan2(y0, x0) || k * 2.1, z0 = h0 - 0.8, A = { orbit: 0.6 + 0.23 * k, amp: 0.28, pvx: x0, pvy: y0 };
       let px = x0, py = y0, pz = z0;
       const segs = [[1.5 * Math.cos(g), 1.5 * Math.sin(g), 4.4], [2.4 * Math.cos(g + 0.6), 2.4 * Math.sin(g + 0.6), 3.6], [1.6 * Math.cos(g + 1.2), 1.6 * Math.sin(g + 1.2), 2.6]];
-      out.push(P_(DOME(1.6, 1.2, 8), x0, y0, z0 - 0.4, "flesh"));
+      out.push(P_(DOME(1.7, 1.3, 8), x0, y0, z0 - 0.3, "flesh"));
       segs.forEach(([dx, dy, dz], i) => {
-        const nx = px + dx, ny = py + dy, nz = pz + dz, dh = Math.hypot(dx, dy), L = Math.hypot(dh, dz);
+        const dh = Math.hypot(dx, dy), L = Math.hypot(dh, dz);
         out.push(P_(CONE(1.1 - 0.3 * i, 0.8 - 0.3 * i, L, 8), px, py, pz, i % 2 ? "carapace2" : "carapace", { ty: Math.atan2(dh, dz), r: Math.atan2(dy, dx), a: A }));
-        px = nx, py = ny, pz = nz;
+        px += dx, py += dy, pz += dz;
       });
       out.push(P_(DOME(0.7, 0.6, 7), px, py, pz - 0.2, "psi", { e: 1, a: A }));
-    }
+    });
     return out;
   }
   function BMODEL(e, t, d, cn, rot, prod = null, doorT = 0) {
