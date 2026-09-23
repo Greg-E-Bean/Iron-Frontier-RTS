@@ -132,6 +132,25 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
 #qstrip .qi.b{border-color:var(--amber);color:var(--amber2);background:#1d2119}
 #qstrip .qi i{font-style:normal;color:var(--dim);font-family:"Courier New",monospace}
+#prodstrip{display:flex;gap:4px;padding:5px 6px 0;overflow-x:auto;touch-action:pan-x;scrollbar-width:none}
+#prodstrip::-webkit-scrollbar{display:none}
+#prodstrip.hidden{display:none}
+#prodstrip .pc{flex:0 0 auto;font-size:10px;letter-spacing:.4px;padding:4px 9px;background:#101920;border:1px solid var(--edge);
+  color:#9fb2c0;white-space:nowrap;cursor:pointer;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
+#prodstrip .pc.on{color:var(--amber2);border-color:var(--amber);background:#1d2119;box-shadow:inset 0 -2px 0 var(--amber)}
+#prodstrip .pc.cap{border-style:dashed}
+#prodstrip .pc i{font-style:normal;color:#7dc4ff}
+#cardinfo{position:absolute;left:6px;bottom:calc(100% + 8px);max-width:min(440px,calc(100vw - 12px));z-index:3;pointer-events:none;
+  background:linear-gradient(165deg,#1b252dee 0%,#0b1115f2 100%);border:1px solid var(--edge);border-left:3px solid var(--amber);
+  padding:7px 10px;box-shadow:0 4px 18px #000c;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+#cardinfo.hidden{display:none}
+#cardinfo .ci-h{display:flex;align-items:center;gap:7px;font-size:13px;color:#eef4fa}
+#cardinfo .ci-h b{letter-spacing:.4px}
+#cardinfo .ci-c{margin-left:auto;color:var(--amber2);font-weight:bold;font-family:"Courier New",monospace}
+#cardinfo .ci-tag{font-size:9px;font-weight:bold;color:#0a0f12;padding:1px 5px;border-radius:3px}
+#cardinfo .ci-s{font-size:10px;color:#8fa3bb;margin-top:3px;font-family:"Courier New",monospace}
+#cardinfo .ci-d{font-size:11px;color:#c6d3de;margin-top:4px;line-height:1.3}
+#cardinfo .ci-n{font-size:11px;color:#ff9a86;margin-top:4px;font-weight:bold}
 #ctrls{display:flex;gap:5px;padding:6px 6px 6px;overflow-x:auto;overscroll-behavior:contain;
   touch-action:pan-x;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 #ctrls::-webkit-scrollbar{display:none}
@@ -441,6 +460,76 @@ body.fps #mmWrap{opacity:.55}
   .cbtn{padding:6px 6px;font-size:9px}
   #hint{top:calc(env(safe-area-inset-top,0px) + 40px);padding:4px 10px;font-size:11px}
 }
+
+/* ---- COD-style touch FPS layout ---- */
+#fpszone{position:absolute;left:0;top:calc(env(safe-area-inset-top,0px) + 64px);bottom:0;width:44%;pointer-events:auto;touch-action:none}
+#fpsstick.float{transition:none;border-color:rgba(200,215,230,.5)}
+#fpslock{position:absolute;left:34px;bottom:calc(env(safe-area-inset-bottom,0px) + 164px);pointer-events:auto;opacity:0;
+  font-size:10px;letter-spacing:1px;padding:4px 9px;border-radius:12px;color:#d0ffd8;background:rgba(40,110,60,.55);border:1px solid rgba(150,255,160,.7);transition:opacity .15s}
+#fpslock.on{opacity:1}
+#fpsfireL{position:absolute;left:170px;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);width:58px;height:58px;border-radius:50%;
+  pointer-events:auto;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:1px;color:#ffd9c0;
+  background:rgba(180,60,40,.3);border:2px solid rgba(255,140,110,.55);touch-action:none}
+#fpsfireL.on{background:rgba(230,90,60,.6)}
+#fpsreload{position:absolute;right:140px;bottom:calc(env(safe-area-inset-bottom,0px) + 136px);width:54px;height:54px;border-radius:50%;
+  pointer-events:auto;display:flex;align-items:center;justify-content:center;font-size:8.5px;letter-spacing:.5px;color:#e6ecf2;
+  background:rgba(60,70,80,.4);border:2px solid rgba(200,210,220,.5)}
+#fpsfire{right:24px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 40px)!important;touch-action:none}
+#fpsaim{right:136px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 54px)!important}
+#fpsjump{left:auto!important;right:30px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 150px)!important}
+#fpscrouch{left:auto!important;right:214px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 26px)!important}
+#fpsability{right:88px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 214px)!important}
+#fpsview{right:auto!important;left:104px!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;bottom:auto!important;width:auto!important;height:auto!important;border-radius:0!important;padding:9px 14px;font-size:12px!important;letter-spacing:2px!important}
+#fpssprint{left:26px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 196px)!important;width:54px!important;height:54px!important}
+#fpsweapon{left:88px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 196px)!important;width:54px!important;height:54px!important}
+#fpscrouch,#fpsjump,#fpsaim,#fpsfire,#fpsreload,#fpsability,#fpsview{touch-action:none}
+#fpskeys{display:none;position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);
+  font-size:11px;letter-spacing:.5px;color:#c8d6e0;background:rgba(6,10,13,.6);padding:5px 12px;border:1px solid rgba(240,167,44,.3);white-space:nowrap}
+body.finepointer #fpsui #fpszone,body.finepointer #fpsui #fpsstick,body.finepointer #fpsui #fpslock,body.finepointer #fpsui #fpsfireL,
+body.finepointer #fpsui #fpsreload,body.finepointer #fpsui #fpsfire,body.finepointer #fpsui #fpsaim,body.finepointer #fpsui #fpsjump,
+body.finepointer #fpsui #fpscrouch,body.finepointer #fpsui #fpssprint{display:none!important}
+body.finepointer #fpsui #fpsability,body.finepointer #fpsui #fpsview,body.finepointer #fpsui #fpsweapon{opacity:.75;transform:scale(.85)}
+body.finepointer #fpskeys{display:block}
+@media (max-height:480px){
+  #fpszone{top:calc(env(safe-area-inset-top,0px) + 50px)}
+  #fpsfireL{left:150px;bottom:calc(env(safe-area-inset-bottom,0px) + 120px)}
+  #fpsjump{bottom:calc(env(safe-area-inset-bottom,0px) + 140px)!important}
+  #fpsreload{bottom:calc(env(safe-area-inset-bottom,0px) + 124px)!important}
+  #fpsability{right:150px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 190px)!important}
+  #fpssprint,#fpsweapon{bottom:calc(env(safe-area-inset-bottom,0px) + 166px)!important}
+  #fpslock{bottom:calc(env(safe-area-inset-bottom,0px) + 144px)}
+}
+
+/* ---- Tab icons + responsive sidebar ---- */
+.tab{display:flex;align-items:center;justify-content:center;gap:5px}
+.tab .ico{width:15px;height:15px;flex:0 0 auto}
+@media (max-width:620px){.tab span{display:none}.tab.on span{display:inline}.tab .ico{width:18px;height:18px}}
+body.sidebar #side{left:auto;right:0;top:var(--sbtop,220px);bottom:0;width:var(--sbw,280px);display:flex;flex-direction:column;
+  border-top:none;border-left:1px solid var(--edge);box-shadow:-3px 0 16px #000b, inset 1px 0 0 #ffffff10}
+body.sidebar #side:before{left:-2px;right:auto;top:0;bottom:0;width:2px;height:auto;background:linear-gradient(180deg,transparent,var(--amber),transparent)}
+body.sidebar #tabs{flex:0 0 auto;padding:4px 3px 0}
+body.sidebar .tab span{display:none}
+body.sidebar .tab{padding:6px 0}
+body.sidebar .tab .ico{width:18px;height:18px}
+body.sidebar #more{display:none}
+body.sidebar #cards{flex:1 1 0;min-height:0;max-height:none!important;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;align-content:start}
+body.sidebar .card{height:84px}
+body.sidebar #ctrls{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:4px;overflow:visible}
+body.sidebar .cbtn{min-width:0;padding:6px 2px;font-size:9px}
+body.sidebar #mmWrap{right:0;transform:none;width:var(--sbw,280px);box-sizing:border-box;display:flex;justify-content:center}
+body.sidebar #fpsPrompt,body.sidebar #deployPrompt,body.sidebar #rotatePrompt,body.sidebar #weaponPrompt{right:calc(var(--sbw,280px) + 10px)}
+body.sidebar #cardinfo{left:auto;right:calc(100% + 8px);bottom:auto;top:0;max-width:min(360px,calc(100vw - var(--sbw,280px) - 20px))}
+body.sidebar #hint{left:calc((100% - var(--sbw,280px))/2)}
+@media (max-height:500px){
+  body.sidebar .card{height:66px}
+  body.sidebar .card canvas{transform:scale(.7);transform-origin:top center;top:1px}
+  body.sidebar .card .nm{height:14px;font-size:7.5px}
+  body.sidebar .card .role{bottom:25px}
+  body.sidebar .tab{padding:4px 0}
+  body.sidebar .cbtn{padding:4px 1px;font-size:8px}
+  body.sidebar .cbtn .ico{width:14px;height:14px}
+  body.sidebar #prodstrip .pc,body.sidebar #qstrip .qi,body.sidebar #selbar .si{font-size:9px;padding:2px 6px}
+}
 </style>
 </head>
 <body>
@@ -458,6 +547,12 @@ body.fps #mmWrap{opacity:.55}
 <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="9" cy="14" r="6.5"/><circle cx="15" cy="9" r="6.5" fill="#0d1418" stroke="currentColor"/></symbol>
 <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M6.5 17.5L15 9M9 15L16.5 7.5"/><circle cx="6" cy="18" r="2.6"/><circle cx="18" cy="6" r="2.6"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-house" viewBox="0 0 24 24"><path d="M3.5 11.5L12 4l8.5 7.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-5h4v5"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6z"/><path d="M12 7.5v9"/></symbol>
+<symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.4"/><path d="M8.5 21l1.2-7.2-2.2-1.3L9 9h6l1.5 3.5-2.2 1.3L15.5 21"/><path d="M12 9v4.5"/></symbol>
+<symbol id="i-tank" viewBox="0 0 24 24"><rect x="3" y="13" width="18" height="5.5" rx="2.7"/><path d="M6 13l1.5-3.5h8L17 13"/><path d="M13 10.5L21.5 8.5"/><circle cx="7" cy="15.8" r=".6" fill="currentColor"/><circle cx="12" cy="15.8" r=".6" fill="currentColor"/><circle cx="17" cy="15.8" r=".6" fill="currentColor"/></symbol>
+<symbol id="i-plane" viewBox="0 0 24 24"><path d="M12 2.5c1 0 1.5 1.2 1.5 3v4.2l7.5 4.3v2l-7.5-2.3v4.1l2.3 1.8v1.7L12 20.2l-3.8 1.1v-1.7l2.3-1.8v-4.1L3 16v-2l7.5-4.3V5.5c0-1.8.5-3 1.5-3z"/></symbol>
+<symbol id="i-boat" viewBox="0 0 24 24"><path d="M3 14.5h18l-2.6 4.5H5.6z"/><path d="M7 14.5V11h8.5l1.5 3.5"/><path d="M10 11V7.5h3V11"/><path d="M2.5 21.5c1.5 0 1.5-.8 3-.8s1.5.8 3 .8 1.5-.8 3-.8 1.5.8 3 .8 1.5-.8 3-.8 1.5.8 3 .8"/></symbol>
 </defs>
 </svg>
 
@@ -477,12 +572,12 @@ body.fps #mmWrap{opacity:.55}
 
 <div id="side" class="hidden">
   <div id="tabs">
-    <div class="tab on" data-t="bld">STRUCTURES</div>
-    <div class="tab" data-t="inf">INFANTRY</div>
-    <div class="tab" data-t="veh">VEHICLES</div>
-    <div class="tab" data-t="air">AIR</div>
-    <div class="tab" data-t="sea">NAVY</div>
-    <div class="tab" data-t="def">DEFENSE</div>
+    <div class="tab on" data-t="bld" title="Structures"><svg class="ico"><use href="#i-house"></use></svg><span>STRUCTURES</span></div>
+    <div class="tab" data-t="def" title="Defense"><svg class="ico"><use href="#i-shield"></use></svg><span>DEFENSE</span></div>
+    <div class="tab" data-t="inf" title="Infantry"><svg class="ico"><use href="#i-person"></use></svg><span>INFANTRY</span></div>
+    <div class="tab" data-t="veh" title="Vehicles"><svg class="ico"><use href="#i-tank"></use></svg><span>VEHICLES</span></div>
+    <div class="tab" data-t="air" title="Air"><svg class="ico"><use href="#i-plane"></use></svg><span>AIR</span></div>
+    <div class="tab" data-t="sea" title="Navy"><svg class="ico"><use href="#i-boat"></use></svg><span>NAVY</span></div>
     <div id="more" title="Show all">▾</div>
   </div>
   <div id="selbar"></div>
@@ -491,6 +586,8 @@ body.fps #mmWrap{opacity:.55}
   <button id="deployPrompt" class="hidden">⌂ DEPLOY</button>
   <button id="rotatePrompt" class="hidden">⟳ ROTATE</button>
   <button id="cancelPlace" class="hidden">✕ CANCEL</button>
+  <div id="cardinfo" class="hidden"></div>
+  <div id="prodstrip" class="hidden"></div>
   <div id="qstrip"></div>
   <div id="cards"></div>
   <div id="ctrls">
@@ -512,7 +609,12 @@ body.fps #mmWrap{opacity:.55}
   <div id="fpsammo" class="hidden"></div>
   <div id="fpsbar"><span id="fpsname">—</span><i id="fpshp"></i></div>
   <div id="fpsexit">EXIT</div>
+  <div id="fpszone"></div>
   <div id="fpsstick"><i></i></div>
+  <div id="fpslock">⇑ SPRINT LOCK</div>
+  <div id="fpsfireL">FIRE</div>
+  <div id="fpsreload">RELOAD</div>
+  <div id="fpskeys">WASD move · Mouse look · LMB fire · RMB aim · SPACE jump · C crouch · SHIFT sprint · R reload · Q ability · E enter · V view</div>
   <div id="fpsstamina" class="hidden"><i></i></div>
   <div id="fpscrouch" class="hidden">CROUCH</div>
   <div id="fpssprint" class="hidden">SPRINT</div>
@@ -586,6 +688,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>/* BUNDLE:audio */</script>
 <script>
 "use strict";
+(()=>{const mf=matchMedia("(pointer:fine)"),mc=matchMedia("(pointer:coarse)"),f=()=>document.body.classList.toggle("finepointer",mf.matches&&!mc.matches);f(),mf.addEventListener&&mf.addEventListener("change",f),window.addEventListener("touchstart",()=>document.body.classList.remove("finepointer"),{passive:!0,capture:!0})})();
 const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),elPwr=$("#power"),elPwrBar=$("#pwrBar");let hintT=0;function hint(e){const t=$("#hint");t.textContent=e,t.classList.add("show"),hintT=2.4}
 </script>
 <script>/* BUNDLE:cards */</script>

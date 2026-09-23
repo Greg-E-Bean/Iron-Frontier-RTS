@@ -132,6 +132,25 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
 #qstrip .qi.b{border-color:var(--amber);color:var(--amber2);background:#1d2119}
 #qstrip .qi i{font-style:normal;color:var(--dim);font-family:"Courier New",monospace}
+#prodstrip{display:flex;gap:4px;padding:5px 6px 0;overflow-x:auto;touch-action:pan-x;scrollbar-width:none}
+#prodstrip::-webkit-scrollbar{display:none}
+#prodstrip.hidden{display:none}
+#prodstrip .pc{flex:0 0 auto;font-size:10px;letter-spacing:.4px;padding:4px 9px;background:#101920;border:1px solid var(--edge);
+  color:#9fb2c0;white-space:nowrap;cursor:pointer;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
+#prodstrip .pc.on{color:var(--amber2);border-color:var(--amber);background:#1d2119;box-shadow:inset 0 -2px 0 var(--amber)}
+#prodstrip .pc.cap{border-style:dashed}
+#prodstrip .pc i{font-style:normal;color:#7dc4ff}
+#cardinfo{position:absolute;left:6px;bottom:calc(100% + 8px);max-width:min(440px,calc(100vw - 12px));z-index:3;pointer-events:none;
+  background:linear-gradient(165deg,#1b252dee 0%,#0b1115f2 100%);border:1px solid var(--edge);border-left:3px solid var(--amber);
+  padding:7px 10px;box-shadow:0 4px 18px #000c;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+#cardinfo.hidden{display:none}
+#cardinfo .ci-h{display:flex;align-items:center;gap:7px;font-size:13px;color:#eef4fa}
+#cardinfo .ci-h b{letter-spacing:.4px}
+#cardinfo .ci-c{margin-left:auto;color:var(--amber2);font-weight:bold;font-family:"Courier New",monospace}
+#cardinfo .ci-tag{font-size:9px;font-weight:bold;color:#0a0f12;padding:1px 5px;border-radius:3px}
+#cardinfo .ci-s{font-size:10px;color:#8fa3bb;margin-top:3px;font-family:"Courier New",monospace}
+#cardinfo .ci-d{font-size:11px;color:#c6d3de;margin-top:4px;line-height:1.3}
+#cardinfo .ci-n{font-size:11px;color:#ff9a86;margin-top:4px;font-weight:bold}
 #ctrls{display:flex;gap:5px;padding:6px 6px 6px;overflow-x:auto;overscroll-behavior:contain;
   touch-action:pan-x;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 #ctrls::-webkit-scrollbar{display:none}
@@ -441,6 +460,76 @@ body.fps #mmWrap{opacity:.55}
   .cbtn{padding:6px 6px;font-size:9px}
   #hint{top:calc(env(safe-area-inset-top,0px) + 40px);padding:4px 10px;font-size:11px}
 }
+
+/* ---- COD-style touch FPS layout ---- */
+#fpszone{position:absolute;left:0;top:calc(env(safe-area-inset-top,0px) + 64px);bottom:0;width:44%;pointer-events:auto;touch-action:none}
+#fpsstick.float{transition:none;border-color:rgba(200,215,230,.5)}
+#fpslock{position:absolute;left:34px;bottom:calc(env(safe-area-inset-bottom,0px) + 164px);pointer-events:auto;opacity:0;
+  font-size:10px;letter-spacing:1px;padding:4px 9px;border-radius:12px;color:#d0ffd8;background:rgba(40,110,60,.55);border:1px solid rgba(150,255,160,.7);transition:opacity .15s}
+#fpslock.on{opacity:1}
+#fpsfireL{position:absolute;left:170px;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);width:58px;height:58px;border-radius:50%;
+  pointer-events:auto;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:1px;color:#ffd9c0;
+  background:rgba(180,60,40,.3);border:2px solid rgba(255,140,110,.55);touch-action:none}
+#fpsfireL.on{background:rgba(230,90,60,.6)}
+#fpsreload{position:absolute;right:140px;bottom:calc(env(safe-area-inset-bottom,0px) + 136px);width:54px;height:54px;border-radius:50%;
+  pointer-events:auto;display:flex;align-items:center;justify-content:center;font-size:8.5px;letter-spacing:.5px;color:#e6ecf2;
+  background:rgba(60,70,80,.4);border:2px solid rgba(200,210,220,.5)}
+#fpsfire{right:24px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 40px)!important;touch-action:none}
+#fpsaim{right:136px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 54px)!important}
+#fpsjump{left:auto!important;right:30px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 150px)!important}
+#fpscrouch{left:auto!important;right:214px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 26px)!important}
+#fpsability{right:88px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 214px)!important}
+#fpsview{right:auto!important;left:104px!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;bottom:auto!important;width:auto!important;height:auto!important;border-radius:0!important;padding:9px 14px;font-size:12px!important;letter-spacing:2px!important}
+#fpssprint{left:26px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 196px)!important;width:54px!important;height:54px!important}
+#fpsweapon{left:88px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 196px)!important;width:54px!important;height:54px!important}
+#fpscrouch,#fpsjump,#fpsaim,#fpsfire,#fpsreload,#fpsability,#fpsview{touch-action:none}
+#fpskeys{display:none;position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);
+  font-size:11px;letter-spacing:.5px;color:#c8d6e0;background:rgba(6,10,13,.6);padding:5px 12px;border:1px solid rgba(240,167,44,.3);white-space:nowrap}
+body.finepointer #fpsui #fpszone,body.finepointer #fpsui #fpsstick,body.finepointer #fpsui #fpslock,body.finepointer #fpsui #fpsfireL,
+body.finepointer #fpsui #fpsreload,body.finepointer #fpsui #fpsfire,body.finepointer #fpsui #fpsaim,body.finepointer #fpsui #fpsjump,
+body.finepointer #fpsui #fpscrouch,body.finepointer #fpsui #fpssprint{display:none!important}
+body.finepointer #fpsui #fpsability,body.finepointer #fpsui #fpsview,body.finepointer #fpsui #fpsweapon{opacity:.75;transform:scale(.85)}
+body.finepointer #fpskeys{display:block}
+@media (max-height:480px){
+  #fpszone{top:calc(env(safe-area-inset-top,0px) + 50px)}
+  #fpsfireL{left:150px;bottom:calc(env(safe-area-inset-bottom,0px) + 120px)}
+  #fpsjump{bottom:calc(env(safe-area-inset-bottom,0px) + 140px)!important}
+  #fpsreload{bottom:calc(env(safe-area-inset-bottom,0px) + 124px)!important}
+  #fpsability{right:150px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 190px)!important}
+  #fpssprint,#fpsweapon{bottom:calc(env(safe-area-inset-bottom,0px) + 166px)!important}
+  #fpslock{bottom:calc(env(safe-area-inset-bottom,0px) + 144px)}
+}
+
+/* ---- Tab icons + responsive sidebar ---- */
+.tab{display:flex;align-items:center;justify-content:center;gap:5px}
+.tab .ico{width:15px;height:15px;flex:0 0 auto}
+@media (max-width:620px){.tab span{display:none}.tab.on span{display:inline}.tab .ico{width:18px;height:18px}}
+body.sidebar #side{left:auto;right:0;top:var(--sbtop,220px);bottom:0;width:var(--sbw,280px);display:flex;flex-direction:column;
+  border-top:none;border-left:1px solid var(--edge);box-shadow:-3px 0 16px #000b, inset 1px 0 0 #ffffff10}
+body.sidebar #side:before{left:-2px;right:auto;top:0;bottom:0;width:2px;height:auto;background:linear-gradient(180deg,transparent,var(--amber),transparent)}
+body.sidebar #tabs{flex:0 0 auto;padding:4px 3px 0}
+body.sidebar .tab span{display:none}
+body.sidebar .tab{padding:6px 0}
+body.sidebar .tab .ico{width:18px;height:18px}
+body.sidebar #more{display:none}
+body.sidebar #cards{flex:1 1 0;min-height:0;max-height:none!important;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;align-content:start}
+body.sidebar .card{height:84px}
+body.sidebar #ctrls{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:4px;overflow:visible}
+body.sidebar .cbtn{min-width:0;padding:6px 2px;font-size:9px}
+body.sidebar #mmWrap{right:0;transform:none;width:var(--sbw,280px);box-sizing:border-box;display:flex;justify-content:center}
+body.sidebar #fpsPrompt,body.sidebar #deployPrompt,body.sidebar #rotatePrompt,body.sidebar #weaponPrompt{right:calc(var(--sbw,280px) + 10px)}
+body.sidebar #cardinfo{left:auto;right:calc(100% + 8px);bottom:auto;top:0;max-width:min(360px,calc(100vw - var(--sbw,280px) - 20px))}
+body.sidebar #hint{left:calc((100% - var(--sbw,280px))/2)}
+@media (max-height:500px){
+  body.sidebar .card{height:66px}
+  body.sidebar .card canvas{transform:scale(.7);transform-origin:top center;top:1px}
+  body.sidebar .card .nm{height:14px;font-size:7.5px}
+  body.sidebar .card .role{bottom:25px}
+  body.sidebar .tab{padding:4px 0}
+  body.sidebar .cbtn{padding:4px 1px;font-size:8px}
+  body.sidebar .cbtn .ico{width:14px;height:14px}
+  body.sidebar #prodstrip .pc,body.sidebar #qstrip .qi,body.sidebar #selbar .si{font-size:9px;padding:2px 6px}
+}
 </style>
 </head>
 <body>
@@ -458,6 +547,12 @@ body.fps #mmWrap{opacity:.55}
 <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="9" cy="14" r="6.5"/><circle cx="15" cy="9" r="6.5" fill="#0d1418" stroke="currentColor"/></symbol>
 <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M6.5 17.5L15 9M9 15L16.5 7.5"/><circle cx="6" cy="18" r="2.6"/><circle cx="18" cy="6" r="2.6"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-house" viewBox="0 0 24 24"><path d="M3.5 11.5L12 4l8.5 7.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-5h4v5"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6z"/><path d="M12 7.5v9"/></symbol>
+<symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.4"/><path d="M8.5 21l1.2-7.2-2.2-1.3L9 9h6l1.5 3.5-2.2 1.3L15.5 21"/><path d="M12 9v4.5"/></symbol>
+<symbol id="i-tank" viewBox="0 0 24 24"><rect x="3" y="13" width="18" height="5.5" rx="2.7"/><path d="M6 13l1.5-3.5h8L17 13"/><path d="M13 10.5L21.5 8.5"/><circle cx="7" cy="15.8" r=".6" fill="currentColor"/><circle cx="12" cy="15.8" r=".6" fill="currentColor"/><circle cx="17" cy="15.8" r=".6" fill="currentColor"/></symbol>
+<symbol id="i-plane" viewBox="0 0 24 24"><path d="M12 2.5c1 0 1.5 1.2 1.5 3v4.2l7.5 4.3v2l-7.5-2.3v4.1l2.3 1.8v1.7L12 20.2l-3.8 1.1v-1.7l2.3-1.8v-4.1L3 16v-2l7.5-4.3V5.5c0-1.8.5-3 1.5-3z"/></symbol>
+<symbol id="i-boat" viewBox="0 0 24 24"><path d="M3 14.5h18l-2.6 4.5H5.6z"/><path d="M7 14.5V11h8.5l1.5 3.5"/><path d="M10 11V7.5h3V11"/><path d="M2.5 21.5c1.5 0 1.5-.8 3-.8s1.5.8 3 .8 1.5-.8 3-.8 1.5.8 3 .8 1.5-.8 3-.8 1.5.8 3 .8"/></symbol>
 </defs>
 </svg>
 
@@ -477,12 +572,12 @@ body.fps #mmWrap{opacity:.55}
 
 <div id="side" class="hidden">
   <div id="tabs">
-    <div class="tab on" data-t="bld">STRUCTURES</div>
-    <div class="tab" data-t="inf">INFANTRY</div>
-    <div class="tab" data-t="veh">VEHICLES</div>
-    <div class="tab" data-t="air">AIR</div>
-    <div class="tab" data-t="sea">NAVY</div>
-    <div class="tab" data-t="def">DEFENSE</div>
+    <div class="tab on" data-t="bld" title="Structures"><svg class="ico"><use href="#i-house"></use></svg><span>STRUCTURES</span></div>
+    <div class="tab" data-t="def" title="Defense"><svg class="ico"><use href="#i-shield"></use></svg><span>DEFENSE</span></div>
+    <div class="tab" data-t="inf" title="Infantry"><svg class="ico"><use href="#i-person"></use></svg><span>INFANTRY</span></div>
+    <div class="tab" data-t="veh" title="Vehicles"><svg class="ico"><use href="#i-tank"></use></svg><span>VEHICLES</span></div>
+    <div class="tab" data-t="air" title="Air"><svg class="ico"><use href="#i-plane"></use></svg><span>AIR</span></div>
+    <div class="tab" data-t="sea" title="Navy"><svg class="ico"><use href="#i-boat"></use></svg><span>NAVY</span></div>
     <div id="more" title="Show all">▾</div>
   </div>
   <div id="selbar"></div>
@@ -491,6 +586,8 @@ body.fps #mmWrap{opacity:.55}
   <button id="deployPrompt" class="hidden">⌂ DEPLOY</button>
   <button id="rotatePrompt" class="hidden">⟳ ROTATE</button>
   <button id="cancelPlace" class="hidden">✕ CANCEL</button>
+  <div id="cardinfo" class="hidden"></div>
+  <div id="prodstrip" class="hidden"></div>
   <div id="qstrip"></div>
   <div id="cards"></div>
   <div id="ctrls">
@@ -512,7 +609,12 @@ body.fps #mmWrap{opacity:.55}
   <div id="fpsammo" class="hidden"></div>
   <div id="fpsbar"><span id="fpsname">—</span><i id="fpshp"></i></div>
   <div id="fpsexit">EXIT</div>
+  <div id="fpszone"></div>
   <div id="fpsstick"><i></i></div>
+  <div id="fpslock">⇑ SPRINT LOCK</div>
+  <div id="fpsfireL">FIRE</div>
+  <div id="fpsreload">RELOAD</div>
+  <div id="fpskeys">WASD move · Mouse look · LMB fire · RMB aim · SPACE jump · C crouch · SHIFT sprint · R reload · Q ability · E enter · V view</div>
   <div id="fpsstamina" class="hidden"><i></i></div>
   <div id="fpscrouch" class="hidden">CROUCH</div>
   <div id="fpssprint" class="hidden">SPRINT</div>
@@ -2020,7 +2122,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function spawnUnit(e, t) {
     const r = UNITS[t], own = FACTIONS[e.f.key].units.includes(t), ff = own ? null : unitFacOwner(t), n = S.blds.filter((b) => b.owner === e.id && !b.dead && b.key === r.from && (own || b.capturedFac === ff));
     if (!n.length) return;
-    const a = n[Math.floor(Math.random() * n.length)];
+    const pid = e.primary && e.primary[r.from], a = n.find((b) => b.id === pid) || n[Math.floor(Math.random() * n.length)];
     let o = a.x, s = a.y + 32 * a.size / 2 + 16;
     const wfn = r.naval ? walkableW : walkable, i = nearestFree(Math.floor(o / 32), Math.floor(s / 32), wfn);
     i && (o = 32 * i[0] + 16, s = 32 * i[1] + 16);
@@ -3432,7 +3534,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     DPR = QUALITY >= 2 ? Math.min(3, window.devicePixelRatio || 1) : QUALITY >= 1 ? Math.min(1.5, window.devicePixelRatio || 1) : 1;
     const e = document.documentElement;
     CW = e && e.clientWidth || window.innerWidth, CH = e && e.clientHeight || window.innerHeight, cv.width = CW * DPR, cv.height = CH * DPR, cv.style.width = CW + "px", cv.style.height = CH + "px", ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    const t = Math.min(150, Math.max(96, Math.floor(0.3 * CW))), r = Math.round(72 * t / 92);
+    const sb = CW > 1.2 * CH && CW >= 600, phone = CH <= 500, sbw = sb ? phone ? Math.min(236, Math.max(200, Math.round(0.27 * CW))) : Math.min(330, Math.max(260, Math.round(0.22 * CW))) : 0;
+    document.body.classList.toggle("sidebar", sb);
+    const t = sb ? phone ? Math.min(150, sbw - 14) : sbw - 14 : Math.min(150, Math.max(96, Math.floor(0.3 * CW))), r = Math.round(72 * t / 92);
+    sb && (document.documentElement.style.setProperty("--sbw", sbw + "px"), document.documentElement.style.setProperty("--sbtop", Math.round(54 + r + 8 + 6) + "px"));
     mm.width = t * DPR, mm.height = r * DPR, mm.style.width = t + "px", mm.style.height = r + "px", mctx.setTransform(DPR, 0, 0, DPR, 0, 0), "function" == typeof resizeGL && resizeGL();
   }
   function clampCam() {
@@ -7698,7 +7803,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function drawRallyFlags() {
     for (const b of S.blds) {
-      if (b.dead || 0 !== b.owner || !b.rally) continue;
+      if (b.dead || 0 !== b.owner || !b.rally || !S.sel.includes(b)) continue;
       const sx = w2sx(b.rally.x, b.rally.y), sy = w2sy(b.rally.x, b.rally.y), bx = w2sx(b.x, b.y), by = w2sy(b.x, b.y);
       ctx.save(), ctx.strokeStyle = "rgba(125,196,255,.5)", ctx.lineWidth = 1.5, ctx.setLineDash([5, 5]), ctx.beginPath(), ctx.moveTo(bx, by), ctx.lineTo(sx, sy), ctx.stroke(), ctx.setLineDash([]), ctx.strokeStyle = "#7dc4ff", ctx.fillStyle = "#7dc4ff", ctx.lineWidth = 2, ctx.beginPath(), ctx.moveTo(sx, sy + 8), ctx.lineTo(sx, sy - 16), ctx.stroke(), ctx.beginPath(), ctx.moveTo(sx, sy - 16), ctx.lineTo(sx + 11, sy - 11), ctx.lineTo(sx, sy - 6), ctx.closePath(), ctx.fill(), ctx.restore();
     }
@@ -9511,7 +9616,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [], glowC = "allied" === fac ? "#8fe0ff" : "soviet" === fac ? "#ff9c4a" : "yuri" === fac ? "#c98cff" : "glow", bodyC = "soviet" === fac ? "#8a7a6a" : "allied" === fac ? "#d8e8ee" : "yuri" === fac ? "#7a5f8a" : "white", noseC = "soviet" === fac ? "#c0392b" : "allied" === fac ? "#3ba0c9" : "yuri" === fac ? "#8c3fc9" : "red", shellC = "soviet" === fac ? "#e8c04a" : "allied" === fac ? "#c9d8e0" : "yuri" === fac ? "#b98cd8" : "gold";
     return "bullet" === kind || "flak" === kind ? e.push(P_(CYL(0.5, 4.5, 6), 0, 0, 0, glowC, { ty: PI2, e: 1 })) : "flame" === kind ? e.push(P_(CYL(0.9, 3, 6), 0, 0, 0, "yuri" === fac ? "#8fe06a" : "tibGlit", { ty: PI2, e: 1 })) : "rocket" === kind || "missile" === kind || "aamissile" === kind ? (e.push(P_(CYL(0.7, 4.5, 7), 0, 0, 0, bodyC, { ty: PI2 })), e.push(P_(CONE(0.7, 0.2, 1.6, 7), 4.5, 0, 0, noseC, { ty: PI2 })), e.push(P_(CYL(0.95, 1.6, 6), -0.6, 0, 0, glowC, { ty: PI2, e: 1 }))) : "bomb" === kind ? e.push(P_(CYL(1.1, 3.5, 8), 0, 0, 0, "darkmetal", { ty: PI2 })) : "grenade" === kind ? (e.push(P_(CYL(1.3, 1.9, 8), 0, 0, 0, "olive", { ty: PI2 })), e.push(P_(CYL(0.35, 0.5, 6), 0, 1.1, 0, "darkmetal", { ty: PI2 }))) : e.push(P_(CYL(0.55, 3.4, 6), 0, 0, 0, shellC, { ty: PI2 })), e;
   }
-  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, tpDist: null, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0, deathT: 0, jumpT: 0, jumpZ: 0, chargingGrenade: false, swimming: false, nextAmbientT: 0, shakeMag: 0, shakeX: 0, shakeY: 0, exitCD: 0 };
+  var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, tpDist: null, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0, deathT: 0, jumpT: 0, jumpZ: 0, chargingGrenade: false, swimming: false, nextAmbientT: 0, shakeMag: 0, shakeX: 0, shakeY: 0, exitCD: 0, sprintLock: false };
   var fpsPromptTarget = null;
   var rotateTarget = null;
   function fpsEyeH(e) {
@@ -9732,6 +9837,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var MAG_SIZE = { rifle: 24, sniper: 5, flak: 8, pistol: 10 };
   var RELOAD_DUR = 1.6;
+  function fpsReload() {
+    const vm = FPS.vm;
+    if (!vm || !FPS.u || FPS.u.dead) return;
+    const mag = MAG_SIZE[vm.userData.magFamily];
+    mag && !(vm.userData.reloadT > 0) && null != vm.userData.mag && vm.userData.mag < mag && (vm.userData.reloadT = RELOAD_DUR);
+  }
   function fpsShoot(e) {
     if (e.cool > 0) return;
     const vm = FPS.vm, magSize = vm && MAG_SIZE[vm.userData.magFamily];
@@ -10689,6 +10800,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   Object.assign(window, {
     projModel,
     fpsEyeH,
+    fpsReload,
     fpsEnterDoor,
     fpsDoorExit,
     furnishTheme,
@@ -11408,11 +11520,85 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 </script>
 <script>
 "use strict";
+(()=>{const mf=matchMedia("(pointer:fine)"),mc=matchMedia("(pointer:coarse)"),f=()=>document.body.classList.toggle("finepointer",mf.matches&&!mc.matches);f(),mf.addEventListener&&mf.addEventListener("change",f),window.addEventListener("touchstart",()=>document.body.classList.remove("finepointer"),{passive:!0,capture:!0})})();
 const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),elPwr=$("#power"),elPwrBar=$("#pwrBar");let hintT=0;function hint(e){const t=$("#hint");t.textContent=e,t.classList.add("show"),hintT=2.4}
 </script>
 <script>
 (() => {
   // src/cards.ts
+  var PROD_FROM = { inf: "barracks", veh: "factory", air: "airfield", sea: "navalyard" };
+  var prodSel = {};
+  function producers(tab) {
+    const from = PROD_FROM[tab];
+    return from ? S.blds.filter((b) => b.owner === P().id && !b.dead && b.key === from).sort((a, b) => (a.capturedFac ? 1 : 0) - (b.capturedFac ? 1 : 0) || a.id - b.id) : [];
+  }
+  function selProducer(tab) {
+    const id = prodSel[tab];
+    if (!id) return null;
+    const b = producers(tab).find((b2) => b2.id === id);
+    return b || (delete prodSel[tab], P().primary && delete P().primary[PROD_FROM[tab]], null);
+  }
+  function producerLabel(b, i) {
+    const own = P().f.key, cf = b.capturedFac && b.capturedFac !== own ? b.capturedFac : null;
+    return bname(b.key, cf || P().fac) + " " + (i + 1) + (cf ? " \xB7 " + (FACTIONS[cf].name || cf).toUpperCase().split(" ")[0] : "");
+  }
+  function buildProdStrip() {
+    const el = $("#prodstrip"), list = producers(S.tab);
+    el._sig = S.tab + "|" + list.map((b) => b.id + (b.capturedFac || "")).join(",") + "|" + (prodSel[S.tab] || 0);
+    el.innerHTML = "";
+    if (!list.length) return void el.classList.add("hidden");
+    el.classList.remove("hidden");
+    const cur = selProducer(S.tab), mk = (label, b, on) => {
+      const c = document.createElement("div");
+      c.className = "pc" + (on ? " on" : "") + (b && b.capturedFac && b.capturedFac !== P().f.key ? " cap" : "");
+      c.innerHTML = label + (b && b.rally ? " <i>\u2691</i>" : "");
+      c.title = b ? "Build here \xB7 tap again to view it" : "Build from any";
+      c.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        if (b && on) {
+          cam.x = b.x, cam.y = b.y, S.sel = [b], sfx("sel");
+          return;
+        }
+        b ? (prodSel[S.tab] = b.id, (P().primary = P().primary || {})[b.key] = b.id) : (delete prodSel[S.tab], P().primary && delete P().primary[PROD_FROM[S.tab]]), sfx("sel"), buildCards();
+      });
+      el.appendChild(c);
+    };
+    list.length > 1 && mk("ALL", null, !cur);
+    list.forEach((b, i) => mk(producerLabel(b, i), b, cur === b || list.length === 1 && !cur && false));
+  }
+  function needText(it) {
+    const t = P();
+    if ("ability" === it.kind) return "";
+    if ("bld" === it.kind || "def" === it.kind) {
+      if (canBuildBld(t, it.key) || t.ready[it.kind] === it.key) return "";
+      const r2 = BLD[it.key].prereq.filter((e) => !hasBld(0, e));
+      return "Needs " + (r2.length ? r2 : BLD[it.key].prereq).map((e) => bname(e, t.fac)).join(" + ");
+    }
+    if (canBuildUnit(t, it.key)) return "";
+    const r = UNITS[it.key];
+    return r.limit && qCount(t, it.kind, it.key) + S.units.filter((u) => u.owner === t.id && !u.dead && u.key === it.key).length >= r.limit ? "Limit " + r.limit : "Needs " + bname(r.req || r.from, t.fac);
+  }
+  var infoT = 0;
+  function showCardInfo(it, touch) {
+    const el = $("#cardinfo"), t = P();
+    let nm, cost, desc = "", stats = "", tag = null;
+    if ("ability" === it.kind) {
+      const a = ABILITIES[it.key];
+      nm = a.name, cost = a.cost || 0, desc = a.desc || "";
+    } else if ("bld" === it.kind || "def" === it.kind) {
+      const d = BLD[it.key];
+      nm = bname(it.key, t.fac), cost = d.cost, desc = BLD_DESC[it.key] || "", stats = "HP " + d.hp + (d.power ? " \xB7 PWR " + (d.power > 0 ? "+" : "") + d.power : "") + (d.range ? " \xB7 RNG " + d.range : "");
+    } else {
+      const d = UNITS[it.key];
+      nm = uname(it.key, it.foreign ? unitFacOwner(it.key) : t.fac), cost = d.cost, tag = unitRoleTag(it.key), desc = UNIT_DESC[it.key] || (tag ? tag.label + " \u2014 " + tag.desc : ""), stats = "HP " + d.hp + (d.dmg ? " \xB7 DMG " + d.dmg : "") + (d.range ? " \xB7 RNG " + d.range : "") + " \xB7 SPD " + d.speed;
+    }
+    const need = needText(it);
+    el.innerHTML = '<div class="ci-h"><b>' + nm + "</b>" + (tag ? '<span class="ci-tag" style="background:' + tag.color + '">' + tag.label + "</span>" : "") + (cost ? '<span class="ci-c">$' + cost + "</span>" : "") + "</div>" + (stats ? '<div class="ci-s">' + stats + "</div>" : "") + (desc ? '<div class="ci-d">' + desc + "</div>" : "") + (need ? '<div class="ci-n">' + need + "</div>" : "");
+    el.classList.remove("hidden"), clearTimeout(infoT), touch && (infoT = setTimeout(hideCardInfo, 3800));
+  }
+  function hideCardInfo() {
+    clearTimeout(infoT), $("#cardinfo").classList.add("hidden");
+  }
   function tabList(e) {
     const t = P().f, capFacs = new Set(S.blds.filter((b) => b.owner === P().id && !b.dead && b.capturedFac && b.capturedFac !== t.key).map((b) => b.capturedFac));
     if ("bld" === e) {
@@ -11424,6 +11610,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       return own2.concat(foreign2);
     }
     if ("def" === e) return [{ kind: "def", key: "def1" }, { kind: "def", key: "aa" }, { kind: "def", key: "def2" }, { kind: "def", key: "wall" }, { kind: "def", key: "gate" }, { kind: "veh", key: "bastion" }, { kind: "def", key: "super" }, { kind: "ability", key: "super" }, { kind: "ability", key: "spy" }, { kind: "ability", key: "paradrop" }, { kind: "ability", key: "emp" }];
+    const pb = selProducer(e);
+    if (pb) {
+      const pf = pb.capturedFac && pb.capturedFac !== t.key ? pb.capturedFac : null;
+      return (pf ? FACTIONS[pf].units : t.units).filter((u) => UNITS[u].tab === e && (!pf || !t.units.includes(u))).map((u) => ({ kind: e, key: u, foreign: !!pf }));
+    }
     const own = t.units.filter((t2) => UNITS[t2].tab === e), foreign = [];
     for (const fac of capFacs) for (const u of FACTIONS[fac].units) UNITS[u].tab === e && !own.includes(u) && !foreign.includes(u) && foreign.push(u);
     return own.concat(foreign).map((t2) => ({ kind: e, key: t2, foreign: !own.includes(t2) }));
@@ -11438,7 +11629,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var cardEls = [];
   function buildCards() {
-    elCards.innerHTML = "", cardEls = [];
+    elCards.innerHTML = "", cardEls = [], hideCardInfo(), buildProdStrip();
     const e = P();
     for (const t of tabList(S.tab)) {
       const r = document.createElement("div");
@@ -11465,8 +11656,12 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const bd = BLD_DESC[t.key];
         bd && (r.title = bd);
       }
-      r.addEventListener("pointerdown", (e2) => {
-        e2.stopPropagation(), r._t = setTimeout(() => {
+      r.removeAttribute("title"), r.addEventListener("pointerenter", (e2) => {
+        "mouse" === e2.pointerType && showCardInfo(t, false);
+      }), r.addEventListener("pointerleave", (e2) => {
+        "mouse" === e2.pointerType && hideCardInfo();
+      }), r.addEventListener("pointerdown", (e2) => {
+        e2.stopPropagation(), "mouse" !== e2.pointerType && showCardInfo(t, true), r._t = setTimeout(() => {
           const q = P().queues[t.kind];
           q && q.list.includes(t.key) && (r._long = true, cancelBuild(P(), t.kind, t.key), hint("Removed from queue"), sfx("place"));
         }, 750), r._long = false;
@@ -11571,7 +11766,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const r2 = e.queues[t2.it.kind], n = qCount(e, t2.it.kind, t2.it.key), a = r2 && r2.list.length && r2.list[0] === t2.it.key, isBld = "bld" === t2.it.kind || "def" === t2.it.kind, o = isBld && e.ready[t2.it.kind] === t2.it.key, s = isBld ? canBuildBld(e, t2.it.key) : canBuildUnit(e, t2.it.key);
       t2.el.classList.toggle("dis", !s && !n && !o), t2.el.classList.toggle("rdy", !!o), t2.el.classList.toggle("head", !!a && !o), t2.pg.style.transform = "scaleY(" + (a && !o ? 1 - (r2.prog || 0) : 0) + ")", n > 1 ? (t2.qn.style.display = "", t2.qn.textContent = "x" + n) : t2.qn.style.display = "none", o ? (t2.bd.style.display = "", t2.bd.textContent = "PLACE") : a && r2.hold ? (t2.bd.style.display = "", t2.bd.textContent = "$") : a ? (t2.bd.style.display = "", t2.bd.textContent = Math.round(100 * (r2.prog || 0)) + "%") : t2.bd.style.display = "none";
     }
-    updateQueueStrip(), updateSelBar(), elCred.textContent = Math.floor(e.credits), elPwr.textContent = Math.round((e.power, e.drain, e.power)) + "/" + e.drain;
+    ((ps) => {
+      const list = producers(S.tab), sig = S.tab + "|" + list.map((b) => b.id + (b.capturedFac || "")).join(",") + "|" + (prodSel[S.tab] || 0);
+      ps._sig !== sig && (selProducer(S.tab), buildCards());
+    })($("#prodstrip")), updateQueueStrip(), updateSelBar(), elCred.textContent = Math.floor(e.credits), elPwr.textContent = Math.round((e.power, e.drain, e.power)) + "/" + e.drain;
     const t = 0 === e.drain ? 1 : clamp(e.power / Math.max(1, e.drain), 0, 1);
     elPwrBar.style.width = 100 * t + "%", elPwrBar.style.background = t >= 1 ? "#39d353" : t > 0.6 ? "#e8c53a" : "#e0473a";
     const r = S.units.filter((e2) => 0 === e2.owner && !e2.dead).length;
@@ -11608,7 +11806,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     updateCards,
     doDeploy,
     cardClick,
-    tabList
+    tabList,
+    producers,
+    selProducer,
+    showCardInfo,
+    hideCardInfo
   });
   Object.defineProperties(window, {
     cardEls: { get: () => cardEls, configurable: true }
@@ -14107,32 +14309,66 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }), $("#fpsexit").addEventListener("click", (e) => {
     e.stopPropagation(), exitFPS();
   }), (function() {
-    const e = $("#fpsstick"), t = e.firstElementChild, r = $("#fpsfire");
-    let n = null;
-    const a = (r2) => {
-      const n2 = e.getBoundingClientRect();
-      let a2 = (r2.clientX - (n2.left + n2.width / 2)) / (n2.width / 2), o2 = (r2.clientY - (n2.top + n2.height / 2)) / (n2.height / 2);
-      const s2 = Math.hypot(a2, o2);
-      s2 > 1 && (a2 /= s2, o2 /= s2), FPS.mv.f = -o2, FPS.mv.s = a2, t.style.transform = "translate(" + 30 * a2 + "px," + 30 * o2 + "px)";
+    const e = $("#fpsstick"), t = e.firstElementChild, r = $("#fpsfire"), zone = $("#fpszone"), lock = $("#fpslock");
+    let n = null, cx = 0, cy = 0;
+    const R = 59, setLock = (v) => {
+      FPS.sprintLock = v, lock.classList.toggle("on", v), v ? (FPS.sprinting = true, FPS.crouching = false) : FPS.sprinting = false;
     };
-    e.addEventListener("pointerdown", (t2) => {
-      t2.stopPropagation(), n = t2.pointerId, e.setPointerCapture(t2.pointerId), a(t2);
-    }), e.addEventListener("pointermove", (e2) => {
-      e2.pointerId === n && (e2.stopPropagation(), a(e2));
+    const a = (ev) => {
+      let dx = (ev.clientX - cx) / R, dy = (ev.clientY - cy) / R;
+      const raw = Math.hypot(dx, dy);
+      !FPS.sprintLock && dy < -1.25 && Math.abs(dx) < 0.6 && FPS.stamina > 0.1 && setLock(true);
+      FPS.sprintLock && dy > -0.5 && setLock(false);
+      const s = Math.hypot(dx, dy);
+      s > 1 && (dx /= s, dy /= s);
+      const dz = 0.12, m = Math.max(0, (Math.min(1, raw) - dz) / (1 - dz)) / (Math.min(1, raw) || 1);
+      FPS.mv.f = -dy * m * Math.min(1, raw), FPS.mv.s = dx * m * Math.min(1, raw), FPS.sprintLock && (FPS.mv.f = 1, FPS.mv.s = dx * 0.4), t.style.transform = "translate(" + 30 * dx + "px," + 30 * dy + "px)";
+    };
+    const start = (ev, float) => {
+      ev.stopPropagation(), ev.preventDefault(), n = ev.pointerId, ev.target.setPointerCapture(ev.pointerId), FPS.sprintLock && setLock(false);
+      if (float) {
+        e.classList.add("float"), e.style.left = ev.clientX - R + "px", e.style.top = ev.clientY - R + "px", e.style.bottom = "auto", cx = ev.clientX, cy = ev.clientY;
+      } else {
+        const b = e.getBoundingClientRect();
+        cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+      }
+      a(ev);
+    };
+    e.addEventListener("pointerdown", (ev) => start(ev, false)), zone.addEventListener("pointerdown", (ev) => start(ev, true));
+    const mv = (ev) => {
+      ev.pointerId === n && (ev.stopPropagation(), a(ev));
+    };
+    e.addEventListener("pointermove", mv), zone.addEventListener("pointermove", mv);
+    const o = (ev) => {
+      ev.pointerId === n && (n = null, e.classList.remove("float"), e.style.left = e.style.top = e.style.bottom = "", FPS.sprintLock ? (FPS.mv.f = 1, FPS.mv.s = 0) : (FPS.mv.f = 0, FPS.mv.s = 0), t.style.transform = FPS.sprintLock ? "translate(0,-30px)" : "translate(0,0)");
+    };
+    for (const el of [e, zone]) el.addEventListener("pointerup", o), el.addEventListener("pointercancel", o);
+    lock.addEventListener("pointerdown", (ev) => {
+      ev.stopPropagation(), setLock(false), FPS.mv.f = 0, t.style.transform = "translate(0,0)";
     });
-    const o = (e2) => {
-      e2.pointerId === n && (n = null, FPS.mv.f = 0, FPS.mv.s = 0, t.style.transform = "translate(0,0)");
+    const lookBy = (dx, dy) => {
+      const k = 56e-4 * (FPS.aiming ? 0.55 : 1) * (1 + Math.min(0.7, Math.hypot(dx, dy) / 60));
+      FPS.yaw += dx * k, FPS.pitch = clamp(FPS.pitch - dy * k * 0.85, -0.85, 0.62);
+    }, fireBtn = (btn) => {
+      let fid = null, lx = 0, ly = 0;
+      btn.addEventListener("pointerdown", (ev) => {
+        ev.stopPropagation(), ev.preventDefault(), fid = ev.pointerId, lx = ev.clientX, ly = ev.clientY, btn.setPointerCapture(ev.pointerId), FPS.firing = true, btn.classList.add("on"), FPS.sprintLock && setLock(false);
+      }), btn.addEventListener("pointermove", (ev) => {
+        ev.pointerId === fid && (ev.stopPropagation(), lookBy(ev.clientX - lx, ev.clientY - ly), lx = ev.clientX, ly = ev.clientY);
+      });
+      const off = (ev) => {
+        ev.pointerId === fid && (fid = null, FPS.firing = false, btn.classList.remove("on"));
+      };
+      btn.addEventListener("pointerup", off), btn.addEventListener("pointercancel", off);
     };
-    e.addEventListener("pointerup", o), e.addEventListener("pointercancel", o), r.addEventListener("pointerdown", (e2) => {
-      e2.stopPropagation(), FPS.firing = true, r.classList.add("on");
+    fireBtn(r), fireBtn($("#fpsfireL")), window.fpsLookBy = lookBy;
+    const rl = $("#fpsreload");
+    rl.addEventListener("pointerdown", (ev) => {
+      ev.stopPropagation(), fpsReload();
     });
-    const s = (e2) => {
-      FPS.firing = false, r.classList.remove("on");
-    };
-    r.addEventListener("pointerup", s), r.addEventListener("pointercancel", s), r.addEventListener("pointerleave", s);
     const am = $("#fpsaim");
     am.addEventListener("pointerdown", (e2) => {
-      e2.stopPropagation(), FPS.aiming = !FPS.aiming, am.classList.toggle("on", FPS.aiming);
+      e2.stopPropagation(), FPS.aiming = !FPS.aiming, am.classList.toggle("on", FPS.aiming), FPS.aiming && FPS.sprintLock && setLock(false);
     });
     const vwb = $("#fpsview");
     vwb.addEventListener("pointerdown", (e2) => {
@@ -14162,20 +14398,21 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     });
     const crBtn = $("#fpscrouch");
     crBtn.addEventListener("pointerdown", (e2) => {
-      e2.stopPropagation(), FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false);
+      e2.stopPropagation(), FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false, FPS.sprintLock && setLock(false));
     });
     const spBtn = $("#fpssprint");
     spBtn.addEventListener("pointerdown", (e2) => {
       e2.stopPropagation(), FPS.stamina > 0 && (FPS.sprinting = true, FPS.crouching = false);
     });
-    const spOff = () => FPS.sprinting = false;
+    const spOff = () => {
+      FPS.sprintLock || (FPS.sprinting = false);
+    };
     spBtn.addEventListener("pointerup", spOff), spBtn.addEventListener("pointercancel", spOff), spBtn.addEventListener("pointerleave", spOff);
   })(), cv.addEventListener("pointerdown", (e) => {
     FPS.on && (FPS.look = { id: e.pointerId, x: e.clientX, y: e.clientY });
   }, true), cv.addEventListener("pointermove", (e) => {
     if (!FPS.on || !FPS.look || e.pointerId !== FPS.look.id) return;
-    const t = 52e-4;
-    FPS.yaw += (e.clientX - FPS.look.x) * t, FPS.pitch = clamp(FPS.pitch - (e.clientY - FPS.look.y) * t * 0.85, -0.85, 0.62), FPS.look.x = e.clientX, FPS.look.y = e.clientY;
+    window.fpsLookBy(e.clientX - FPS.look.x, e.clientY - FPS.look.y), FPS.look.x = e.clientX, FPS.look.y = e.clientY;
   }, true), cv.addEventListener("pointerup", (e) => {
     FPS.look && e.pointerId === FPS.look.id && (FPS.look = null);
   }, true), cv.addEventListener("mousedown", (e) => {
@@ -14192,7 +14429,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }), window.addEventListener("keydown", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();
-    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? (e.preventDefault(), fpsJump()) : "b" === t ? fpsPlantBomb() : "e" === t ? fpsInteract() : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? e.repeat || fpsAbilityDown() : "r" === t ? e.repeat || fpsToggleWeapon() : "v" === t ? (FPS.thirdPerson = !FPS.thirdPerson, $("#fpsview").classList.toggle("on", FPS.thirdPerson)) : "shift" === t ? FPS.sprinting = true : "c" === t && (FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false));
+    "w" === t ? FPS.mv.f = 1 : "s" === t ? FPS.mv.f = -1 : "a" === t ? FPS.mv.s = -1 : "d" === t ? FPS.mv.s = 1 : " " === t ? (e.preventDefault(), fpsJump()) : "b" === t ? fpsPlantBomb() : "e" === t ? fpsInteract() : "escape" === t ? S.mission && S.mission.hero || exitFPS() : "arrowleft" === t ? FPS.yaw -= 0.09 : "arrowright" === t ? FPS.yaw += 0.09 : "q" === t ? e.repeat || fpsAbilityDown() : "r" === t ? e.repeat || (FPS.u && FPS.u.d.modes ? fpsToggleWeapon() : fpsReload()) : "v" === t ? (FPS.thirdPerson = !FPS.thirdPerson, $("#fpsview").classList.toggle("on", FPS.thirdPerson)) : "shift" === t ? FPS.sprinting = true : "c" === t && (FPS.crouching = !FPS.crouching, FPS.crouching && (FPS.sprinting = false));
   }), window.addEventListener("keyup", (e) => {
     if (!FPS.on) return;
     const t = e.key.toLowerCase();

@@ -554,6 +554,8 @@ declare global {
   function fpsAbilityUp(): void;
   function fpsToggleWeapon(): void;
   function fpsJump(): void;
+  function fpsReload(): void;
+  function fpsLookBy(dx: number, dy: number): void;
   function fpsPassable(x: number, y: number, self: Unit): boolean;
   function fpsDeathTick(dt: number): void;
   const buildViewmodel: AnyFn;
@@ -616,6 +618,7 @@ declare global {
     shakeX: number;
     shakeY: number;
     exitCD: number;
+    sprintLock: boolean;
     [k: string]: unknown;
   };
   const FLOOR_Z: number;
