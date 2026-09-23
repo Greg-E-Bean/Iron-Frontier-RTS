@@ -141,6 +141,8 @@ declare global {
   function unstick(u: Unit): void;
   function nearWater(tx: number, ty: number, size: number, margin: number): boolean;
   function canPlace(key: string, tx: number, ty: number, owner: number): boolean;
+  function inBuildZone(owner: number, tx: number, ty: number, naval?: boolean): boolean;
+  function zoneAnchor(b: any): boolean;
   function canDeploy(key: string, tx: number, ty: number, unit: Unit): boolean;
   const DEPLOY_RANGE: number;
   function addUnit(owner: number, key: string, x: number, y: number): Unit | null;

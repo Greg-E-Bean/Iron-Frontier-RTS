@@ -278,6 +278,7 @@ export interface MapData {
   expansions?: any[];
   plateaus?: any[];
   stratSpecial?: any[];
+  skirtProps?: any[];
   terr: Uint8Array;
   ore: Float32Array;
   tib: Uint8Array;
