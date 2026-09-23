@@ -87,6 +87,7 @@ function fpsGfxPre() {
   const want = FPS.on ? fpsPixelRatio() : glPixelRatioCap();
   GL.renderer.getPixelRatio() !== want && GL.renderer.setPixelRatio(want);
   fgTerrainDetail();
+  fgPatchWorldMats(), FG.sdOn.value = FPS.on && FPS.u && QUALITY >= 1 ? 1 : 0;
   const on = !!(FPS.on && FPS.u);
   GL.sun.shadow.normalBias = on ? .5 : 1.2;
   fgGrass(on), fgFx(on);
@@ -132,6 +133,100 @@ function fgTerrainDetail() {
   m.needsUpdate = !0;
 }
 
+// ------------------------------------------------ close-up surface detail
+// Panel seams, rivets, scratches, grit and grime, triplanar-projected from
+// world position and bump-lit, fading in only near the first-person camera.
+function fgSurfDetailTex() {
+  if (FG.sdTex) return FG.sdTex;
+  const N = 512, c = fgCanvas(N), x = c.getContext("2d")!, im = x.createImageData(N, N), d = im.data;
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const u = i / N, v = j / N, k = 4 * (j * N + i);
+    d[k] = 255 * Math.min(1, Math.max(0, .5 + .8 * (fgFbm(u * 64, v * 64, 64, 5) - .5) + .3 * (fgHash(i, j, 3) - .5)));
+    d[k + 1] = 190, d[k + 2] = 128;
+    d[k + 3] = 255 * Math.min(1, Math.max(0, .5 + 1.2 * (fgFbm(u * 6, v * 6, 6, 21) - .5)));
+  }
+  x.putImageData(im, 0, 0);
+  // panel seams (G) — lines on a staggered grid, rivet dots along them
+  const P = 128;
+  const px = (fx: number, fy: number, w: number, h: number, g: number) => { const img = x.getImageData(fx, fy, w, h); for (let q = 0; q < img.data.length; q += 4) img.data[q + 1] = g; x.putImageData(img, fx, fy); };
+  for (let r = 0; r < N / P; r++) {
+    px(0, r * P, N, 3, 25), px(0, r * P + 3, N, 1, 235);
+    const off = r % 2 ? P / 2 : 0;
+    for (let q = 0; q < N / P; q++) { const cx = (q * P + off) % N; px(cx, r * P, 3, P, 25), px(cx + 3, r * P, 1, P, 235); }
+    for (let q = 6; q < N; q += 16) px(q, r * P + 7, 3, 3, 255), px(q + 1, r * P + 10, 2, 1, 60);
+  }
+  // scratches / streaks (B)
+  { const img = x.getImageData(0, 0, N, N), dd = img.data;
+    for (let n = 0; n < 900; n++) { let sx = fgHash(n, 1, 9) * N, sy = fgHash(n, 2, 9) * N; const a = fgHash(n, 3, 9) * 6.283, l = 6 + 40 * fgHash(n, 4, 9), val = fgHash(n, 5, 9) > .3 ? 215 : 60;
+      for (let t = 0; t < l; t++) { const qx = ((sx + Math.cos(a) * t) % N + N) % N | 0, qy = ((sy + Math.sin(a) * t) % N + N) % N | 0; dd[4 * (qy * N + qx) + 2] = val; } }
+    // organic veins also live in B: branching dark curves
+    for (let n = 0; n < 40; n++) { let vx = fgHash(n, 7, 2) * N, vy = fgHash(n, 8, 2) * N, a = fgHash(n, 9, 2) * 6.283;
+      for (let t = 0; t < 140; t++) { a += (fgHash(n, t, 4) - .5) * .5, vx += Math.cos(a), vy += Math.sin(a); const qx = ((vx % N) + N) % N | 0, qy = ((vy % N) + N) % N | 0; dd[4 * (qy * N + qx) + 2] = 20; } }
+    x.putImageData(img, 0, 0); }
+  const t = fgTexOf(c, !0);
+  t.anisotropy = GL && GL.renderer.capabilities.getMaxAnisotropy ? GL.renderer.capabilities.getMaxAnisotropy() : 8;
+  return FG.sdTex = t;
+}
+const FG_KIND: Record<string, number> = { metal: 0, concrete: 1, matte: 2, organic: 3, rubber: 4, foliage: 5 };
+FG.sdOn = { value: 0 };
+function fgSurfDetail(m: any, bucket: string, scale?: number) {
+  const kind = FG_KIND[bucket];
+  if (!m || null == kind || m.userData.fgSD) return m;
+  m.userData.fgSD = 1, m.extensions = Object.assign({}, m.extensions || {}, { derivatives: !0 });
+  const tex = fgSurfDetailTex(), prev = m.onBeforeCompile, sc = scale || 1;
+  m.onBeforeCompile = (sh: any, r: any) => {
+    prev && prev(sh, r);
+    sh.uniforms.fgSD = { value: tex }, sh.uniforms.fgOn = FG.sdOn;
+    sh.vertexShader = "varying vec3 vFgP;\nvarying vec3 vFgWN;\n" + sh.vertexShader.replace("#include <project_vertex>", `#include <project_vertex>
+      #ifdef USE_INSTANCING
+        vFgP = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
+        vFgWN = normalize(mat3(modelMatrix) * mat3(instanceMatrix) * objectNormal);
+      #else
+        vFgP = (modelMatrix * vec4(transformed, 1.0)).xyz;
+        vFgWN = normalize(mat3(modelMatrix) * objectNormal);
+      #endif`);
+    sh.fragmentShader = `uniform sampler2D fgSD;\nuniform float fgOn;\nvarying vec3 vFgP;\nvarying vec3 vFgWN;
+      vec4 fgTri(vec3 p, vec3 w, float s) { return texture2D(fgSD, p.zy * s) * w.x + texture2D(fgSD, p.xz * s) * w.y + texture2D(fgSD, p.xy * s) * w.z; }
+      vec3 fgBump(vec3 sp, vec3 sn, float h) {
+        vec3 dx = dFdx(sp), dy = dFdy(sp), r1 = cross(dy, sn), r2 = cross(sn, dx); float det = dot(dx, r1);
+        vec3 g = sign(det) * (dFdx(h) * r1 + dFdy(h) * r2); return normalize(abs(det) * sn - g);
+      }
+      float fgH = 0.0; float fgF = 0.0;
+      ` + sh.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+      if (fgOn > 0.5) {
+        vec3 P = vFgP * ${sc.toFixed(3)};
+        fgF = 1.0 - smoothstep(${(120 / sc).toFixed(1)}, ${(700 / sc).toFixed(1)}, distance(cameraPosition, vFgP));
+        vec3 w = pow(abs(normalize(vFgWN)), vec3(4.0)); w /= (w.x + w.y + w.z);
+        vec4 A = fgTri(P, w, 1.0 / 44.0), B = fgTri(P, w, 1.0 / 15.0);
+        float grit = B.r, seam = A.g, scr = A.b, grime = A.a, f = 1.0;
+        #if ${kind} == 0
+          f = (0.55 + 0.55 * seam) * (0.94 + 0.12 * grit) * (1.0 + 0.14 * (scr - 0.5)) * (0.86 + 0.24 * grime); fgH = seam * 0.9 + grit * 0.06;
+        #elif ${kind} == 1
+          f = (0.84 + 0.3 * grit) * (0.84 + 0.3 * grime) * (1.0 + 0.08 * (scr - 0.5)); fgH = grit * 0.45;
+        #elif ${kind} == 2
+          f = (0.92 + 0.16 * grit) * (0.9 + 0.2 * grime); fgH = grit * 0.2;
+        #elif ${kind} == 3
+          f = (0.78 + 0.4 * scr) * (0.88 + 0.24 * grime) * (0.95 + 0.1 * grit); fgH = scr * 0.6 + grit * 0.08;
+        #elif ${kind} == 4
+          f = (0.9 + 0.2 * grit); fgH = grit * 0.3;
+        #else
+          f = (0.84 + 0.26 * grime) * (0.93 + 0.14 * grit); fgH = grit * 0.2;
+        #endif
+        diffuseColor.rgb *= mix(1.0, f, fgF);
+      }`).replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+      if (fgOn > 0.5 && fgF > 0.001) normal = fgBump(-vViewPosition, normal, fgH * fgF * ${(0.9 / sc).toFixed(3)});`);
+  };
+  m.needsUpdate = !0;
+  return m;
+}
+function fgPatchWorldMats() {
+  if (!GL || GL.mats._fgSD) return;
+  GL.mats._fgSD = 1;
+  for (const k in FG_KIND) GL.mats[k] && fgSurfDetail(GL.mats[k], k);
+  const an = GL.renderer.capabilities.getMaxAnisotropy ? GL.renderer.capabilities.getMaxAnisotropy() : 8;
+  for (const k in GL.surfaces || {}) { const sf = GL.surfaces[k]; sf.map && (sf.map.anisotropy = an, sf.map.needsUpdate = !0); sf.normal && (sf.normal.anisotropy = an); }
+}
+
 // ------------------------------------------------------------ foliage wind
 function fgWindPatch(m: any, grass?: boolean) {
   const prev = m.onBeforeCompile;
@@ -163,7 +258,7 @@ function fgWindMat(bucket: string) {
   if (!b || "emis" === bucket) return b;
   const m = new THREE.MeshStandardMaterial({ vertexColors: !0, roughness: b.roughness, metalness: b.metalness, envMapIntensity: b.envMapIntensity, map: b.map, normalMap: b.normalMap, normalScale: b.normalScale });
   m.color = b.color.clone();
-  fogPatch(m), fgWindPatch(m);
+  fogPatch(m), fgWindPatch(m), fgSurfDetail(m, bucket);
   return GL.mats[k] = m;
 }
 const WIND_KEYS = /^X(tree|scrub|grass|flower)/;
@@ -611,7 +706,8 @@ function hdIK(s: any, t: any, a: number, b: number, pole: any, out: any) {
 const HD = { hip: 9.85, hipW: 1.3, th: 4.6, sh: 4.5, ank: .95, ua: 3.2, fa: 3.05, shY: 5.35, shW: 2.45, neck: 6.45 };
 function hdBuildFigure(u: any, parent?: any) {
   const L = hdLook(u), pal = palette(u.owner), kind = unitViewmodelKind(u), wt = hdWeaponType(kind), look = u.key + "|" + u.owner + "|";
-  const G = (n: string, f: (a: any[]) => void) => hdObj(hdGeo(look + n, pal, f), GL.mats, !0);
+  const cloth = Object.assign({}, GL.mats, { metal: GL.mats.matte });
+  const G = (n: string, f: (a: any[]) => void) => hdObj(hdGeo(look + n, pal, f), cloth, !0);
   const root = new THREE.Group(), F: any = { root, u, wt, kind, parts: {} };
   const add = (n: string, o: any) => (root.add(o), F.parts[n] = o, o);
   add("pelvis", G("pelvis", a => hdPelvis(a, L))), add("torso", G("torso", a => hdTorso(a, L))), add("head", G("head", a => hdHead(a, L)));

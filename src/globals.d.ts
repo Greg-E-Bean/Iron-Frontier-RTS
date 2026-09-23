@@ -773,7 +773,7 @@ declare global {
   // fpsgfx.ts / cross-module render helpers
   const DOME: AnyFn; const BOXM: AnyFn; const ell: AnyFn; const taper3: AnyFn; const lowPoly: AnyFn; const SLAB: AnyFn; const TSLAB: AnyFn; const INF_FAC: any;
   const glMerge: AnyFn; const fogPatch: AnyFn; const glPixelRatioCap: AnyFn; const GLGEO: Map<string, any>;
-  const fpsGfxPre: AnyFn; const fpsGfxShadow: AnyFn; const fgWindMat: AnyFn; const WIND_KEYS: RegExp; const fx3dActive: AnyFn; const FG: any;
+  const tickSeparation: AnyFn; const fpsGfxPre: AnyFn; const fpsGfxShadow: AnyFn; const fgWindMat: AnyFn; const WIND_KEYS: RegExp; const fx3dActive: AnyFn; const FG: any;
   const fpsHDSet: AnyFn; const fpsViewmodelAnimate: AnyFn; const fpsBuildViewmodel: AnyFn; const fpsBuildCockpit: AnyFn; const fpsCockpitAnimate: AnyFn; const fpsSightOverlay: AnyFn; const fpsViewmodelThrow: AnyFn; const fpsInteriorFig: AnyFn; const fpsPoseFig: AnyFn; const fpsGfxPost: AnyFn;
 }
 
