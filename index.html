@@ -3949,22 +3949,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1, dh = Math.hypot(dx, dy), L = Math.hypot(dh, dz) || 0.01;
     e.push(P_(CONE(r0, r1, L, 9), x1, y1, z1, mat, Object.assign({ ty: Math.atan2(dh, dz), r: Math.atan2(dy, dx) }, o || {})));
   }
-  function legWalker(e, t, r, n, a, legCount) {
+  function legWalker(e, t, r, n, a, legCount, lo) {
     legCount = legCount || 6;
-    const perSide = legCount / 2, hipZ = 0.8 * n, spanX = 0.7 * t, step = perSide > 1 ? spanX / (perSide - 1) : 0, br = 16 & (a || 0) ? 1 : 0, L = (p, q, k) => p + (q - p) * k;
+    lo = lo || {};
+    const TK = lo.thick || 1, RC = lo.reach || 1, HI = lo.high || 1, perSide = legCount / 2, hipZ = 0.8 * n, spanX = (legCount < 6 ? 0.5 : 0.7) * t, step = perSide > 1 ? spanX / (perSide - 1) : 0, br = 16 & (a || 0) ? 1 : 0, L = (p, q, k) => p + (q - p) * k;
     for (const side of [-1, 1]) for (let i = 0; i < perSide; i++) {
-      const hx = -spanX / 2 + i * step, hy = side * (0.5 * r - 0.8), grp = (i + (side > 0 ? 0 : 1)) % 2, c = ((a || 0) & 3) + 2 * grp & 3, lift = 1 === c ? 3 : 0, sw = [-1, 0, 1, 0][c] * 0.08 * t, fw = (i - (perSide - 1) / 2) * 0.9, kx = hx + 0.4 * sw + fw, ky = side * (0.5 * r + 3.6), kz = hipZ + 2.4 + 0.6 * lift, fx = hx + sw + 1.6 * fw, fy = side * (0.5 * r + 7.2 - 0.6 * lift), fz = 0.3 + 0.6 * lift;
-      e.push(P_(DOME(2.1, 1.7, 9), hx, hy, hipZ - 0.9, "flesh"));
-      e.push(P_(DOME(1.7, 1.3, 9), hx, hy + side * 0.4, hipZ - 0.2, "carapace2"));
-      taper3(e, hx, hy, hipZ, kx, ky, kz, 1.45, 1, "carapace");
+      const hx = -spanX / 2 + i * step, hy = side * (0.5 * r - 0.8), grp = (i + (side > 0 ? 0 : 1)) % 2, c = ((a || 0) & 3) + 2 * grp & 3, lift = 1 === c ? 3 : 0, sw = [-1, 0, 1, 0][c] * 0.08 * t, fw = (i - (perSide - 1) / 2) * 0.9, kx = hx + 0.4 * sw + fw * RC, ky = side * (0.5 * r + 3.6 * RC), kz = hipZ + (2.4 + 0.6 * lift) * HI, fx = hx + sw + 1.6 * fw * RC, fy = side * (0.5 * r + (7.2 - 0.6 * lift) * RC), fz = 0.3 + 0.6 * lift;
+      e.push(P_(DOME(2.1 * TK, 1.7 * TK, 9), hx, hy, hipZ - 0.9, "flesh"));
+      e.push(P_(DOME(1.7 * TK, 1.3 * TK, 9), hx, hy + side * 0.4, hipZ - 0.2, "carapace2"));
+      taper3(e, hx, hy, hipZ, kx, ky, kz, 1.45 * TK, 1 * TK, "carapace");
       taper3(e, L(hx, kx, 0.15), L(hy, ky, 0.15) + side * 0.2, L(hipZ, kz, 0.15) + 0.9, L(hx, kx, 0.8), L(hy, ky, 0.8) + side * 0.2, L(hipZ, kz, 0.8) + 0.7, 0.22, 0.18, "psi", { e: 1 });
-      e.push(P_(DOME(1.25, 1.1, 8), kx, ky, kz - 0.5, "flesh"));
+      e.push(P_(DOME(1.25 * TK, 1.1 * TK, 8), kx, ky, kz - 0.5, "flesh"));
       e.push(P_(CONE(0.6, 0.05, 2.4, 6), kx, ky, kz + 0.4, "bone", { ty: -0.35 * side, r: PI2 * side }));
       e.push(P_(DOME(0.45, 0.4, 6), kx, ky + side * 0.8, kz, "psi", { e: 1 }));
       const mx = L(kx, fx, 0.55), my = L(ky, fy, 0.55), mz = L(kz, fz, 0.55) + 0.6;
-      taper3(e, kx, ky, kz, mx, my, mz, 0.95, 0.7, "carapace2");
-      e.push(P_(DOME(0.75, 0.6, 7), mx, my, mz - 0.3, "flesh"));
-      taper3(e, mx, my, mz, fx, fy, fz + 0.6, 0.62, 0.2, "carapace");
+      taper3(e, kx, ky, kz, mx, my, mz, 0.95 * TK, 0.7 * TK, "carapace2");
+      e.push(P_(DOME(0.75 * TK, 0.6 * TK, 7), mx, my, mz - 0.3, "flesh"));
+      taper3(e, mx, my, mz, fx, fy, fz + 0.6, 0.62 * TK, 0.2 * TK, "carapace");
       taper3(e, fx, fy, fz + 0.8, fx + 0.6 * sw / (0.08 * t || 1) * 0.2, fy, fz - 0.3, 0.3, 0.04, "bone");
     }
   }
@@ -3972,30 +3973,74 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     a.push(P_(DOME(1, 1, 16), x, y, z, mat, Object.assign({ sx: rx, sy: ry, sz: rz }, o || {})));
   }
   function organicBody(a, e, t, s, n, frame) {
-    const br = 16 & (frame || 0) ? 1 : 0, bs = 1 + 0.07 * br, cz = s + 0.6;
-    ell(a, 0, 0, cz, 0.46 * e, 0.48 * t, 2.6, "flesh", { tx: Math.PI });
-    for (let k = 0; k < 4; k++) {
-      const x = (0.27 - 0.18 * k) * e, rw = (0.56 - 0.06 * Math.abs(k - 1.3)) * t, rh = 6.6 - 0.7 * k + 0.35 * br * (k % 2);
+    n = n || {};
+    const sh2 = n.shape || "", hs = n.hs || ({ wasp: 0.7, crab: 0.66, beetle: 1.28, brain: 1.12 }[sh2] || 1), ws = { crab: 1.2, wasp: 0.82, brain: 1.1 }[sh2] || 1, br = 16 & (frame || 0) ? 1 : 0, bs = 1 + 0.07 * br, cz = s + 0.6, W = t * ws;
+    ell(a, 0, 0, cz, 0.46 * e, 0.48 * W, 2.6 * hs, "flesh", { tx: Math.PI });
+    const nseg = "wasp" === sh2 ? 3 : 4;
+    for (let k = 0; k < nseg; k++) {
+      const x = ("wasp" === sh2 ? 0.3 - 0.13 * k : 0.27 - 0.18 * k) * e, rw = (0.56 - 0.06 * Math.abs(k - 1.3)) * W, rh = ((6.6 - 0.7 * k) * ("beetle" === sh2 && (1 === k || 2 === k) ? 1.12 : 1) + 0.35 * br * (k % 2)) * hs;
       ell(a, x - 0.03 * e, 0, cz, 0.15 * e, rw * 1.04, rh - 1, "carapace");
       ell(a, x, 0, cz + 0.4, 0.14 * e, rw, rh, "body");
     }
-    for (let k = 0; k < 5; k++) a.push(P_(CONE(0.8 - 0.08 * k, 0.06, 2.6 - 0.25 * k, 6), (0.26 - 0.14 * k) * e, 0, cz + 6.6 - 0.55 * k, "bone", { ty: -0.4 }));
-    const hx = 0.47 * e;
-    ell(a, hx, 0, cz + 0.6, 0.14 * e, 0.3 * t, 4.2, "carapace2");
-    ell(a, hx + 0.03 * e, 0, cz + 0.4, 0.12 * e, 0.24 * t, 1.8, "flesh", { tx: Math.PI });
-    for (const [ey, ez, er] of [[0, 3.6, 1], [-0.13, 3, 0.7], [0.13, 3, 0.7], [-0.2, 2, 0.55], [0.2, 2, 0.55]]) a.push(P_(DOME(er, er * 0.85, 8), hx + 0.11 * e, ey * t, cz + ez, "psi", { e: 1 }));
-    for (const sy of [-1, 1]) {
-      a.push(P_(CONE(0.8, 0.08, 4.6, 7), hx + 0.1 * e, sy * 0.12 * t, cz + 0.8, "bone", { ty: PI2 + 0.3, r: -sy * 0.4 }));
-      a.push(P_(CONE(0.5, 0.06, 2.8, 6), hx + 0.08 * e, sy * 0.2 * t, cz + 2, "bone", { ty: PI2 - 0.1, r: -sy * 0.7 }));
+    if ("beetle" === sh2) {
+      for (let k = 0; k < 5; k++) for (const sy of k % 2 ? [-1, 1] : [0]) a.push(P_(CONE(1.3 - 0.1 * k, 0.1, 3.6 - 0.3 * k, 6), (0.22 - 0.12 * k) * e, sy * 0.2 * W, cz + (6.8 - 0.5 * k) * hs, "crystal", { e: 1, ty: -0.3, r: sy * 0.4 }));
+      for (const sy of [-1, 1]) for (let k = 0; k < 3; k++) a.push(P_(CONE(0.9, 0.08, 2.4, 6), (0.2 - 0.17 * k) * e, sy * 0.5 * W, cz + 2.2 * hs, "crystal", { e: 1, ty: sy * 1.1, r: PI2 * sy }));
+    } else if ("crab" === sh2) {
+      for (const sy of [-1, 1]) for (let k = 0; k < 4; k++) a.push(P_(CONE(0.6, 0.06, 1.6, 6), (0.24 - 0.15 * k) * e, sy * 0.56 * W, cz + 1.8, "bone", { ty: sy * 1.2, r: PI2 * sy }));
+    } else if ("brain" === sh2) {
+      ell(a, -0.06 * e, 0, cz + 1, 0.34 * e * bs, 0.46 * W * bs, 5.4 * hs * bs, "flesh");
+      for (const sy of [-1, 1]) for (let k = 0; k < 4; k++) {
+        const x = (0.24 - 0.16 * k) * e, y = sy * 0.5 * W;
+        taper3(a, x, y, cz + 2.2, x - 0.04 * e, y + sy * 2.2, cz - 2.6, 0.7, 0.25, "flesh");
+        a.push(P_(DOME(0.45, 0.4, 6), x - 0.04 * e, y + sy * 2.2, cz - 3, "psi", { e: 1 }));
+      }
+    } else if ("wasp" !== sh2) for (let k = 0; k < 5; k++) a.push(P_(CONE(0.8 - 0.08 * k, 0.06, 2.6 - 0.25 * k, 6), (0.26 - 0.14 * k) * e, 0, cz + 6.6 * hs - 0.55 * k, "bone", { ty: -0.4 }));
+    const hx = ("wasp" === sh2 ? 0.46 : 0.47) * e, hsz = "beetle" === sh2 ? 1.25 : "wasp" === sh2 ? 0.8 : 1;
+    ell(a, hx, 0, cz + 0.6, 0.14 * e * hsz, 0.3 * W * hsz, 4.2 * hs * hsz, "carapace2");
+    ell(a, hx + 0.03 * e, 0, cz + 0.4, 0.12 * e * hsz, 0.24 * W * hsz, 1.8 * hs, "flesh", { tx: Math.PI });
+    const eyes = "wasp" === sh2 ? [[-0.16, 2.6 * hs, 1.5], [0.16, 2.6 * hs, 1.5], [0, 3.4 * hs, 0.6]] : [[0, 3.6 * hs, 1], [-0.13, 3 * hs, 0.7], [0.13, 3 * hs, 0.7], [-0.2, 2 * hs, 0.55], [0.2, 2 * hs, 0.55]];
+    for (const [ey, ez, er] of eyes) a.push(P_(DOME(er, er * 0.85, 8), hx + 0.11 * e * hsz, ey * W, cz + ez, "psi", { e: 1 }));
+    if ("crab" === sh2) for (const sy of [-1, 1]) {
+      const x0 = 0.36 * e, y0 = sy * 0.34 * W, x1 = 0.58 * e, y1 = sy * 0.52 * W, x2 = 0.74 * e, y2 = sy * 0.24 * W;
+      taper3(a, x0, y0, cz + 1.4, x1, y1, cz + 2.6, 1.5, 1.1, "carapace2");
+      ell(a, x1, y1, cz + 1.8, 2.4, 2, 1.6, "body");
+      taper3(a, x1, y1, cz + 2.6, x2, y2, cz + 1.6, 1.4, 0.9, "carapace");
+      a.push(P_(CONE(1, 0.08, 4.2, 7), x2, y2, cz + 1.9, "bone", { ty: PI2 + 0.2, r: -sy * 0.5 }));
+      a.push(P_(CONE(0.8, 0.06, 3.4, 7), x2, y2, cz + 1.2, "bone", { ty: PI2 - 0.3, r: -sy * 0.15 }));
+      taper3(a, hx, sy * 0.1 * W, cz + 2.6 * hs, hx + 0.05 * e, sy * 0.16 * W, cz + 6.4, 0.35, 0.25, "carapace2");
+      a.push(P_(DOME(0.8, 0.7, 8), hx + 0.05 * e, sy * 0.16 * W, cz + 6.2, "psi", { e: 1 }));
     }
-    const tx = -0.5 * e;
-    ell(a, tx, 0, cz, 0.2 * e * bs, 0.3 * t * bs, 4.6 * bs, "flesh");
-    ell(a, tx - 0.02 * e, 0, cz + 0.6, 0.17 * e, 0.26 * t, 4.4, "carapace2", {});
-    for (const sy of [-1, 1]) a.push(P_(DOME(1.7 * bs, 1.5 * bs, 9), tx - 0.08 * e, sy * 0.14 * t, cz + 3.4, "bile", { e: 1 }));
-    a.push(P_(DOME(1.3 * bs, 1.2 * bs, 9), tx - 0.18 * e, 0, cz + 2.6, "bile", { e: 1 }));
-    for (const sy of [-1, 1]) for (let k = 0; k < 3; k++) a.push(P_(BOXM(0.14 * e, 0.28, 0.3, 0.1), (0.2 - 0.17 * k) * e, sy * (0.5 * t + 0.2 * (k % 2)), cz + 2.2 + 0.5 * k, "psi", { e: 1, r: sy * (k % 2 ? 0.3 : -0.3) }));
-    a.push(P_(DOME(1.6 * bs, 1.3 * bs, 9), 0.05 * e, -0.4 * t, cz + 4.2, "bile", { e: 1 }));
-    a.push(P_(DOME(1.3 * bs, 1.1 * bs, 9), -0.14 * e, 0.42 * t, cz + 4.4, "bile", { e: 1 }));
+    else if ("beetle" === sh2) a.push(P_(CONE(1.8, 0.15, 8, 8), hx + 0.08 * e, 0, cz + 2.6 * hs, "bone", { ty: PI2 - 0.55 })), a.push(P_(CONE(1, 0.1, 4, 7), hx + 0.05 * e, 0, cz + 4.4 * hs, "bone", { ty: PI2 - 0.9 }));
+    else for (const sy of [-1, 1]) {
+      const sc = "wasp" === sh2 ? 0.6 : 1;
+      a.push(P_(CONE(0.8 * sc, 0.08, 4.6 * sc, 7), hx + 0.1 * e, sy * 0.12 * W, cz + 0.8, "bone", { ty: PI2 + 0.3, r: -sy * 0.4 }));
+      a.push(P_(CONE(0.5 * sc, 0.06, 2.8 * sc, 6), hx + 0.08 * e, sy * 0.2 * W, cz + 2, "bone", { ty: PI2 - 0.1, r: -sy * 0.7 }));
+    }
+    if ("wasp" === sh2) {
+      let px = -0.12 * e, pz = cz + 1.8;
+      for (let k = 0; k < 3; k++) {
+        const x = px - 0.12 * e;
+        ell(a, x, 0, pz, 0.1 * e * bs, (0.3 - 0.05 * k) * W * bs, (3.2 - 0.4 * k) * bs, k % 2 ? "body" : "carapace2");
+        px = x, pz += 0.4;
+      }
+      for (let k = 0; k < 2; k++) a.push(P_(BOXM(0.06 * e, 0.26 * W, 0.3, 0.1), (-0.24 - 0.12 * k) * e, 0, cz + 4.2 + 0.4 * k, "bile", { e: 1 }));
+      const T = [[px - 0.08 * e, pz + 2.6], [px - 0.04 * e, pz + 6.2], [px + 0.08 * e, pz + 8.6], [px + 0.2 * e, pz + 8.2]];
+      let lx = px, lz = pz + 1;
+      T.forEach(([x, z], k) => {
+        taper3(a, lx, 0, lz, x, 0, z, 1.3 - 0.25 * k, 1.05 - 0.25 * k, k % 2 ? "carapace" : "carapace2");
+        a.push(P_(DOME(1.05 - 0.2 * k, 0.9 - 0.2 * k, 8), x, 0, z - 0.4, "flesh"));
+        lx = x, lz = z;
+      });
+      a.push(P_(CONE(0.55, 0.04, 3.4, 7), lx, 0, lz, "psi", { e: 1, ty: PI2 + 0.9 }));
+    } else {
+      const tx = -0.5 * e, ab = "brain" === sh2 ? 1.2 : "beetle" === sh2 ? 1.1 : 1;
+      ell(a, tx, 0, cz, 0.2 * e * bs * ab, 0.3 * W * bs, 4.6 * bs * hs, "flesh");
+      ell(a, tx - 0.02 * e, 0, cz + 0.6, 0.17 * e * ab, 0.26 * W, 4.4 * hs, "carapace2");
+      for (const sy of [-1, 1]) a.push(P_(DOME(1.7 * bs, 1.5 * bs, 9), tx - 0.08 * e, sy * 0.14 * W, cz + 3.4 * hs, "bile", { e: 1 }));
+      a.push(P_(DOME(1.3 * bs, 1.2 * bs, 9), tx - 0.18 * e, 0, cz + 2.6 * hs, "bile", { e: 1 }));
+    }
+    for (const sy of [-1, 1]) for (let k = 0; k < 3; k++) a.push(P_(BOXM(0.14 * e, 0.28, 0.3, 0.1), (0.2 - 0.17 * k) * e, sy * (0.5 * W + 0.2 * (k % 2)), cz + (2.2 + 0.5 * k) * hs, "psi", { e: 1, r: sy * (k % 2 ? 0.3 : -0.3) }));
+    "wasp" !== sh2 && (a.push(P_(DOME(1.6 * bs, 1.3 * bs, 9), 0.05 * e, -0.4 * W, cz + 4.2 * hs, "bile", { e: 1 })), a.push(P_(DOME(1.3 * bs, 1.1 * bs, 9), -0.14 * e, 0.42 * W, cz + 4.4 * hs, "bile", { e: 1 })));
     return a;
   }
   function yuriTurret(e, t, r, n) {
@@ -4008,7 +4053,24 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const sy of [-1, 1]) a.push(P_(DOME(0.36 * t, 0.32 * t, 9), -0.78 * t, sy * 0.42 * t, e + 0.3, "bile", { e: 1 })), a.push(P_(BOXM(0.9 * t, 0.25, 0.3, 0.1), -0.05 * t, sy * 0.94 * t, e + 1.6, "psi", { e: 1, r: sy * 0.15 }));
     for (const [ey, ez] of [[0, 2.4], [-0.28, 1.6], [0.28, 1.6]]) a.push(P_(DOME(0.55, 0.45, 7), 0.9 * t, ey * t, e + ez, "psi", { e: 1 }));
     const B = { b: 1 };
-    if (n.gat) {
+    if (n.fang) {
+      a.push(P_(DOME(1.8, 1.5, 9), 0.6 * t, 0, o - 1.2, "flesh"));
+      for (const sy of [-1, 1]) {
+        const x0 = 0.6 * t, y0 = sy * 0.3 * t, x1 = 0.6 * t + 0.55 * r, y1 = sy * 0.42 * t, x2 = 0.6 * t + r, y2 = sy * 0.14 * t;
+        taper3(a, x0, y0, o, x1, y1, o + 1.2, 1.3, 0.95, "bone", B);
+        taper3(a, x1, y1, o + 1.2, x2, y2, o + 0.4, 0.95, 0.35, "bone", B);
+        a.push(P_(DOME(0.75, 0.7, 8), x2, y2, o + 0.1, "psi", Object.assign({ e: 1 }, B)));
+      }
+      a.push(P_(BOXM(0.8, 0.28 * t, 0.3, 0.1), 0.6 * t + r, 0, o + 0.5, "psi", Object.assign({ e: 1 }, B)));
+    } else if (n.crystal) {
+      taper3(a, 0.2 * t, 0, e + 1, 0.62 * t, 0, o + 1.4, 2.2, 1.4, "flesh", B);
+      ell(a, 0.62 * t, 0, o + 0.6, 2.2, 2.2, 1.8, "carapace2", B);
+      a.push(P_(CONE(2.2, 0.12, 0.62 * r, 6), 0.66 * t, 0, o + 1.6, "crystal", Object.assign({ e: 1, ty: PI2 - 0.12 }, B)));
+      for (let k = 0; k < 4; k++) {
+        const g = k * PI2 + 0.78;
+        a.push(P_(CONE(0.9, 0.08, 0.3 * r, 5), 0.62 * t, Math.cos(g) * 1.9, o + 1.6 + Math.sin(g) * 1.9, "crystal", Object.assign({ e: 1, ty: PI2 - 0.12 + 0.25 * Math.sin(g), r: 0.25 * Math.cos(g) }, B)));
+      }
+    } else if (n.gat) {
       a.push(P_(CYL(2.8, 3, 10), 1.1 * t, 0, o, "flesh", Object.assign({ ty: PI2 }, B)));
       for (let k = 0; k < 5; k++) {
         const s = k * 1.2566 + (n.f ? 0.6 : 0);
@@ -4044,7 +4106,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.push(P_(CYL(0.2 * (t + r), 1.4, 16), 0, 0, 0.7, "dark"));
   }
   var PILLAR_H = { grizzly: 27, rhino: 30, lasher: 26 };
-  var TURRET_RISE = { grizzly: 15.5, rhino: 17.5, lasher: 14.5 };
+  var TURRET_RISE = { grizzly: 15.5, rhino: 17.5, lasher: 16.6 };
   function deployedPillar(topZ, wid, fac) {
     const a = [], baseR = 0.44 * wid;
     a.push(P_(CYL(baseR * 1.3, 3, 14), 0, 0, 1.5, "dark"));
@@ -4295,7 +4357,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function tankHull(e, t, r, n) {
     const a = [], o = (n = n || {}).th || 8.5;
-    n.deployed ? deployedOutriggers(a, e, t, o) : "yuri" === n.fac ? legWalker(a, e, t, o, r, n.legs || 6) : n.wheeled ? wheelUnit(a, e, t, o, r) : trackUnit(a, e, t, o, r, n);
+    n.deployed ? deployedOutriggers(a, e, t, o) : "yuri" === n.fac ? legWalker(a, e, t, o, r, n.legs || 6, n.lo) : n.wheeled ? wheelUnit(a, e, t, o, r) : trackUnit(a, e, t, o, r, n);
     const s = 0.52 * o, org = "yuri" === n.fac;
     if (org && !n.deployed) return organicBody(a, e, t, s, n, r);
     const i = SLAB(hullProfile(0.94 * e, t + 1.5, n.fac), 6.5, 1.8, "hl" + e.toFixed(1) + t.toFixed(1) + (n.fac || ""));
@@ -5178,11 +5240,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const p = tankHull(35, 13, t, { fac: "allied" }), s = 4.42;
         return p.push(P_(CYL(0.35, 2.4, 6), 0.36 * 35, -4.6, s + 6.2, "darkmetal", { ty: PI2, r: -0.25 })), p.push(P_(CYL(0.35, 2.4, 6), 0.36 * 35, -3.2, s + 6.2, "darkmetal", { ty: PI2, r: -0.15 })), p.push(P_(CYL(0.35, 2.4, 6), 0.36 * 35, -1.8, s + 6.2, "darkmetal", { ty: PI2, r: -0.05 })), p.push(P_(CYL(0.13, 9.5, 5), -0.4 * 35, 4.4, s + 9.8, "dark2")), p;
       }
-      case "lasher": {
-        if (extra && extra.dep) return deployedPillar(PILLAR_H.lasher, 13, "yuri");
-        const p = tankHull(34, 13, t, { fac: "yuri", legs: 6 }), s = 4.42;
-        return [-8, -1, 6].forEach((x) => p.push(P_(CONE(1.1, 0.15, 2.8, 7), x, 0, s + 8.2, "carapace2"))), p.push(P_(BOXM(16, 0.5, 0.4, 0.1), -1, 0, s + 8.3, "psi", { e: 1 })), p;
-      }
+      case "lasher":
+        return extra && extra.dep ? deployedPillar(PILLAR_H.lasher, 13, "yuri") : tankHull(30, 13, t, { fac: "yuri", legs: 6, lo: { thick: 0.95, reach: 1.12, high: 1.05 }, shape: "crab" });
       case "rhino": {
         if (extra && extra.dep) return deployedPillar(PILLAR_H.rhino, 14.5, "soviet");
         const p = tankHull(38, 14.5, t, { wheels: 6, fac: "soviet" }), s = 4.42;
@@ -5198,16 +5257,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const p = tankHull(32, 13, t, { fac: "allied", deployed: !!(extra && extra.dep) }), s = 4.42;
         return p.push(P_(DOME(1.3, 1.1, 8), 0.4 * 32, -3, s + 7, "crystal", { e: 1 })), p.push(P_(DOME(1.3, 1.1, 8), 0.4 * 32, 3, s + 7, "crystal", { e: 1 })), p.push(P_(CONE(0.6, 0.1, 4, 7), -0.3 * 32, 0, s + 8, "crystal", { e: 1 })), p;
       }
-      case "gattling": {
-        const p = tankHull(32, 12.5, t, { fac: "yuri", legs: 6 }), s = 4.42;
-        for (const sgn of [-1, 1]) p.push(P_(CONE(1.4, 0.2, 4.5, 7), 0.42 * 32, sgn * 2.6, s + 4, "carapace2", { ty: PI2, r: sgn * 0.3 }));
-        return p.push(P_(CONE(1.6, 0.3, 6, 8), -0.4 * 32, 0, s + 5, "carapace2", { ty: PI2 })), p.push(P_(DOME(0.9, 0.8, 7), -0.62 * 32, 0, s + 5, "psi", { e: 1 })), p;
-      }
-      case "mastermind": {
-        const p = tankHull(35, 15, t, { skirt: true, fac: "yuri", legs: 8 }), s = 4.42;
-        for (const sgn of [-1, 1]) p.push(P_(CYL(0.25, 7, 6), 0, sgn * 4, s + 8, "psi", { e: 1, tx: sgn * 0.5 }));
-        return p.push(P_(BOXM(18, 0.4, 0.3, 0.1), -2, 0, s + 7, "psi", { e: 1 })), p;
-      }
+      case "gattling":
+        return tankHull(26, 10, t, { fac: "yuri", legs: 4, lo: { thick: 0.72, reach: 1.4, high: 1.3 }, shape: "wasp" });
+      case "mastermind":
+        return tankHull(38, 18, t, { fac: "yuri", legs: 8, th: 8, lo: { thick: 1.7, reach: 0.85, high: 0.7 }, shape: "brain" });
       case "ifv": {
         const p = tankHull(26, 12, t, { wheeled: true, th: 7, fac: "allied" }), s = 3.64;
         return p.push(P_(BOXM(7, 8, 3, 0.6), -8, 0, s + 8.4, "armor3")), p.push(P_(BOXM(1.6, 1.6, 0.5, 0.15), -6, -2.4, s + 10, "darkmetal")), p.push(P_(BOXM(1.6, 1.6, 0.5, 0.15), -6, 2.4, s + 10, "darkmetal")), p.push(P_(CYL(0.1, 8.5, 5), -9, 3, s + 10.2, "dark2")), p;
@@ -5231,10 +5284,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         for (const sgn of [-1, 1]) p.push(P_(BOXM(1.2, 3, 3.4, 0.3), -0.48 * 36, sgn * 5, s + 1.5, "darkmetal"));
         return p.push(P_(BOXM(5, 3, 2, 0.3), 0.15 * 36, 0.5 * 15 + 0.6, s + 2.5, "olive")), p;
       }
-      case "shard": {
-        const p = tankHull(34, 14.5, t, { skirt: true, fac: "yuri", legs: 8 }), s = 4.42;
-        return [-9, -2, 6].forEach((x) => p.push(P_(CONE(1.6, 0.2, 4.2, 7), x, 0, s + 9, "crystal", { e: 1 }))), p.push(P_(DOME(1.1, 1, 7), 0, 0, -0.4, "psi", { e: 1 })), p;
-      }
+      case "shard":
+        return tankHull(38, 17, t, { fac: "yuri", legs: 8, th: 9.5, lo: { thick: 1.45, reach: 1, high: 0.95 }, shape: "beetle" });
       case "longbow":
         return longbowModel(t);
       case "rift":
@@ -5505,7 +5556,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       case "grizzly":
         return tankTurret(11.5, 9.2, 20, { fac: "allied" });
       case "lasher":
-        return tankTurret(11.5, 9.2, 16, { beam: true, fac: "yuri" });
+        return tankTurret(9.4, 7.6, 13, { fang: true, fac: "yuri" });
       case "rhino":
         return tankTurret(12.5, 10.2, 21, { fac: "soviet" });
       case "apoc":
@@ -5517,9 +5568,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       case "prism":
         return tankTurret(11.5, 9.2, 16, { beam: true, fac: "allied" });
       case "gattling":
-        return tankTurret(11.5, 8.2, 15, { gat: true, f: t, fac: "yuri" });
+        return tankTurret(8.6, 5.8, 10, { gat: true, f: t, fac: "yuri" });
       case "mastermind":
-        return tankTurret(12.5, 9.5, 0, { dome: true, fac: "yuri" });
+        return tankTurret(13.2, 10.2, 0, { dome: true, fac: "yuri" });
       case "hover":
         return tankTurret(9.5, 6.6, 8, { pods: true, fac: "allied" });
       case "bulwark":
@@ -5529,7 +5580,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       case "sledge":
         return tankTurret(13, 10.5, 26, { fac: "soviet" });
       case "shard":
-        return tankTurret(12, 9.6, 17, { beam: true, fac: "yuri" });
+        return tankTurret(14.4, 9.2, 16, { crystal: true, fac: "yuri" });
       case "longbow":
         return longbowTurret();
       case "rift":
