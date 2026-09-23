@@ -132,14 +132,21 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
   clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
 #qstrip .qi.b{border-color:var(--amber);color:var(--amber2);background:#1d2119}
 #qstrip .qi i{font-style:normal;color:var(--dim);font-family:"Courier New",monospace}
-#prodstrip{display:flex;gap:4px;padding:5px 6px 0;overflow-x:auto;touch-action:pan-x;scrollbar-width:none}
+#prodstrip{display:flex;gap:3px;padding:4px 6px 0;overflow-x:auto;touch-action:pan-x;scrollbar-width:none;align-items:center}
 #prodstrip::-webkit-scrollbar{display:none}
 #prodstrip.hidden{display:none}
-#prodstrip .pc{flex:0 0 auto;font-size:10px;letter-spacing:.4px;padding:4px 9px;background:#101920;border:1px solid var(--edge);
-  color:#9fb2c0;white-space:nowrap;cursor:pointer;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
+#prodstrip .pc{flex:0 0 auto;position:relative;display:flex;align-items:center;gap:5px;min-width:26px;height:22px;box-sizing:border-box;justify-content:center;
+  font-size:10px;letter-spacing:.4px;padding:0 8px;background:#101920;border:1px solid var(--edge);color:#9fb2c0;white-space:nowrap;cursor:pointer;
+  clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+#prodstrip .pc b{font-size:11px;font-family:"Courier New",monospace}
+#prodstrip .pc span{font-size:9.5px}
 #prodstrip .pc.on{color:var(--amber2);border-color:var(--amber);background:#1d2119;box-shadow:inset 0 -2px 0 var(--amber)}
-#prodstrip .pc.cap{border-style:dashed}
-#prodstrip .pc i{font-style:normal;color:#7dc4ff}
+#prodstrip .pc.cap{border-color:var(--fc);border-style:dashed}
+#prodstrip .pc em{width:6px;height:6px;border-radius:50%;background:var(--fc);display:inline-block}
+#prodstrip .pc i{font-style:normal;color:#7dc4ff;font-size:9px}
+.tab{position:relative}
+.tab .tc{position:absolute;top:1px;right:3px;font-style:normal;font-size:8.5px;line-height:1;padding:1px 3px;border-radius:6px;
+  background:var(--amber);color:#111;font-weight:bold;pointer-events:none}
 #cardinfo{position:absolute;left:6px;bottom:calc(100% + 8px);max-width:min(440px,calc(100vw - 12px));z-index:3;pointer-events:none;
   background:linear-gradient(165deg,#1b252dee 0%,#0b1115f2 100%);border:1px solid var(--edge);border-left:3px solid var(--amber);
   padding:7px 10px;box-shadow:0 4px 18px #000c;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
@@ -585,6 +592,7 @@ body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:a
     <div class="tab" data-t="sea" title="Navy"><svg class="ico"><use href="#i-boat"></use></svg><span>NAVY</span></div>
     <div id="more" title="Show all">▾</div>
   </div>
+  <div id="prodstrip" class="hidden"></div>
   <div id="selbar"></div>
   <button id="fpsPrompt" class="hidden">◎ FIRST PERSON</button>
   <button id="weaponPrompt" class="hidden">⌖ SNIPER</button>
@@ -592,7 +600,6 @@ body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:a
   <button id="rotatePrompt" class="hidden">⟳ ROTATE</button>
   <button id="cancelPlace" class="hidden">✕ CANCEL</button>
   <div id="cardinfo" class="hidden"></div>
-  <div id="prodstrip" class="hidden"></div>
   <div id="qstrip"></div>
   <div id="cards"></div>
   <div id="ctrls">
@@ -11531,45 +11538,67 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 <script>
 (() => {
   // src/cards.ts
-  var PROD_FROM = { inf: "barracks", veh: "factory", air: "airfield", sea: "navalyard" };
+  var PROD_FROM = { bld: "conyard", def: "conyard", inf: "barracks", veh: "factory", air: "airfield", sea: "navalyard" };
   var prodSel = {};
+  var UNIT_TABS = { inf: 1, veh: 1, air: 1, sea: 1 };
   function producers(tab) {
     const from = PROD_FROM[tab];
     return from ? S.blds.filter((b) => b.owner === P().id && !b.dead && b.key === from).sort((a, b) => (a.capturedFac ? 1 : 0) - (b.capturedFac ? 1 : 0) || a.id - b.id) : [];
   }
   function selProducer(tab) {
+    if (!UNIT_TABS[tab]) return null;
     const id = prodSel[tab];
     if (!id) return null;
     const b = producers(tab).find((b2) => b2.id === id);
     return b || (delete prodSel[tab], P().primary && delete P().primary[PROD_FROM[tab]], null);
   }
+  function capFacOf(b) {
+    const own = P().f.key;
+    return b.capturedFac && b.capturedFac !== own ? b.capturedFac : null;
+  }
   function producerLabel(b, i) {
-    const own = P().f.key, cf = b.capturedFac && b.capturedFac !== own ? b.capturedFac : null;
-    return bname(b.key, cf || P().fac) + " " + (i + 1) + (cf ? " \xB7 " + (FACTIONS[cf].name || cf).toUpperCase().split(" ")[0] : "");
+    const cf = capFacOf(b);
+    return bname(b.key, cf || P().fac) + " " + (i + 1) + (cf ? " \xB7 " + String(FACTIONS[cf].name || cf).toUpperCase().split(" ")[0] : "");
+  }
+  var FAC_COL = { allied: "#6fb6e8", soviet: "#e0624a", yuri: "#b07ae0" };
+  function prodSig(tab) {
+    const list = producers(tab);
+    return tab + "|" + list.map((b) => b.id + (b.capturedFac || "") + (b.rally ? "r" : "")).join(",") + "|" + (prodSel[tab] || 0);
   }
   function buildProdStrip() {
-    const el = $("#prodstrip"), list = producers(S.tab);
-    el._sig = S.tab + "|" + list.map((b) => b.id + (b.capturedFac || "")).join(",") + "|" + (prodSel[S.tab] || 0);
-    el.innerHTML = "";
-    if (!list.length) return void el.classList.add("hidden");
+    const el = $("#prodstrip"), tab = S.tab, list = producers(tab), unitTab = !!UNIT_TABS[tab];
+    el._sig = prodSig(tab), el.innerHTML = "";
+    if (!list.length || !unitTab && list.length < 2) return void el.classList.add("hidden");
     el.classList.remove("hidden");
-    const cur = selProducer(S.tab), mk = (label, b, on) => {
-      const c = document.createElement("div");
-      c.className = "pc" + (on ? " on" : "") + (b && b.capturedFac && b.capturedFac !== P().f.key ? " cap" : "");
-      c.innerHTML = label + (b && b.rally ? " <i>\u2691</i>" : "");
-      c.title = b ? "Build here \xB7 tap again to view it" : "Build from any";
+    const cur = selProducer(tab), mk = (label, b, on, idx) => {
+      const c = document.createElement("div"), cf = b && capFacOf(b);
+      c.className = "pc" + (on ? " on" : "") + (cf ? " cap" : "") + (b ? " num" : "");
+      cf && c.style.setProperty("--fc", FAC_COL[cf] || "#ccc");
+      c.innerHTML = b ? "<b>" + (idx + 1) + "</b>" + (on ? "<span>" + producerLabel(b, idx).replace(/ \d+( ·|$)/, "$1") + "</span>" : "") + (cf ? "<em></em>" : "") + (b.rally ? "<i>\u2691</i>" : "") : label;
+      c.title = b ? producerLabel(b, idx) + (unitTab ? " \u2014 build here; tap again to view it" : " \u2014 tap to view it") : "Build from any";
       c.addEventListener("click", (ev) => {
         ev.stopPropagation();
-        if (b && on) {
+        if (b && (on || !unitTab)) {
           cam.x = b.x, cam.y = b.y, S.sel = [b], sfx("sel");
           return;
         }
-        b ? (prodSel[S.tab] = b.id, (P().primary = P().primary || {})[b.key] = b.id) : (delete prodSel[S.tab], P().primary && delete P().primary[PROD_FROM[S.tab]]), sfx("sel"), buildCards();
+        b ? (prodSel[tab] = b.id, (P().primary = P().primary || {})[b.key] = b.id) : (delete prodSel[tab], P().primary && delete P().primary[PROD_FROM[tab]]), sfx("sel"), buildCards();
       });
       el.appendChild(c);
     };
-    list.length > 1 && mk("ALL", null, !cur);
-    list.forEach((b, i) => mk(producerLabel(b, i), b, cur === b || list.length === 1 && !cur && false));
+    unitTab && list.length > 1 && mk("ALL", null, !cur, 0);
+    list.forEach((b, i) => mk("", b, unitTab ? cur === b || list.length === 1 : false, i));
+  }
+  var _tabCnt = "";
+  function updateTabCounts() {
+    const sig = Object.keys(PROD_FROM).map((t) => producers(t).length).join(",");
+    if (sig === _tabCnt) return;
+    _tabCnt = sig;
+    document.querySelectorAll(".tab").forEach((el) => {
+      const n = producers(el.dataset.t).length;
+      let bd = el.querySelector(".tc");
+      n > 1 ? (bd || (bd = document.createElement("i"), bd.className = "tc", el.appendChild(bd)), bd.textContent = String(n)) : bd && bd.remove();
+    });
   }
   function needText(it) {
     const t = P();
@@ -11771,9 +11800,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const r2 = e.queues[t2.it.kind], n = qCount(e, t2.it.kind, t2.it.key), a = r2 && r2.list.length && r2.list[0] === t2.it.key, isBld = "bld" === t2.it.kind || "def" === t2.it.kind, o = isBld && e.ready[t2.it.kind] === t2.it.key, s = isBld ? canBuildBld(e, t2.it.key) : canBuildUnit(e, t2.it.key);
       t2.el.classList.toggle("dis", !s && !n && !o), t2.el.classList.toggle("rdy", !!o), t2.el.classList.toggle("head", !!a && !o), t2.pg.style.transform = "scaleY(" + (a && !o ? 1 - (r2.prog || 0) : 0) + ")", n > 1 ? (t2.qn.style.display = "", t2.qn.textContent = "x" + n) : t2.qn.style.display = "none", o ? (t2.bd.style.display = "", t2.bd.textContent = "PLACE") : a && r2.hold ? (t2.bd.style.display = "", t2.bd.textContent = "$") : a ? (t2.bd.style.display = "", t2.bd.textContent = Math.round(100 * (r2.prog || 0)) + "%") : t2.bd.style.display = "none";
     }
-    ((ps) => {
-      const list = producers(S.tab), sig = S.tab + "|" + list.map((b) => b.id + (b.capturedFac || "")).join(",") + "|" + (prodSel[S.tab] || 0);
-      ps._sig !== sig && (selProducer(S.tab), buildCards());
+    updateTabCounts(), ((ps) => {
+      selProducer(S.tab);
+      ps._sig !== prodSig(S.tab) && buildCards();
     })($("#prodstrip")), updateQueueStrip(), updateSelBar(), elCred.textContent = Math.floor(e.credits), elPwr.textContent = Math.round((e.power, e.drain, e.power)) + "/" + e.drain;
     const t = 0 === e.drain ? 1 : clamp(e.power / Math.max(1, e.drain), 0, 1);
     elPwrBar.style.width = 100 * t + "%", elPwrBar.style.background = t >= 1 ? "#39d353" : t > 0.6 ? "#e8c53a" : "#e0473a";
