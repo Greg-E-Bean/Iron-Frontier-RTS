@@ -475,7 +475,7 @@ declare global {
   const garrisonCap: AnyFn;
   function garrisonable(b: Building): boolean;
   function fpsEnterable(b: Building): boolean;
-  function enterGarrison(u: Unit, b: Building): void;
+  function enterGarrison(u: Unit, b: Building): boolean;
   function evacuate(b: Building): void;
   function tickGarrison(b: Building, dt: number): void;
   function tickRogueDen(b: Building, dt: number): void;
@@ -615,6 +615,7 @@ declare global {
     shakeMag: number;
     shakeX: number;
     shakeY: number;
+    exitCD: number;
     [k: string]: unknown;
   };
   const FLOOR_Z: number;
