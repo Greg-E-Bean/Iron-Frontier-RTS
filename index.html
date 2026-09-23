@@ -557,6 +557,17 @@ body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:a
 @media (max-width:620px){.cbtn.icon[data-l]:after{display:none}}
 @media (max-height:500px){body.sidebar .cbtn.icon[data-l]:after{display:none}body.sidebar .cbtn.icon .ico{width:15px;height:15px}}
 body.sidebar .cbtn.icon[data-l]:after{font-size:8px}
+
+/* ---- per-card queue display ---- */
+.card .qn{top:2px;left:3px;min-width:14px;text-align:center;background:#c2801eee;font-family:"Courier New",monospace}
+.card .qx{position:absolute;top:36px;right:4px;font-size:11px;font-weight:bold;color:#fff;background:#000b;border:1px solid #f0a72c88;
+  border-radius:3px;padding:0 4px;line-height:14px;pointer-events:none;font-family:"Courier New",monospace}
+.card.queued .prog{background:#000a}
+.card.paused .prog{background:#000c}
+.card.paused{border-color:#8fa3bb}
+.card.paused .badge{background:#8fa3bbdd;color:#0a0f12}
+.tab .tc.pz{background:#8fa3bb}
+@media (max-height:500px){.card .qx{top:26px;font-size:10px;line-height:12px}}
 </style>
 </head>
 <body>
@@ -2119,7 +2130,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const n = e.queues[t];
     if (!n) return;
     let a = r ? n.list.lastIndexOf(r) : n.list.length - 1;
-    a < 0 || (0 === a && (e.credits += n.paid, n.paid = 0, n.prog = 0, ("bld" === t || "def" === t) && e.ready[t] === n.list[0] && (e.ready[t] = null)), n.list.splice(a, 1), n.list.length || (e.queues[t] = null));
+    a < 0 || (0 === a && (e.credits += n.paid, n.paid = 0, n.prog = 0, ("bld" === t || "def" === t) && e.ready[t] === n.list[0] && (e.ready[t] = null)), n.list.splice(a, 1), 0 === a && (n.paused = false), n.list.length || (e.queues[t] = null));
   }
   function activeSourceOk(e, n, o) {
     if ("bld" === n || "def" === n) return hasActiveBld(e.id, "conyard");
@@ -2136,6 +2147,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (!a || !a.list.length) continue;
       if (("bld" === n || "def" === n) && e.ready[n]) continue;
       const o = a.list[0], s = costOf(n, o), i = timeOf(n, o);
+      if (a.paused) {
+        a.hold = true;
+        continue;
+      }
       if (!("bld" === n || "def" === n ? canBuildBld(e, o, true) : canBuildUnit(e, o, true))) {
         a.hold = true;
         continue;
@@ -11610,13 +11625,16 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var _tabCnt = "";
   function updateTabCounts() {
-    const sig = Object.keys(PROD_FROM).map((t) => producers(t).length).join(",");
+    const p = P(), kinds = ["bld", "def", "inf", "veh", "air", "sea"], cnt = kinds.map((k) => {
+      const q = p.queues[k];
+      return q ? q.list.length : 0;
+    }), sig = cnt.join(",") + kinds.map((k) => p.queues[k] && p.queues[k].paused ? "p" : "").join("");
     if (sig === _tabCnt) return;
     _tabCnt = sig;
     document.querySelectorAll(".tab").forEach((el) => {
-      const n = producers(el.dataset.t).length;
+      const k = el.dataset.t, i = kinds.indexOf(k), n = i < 0 ? 0 : cnt[i];
       let bd = el.querySelector(".tc");
-      n > 1 ? (bd || (bd = document.createElement("i"), bd.className = "tc", el.appendChild(bd)), bd.textContent = String(n)) : bd && bd.remove();
+      n > 0 ? (bd || (bd = document.createElement("i"), bd.className = "tc", el.appendChild(bd)), bd.textContent = String(n), bd.classList.toggle("pz", !!(p.queues[k] && p.queues[k].paused))) : bd && bd.remove();
     });
   }
   function needText(it) {
@@ -11699,6 +11717,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       l.className = "cs", l.textContent = "ability" === t.kind && !a ? "" : "$" + a, r.appendChild(l);
       const c = document.createElement("div");
       c.className = "qn", r.appendChild(c);
+      const qx = document.createElement("div");
+      qx.className = "qx", qx.style.display = "none", r.appendChild(qx);
       if ("bld" !== t.kind && "def" !== t.kind && "ability" !== t.kind) {
         const rt = unitRoleTag(t.key);
         if (rt) {
@@ -11715,17 +11735,31 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         "mouse" === e2.pointerType && hideCardInfo();
       }), r.addEventListener("pointerdown", (e2) => {
         e2.stopPropagation(), "mouse" !== e2.pointerType && showCardInfo(t, true), r._t = setTimeout(() => {
-          const q = P().queues[t.kind];
-          q && q.list.includes(t.key) && (r._long = true, cancelBuild(P(), t.kind, t.key), hint("Removed from queue"), sfx("place"));
-        }, 750), r._long = false;
+          cardAlt(t) && (r._long = true);
+        }, 600), r._long = false;
       }), r.addEventListener("pointerup", (e2) => {
-        e2.stopPropagation(), clearTimeout(r._t), r._long || cardClick(t);
-      }), r.addEventListener("pointercancel", () => clearTimeout(r._t)), elCards.appendChild(r), cardEls.push({ el: r, it: t, pg: o, bd: s, nm: i, qn: c });
+        e2.stopPropagation(), clearTimeout(r._t), r._long || 2 === e2.button || cardClick(t);
+      }), r.addEventListener("pointercancel", () => clearTimeout(r._t)), r.addEventListener("contextmenu", (e2) => {
+        e2.preventDefault(), e2.stopPropagation(), clearTimeout(r._t), r._long = true, cardAlt(t);
+      }), elCards.appendChild(r), cardEls.push({ el: r, it: t, pg: o, bd: s, nm: i, qn: c, qx });
     }
+  }
+  function cardAlt(it) {
+    if ("ability" === it.kind) return false;
+    const p = P(), q = p.queues[it.kind];
+    if (!q || !q.list.includes(it.key)) return false;
+    if (("bld" === it.kind || "def" === it.kind) && p.ready[it.kind] === it.key) return cancelBuild(p, it.kind, it.key), S.placing === it.key && (S.placing = null, S.ghost = null), hint("Cancelled \u2014 refunded"), sfx("place"), true;
+    if (q.list[0] === it.key && !q.paused) return q.paused = true, hint("Paused \u2014 hold / right-click again to cancel"), sfx("sel"), true;
+    const wasHead = q.list.lastIndexOf(it.key) === 0;
+    return cancelBuild(p, it.kind, it.key), hint(wasHead ? "Cancelled \u2014 refunded" : "Removed from queue"), sfx("place"), true;
   }
   function cardClick(e) {
     const t = P();
     if ("ability" === e.kind) return void abilityClick(e.key);
+    {
+      const q = t.queues[e.kind];
+      if (q && q.paused && q.list[0] === e.key) return q.paused = false, hint("Resumed"), void sfx("sel");
+    }
     if ("bld" === e.kind || "def" === e.kind) {
       if (t.ready[e.kind] === e.key) return S.placing = e.key, S.ghost = null, S.deployUnit = null, void hint("Drag on the map, lift to place");
       if (!canBuildBld(t, e.key)) {
@@ -11740,6 +11774,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var QLABEL = (e, t) => "bld" === e || "def" === e ? bname(t, P().fac) : UNITS[t].name;
   function updateQueueStrip() {
+    $("#qstrip").style.display = "none";
+    return;
     const e = P(), t = $("#qstrip"), r = [];
     for (const t2 of ["bld", "def", "inf", "veh", "air", "sea"]) {
       const n2 = e.queues[t2];
@@ -11817,7 +11853,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         continue;
       }
       const r2 = e.queues[t2.it.kind], n = qCount(e, t2.it.kind, t2.it.key), a = r2 && r2.list.length && r2.list[0] === t2.it.key, isBld = "bld" === t2.it.kind || "def" === t2.it.kind, o = isBld && e.ready[t2.it.kind] === t2.it.key, s = isBld ? canBuildBld(e, t2.it.key) : canBuildUnit(e, t2.it.key);
-      t2.el.classList.toggle("dis", !s && !n && !o), t2.el.classList.toggle("rdy", !!o), t2.el.classList.toggle("head", !!a && !o), t2.pg.style.transform = "scaleY(" + (a && !o ? 1 - (r2.prog || 0) : 0) + ")", n > 1 ? (t2.qn.style.display = "", t2.qn.textContent = "x" + n) : t2.qn.style.display = "none", o ? (t2.bd.style.display = "", t2.bd.textContent = "PLACE") : a && r2.hold ? (t2.bd.style.display = "", t2.bd.textContent = "$") : a ? (t2.bd.style.display = "", t2.bd.textContent = Math.round(100 * (r2.prog || 0)) + "%") : t2.bd.style.display = "none";
+      const pz = !!(a && r2.paused && !o), pos = n ? r2.list.indexOf(t2.it.key) + 1 : 0;
+      t2.el.classList.toggle("dis", !s && !n && !o), t2.el.classList.toggle("rdy", !!o), t2.el.classList.toggle("head", !!a && !o && !pz), t2.el.classList.toggle("paused", pz), t2.el.classList.toggle("queued", !!n && !a), t2.pg.style.transform = "scaleY(" + (o ? 0 : a ? pz ? 1 : 1 - (r2.prog || 0) : n ? 1 : 0) + ")", pos && !o ? (t2.qn.style.display = "block", t2.qn.textContent = String(pos)) : t2.qn.style.display = "none", n > 1 ? (t2.qx.style.display = "block", t2.qx.textContent = "\xD7" + n) : t2.qx.style.display = "none", o ? (t2.bd.style.display = "", t2.bd.textContent = "PLACE") : pz ? (t2.bd.style.display = "", t2.bd.textContent = "\u275A\u275A") : a && r2.hold ? (t2.bd.style.display = "", t2.bd.textContent = "$") : a ? (t2.bd.style.display = "", t2.bd.textContent = Math.round(100 * (r2.prog || 0)) + "%") : t2.bd.style.display = "none";
     }
     updateTabCounts(), ((ps) => {
       selProducer(S.tab);
@@ -11859,6 +11896,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     updateCards,
     doDeploy,
     cardClick,
+    cardAlt,
     tabList,
     producers,
     selProducer,

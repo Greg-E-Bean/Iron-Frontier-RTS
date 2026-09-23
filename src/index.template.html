@@ -557,6 +557,17 @@ body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:a
 @media (max-width:620px){.cbtn.icon[data-l]:after{display:none}}
 @media (max-height:500px){body.sidebar .cbtn.icon[data-l]:after{display:none}body.sidebar .cbtn.icon .ico{width:15px;height:15px}}
 body.sidebar .cbtn.icon[data-l]:after{font-size:8px}
+
+/* ---- per-card queue display ---- */
+.card .qn{top:2px;left:3px;min-width:14px;text-align:center;background:#c2801eee;font-family:"Courier New",monospace}
+.card .qx{position:absolute;top:36px;right:4px;font-size:11px;font-weight:bold;color:#fff;background:#000b;border:1px solid #f0a72c88;
+  border-radius:3px;padding:0 4px;line-height:14px;pointer-events:none;font-family:"Courier New",monospace}
+.card.queued .prog{background:#000a}
+.card.paused .prog{background:#000c}
+.card.paused{border-color:#8fa3bb}
+.card.paused .badge{background:#8fa3bbdd;color:#0a0f12}
+.tab .tc.pz{background:#8fa3bb}
+@media (max-height:500px){.card .qx{top:26px;font-size:10px;line-height:12px}}
 </style>
 </head>
 <body>
