@@ -750,7 +750,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/gamedata.ts
-  var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { allied: "Command Spire", soviet: "Fortress HQ", yuri: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { allied: "Solar Array", soviet: "Thermal Plant", yuri: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { allied: "Ore Processor", soviet: "Smelting Works", yuri: "Digester", neutral: "Ore Processor" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { allied: "Spawning Hive", soviet: "Spawning Hive", yuri: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { allied: "Training Hall", soviet: "Muster Bunker", yuri: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { allied: "Assembly Bay", soviet: "Foundry", yuri: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { allied: "Research Spire", soviet: "War Institute", yuri: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { allied: "Auto Turret", soviet: "Gun Bunker", yuri: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { allied: "Airstrip", soviet: "Landing Pad", yuri: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { allied: "Shipwright", soviet: "Drydock", yuri: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { allied: "Interceptor Battery", soviet: "Flak Cannon", yuri: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 1500, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { allied: "Sentinel Line", soviet: "Iron Rampart", yuri: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 280, dmg: 65, rof: 0.85, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true, aaBonus: 2.4 } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Outpost", soviet: "Outpost", yuri: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Storehouse", soviet: "Storehouse", yuri: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "High-Rise", soviet: "High-Rise", yuri: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Chapel", soviet: "Chapel", yuri: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Tenement", soviet: "Tenement", yuri: "Tenement", neutral: "Tenement" } }, civ6: { key: "civ6", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Market Row", soviet: "Market Row", yuri: "Market Row", neutral: "Market Row" } }, civ7: { key: "civ7", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Workshop", soviet: "Workshop", yuri: "Workshop", neutral: "Workshop" } }, civ8: { key: "civ8", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Tavern", soviet: "Tavern", yuri: "Tavern", neutral: "Tavern" } }, civ9: { key: "civ9", size: 3, hp: 1100, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Terrace Flats", soviet: "Terrace Flats", yuri: "Terrace Flats", neutral: "Terrace Flats" } }, bridgehut: { key: "bridgehut", size: 1, hp: 220, cost: 0, power: 0, build: 1, tab: null, prereq: [], noAnchor: true, indestructible: true, names: { allied: "Bridge Watch", soviet: "Bridge Watch", yuri: "Bridge Watch", neutral: "Bridge Watch" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Garrison Cannon", soviet: "Garrison Cannon", yuri: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { allied: "Ore Vault", soviet: "Stockpile", yuri: "Gullet", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { allied: "Service Bay", soviet: "Field Works", yuri: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { allied: "Photon Lance", soviet: "Missile Silo", yuri: "Psychic Amplifier", neutral: "Photon Lance" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { allied: "Photon Tower", soviet: "Arc Tower", yuri: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { allied: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "prism" }, soviet: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "tesla" }, yuri: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { allied: "Barrier Wall", soviet: "Iron Wall", yuri: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { allied: "Checkpoint Gate", soviet: "Blast Gate", yuri: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Oil Derrick", soviet: "Oil Derrick", yuri: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Paradrop Hangar", soviet: "Paradrop Hangar", yuri: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "EMP Spire", soviet: "EMP Spire", yuri: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Rogue Den", soviet: "Rogue Den", yuri: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 } };
+  var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { allied: "Command Spire", soviet: "Fortress HQ", yuri: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { allied: "Solar Array", soviet: "Thermal Plant", yuri: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { allied: "Ore Processor", soviet: "Smelting Works", yuri: "Digester", neutral: "Ore Processor" } }, orerig: { key: "orerig", size: 3, hp: 900, cost: 1200, power: -20, build: 12, tab: "bld", prereq: ["power"], noAnchor: true, drillRig: true, names: { allied: "Ore Pump Station", soviet: "Deep Bore Rig", yuri: "Feeder Maw", neutral: "Ore Rig" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { allied: "Spawning Hive", soviet: "Spawning Hive", yuri: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { allied: "Training Hall", soviet: "Muster Bunker", yuri: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { allied: "Assembly Bay", soviet: "Foundry", yuri: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { allied: "Research Spire", soviet: "War Institute", yuri: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { allied: "Auto Turret", soviet: "Gun Bunker", yuri: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { allied: "Airstrip", soviet: "Landing Pad", yuri: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { allied: "Shipwright", soviet: "Drydock", yuri: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { allied: "Interceptor Battery", soviet: "Flak Cannon", yuri: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 1500, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { allied: "Sentinel Line", soviet: "Iron Rampart", yuri: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 280, dmg: 65, rof: 0.85, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true, aaBonus: 2.4 } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Outpost", soviet: "Outpost", yuri: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Storehouse", soviet: "Storehouse", yuri: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "High-Rise", soviet: "High-Rise", yuri: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Chapel", soviet: "Chapel", yuri: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Tenement", soviet: "Tenement", yuri: "Tenement", neutral: "Tenement" } }, civ6: { key: "civ6", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Market Row", soviet: "Market Row", yuri: "Market Row", neutral: "Market Row" } }, civ7: { key: "civ7", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Workshop", soviet: "Workshop", yuri: "Workshop", neutral: "Workshop" } }, civ8: { key: "civ8", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Tavern", soviet: "Tavern", yuri: "Tavern", neutral: "Tavern" } }, civ9: { key: "civ9", size: 3, hp: 1100, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Terrace Flats", soviet: "Terrace Flats", yuri: "Terrace Flats", neutral: "Terrace Flats" } }, bridgehut: { key: "bridgehut", size: 1, hp: 220, cost: 0, power: 0, build: 1, tab: null, prereq: [], noAnchor: true, indestructible: true, names: { allied: "Bridge Watch", soviet: "Bridge Watch", yuri: "Bridge Watch", neutral: "Bridge Watch" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Garrison Cannon", soviet: "Garrison Cannon", yuri: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { allied: "Ore Vault", soviet: "Stockpile", yuri: "Gullet", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { allied: "Service Bay", soviet: "Field Works", yuri: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { allied: "Photon Lance", soviet: "Missile Silo", yuri: "Psychic Amplifier", neutral: "Photon Lance" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { allied: "Photon Tower", soviet: "Arc Tower", yuri: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { allied: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "prism" }, soviet: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "tesla" }, yuri: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { allied: "Barrier Wall", soviet: "Iron Wall", yuri: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { allied: "Checkpoint Gate", soviet: "Blast Gate", yuri: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Oil Derrick", soviet: "Oil Derrick", yuri: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Paradrop Hangar", soviet: "Paradrop Hangar", yuri: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "EMP Spire", soviet: "EMP Spire", yuri: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Rogue Den", soviet: "Rogue Den", yuri: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 } };
   function U(e) {
     return Object.assign({ kind: "veh", armor: "veh", radius: 11, speed: 44, sight: 260, vsInf: 1, vsVeh: 1, vsBldg: 1, proj: "shell", rof: 1, dmg: 10, range: 130, from: "factory", tab: "veh" }, e);
   }
@@ -879,6 +879,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     piercer: "Rocket infantry built to punch through enemy armor at range."
   };
   var BLD_DESC = {
+    orerig: "Built on top of an ore drill. Pumps the deposit hard, making its ore field regrow several times faster and further out.",
     conyard: "Your base's command center \u2014 produces nothing on its own, but everything else on your base radiates outward from it.",
     power: "Generates the power your base needs to keep every other structure running at full strength.",
     refinery: "Processes ore hauled in by your harvester into credits \u2014 the backbone of your economy.",
@@ -1835,12 +1836,36 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function oreField(e, t, r, n, a) {
     e = Math.round(e), t = Math.round(t), G.oreSpots && G.oreSpots.push({ x: e, y: t, type: a || 1 });
-    for (let o = t - r; o <= t + r; o++) for (let s = e - r; s <= e + r; s++) {
+    const lobes = [[e, t, 0.62 * r]], nl = 2 + irnd(0, 2);
+    for (let k = 0; k < nl; k++) {
+      const g = rnd(0, 6.283), d = rnd(0.35, 0.6) * r;
+      lobes.push([e + Math.cos(g) * d, t + Math.sin(g) * d, rnd(0.42, 0.62) * r]);
+    }
+    const veins = [];
+    for (let k = 0; k < 3; k++) veins.push(rnd(0, 6.283));
+    const R = Math.ceil(1.25 * r);
+    for (let o = t - R; o <= t + R; o++) for (let s = e - R; s <= e + R; s++) {
       if (!inMap(s, o)) continue;
       const i = idx(s, o);
       if (G.terr[i] >= 2) continue;
-      const l = dist(s, o, e, t) + 2.2 * noise2(5 * s, 5 * o, 6) - 1.1;
-      l < r && (G.ore[i] = Math.max(G.ore[i], n * Math.min(1, 1.6 * (1 - l / r)) * rnd(0.7, 1.15) * (2 === a ? 1.6 : 1)), G.tib[i] = a || 1);
+      let w = 0;
+      for (const [lx, ly, lr] of lobes) {
+        const d = dist(s, o, lx, ly) + 1.6 * noise2(5 * s, 5 * o, 6) - 0.8;
+        w = Math.max(w, 1 - d / lr);
+      }
+      const dd = dist(s, o, e, t);
+      if (dd < 1.25 * r && dd > 1) {
+        const g = Math.atan2(o - t, s - e);
+        for (const v of veins) {
+          let df = Math.abs(g - v);
+          df > Math.PI && (df = 2 * Math.PI - df);
+          const perp = Math.sin(df) * dd;
+          df < 1.2 && perp < 0.9 && (w = Math.max(w, 0.3 * (1 - dd / (1.25 * r)) + 0.15));
+        }
+      }
+      if (w <= 0) continue;
+      const core = Math.max(0, 1 - dd / (0.45 * r));
+      G.ore[i] = Math.max(G.ore[i], n * Math.min(1, 1.25 * w + 0.35 * core) * rnd(0.72, 1.12) * (2 === a ? 1.6 : 1)), G.tib[i] = a || 1;
     }
   }
   var _cameFrom = new Int32Array(6624);
@@ -2000,8 +2025,21 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return max - min <= 32 + 6 * size;
   }
+  function drillAt(tx, ty) {
+    return (G.oreSpots || []).find((o) => o.x - 1 === tx && o.y - 1 === ty);
+  }
   function canPlace(e, t, r, n) {
     const a = BLD[e].size, isNaval = BLD[e].naval;
+    if (BLD[e].drillRig) {
+      const sp = drillAt(t, r);
+      if (!sp) return false;
+      for (let yy = r; yy < r + a; yy++) for (let xx = t; xx < t + a; xx++) {
+        if (!inMap(xx, yy)) return false;
+        const q = idx(xx, yy);
+        if (G.terr[q] >= 2 || 0 !== G.occ[q]) return false;
+      }
+      return true;
+    }
     for (let e2 = r; e2 < r + a; e2++) for (let r2 = t; r2 < t + a; r2++) {
       if (!inMap(r2, e2)) return false;
       const t2 = idx(r2, e2);
@@ -3882,37 +3920,60 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let d = 0; d < o; d++) e.push(P_(BOXM(s, i, l), t + (r - t) * (1 === o ? 0.5 : d / (o - 1)), n, a, c));
   }
   function oreDrillModel(type) {
-    const e = [], glowTip = 2 === type ? "tibBlit" : "tibGlit", glowMid = 2 === type ? "tibB" : "tibG", baseZ = 1.4, towerH = 17, topZ = baseZ + towerH;
-    e.push(P_(CYL(6.8, 1.4, 14), 0, 0, 0, "concrete2"));
-    e.push(P_(CYL(6, 0.6, 14), 0, 0, 1.4, "darkmetal"));
-    lattice(e, 0, 0, baseZ, towerH, 3.2, "rust");
-    e.push(P_(BOXM(4.6, 4.6, 2.6, 0.6), 0, 0, topZ + 1.3, "darkmetal"));
-    e.push(P_(CYL(1.7, 1.6, 10), 0, 0, topZ + 2.6, "steel"));
-    e.push(P_(CYL(1, 1.2, 8), 0, 0, topZ + 3.4, "glow", { e: 1 }));
-    const segs = 5, augerR = 2.1, dz = topZ;
-    for (let i = 0; i < segs; i++) {
-      const zz = dz - 3.4 * i, rr = augerR * (1 - i / segs * 0.55), dg = { spin: 2.2, bob: 1.1 };
-      e.push(P_(CYL(0.42 * rr, 3.6, 8), 0, 0, zz, "gunmetal", { a: dg }));
-      e.push(P_(BOXM(rr, 0.26 * rr, 3.4, 0.14), 0, 0, zz, i % 2 ? glowMid : "rust", { a: dg }));
+    const e = [], gem = 2 === type, cG = gem ? "tibB" : "tibG", cL = gem ? "tibBlit" : "tibGlit";
+    for (let k = 0; k < 8; k++) {
+      const a = k * 0.785 + 0.2, rr = 7.5 + 1.2 * (k % 2);
+      e.push(P_(DOME(3.4 - 0.5 * (k % 3), 2.2, 8), Math.cos(a) * rr, Math.sin(a) * rr, -0.4, k % 2 ? "rock2" : "rock3", { r: a }));
+      k % 2 || e.push(P_(CONE(0.8, 0.06, 4.4, 5), Math.cos(a) * rr, Math.sin(a) * rr, 1, k % 4 ? cG : cL, { ty: 0.35, r: a, e: k % 4 ? 0 : 1 }));
     }
-    e.push(P_(CONE(0.9, 0.14, 2.6, 7), 0, 0, dz - 3.4 * segs, glowTip, { e: 1, a: { spin: 2.2, bob: 1.1 } }));
+    e.push(P_(CYL(4.4, 1, 14), 0, 0, 0, "darkmetal")), e.push(P_(CYL(3.2, 2.6, 12), 0, 0, 1, "steel")), e.push(P_(CYL(3.8, 0.6, 12), 0, 0, 3.2, "darkmetal"));
+    const top = 22;
+    for (let k = 0; k < 3; k++) {
+      const a = k * 2.094 + 0.5, fx = Math.cos(a) * 7.4, fy = Math.sin(a) * 7.4;
+      e.push(P_(BOXM(2, 2, 1, 0.3), fx, fy, 0, "darkmetal"));
+      strut3(e, fx, fy, 0.8, Math.cos(a) * 1.4, Math.sin(a) * 1.4, top, 0.55, "rust");
+      for (const f of [0.35, 0.62]) {
+        const b = k * 2.094 + 0.5 + 2.094, x0 = Math.cos(a) * 7.4 * (1 - f), y0 = Math.sin(a) * 7.4 * (1 - f), x1 = Math.cos(b) * 7.4 * (1 - f), y1 = Math.sin(b) * 7.4 * (1 - f), z = 0.8 + f * (top - 0.8);
+        strut3(e, x0, y0, z, x1, y1, z, 0.25, "rust");
+      }
+    }
+    e.push(P_(BOXM(4, 4, 2, 0.4), 0, 0, top, "darkmetal")), e.push(P_(CYL(1, 0.8, 8), 0, 0, top + 2, "glow", { e: 1, a: { spin: 4 } })), e.push(P_(BOXM(3.4, 0.5, 0.5, 0.1), 0, 0, top + 2.3, "glow", { e: 1, a: { spin: 4 } }));
+    const sp = { spin: 2.6 };
+    e.push(P_(CYL(0.75, top - 3, 8), 0, 0, 1.5, "gunmetal", { a: sp }));
+    for (let k = 0; k < 6; k++) e.push(P_(BOXM(2.6, 0.3, 0.5, 0.1), 0, 0, 3 + 2.6 * k, k % 2 ? cG : "steel", { a: sp, r: k * 0.8 }));
+    const pb = { bob: 2.2, ba: 1.6 };
+    e.push(P_(CYL(1.1, 8, 8), 3.2, -2.4, 3.6, "steel")), e.push(P_(CYL(0.55, 6, 8), 3.2, -2.4, 9, "gunmetal", { a: pb })), e.push(P_(BOXM(2, 2, 0.8, 0.2), 3.2, -2.4, 15, "darkmetal", { a: pb }));
+    e.push(P_(BOXM(4.2, 3.2, 3, 0.5), -4.2, 2.8, 0.8, "armor3")), e.push(P_(CYL(0.5, 4, 6), -5.2, 3.6, 3.8, "darkmetal")), e.push(P_(BOXM(1.2, 1.2, 0.6, 0.1), -3, 1.2, 3.8, "lightY", { e: 1 }));
+    e.push(P_(BOXM(6, 1.6, 0.6, 0.2), 3.8, 3.6, 3.6, "steel", { ty: 0.35 }));
+    for (let k = 0; k < 3; k++) e.push(P_(DOME(0.8, 0.8, 6), 5 + 1.2 * k, 3.6, 4.2 + 0.3 * k, k % 2 ? cL : cG, { e: 1, a: { bob: 1.6 + 0.5 * k, ba: 0.8 } }));
     return e;
   }
   function crystalModel(e, t, v) {
     v = v || 0;
-    const r = [], glowTip = 2 === e ? "tibBlit" : "tibGlit", glowMid = 2 === e ? "tibB" : "tibG", rk = "#ab9c81", rk2 = "#83745f", frac = (t + 1) / 6, ph = 1.7 * v;
-    const boulderN = 3 + Math.round(7 * frac);
-    for (let i = 0; i < boulderN; i++) {
-      const ang = 2.399 * i + ph * 0.7 + v, rad = 12 * Math.sqrt((i + 0.7) / boulderN), bh = (2.2 + 2.6 * ((i * 53 + v * 17) % 7) / 7) * (0.6 + 0.4 * frac), bw = bh * (1.25 + 0.3 * (i % 3));
-      r.push(P_(DOME(bw, bh, 8), Math.cos(ang) * rad, Math.sin(ang) * rad, 0, i % 3 ? rk : rk2, { r: 1.7 * ang }));
-      if (i % 3 === 1 && frac > 0.3) r.push(P_(DOME(0.42 * bw, 0.55 * bh, 6), Math.cos(ang) * rad + 0.4 * bw, Math.sin(ang) * rad + 0.3 * bw, 0.75 * bh, i % 2 ? glowMid : glowTip, { r: ang, e: 1 }));
+    const r = [], gem = 2 === e, cG = gem ? "tibB" : "tibG", cL = gem ? "tibBlit" : "tibGlit", frac = (t + 1) / 6, H = (k) => {
+      const x = Math.sin(12.9898 * k + 78.233 * (v + 1) + e * 7.7) * 43758.5453;
+      return x - Math.floor(x);
+    };
+    const nr = 2 + Math.round(3 * frac);
+    for (let i = 0; i < nr; i++) {
+      const a = i * 2.399 + v, rr = 4 + 8 * H(i), s = 2.6 + 2.2 * H(i + 9);
+      r.push(P_(DOME(s * 1.3, s * 0.55, 7), Math.cos(a) * rr, Math.sin(a) * rr, -0.3, i % 2 ? "rock2" : "rock3", { r: a, sy: 0.75 }));
     }
-    const segs = 3 + Math.round(5 * frac), augerR = 1.9 + 2 * frac, ax = -9 * frac - 2, ay = -2;
-    for (let i = 0; i < segs; i++) {
-      const zz = 1.6 - 1.2 * i, rr = augerR * (1 - i / segs * 0.7), ang = v + 1.05 * i;
-      r.push(P_(CYL(0.4 * rr, 1, 7), ax, ay, zz, rk2, { r: ang })), r.push(P_(BOXM(rr, 0.24 * rr, 0.85, 0.12), ax, ay, zz, i % 2 ? glowMid : rk, { r: ang }));
+    const nc = gem ? 1 + Math.round(2 * frac) : 2 + Math.round(3 * frac);
+    for (let c = 0; c < nc; c++) {
+      const a = c * 2.1 + v * 1.3 + 0.4, cr = c ? 5 + 6 * H(c + 3) : 1.5 * H(c + 4), cx = Math.cos(a) * cr, cy = Math.sin(a) * cr;
+      r.push(P_(DOME(2.6, 0.9, 7), cx, cy, -0.2, gem ? "rock3" : "rock2"));
+      const ns = gem ? 4 + Math.round(2 * frac) : 3 + Math.round(3 * frac);
+      for (let k = 0; k < ns; k++) {
+        const g = k * 2.399 + c, tilt = k ? 0.35 + 0.35 * H(k + c * 5) : 0.05, h = (gem ? 7 + 9 * frac : 3.5 + 5.5 * frac) * (k ? 0.55 + 0.45 * H(k + c * 3 + 1) : 1), w = gem ? 0.9 + 0.5 * H(k + c) : 0.7 + 0.5 * H(k + c);
+        r.push(P_(CONE(w, 0.08 * w, h, gem ? 6 : 5), cx + Math.cos(g) * (k ? 1 : 0), cy + Math.sin(g) * (k ? 1 : 0), 0.2, k % 3 ? cG : cL, { ty: tilt, r: g, e: k % 3 ? 0 : 1 }));
+      }
     }
-    r.push(P_(CONE(0.6 + 0.5 * frac, 0.08, 1.6 + 1.2 * frac, 6), ax, ay, 1.6 - 1.2 * segs, rk2));
+    const nn = gem ? 2 : 3 + Math.round(4 * frac);
+    for (let k = 0; k < nn; k++) {
+      const a = k * 1.9 + v * 2.2, rr = 3 + 10 * H(k + 20);
+      r.push(P_(DOME(0.7 + 0.6 * H(k + 30), 0.5, 6), Math.cos(a) * rr, Math.sin(a) * rr, 0, k % 3 ? cG : cL, { e: k % 3 ? 0 : 1 }));
+    }
     return r;
   }
   function blossomModel(e) {
@@ -6621,6 +6682,54 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
     }
   }
+  function oreRigModel(fac, l) {
+    const n = [], r = 96;
+    if ("allied" === fac) {
+      n.push(P_(CYL(0.34 * r, 2.2, 24), 0, 0, l, "armor2")), n.push(P_(CYL(0.3 * r, 0.6, 24), 0, 0, l + 2.2, "armor3"));
+      for (let k = 0; k < 3; k++) {
+        const a = k * 2.094 + 0.3, tx = Math.cos(a) * 0.34 * r, ty = Math.sin(a) * 0.34 * r;
+        n.push(P_(CYL(4.6, 11, 14), tx, ty, l, "armor")), n.push(P_(DOME(4.6, 2.4, 14), tx, ty, l + 11, "armor2")), n.push(P_(CYL(4.7, 0.7, 14), tx, ty, l + 7.5, "tesla", { e: 1 })), strut3(n, tx * 0.55, ty * 0.55, l + 4.5, tx * 0.9, ty * 0.9, l + 4.5, 1, "steel");
+      }
+      n.push(P_(CYL(0.17 * r, 6, 20), 0, 0, l + 2.2, "armor")), n.push(P_(DOME(0.17 * r, 0.13 * r, 20), 0, 0, l + 8.2, "armor2")), n.push(P_(CYL(0.175 * r, 1.4, 20), 0, 0, l + 6, "glass", { e: 1 }));
+      const sp = { spin: 1.8 };
+      n.push(P_(CYL(1.2, 10, 10), 0, 0, l + 14, "steel")), n.push(P_(CYL(2, 1, 10), 0, 0, l + 24, "darkmetal", { a: sp }));
+      for (let k = 0; k < 3; k++) n.push(P_(BOXM(9, 1.4, 0.3, 0.1), 4.5 * Math.cos(k * 2.094), 4.5 * Math.sin(k * 2.094), l + 24.6, "white", { a: sp, r: k * 2.094 }));
+      for (const sx of [-1, 1]) n.push(P_(CYL(0.9, 7, 8), sx * 6, -6, l + 8, "steel")), n.push(P_(CYL(0.5, 5, 8), sx * 6, -6, l + 15, "tesla", { e: 1, a: { bob: 2.4 + sx * 0.3, ba: 1.4 } }));
+      n.push(P_(CYL(0.2, 9, 5), -8, 8, l + 8, "dark2")), n.push(P_(DOME(0.4, 0.35, 6), -8, 8, l + 17, "red", { e: 1 }));
+    } else if ("soviet" === fac) {
+      n.push(P_(CYL(0.36 * r, 1.6, 8), 0, 0, l, "concrete2"));
+      for (let k = 0; k < 4; k++) {
+        const a = k * 1.571 + 0.785, x = Math.cos(a) * 9, y = Math.sin(a) * 9;
+        strut3(n, x, y, l + 1.6, Math.cos(a) * 2, Math.sin(a) * 2, l + 38, 0.9, "rust");
+      }
+      for (const z of [12, 22, 31]) n.push(P_(BOXM(12 - 0.2 * z, 12 - 0.2 * z, 0.8, 0.2), 0, 0, l + z, "rust"));
+      n.push(P_(BOXM(6, 6, 2.4, 0.4), 0, 0, l + 38, "darkmetal")), n.push(P_(CYL(0.7, 0.7, 8), 0, 0, l + 40.4, "red", { e: 1, a: { spin: 3 } }));
+      const px = 0.26 * r, pb = { bob: 1.7, ba: 3 };
+      n.push(P_(BOXM(3, 3, 12, 0.4), px, 0, l + 1.6, "darkmetal")), n.push(P_(BOXM(18, 1.8, 1.8, 0.3), px, 0, l + 13.6, "rust", { a: pb })), n.push(P_(BOXM(3.4, 3, 5, 0.4), px + 9, 0, l + 10.4, "darkmetal", { a: pb })), n.push(P_(CYL(0.3, 9, 6), px + 10, 0, l + 2, "steel", { a: { bob: 1.7, ba: 2.2 } })), n.push(P_(BOXM(4, 4, 4, 0.4), px - 9, 0, l + 10.8, "concrete", { a: pb })), n.push(P_(BOXM(6, 5, 5, 0.6), px - 6, 0, l + 1.6, "armor3"));
+      stack(n, -0.28 * r, 0.22 * r, l + 1.6, 2.4, 22, "rust");
+      for (const ty of [-1, 1]) n.push(P_(CYL(4, 8, 12), -0.2 * r, ty * 0.28 * r, l + 1.6, "rust")), n.push(P_(DOME(4, 1.8, 12), -0.2 * r, ty * 0.28 * r, l + 9.6, "darkmetal"));
+      n.push(P_(BOXM(0.4, 3, 3, 0.1), -0.2 * r - 4.1, 0.28 * r, l + 4.5, "red", { e: 1 }));
+    } else {
+      ell(n, 0, 0, l - 0.4, 0.3 * r, 0.28 * r, 8, "flesh"), ell(n, 0, 0, l, 0.27 * r, 0.25 * r, 20, "carapace2");
+      for (let k = 0; k < 3; k++) ell(n, (0.12 - 0.12 * k) * r, 0, l + 2, 0.1 * r, 0.26 * r - 2 * k, 24 - 3 * k, k % 2 ? "carapace" : "body");
+      const mx = 0.06 * r;
+      taper3(n, mx, 0, l + 20, mx + 3, 0, l + 36, 5, 3, "flesh");
+      for (let k = 0; k < 3; k++) n.push(P_(CYL(5.2 - 0.6 * k, 1.2, 12), mx + 1 + k, 0, l + 24 + 4 * k, "carapace", { ty: 0.18 }));
+      ell(n, mx + 3, 0, l + 36, 4.6, 4.6, 3.4, "carapace2");
+      n.push(P_(DOME(2.6, 2.4, 10), mx + 3, 0, l + 37.6, "psi", { e: 1, a: { bob: 1.3, ba: 0.9 } }));
+      for (let k = 0; k < 6; k++) {
+        const a = k * 1.047, x = Math.cos(a) * 0.31 * r, y = Math.sin(a) * 0.29 * r;
+        taper3(n, x * 0.8, y * 0.8, l + 6, x * 1.25, y * 1.25, l - 0.6, 1.8, 0.4, "flesh");
+        n.push(P_(DOME(2.2, 2, 9), x, y, l + 4, "bile", { e: 1, a: { bob: 1.1 + 0.2 * k, ba: 0.6 } }));
+      }
+      for (let k = 0; k < 3; k++) {
+        const a = k * 2.094 + 0.4, x = Math.cos(a) * 0.14 * r, y = Math.sin(a) * 0.14 * r, A = { orbit: 0.7 + 0.2 * k, amp: 0.3, pvx: x, pvy: y };
+        taper3(n, x, y, l + 13, x + Math.cos(a) * 5, y + Math.sin(a) * 5, l + 22, 1.1, 0.5, "carapace", { a: A });
+        n.push(P_(DOME(0.8, 0.7, 7), x + Math.cos(a) * 5, y + Math.sin(a) * 5, l + 22, "psi", { e: 1, a: A }));
+      }
+    }
+    return n;
+  }
   var _bFac = null;
   function BMODEL_(e, t, dep, cn, rot, prod, doorT = 0) {
     cn = cn || 0;
@@ -6628,6 +6737,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const r = 32 * BLD[e].size, n = [], a = "allied" === t, o = "soviet" === t, d = false !== dep;
     const s = 0.3 * r, i = 0.24 * r, l = 3.6, c = l + s;
     const riseBucket = hasStagedBuild(e) ? Math.round(4 * Math.max(0, Math.min(1, +dep || 0))) : 4;
+    if ("orerig" === e) return oreRigModel(t || "allied", l);
     switch (e) {
       case "triturret": {
         const fac = a ? "allied" : o ? "soviet" : "yuri", mat = a ? "armor" : o ? "concrete2" : "carapace", accent = a ? "armor3" : o ? "rust" : "carapace2", plw = 0.92 * r, pld = 0.62 * r, ph = 0.14 * r, rs = 16, taper = 0.92;
@@ -8291,9 +8401,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function footprintPath(e, t, r) {
     ctx.beginPath();
-    [[e, t], [e + r, t], [e + r, t + r], [e, t + r]].forEach((e2, t2) => {
-      const r2 = w2sx(32 * e2[0], 32 * e2[1]), n = w2sy(32 * e2[0], 32 * e2[1]);
-      t2 ? ctx.lineTo(r2, n) : ctx.moveTo(r2, n);
+    const pts = [];
+    for (let i = 0; i <= r; i++) pts.push([e + i, t]);
+    for (let i = 1; i <= r; i++) pts.push([e + r, t + i]);
+    for (let i = r - 1; i >= 0; i--) pts.push([e + i, t + r]);
+    for (let i = r - 1; i > 0; i--) pts.push([e, t + i]);
+    pts.forEach((p, k) => {
+      const h = heightAt(32 * p[0], 32 * p[1]) + 0.6, x = w2sx(32 * p[0], 32 * p[1], h), y = w2sy(32 * p[0], 32 * p[1], h);
+      k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
     }), ctx.closePath();
   }
   function drawProj(e) {
@@ -8376,7 +8491,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       _zoneSig = sig, _zoneMask = new Uint8Array(92 * 72);
       for (let ty = 0; ty < 72; ty++) for (let tx = 0; tx < 92; tx++) inBuildZone(0, tx, ty, isNaval) && (_zoneMask[ty * 92 + tx] = 1);
     }
-    const M = _zoneMask, Z = (x, y) => x >= 0 && y >= 0 && x < 92 && y < 72 && M[y * 92 + x], P = (x, y) => [w2sx(32 * x, 32 * y), w2sy(32 * x, 32 * y)];
+    const M = _zoneMask, Z = (x, y) => x >= 0 && y >= 0 && x < 92 && y < 72 && M[y * 92 + x], P = (x, y) => {
+      const h = heightAt(32 * x, 32 * y) + 0.6;
+      return [w2sx(32 * x, 32 * y, h), w2sy(32 * x, 32 * y, h)];
+    };
     ctx.beginPath();
     for (let ty = 0; ty < 72; ty++) for (let tx = 0; tx < 92; tx++) if (M[ty * 92 + tx]) {
       const a = P(tx, ty), b = P(tx + 1, ty), c = P(tx + 1, ty + 1), d = P(tx, ty + 1);
@@ -9277,16 +9395,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function tickTiberium(e) {
     if (G.oreSpots) for (const t of G.oreSpots) {
       if (void 0 === t.t && (t.t = rnd(2, 6)), t.t -= e, t.t > 0) continue;
-      t.t = rnd(5, 10);
-      const r = 6;
-      for (let e2 = 0; e2 < 6; e2++) {
+      const rig = S.blds.find((b) => b.drill === t && !b.dead) || S.blds.find((b) => "orerig" === b.key && !b.dead && b.tx === t.x - 1 && b.ty === t.y - 1 && (b.drill = t));
+      t.t = rig ? rnd(2.2, 4) : rnd(5, 10);
+      const r = rig ? 8 : 6;
+      for (let pass = 0; pass < (rig ? 2 : 1); pass++) for (let e2 = 0; e2 < 6; e2++) {
         const e3 = rnd(0, 6.283), n = Math.sqrt(Math.random()) * r, a = Math.round(t.x + Math.cos(e3) * n), o = Math.round(t.y + Math.sin(e3) * n);
         if (!inMap(a, o)) continue;
         const s = idx(a, o);
         if (G.terr[s] >= 2 || 0 !== G.occ[s]) continue;
         const i = ORE_MAX[t.type] || 2600;
         if (!(G.ore[s] >= i) && !(G.ore[s] <= 0 && Math.random() < 0.55)) {
-          G.ore[s] = Math.min(i, G.ore[s] + rnd(160, 330)), G.tib[s] = t.type;
+          G.ore[s] = Math.min(i, G.ore[s] + rnd(160, 330) * (rig ? 1.3 : 1)), G.tib[s] = t.type;
+          rig && Math.random() < 0.5 && S.fx.push({ kind: "spark", x: 32 * a + 16, y: 32 * o + 16, z: 4, s: 0.3, c: 2 === t.type ? "#bff4ff" : "#ffe08a", t: 0, life: 0.35 });
           break;
         }
       }
@@ -10249,6 +10369,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const u = FPS.on ? 900 : 0.8 * h, p = Math.max(0, Math.floor((cam.x - u) / 32)), m = Math.min(91, Math.ceil((cam.x + u) / 32)), g = Math.max(0, Math.floor((cam.y - u) / 32)), y = Math.min(71, Math.ceil((cam.y + u) / 32)), drillTiles = {};
     if (G.oreSpots) for (const spot of G.oreSpots) {
       if (Math.abs(32 * spot.x + 16 - cam.x) + Math.abs(32 * spot.y + 16 - cam.y) > 1.3 * h) continue;
+      if (inMap(spot.x, spot.y) && G.occ[idx(spot.x, spot.y)]) {
+        for (let ny = spot.y - 1; ny <= spot.y + 1; ny++) for (let nx = spot.x - 1; nx <= spot.x + 1; nx++) drillTiles[nx + "," + ny] = 1;
+        continue;
+      }
       for (let ny = spot.y - 1; ny <= spot.y + 1; ny++) for (let nx = spot.x - 1; nx <= spot.x + 1; nx++) drillTiles[nx + "," + ny] = 1;
       const dwx = 32 * spot.x + 16, dwy = 32 * spot.y + 16, dwz = heightAt(dwx, dwy), drot = (7 * spot.x + 3 * spot.y) % 8 / 8 * 6.283, dk = "DRILL" + spot.type;
       c(dk, () => oreDrillModel(spot.type), TIBPAL, dwx, dwy, dwz, drot, 0);
@@ -12321,7 +12445,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function tabList(e) {
     const t = P().f, capFacs = new Set(S.blds.filter((b) => b.owner === P().id && !b.dead && b.capturedFac && b.capturedFac !== t.key).map((b) => b.capturedFac));
     if ("bld" === e) {
-      const own2 = ["power", "refinery", "barracks", "factory", "silo", "repair", "lab", "airfield", "navalyard"].filter((e2) => "refinery" !== e2 || "yuri" !== t.key).map((e2) => ({ kind: "bld", key: e2 })).concat("yuri" === t.key ? [{ kind: "veh", key: "hivetrans" }] : []), foreign2 = [];
+      const own2 = ["power", "refinery", "orerig", "barracks", "factory", "silo", "repair", "lab", "airfield", "navalyard"].filter((e2) => "refinery" !== e2 || "yuri" !== t.key).map((e2) => ({ kind: "bld", key: e2 })).concat("yuri" === t.key ? [{ kind: "veh", key: "hivetrans" }] : []), foreign2 = [];
       for (const fac of capFacs) {
         const econKey = "yuri" === fac ? "hive" : "refinery";
         own2.some((o) => o.key === econKey) || foreign2.some((o) => o.key === econKey) || foreign2.push({ kind: "bld", key: econKey, foreign: true }), "yuri" === fac && !own2.some((o) => "hivetrans" === o.key) && !foreign2.some((o) => "hivetrans" === o.key) && foreign2.push({ kind: "veh", key: "hivetrans", foreign: true });
@@ -12676,6 +12800,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function updateGhost(e, t, r) {
     const n = s2w(e, t - (r ? Math.min(46, 26 / Math.max(0.35, cam.z)) : 0)), a = n.x, o = n.y, s = BLD[S.placing].size;
     S.ghost = { tx: clamp(Math.round(a / 32 - s / 2), 0, 92 - s), ty: clamp(Math.round(o / 32 - s / 2), 0, 72 - s) };
+    if (BLD[S.placing].drillRig && G.oreSpots) {
+      let best = null, bd = 1e9;
+      for (const sp of G.oreSpots) {
+        const d = dist(a / 32, o / 32, sp.x + 0.5, sp.y + 0.5);
+        d < bd && (bd = d, best = sp);
+      }
+      best && bd < 9 && (S.ghost = { tx: best.x - 1, ty: best.y - 1 });
+    }
   }
   function tryPlace(e, t) {
     updateGhost(e, t, false);
