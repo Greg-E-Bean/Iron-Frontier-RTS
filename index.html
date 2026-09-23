@@ -3934,7 +3934,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const o = r / 2 + 1.4, rad = clamp(0.34 * r, 0.45 * n, 0.7 * n);
     for (let r2 = 0; r2 < 3; r2++) {
       const s = 0.32 * -t + r2 * (0.32 * t);
-      for (const t2 of [-o, o]) e.push(P_(CYL(rad, 5.4, 10), s, t2 + 2.7, rad, "rubber", { tx: PI2 })), e.push(P_(CYL(0.47 * rad, 5.8, 8), s, t2 + 2.9, rad, a && r2 % 2 ? "steel" : "gunmetal", { tx: PI2 }));
+      for (const t2 of [-o, o]) {
+        e.push(P_(CYL(rad, 5.4, 10), s, t2 + 2.7, rad, "rubber", { tx: PI2 })), e.push(P_(CYL(0.47 * rad, 5.8, 8), s, t2 + 2.9, rad, a && r2 % 2 ? "steel" : "gunmetal", { tx: PI2 })), e.push(P_(CYL(0.2 * rad, 6, 6), s, t2 + 3, rad, "darkmetal", { tx: PI2 }));
+        const sg = Math.sign(t2);
+        strut3(e, s, t2, rad, s + 0.25 * rad, t2 - sg * 0.5 * o, 1.6 * rad, 0.45, "steel"), e.push(P_(BOXM(2.3 * rad, 6.4, 0.55, 0.25), s, t2, 2.05 * rad, "armor3")), e.push(P_(BOXM(2.3 * rad, 0.4, 0.9, 0.1), s, t2 + sg * 3.1, 1.95 * rad, "dark2"));
+      }
     }
   }
   function strut3(e, x1, y1, z1, x2, y2, z2, rad, mat, segs) {
@@ -4274,6 +4278,25 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       pipeRun(a, 0.02 * e, 0.4 * t, 0.34 * -e, 0.4 * t, s + 6.5, 0.45, "rust");
     }
     factionHullDetail(a, n.fac, e, t, s);
+    {
+      const fg = FGLOW[n.fac] || "tesla";
+      if (org) {
+        a.push(P_(DOME(1.3, 1, 8), 0.47 * e, 0, s + 4.2, "psi", { e: 1 }));
+        for (const sy of [-1, 1]) a.push(P_(BOXM(0.46 * e, 0.3, 0.35, 0.1), -0.04 * e, sy * (0.5 * t + 0.95), s + 5.2, "psi", { e: 1 }));
+      } else {
+        for (const sy of [-1, 1]) {
+          a.push(P_(BOXM(0.56 * e, 0.28, 0.34, 0.1), -0.02 * e, sy * (0.5 * t + 0.82), s + 5.9, fg, { e: 1 }));
+          a.push(P_(BOXM(0.9, 0.5 * 0.3 * t, 0.6, 0.1), -0.505 * e, sy * 0.36 * t, s + 4.6, "red", { e: 1 }));
+          a.push(P_(BOXM(1.1, 1.1, 0.9, 0.2), 0.5 * e, sy * 0.3 * t, s + 1.8, "darkmetal"));
+          if (!n.skirt && !n.wheeled && !n.deployed) for (let k = 0; k < 4; k++) a.push(P_(BOXM(0.19 * e, 0.6, 2.5, 0.3), (-0.3 + 0.2 * k) * e, sy * (0.75 * t + 2.2), s + 2.7, k % 2 ? "armor3" : "armor2"));
+        }
+        a.push(P_(BOXM(0.3, 0.46 * t, 0.45, 0.1), 0.53 * e, 0, s + 4.5, fg, { e: 1 }));
+        a.push(P_(SLAB(roundRectProfile(0.26 * e, 0.56 * t, 1.2, 2), 1.3, 0.5, "ed" + e.toFixed(1) + t.toFixed(1)), -0.34 * e, 0, s + 6.5, "armor3"));
+        for (const sy of [-1, 1]) vent(a, -0.34 * e, sy * 0.14 * t, s + 7.8, 0.18 * e, 0.18 * t, "darkmetal");
+        a.push(P_(CYL(0.16, 9, 5), -0.42 * e, -0.36 * t, s + 7.8, "dark2"));
+        a.push(P_(DOME(0.35, 0.3, 6), -0.42 * e, -0.36 * t, s + 16.8, "red", { e: 1 }));
+      }
+    }
     return a;
   }
   function turretProfile(e, t, fac) {
@@ -4297,6 +4320,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if ("soviet" === fac) return roundRectProfile(0.92 * e, 0.86 * t, 0.055 * Math.min(e, t), 1);
     return hexProfile(e, t);
   }
+  var FGLOW = { allied: "tesla", soviet: "glow", yuri: "psi" };
   function tankTurret(e, t, r, n) {
     n = n || {};
     const a = [];
@@ -4321,8 +4345,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const n2 = r2 * PI2 + 0.78;
         a.push(P_(CYL(0.7, 6.5, 6), Math.cos(n2) * t * 0.9, Math.sin(n2) * t * 0.9, e + 6.2, "crystal", { e: 1 }));
       }
-    } else a.push(P_(CYL(1.75, r, 10), 1.25 * t, 0, o, "gunmetal", { ty: PI2 })), a.push(P_(CYL(2.4, 4.6, 10), 1.25 * t + r - 4.6, 0, o, "steel", { ty: PI2 })), a.push(P_(CYL(2.9, 2.6, 10), 1.25 * t + r - 1.4, 0, o, "darkmetal", { ty: PI2 })), a.push(P_(BOXM(2.6, 7, 7, 0.4), 1.25 * t + r - 0.5, 0, o, "gunmetal")), a.push(P_(BOXM(2.6, 7, 7, 0.4), 1.25 * t + r - 3.4, 0, o, "gunmetal"));
-    return n.dome || (a.push(P_(CYL(2.9, 2.6, 10), 0.42 * -t, 0, e + 6.2, "body")), a.push(P_(DOME(2.9, 1.5, 10), 0.42 * -t, 0, e + 8.8, "trim")), a.push(P_(CYL(0.6, 5.2, 6), 0.42 * -t, 0.75 * t, e + 7, "gunmetal", { ty: PI2 }))), a.push(P_(BOXM(0.55 * t, 1.35 * t, 3.6, 0.9), 1.2 * -t, 0, e + 1.2, "armor3")), a.push(P_(CYL(0.45, 8.5, 5), 1.15 * -t, 0.5 * -t, e + 5.5, "gunmetal")), a.push(P_(CYL(0.22, 16, 5), 1.1 * -t, 0.62 * t, e + 5.5, "darkmetal", { tx: 0.12 })), a.push(P_(BOXM(1.6, 1.6, 0.6, 0.2), 0.15 * -t, 0.7 * t, e + 2.4, "darkmetal")), seams(a, 0.8 * t, 0.7 * t, e + 0.2, "dark"), a;
+    } else a.push(P_(CYL(1.75, r, 10), 1.25 * t, 0, o, "gunmetal", { ty: PI2 })), a.push(P_(CYL(2.25, 0.45 * r, 10), 1.25 * t + 0.18 * r, 0, o, "armor3", { ty: PI2 })), a.push(P_(CYL(2.1, 0.9, 10), 1.25 * t + 0.1 * r, 0, o, "darkmetal", { ty: PI2 })), a.push(P_(CYL(2.4, 4.6, 10), 1.25 * t + r - 4.6, 0, o, "steel", { ty: PI2 })), a.push(P_(CYL(2.9, 2.6, 10), 1.25 * t + r - 1.4, 0, o, "darkmetal", { ty: PI2 })), a.push(P_(BOXM(2.6, 7, 7, 0.4), 1.25 * t + r - 0.5, 0, o, "gunmetal")), a.push(P_(BOXM(2.6, 7, 7, 0.4), 1.25 * t + r - 3.4, 0, o, "gunmetal"));
+    for (const q of a) (q.ty === PI2 && (q.x || 0) >= 1.2 * t - 0.01 || (q.x || 0) >= 1.25 * t + 0.5 * r) && (q.b = 1);
+    const fg = FGLOW[n.fac] || "tesla";
+    n.dome || n.pods || (a.push(P_(SLAB(turretProfile(1.45 * t, 1.2 * t, n.fac), 1.5, 0.7, "tt2" + t.toFixed(1) + (n.fac || "")), -0.22 * t, 0, e + 6.2, "armor2")), a.push(P_(BOXM(1.05 * t, 0.3, 0.4, 0.1), -0.1 * t, -0.9 * t, e + 4.1, fg, { e: 1 })), a.push(P_(BOXM(1.05 * t, 0.3, 0.4, 0.1), -0.1 * t, 0.9 * t, e + 4.1, fg, { e: 1 })), a.push(P_(BOXM(1.7, 2.3, 1.5, 0.4), 0.48 * t, -0.46 * t, e + 6.2, "gunmetal")), a.push(P_(CYL(0.62, 0.5, 8), 0.48 * t + 0.9, -0.46 * t, e + 6.95, fg, { ty: PI2, e: 1 })), a.push(P_(BOXM(0.5 * t, 1.45 * t, 0.3, 0.1), -1.38 * t, 0, e + 3.4, "dark2")), a.push(P_(DOME(0.42, 0.36, 6), 1.1 * -t, 0.62 * t, e + 21.4, "red", { e: 1 })));
+    for (const sg of [-1, 1]) for (let k = 0; k < 3; k++) a.push(P_(CYL(0.42, 1.7, 6), (0.42 - 0.1 * k) * t, sg * (0.82 * t), e + 4.6 + 0.6 * k, "darkmetal", { ty: 1, r: sg * 0.55 }));
+    return n.dome || (a.push(P_(CYL(2.9, 2.6, 10), 0.42 * -t, 0, e + 6.2, "body")), a.push(P_(DOME(2.9, 1.5, 10), 0.42 * -t, 0, e + 8.8, "trim")), a.push(P_(CYL(0.6, 5.2, 6), 0.42 * -t, 0.75 * t, e + 7, "gunmetal", { ty: PI2 }))), a.push(P_(BOXM(0.55 * t, 1.35 * t, 3.6, 0.9), 1.2 * -t, 0, e + 1.2, "armor3")), a.push(P_(CYL(0.45, 8.5, 5), 1.15 * -t, 0.5 * -t, e + 5.5, "gunmetal")), a.push(P_(CYL(0.22, 16, 5), 1.1 * -t, 0.62 * t, e + 5.5, "darkmetal", { tx: 0.12 })), a.push(P_(BOXM(1.6, 1.6, 0.6, 0.2), 0.15 * -t, 0.7 * t, e + 2.4, "darkmetal")), seams(a, 0.8 * t, 0.7 * t, e + 0.2, "dark"), (n.twin || n.gat || n.beam || n.flame) && a.forEach((q) => {
+      q.ty === PI2 && (q.x || 0) >= 1.2 * t - 0.01 && (q.z || 0) >= e + 1 && (q.b = 1);
+    }), a;
   }
   function harvesterSoviet(e) {
     const t = [], r = 46, n = 22;
@@ -7128,9 +7158,20 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     return null;
   }
+  var VEH_ACCENT = { hover: [30, 20, 13.4, 0], v3: [34, 17, 10.6, 1], longbow: [40, 16, 9.8, 0], rift: [40, 16, 10, 2], spore: [32, 15, 9, 2], harvester: [0, 0, 0, 0] };
+  var ACC_FAC = ["allied", "soviet", "yuri"];
+  function vehAccent(p, k, extra) {
+    const A = VEH_ACCENT[k];
+    if (!A || !A[0]) return p;
+    const [L, W, z, fi] = A, fac = ACC_FAC[fi], fg = FGLOW[fac], dep = extra && extra.dep;
+    for (const sy of [-1, 1]) p.push(P_(BOXM(0.5 * L, 0.28, 0.34, 0.1), -0.02 * L, sy * (0.5 * W + 0.1), z - 1.4, fg, { e: 1 })), p.push(P_(BOXM(0.8, 0.14 * W, 0.6, 0.1), -0.5 * L, sy * 0.3 * W, z - 2.6, "red", { e: 1 }));
+    p.push(P_(BOXM(0.3, 0.42 * W, 0.45, 0.1), 0.5 * L, 0, z - 2.2, fg, { e: 1 }));
+    dep || (p.push(P_(CYL(0.16, 8, 5), -0.36 * L, 0.34 * W, z, "dark2")), p.push(P_(DOME(0.35, 0.3, 6), -0.36 * L, 0.34 * W, z + 8, "red", { e: 1 })));
+    return p;
+  }
   function UMODEL(e, t, extra) {
     const fac = extra && "object" == typeof extra ? extra.fac : void 0, _a = getAssetModel(e, fac);
-    return _a || UMODEL_(e, t || 0, extra);
+    return _a || vehAccent(UMODEL_(e, t || 0, extra), e, extra);
   }
   function UTURRET(e, t, extra) {
     return UTURRET_(e, t || 0, extra);
@@ -9338,6 +9379,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const f = Math.hypot(l, c, d) || 1;
     return [l / f, c / f, d / f];
   }
+  var _hasB = /* @__PURE__ */ new Map();
+  function turretHasBarrel(k, g, dep) {
+    const key = k + "|" + (g || "") + (dep ? "D" : "");
+    let v = _hasB.get(key);
+    return void 0 === v && (v = UTURRET(k, 0, { gunKey: g }).some((q) => q.b), _hasB.set(key, v)), v;
+  }
   function groundTilt(e, yaw, turret) {
     if (e.d.fly || e.d.naval || "inf" === e.d.kind || e.inside) return null;
     const d = Math.max(8, 0.45 * (e.d.radius || 12));
@@ -9697,7 +9744,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (!seen(e2)) continue;
       const hitFlash = e2.hitT > 0 && "inf" === e2.d.kind, t2 = hitFlash ? { body: "#ffffff", dark: "#ddb8b0", trim: "#ffffff" } : palette(e2.owner), r2 = unitFrame(e2), gy = (e2.d.naval ? 0.8 : heightAt(e2.x, e2.y)) + (FPS.on && e2 === FPS.u ? 0 : unitBob(e2)), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
       let gt, tt;
-      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : "") + (hitFlash ? "|H" : "") + (e2.heroMode ? "|" + e2.heroMode : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac, heroMode: e2.heroMode }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang, void 0, void 0, (gt = groundTilt(e2, e2.ang)) ? gt[0] : e2.bank || 0, gt ? gt[1] : e2.pitchA || 0), hasTurret(e2.key) && (tt = gt && groundTilt(e2, e2.tang, 1), c("UT" + e2.key + (e2.gunKey ? "_" + e2.gunKey : "") + "|" + e2.owner + (dep ? "|D" : ""), () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }), t2, e2.x - Math.cos(e2.tang) * 2.8 * (e2.recoil || 0), e2.y - Math.sin(e2.tang) * 2.8 * (e2.recoil || 0), gy + (e2.alt || 0) + turRise, e2.tang, void 0, void 0, tt ? tt[0] : 0, (tt ? tt[1] : 0) + 0.1 * (e2.recoil || 0))), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), "chinook" === e2.key ? c("UTR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, -(e2.rotorSpin || 0)) : c("UTRV" + e2.key + "|" + e2.owner, heliTailRotorV, t2, e2.x - 28 * Math.cos(e2.ang) - 2.2 * Math.sin(e2.ang), e2.y - 28 * Math.sin(e2.ang) + 2.2 * Math.cos(e2.ang), gy + (e2.alt || 0) + 16, e2.ang, void 0, void 0, 0, 1.4 * (+e2.rotorSpin || 0))), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
+      c("U" + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : "") + (hitFlash ? "|H" : "") + (e2.heroMode ? "|" + e2.heroMode : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac, heroMode: e2.heroMode }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang, void 0, void 0, (gt = groundTilt(e2, e2.ang)) ? gt[0] : e2.bank || 0, gt ? gt[1] : e2.pitchA || 0), hasTurret(e2.key) && (tt = gt && groundTilt(e2, e2.tang, 1), ((tk, rc) => {
+        const hb = turretHasBarrel(e2.key, e2.gunKey, dep), bk = rc * (hb ? 0.7 : 2.8), cx = Math.cos(e2.tang), sx = Math.sin(e2.tang), tz = gy + (e2.alt || 0) + turRise, tr = tt ? tt[0] : 0, tp = (tt ? tt[1] : 0) + (hb ? 0.03 : 0.1) * rc;
+        c("UT" + tk, () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }).filter((q) => !q.b), t2, e2.x - cx * bk, e2.y - sx * bk, tz, e2.tang, void 0, void 0, tr, tp);
+        hb && c("UB" + tk, () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }).filter((q) => q.b), t2, e2.x - cx * 4.2 * rc, e2.y - sx * 4.2 * rc, tz, e2.tang, void 0, void 0, tr, tp);
+      })(e2.key + (e2.gunKey ? "_" + e2.gunKey : "") + "|" + e2.owner + (dep ? "|D" : ""), e2.recoil || 0)), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), "chinook" === e2.key ? c("UTR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, -(e2.rotorSpin || 0)) : c("UTRV" + e2.key + "|" + e2.owner, heliTailRotorV, t2, e2.x - 28 * Math.cos(e2.ang) - 2.2 * Math.sin(e2.ang), e2.y - 28 * Math.sin(e2.ang) + 2.2 * Math.cos(e2.ang), gy + (e2.alt || 0) + 16, e2.ang, void 0, void 0, 0, 1.4 * (+e2.rotorSpin || 0))), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
     }
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
     if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind);
