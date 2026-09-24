@@ -87,7 +87,7 @@ function fpsGfxPre() {
   const want = FPS.on ? fpsPixelRatio() : glPixelRatioCap();
   GL.renderer.getPixelRatio() !== want && GL.renderer.setPixelRatio(want);
   fgTerrainDetail();
-  fgPatchWorldMats(), FG.sdOn.value = FPS.on && FPS.u && QUALITY >= 1 ? 1 : 0;
+  fgPruneInteriors(), fgPruneGroups(), fgPatchWorldMats(), FG.sdOn.value = FPS.on && FPS.u && QUALITY >= 1 ? 1 : 0;
   const on = !!(FPS.on && FPS.u);
   GL.sun.shadow.normalBias = on ? .5 : 1.2;
   fgGrass(on), fgFx(on);
@@ -680,7 +680,7 @@ function fgMergeGeos(list: any[]) {
 function hdObj(g: any, mats: any, shadow: boolean) {
   const o = new THREE.Group();
   if (!g._grp) { const by: any = {}; for (const k of BK) g[k] && (by[HD_GROUP[k]] = by[HD_GROUP[k]] || []).push(g[k]); g._grp = {}; for (const k in by) g._grp[k] = fgMergeGeos(by[k]); }
-  for (const k in g._grp) { const m = new THREE.Mesh(g._grp[k], mats[k] || mats.metal); m.castShadow = shadow && "emis" !== k, m.receiveShadow = shadow && "emis" !== k, o.add(m); }
+  for (const k in g._grp) { const m = new THREE.Mesh(g._grp[k], mats[k] || mats.metal); m.userData.shared = 1, m.castShadow = shadow && "emis" !== k, m.receiveShadow = shadow && "emis" !== k, o.add(m); }
   return o;
 }
 
@@ -963,6 +963,44 @@ function fpsViewmodelAnimate(vm: any, e: any) {
 }
 function fpsViewmodelThrow() { const V = fgVM(); V.st.throwT = .45; }
 
+// Frees a replaced viewmodel/cockpit rig: its one-off geometries and
+// materials, never the cached part geometry or the shared material set.
+function fgDisposeRig(root: any) {
+  if (!root) return;
+  root.parent && root.parent.remove(root);
+  const keep = new Set<any>(FG.vm ? Object.values(FG.vm.mats) : []);
+  root.traverse((o: any) => {
+    if (!o.isMesh || o.userData.shared) return;
+    o.geometry && o.geometry.dispose();
+    for (const m of Array.isArray(o.material) ? o.material : [o.material]) m && !keep.has(m) && m.dispose();
+  });
+}
+// Drops interiors of buildings that no longer exist.
+function fgPruneInteriors() {
+  if (!GL.interiorScene || (FG.intT = (FG.intT || 0) + 1) % 120) return;
+  const live = new Set<any>();
+  for (const b of S.blds) !b.dead && (b as any).interior && live.add((b as any).interior);
+  for (const g of GL.interiorScene.children.slice()) if (!live.has(g)) {
+    GL.interiorScene.remove(g);
+    g.traverse((o: any) => { o.isMesh && !o.userData.shared && o.geometry && o.geometry.dispose(); });
+  }
+}
+// Instanced render groups for model variants nobody has drawn for a while
+// (finished production frames, dead owners' colours, old damage states)
+// release their GPU buffers; they rebuild on demand if seen again.
+function fgPruneGroups() {
+  FG.frame = (FG.frame || 0) + 1;
+  if (FG.frame % 300) return;
+  for (const [k, d] of GL.groups) {
+    if (d.touched) { d.seen = FG.frame; continue; }
+    if (FG.frame - (d.seen || FG.frame) < 1800) { d.seen = d.seen || FG.frame; continue; }
+    for (const b of BK) if (d[b]) GL.scene.remove(d[b]), d[b].dispose(), d[b] = null;
+    GL.groups.delete(k);
+    const g = GLGEO.get(k);
+    if (g && !g.shared) { for (const b of BK) g[b] && g[b].dispose(); for (const an of g.anims || []) for (const b of BK) an.geo && an.geo[b] && an.geo[b].dispose(); GLGEO.delete(k); }
+  }
+}
+
 // ============================================================ COCKPITS
 function fpsBuildCockpit(e: any) {
   const V = fgVM(), root = new THREE.Group(), fac = hdFac(e), pal = palette(e.owner), fly = !!e.d.fly, naval = !!e.d.naval, walker = /titan|bastion/.test(e.key);
@@ -1041,4 +1079,4 @@ function fpsGfxPost() {
   r.autoClear = !1, r.clearDepth(), r.render(V.scene, V.cam), r.autoClear = !0;
 }
 
-Object.assign(window, { fpsGfxPre, fpsGfxShadow, fpsGfxPost, fgWindMat, WIND_KEYS, fx3dActive, fpsPixelRatio, FG, fpsHDSet, fpsBuildViewmodel, fpsViewmodelAnimate, fpsViewmodelThrow, fpsInteriorFig, fpsPoseFig, fpsBuildCockpit, fpsCockpitAnimate, fpsSightOverlay, hdWeapon, hdBuildFigure });
+Object.assign(window, { fpsGfxPre, fpsGfxShadow, fpsGfxPost, fgWindMat, WIND_KEYS, fx3dActive, fpsPixelRatio, FG, fpsHDSet, fpsBuildViewmodel, fpsViewmodelAnimate, fpsViewmodelThrow, fgDisposeRig, fpsInteriorFig, fpsPoseFig, fpsBuildCockpit, fpsCockpitAnimate, fpsSightOverlay, hdWeapon, hdBuildFigure });

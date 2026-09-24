@@ -2889,7 +2889,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         if (rk.dead) continue;
         rk.t += dt;
         if (rk.t >= rk.dur) {
-          rk.dead = true, rk.mesh && GL && GL.scene && (GL.scene.remove(rk.mesh), rk.mesh = null), superBlast(rk.owner, rk.tx, rk.ty, 150, 950, "#ffcf6a", true);
+          rk.dead = true, rk.mesh && GL && GL.scene && (GL.scene.remove(rk.mesh), rk.mesh.traverse((o) => {
+            o.geometry && o.geometry.dispose(), o.material && o.material.dispose();
+          }), rk.mesh = null), superBlast(rk.owner, rk.tx, rk.ty, 150, 950, "#ffcf6a", true);
           continue;
         }
         if (Math.random() < 0.4) {
@@ -2951,6 +2953,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const tx = Math.floor(b.x / 32), ty = Math.floor(b.y / 32);
         inMap(tx, ty) && grid[idx(tx, ty)] && known.add(b.id);
       }
+      if (known.size > 64) for (const id of known) S.bldById.get(id) || known.delete(id);
     }
     "function" == typeof onFogUpdated && onFogUpdated();
   }
@@ -10268,7 +10271,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       r2.receiveShadow = true, r2.frustumCulled = false, GL.scene.add(r2), GL.water = r2;
     } else GL.water = null;
     const f = new THREE.Mesh(new THREE.PlaneGeometry(14720, 11520), new THREE.MeshBasicMaterial({ color: 725273 }));
-    f.rotation.x = -Math.PI / 2, f.position.set(1472, -60, 1152), f.frustumCulled = false, GL.scene.add(f);
+    f.rotation.x = -Math.PI / 2, f.position.set(1472, -60, 1152), f.frustumCulled = false, GL.scene.add(f), GL.backdrop = f;
     buildSkirtGL(getCorner);
   }
   function buildSkirtGL(gc) {
@@ -10315,8 +10318,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const m = new THREE.Mesh(geo, mat);
     m.receiveShadow = true, m.frustumCulled = false, GL.scene.add(m), GL.skirt = m, G.skirtProps = props;
   }
+  function glDisposeMesh(m) {
+    if (!m) return;
+    GL.scene.remove(m), m.geometry && m.geometry.dispose();
+    const ms = Array.isArray(m.material) ? m.material : [m.material];
+    for (const t of ms) t && (["map", "bumpMap", "normalMap"].forEach((k) => t[k] && t[k].dispose()), t.dispose());
+  }
   function rebuildTerrainGL() {
-    GL && (GL.terrain && (GL.scene.remove(GL.terrain), GL.terrain.geometry.dispose()), GL.water && GL.scene.remove(GL.water), buildTerrainGL());
+    GL && (glDisposeMesh(GL.terrain), glDisposeMesh(GL.water), glDisposeMesh(GL.backdrop), GL.terrain = GL.water = GL.backdrop = null, buildTerrainGL());
   }
   function skySphere() {
     const e = new THREE.SphereGeometry(4200, 32, 20), t = [], r = e.attributes.position;
@@ -10926,7 +10935,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function ensureViewmodel(kind) {
     const u = FPS.u, vk = kind + "|" + (u && u.key) + "|" + (u && u.owner);
     if (FPS.vm && FPS.vm.userData.vk === vk) return FPS.vm;
-    FPS.vm && FPS.vm.parent && FPS.vm.parent.remove(FPS.vm);
+    fgDisposeRig(FPS.vm);
     FPS.vm = fpsBuildViewmodel(kind, u);
     FPS.vm.userData.vk = vk;
     return FPS.vm;
@@ -10934,19 +10943,21 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function ensureVehicleViewmodel(e) {
     const vk = e.key + "|" + e.owner;
     if (FPS.vvm && FPS.vvm.userData.vk === vk) return FPS.vvm;
-    FPS.vvm && FPS.vvm.parent && FPS.vvm.parent.remove(FPS.vvm);
+    fgDisposeRig(FPS.vvm);
     FPS.vvm = fpsBuildCockpit(e);
     FPS.vvm.userData.vk = vk;
     return FPS.vvm;
   }
+  var SHELL_GEO = null;
+  var SHELL_MAT = null;
   function spawnShell(vm) {
     const ej = vm.userData.eject;
     if (!ej) return;
     vm.updateMatrixWorld(true);
     const p = ej.getWorldPosition(new THREE.Vector3());
     vm.worldToLocal(p);
-    const bx = p.x, by = p.y, bz = p.z, m = new THREE.Mesh(new THREE.CylinderGeometry(45e-4, 45e-4, 0.02, 8), new THREE.MeshStandardMaterial({ color: 14071847, roughness: 0.3, metalness: 0.85 }));
-    m.position.set(bx, by, bz), m.userData.t0 = S.time, m.userData.bx = bx, m.userData.by = by, m.userData.bz = bz, m.userData.dx = 0.35 + 0.2 * Math.random(), m.userData.dy = 0.28 + 0.2 * Math.random(), m.userData.dz = 0.1 + 0.1 * Math.random(), vm.add(m), (vm.userData.shells = vm.userData.shells || []).push(m);
+    const bx = p.x, by = p.y, bz = p.z, m = new THREE.Mesh(SHELL_GEO || (SHELL_GEO = new THREE.CylinderGeometry(45e-4, 45e-4, 0.02, 8)), SHELL_MAT || (SHELL_MAT = new THREE.MeshStandardMaterial({ color: 14071847, roughness: 0.3, metalness: 0.85 })));
+    m.userData.shared = 1, m.position.set(bx, by, bz), m.userData.t0 = S.time, m.userData.bx = bx, m.userData.by = by, m.userData.bz = bz, m.userData.dx = 0.35 + 0.2 * Math.random(), m.userData.dy = 0.28 + 0.2 * Math.random(), m.userData.dz = 0.1 + 0.1 * Math.random(), vm.add(m), (vm.userData.shells = vm.userData.shells || []).push(m);
   }
   function tickShells(vm) {
     const shells = vm.userData.shells;
@@ -11988,7 +11999,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const want = FPS.on ? fpsPixelRatio() : glPixelRatioCap();
     GL.renderer.getPixelRatio() !== want && GL.renderer.setPixelRatio(want);
     fgTerrainDetail();
-    fgPatchWorldMats(), FG.sdOn.value = FPS.on && FPS.u && QUALITY >= 1 ? 1 : 0;
+    fgPruneInteriors(), fgPruneGroups(), fgPatchWorldMats(), FG.sdOn.value = FPS.on && FPS.u && QUALITY >= 1 ? 1 : 0;
     const on = !!(FPS.on && FPS.u);
     GL.sun.shadow.normalBias = on ? 0.5 : 1.2;
     fgGrass(on), fgFx(on);
@@ -12652,7 +12663,7 @@ varying vec3 vFgWN;
     }
     for (const k in g._grp) {
       const m = new THREE.Mesh(g._grp[k], mats[k] || mats.metal);
-      m.castShadow = shadow && "emis" !== k, m.receiveShadow = shadow && "emis" !== k, o.add(m);
+      m.userData.shared = 1, m.castShadow = shadow && "emis" !== k, m.receiveShadow = shadow && "emis" !== k, o.add(m);
     }
     return o;
   }
@@ -13009,6 +13020,49 @@ varying vec3 vFgWN;
     const V = fgVM();
     V.st.throwT = 0.45;
   }
+  function fgDisposeRig(root) {
+    if (!root) return;
+    root.parent && root.parent.remove(root);
+    const keep = new Set(FG.vm ? Object.values(FG.vm.mats) : []);
+    root.traverse((o) => {
+      if (!o.isMesh || o.userData.shared) return;
+      o.geometry && o.geometry.dispose();
+      for (const m of Array.isArray(o.material) ? o.material : [o.material]) m && !keep.has(m) && m.dispose();
+    });
+  }
+  function fgPruneInteriors() {
+    if (!GL.interiorScene || (FG.intT = (FG.intT || 0) + 1) % 120) return;
+    const live = /* @__PURE__ */ new Set();
+    for (const b of S.blds) !b.dead && b.interior && live.add(b.interior);
+    for (const g of GL.interiorScene.children.slice()) if (!live.has(g)) {
+      GL.interiorScene.remove(g);
+      g.traverse((o) => {
+        o.isMesh && !o.userData.shared && o.geometry && o.geometry.dispose();
+      });
+    }
+  }
+  function fgPruneGroups() {
+    FG.frame = (FG.frame || 0) + 1;
+    if (FG.frame % 300) return;
+    for (const [k, d] of GL.groups) {
+      if (d.touched) {
+        d.seen = FG.frame;
+        continue;
+      }
+      if (FG.frame - (d.seen || FG.frame) < 1800) {
+        d.seen = d.seen || FG.frame;
+        continue;
+      }
+      for (const b of BK) if (d[b]) GL.scene.remove(d[b]), d[b].dispose(), d[b] = null;
+      GL.groups.delete(k);
+      const g = GLGEO.get(k);
+      if (g && !g.shared) {
+        for (const b of BK) g[b] && g[b].dispose();
+        for (const an of g.anims || []) for (const b of BK) an.geo && an.geo[b] && an.geo[b].dispose();
+        GLGEO.delete(k);
+      }
+    }
+  }
   function fpsBuildCockpit(e) {
     const V = fgVM(), root = new THREE.Group(), fac = hdFac(e), pal = palette(e.owner), fly = !!e.d.fly, naval = !!e.d.naval, walker = /titan|bastion/.test(e.key);
     const key = "ck|" + e.key + "|" + e.owner;
@@ -13104,7 +13158,7 @@ varying vec3 vFgWN;
     const r = GL.renderer;
     r.autoClear = false, r.clearDepth(), r.render(V.scene, V.cam), r.autoClear = true;
   }
-  Object.assign(window, { fpsGfxPre, fpsGfxShadow, fpsGfxPost, fgWindMat, WIND_KEYS, fx3dActive, fpsPixelRatio, FG, fpsHDSet, fpsBuildViewmodel, fpsViewmodelAnimate, fpsViewmodelThrow, fpsInteriorFig, fpsPoseFig, fpsBuildCockpit, fpsCockpitAnimate, fpsSightOverlay, hdWeapon, hdBuildFigure });
+  Object.assign(window, { fpsGfxPre, fpsGfxShadow, fpsGfxPost, fgWindMat, WIND_KEYS, fx3dActive, fpsPixelRatio, FG, fpsHDSet, fpsBuildViewmodel, fpsViewmodelAnimate, fpsViewmodelThrow, fgDisposeRig, fpsInteriorFig, fpsPoseFig, fpsBuildCockpit, fpsCockpitAnimate, fpsSightOverlay, hdWeapon, hdBuildFigure });
 })();
 
 </script>
