@@ -487,6 +487,8 @@ declare global {
   function tickEngineer(u: Unit, dt: number): void;
   function tickInfiltrate(u: any, dt: number): void;
   function trackPair(u: any): void;
+  function snowTrails(): void;
+  function footStep(u: any): void;
   const NO_TREAD: RegExp;
   function trackMark(x: number, y: number, ang: number, w: number, l: number, life: number): void;
   function canInfiltrate(u: any, b: any): boolean;

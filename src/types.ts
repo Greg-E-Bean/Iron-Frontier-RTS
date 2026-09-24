@@ -277,6 +277,7 @@ export interface MapData {
   townHints?: any[];
   towns?: any[];
   roadLines?: number[][][];
+  snow?: number;
   expansions?: any[];
   plateaus?: any[];
   stratSpecial?: any[];

@@ -162,9 +162,9 @@ function terrainDetailPatch(m: any) {
   const prev = m.onBeforeCompile, tex = glDetailTex(), rtex = glRoadTex();
   m.onBeforeCompile = (sh: any, r: any) => {
     prev && prev(sh, r);
-    sh.uniforms.tDetail = { value: tex }; sh.uniforms.tRoad = { value: rtex };
+    sh.uniforms.tDetail = { value: tex }; sh.uniforms.tRoad = { value: rtex }; sh.uniforms.uSnow = { value: G.snow ? 1 : 0 };
     sh.vertexShader = "varying vec3 vTN;\n" + sh.vertexShader.replace("#include <beginnormal_vertex>", "#include <beginnormal_vertex>\nvTN = objectNormal;");
-    sh.fragmentShader = "uniform sampler2D tDetail;\nuniform sampler2D tRoad;\nvarying vec3 vTN;\n" + sh.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+    sh.fragmentShader = "uniform sampler2D tDetail;\nuniform sampler2D tRoad;\nuniform float uSnow;\nvarying vec3 vTN;\n" + sh.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
       { vec2 wp = vWorldFog.xz;
         float tdD1 = texture2D(tDetail, wp / 96.0).r, tdD2 = texture2D(tDetail, mat2(0.8, -0.6, 0.6, 0.8) * wp / 31.0).r;
         float tdM1 = texture2D(tDetail, wp / 700.0).g, tdM2 = texture2D(tDetail, wp / 190.0).g;
@@ -199,6 +199,14 @@ function terrainDetailPatch(m: any) {
         vec3 scree = mix(vec3(0.36, 0.33, 0.29), vec3(0.5, 0.46, 0.4), tdG) * (0.75 + 0.5 * tdD2);
         c = mix(c, scree, smoothstep(0.14, 0.28, slope) * (1.0 - cliffK) * 0.75);
         c = mix(c, rockC, cliffK);
+        // snow: flat and gentle ground under a white blanket; cliffs stay
+        // rock with drifts caught on the ledges.
+        if (uSnow > 0.5) {
+          float lie = 1.0 - smoothstep(0.3, 0.6, slope);
+          vec3 snowC = vec3(0.86, 0.9, 0.96) * (0.9 + 0.1 * tdD1) * (0.95 + 0.05 * tdG);
+          snowC = mix(snowC, vec3(0.78, 0.83, 0.92), smoothstep(0.55, 0.8, tdM1) * 0.5);
+          c = mix(c, snowC, max(lie, cliffK * smoothstep(0.2, 0.6, ledge) * 0.7) * 0.96);
+        }
         // roads: plain asphalt with patches and cracks, gravel shoulders,
         // darker worn edges.
         vec4 rd = texture2D(tRoad, wp / vec2(2944.0, 2304.0));
@@ -210,6 +218,7 @@ function terrainDetailPatch(m: any) {
           asph = mix(asph, asph * 1.25 + vec3(0.03, 0.025, 0.0), smoothstep(0.4, 0.6, tdM1) * 0.35);
           asph *= 1.0 - 0.12 * smoothstep(0.75, 0.58, rd.r);
           vec3 grav = mix(vec3(0.42, 0.38, 0.31), vec3(0.3, 0.27, 0.22), tdG) * (0.85 + 0.3 * tdD2);
+          if (uSnow > 0.5) { asph = mix(asph, vec3(0.66, 0.69, 0.74) * (0.85 + 0.2 * tdG), 0.55); grav = mix(grav, vec3(0.8, 0.83, 0.88), 0.7); }
           c = mix(c, grav, sMask * 0.85);
           c = mix(c, asph, rMask);
         }
@@ -219,9 +228,9 @@ function terrainDetailPatch(m: any) {
 }
 function buildTerrainGL(){waterSDF();const e=[],t=[],r=[],n=[],a=e=>0,PALS=[GRASS,DIRT,WATER,ROCK],colBlend=(a,e,t)=>{const o=.62*tfbm(.0085*e,.0085*t,11)+.38*tfbm(.03*e,.03*t,29),s=Math.max(0,Math.min(a.length-1.001,o*(a.length-1))),i=0|s,l=Math.min(a.length-1,i+1),c=s-i,d=rgbOf(a[i]),f=rgbOf(a[l]);return[d[0]+(f[0]-d[0])*c,d[1]+(f[1]-d[1])*c,d[2]+(f[2]-d[2])*c]},cornerColor=(cx,cy)=>{let rr=0,gg=0,bb=0,cnt=0;const wx=32*cx,wy=32*cy;for(let dy=-1;dy<=0;dy++)for(let dx=-1;dx<=0;dx++){const xx=cx+dx,yy=cy+dy;if(xx<0||yy<0||xx>=92||yy>=72)continue;let nn=G.terr[idx(xx,yy)];nn=nn>3?3:nn;const col=colBlend(PALS[nn],wx,wy);rr+=col[0],gg+=col[1],bb+=col[2],cnt++}const tc=shoreTint(cx,cy,tintCorner(cx,cy,cnt?[rr/cnt,gg/cnt,bb/cnt]:[110,110,110]));let pv=0;if(G.pave)for(let dy=-1;dy<=0;dy++)for(let dx=-1;dx<=0;dx++){const xx=cx+dx,yy=cy+dy;xx>=0&&yy>=0&&xx<92&&yy<72&&G.pave[idx(xx,yy)]&&pv++}if(!pv)return tc;const k=.35*Math.min(1,pv/2.5),n=fbm(.7*cx+3,.7*cy-9,55)-.5,ar=86+14*n,ag=88+14*n,ab=86+12*n;return[tc[0]+(ar-tc[0])*k,tc[1]+(ag-tc[1])*k,tc[2]+(ab-tc[2])*k]},CCR=new Float32Array(93*73),CCG=new Float32Array(93*73),CCB=new Float32Array(93*73);for(let cy=0;cy<73;cy++)for(let cx=0;cx<93;cx++){const col=cornerColor(cx,cy),ci=93*cy+cx;CCR[ci]=col[0],CCG[ci]=col[1],CCB[ci]=col[2]}const getCorner=(cx,cy)=>{const ci=93*cy+cx;return[CCR[ci],CCG[ci],CCB[ci]]},s=(a,o,s,i,l,c,d,f)=>{e.push(a,o,s),t.push(i,l,c);const h=f*(.72+.32*(.62*tfbm(a/32*.34,s/32*.34,5)+.38*tfbm(a/32*1.15,s/32*1.15,17))),u="string"==typeof d?rgbOf(d):d;r.push(_s2l[Math.round(u[0])]*h,_s2l[Math.round(u[1])]*h,_s2l[Math.round(u[2])]*h),n.push(a/48,s/48)};for(let e=0;e<72;e++)for(let t=0;t<92;t++){const r=idx(t,e),n=G.terr[r];const l=a(n);const paved=G.pave&&G.pave[r];const flat=null;const cTL=flat||getCorner(t,e),cBL=flat||getCorner(t,e+1),cBR=flat||getCorner(t+1,e+1),cTR=flat||getCorner(t+1,e);const c=32*t,d=c+32,f=32*e,h=f+32;const bTL=cornerBump(t,e),bBL=cornerBump(t,e+1),bBR=cornerBump(t+1,e+1),bTR=cornerBump(t+1,e);const nTL=cornerNormal(t,e),nBL=cornerNormal(t,e+1),nBR=cornerNormal(t+1,e+1),nTR=cornerNormal(t+1,e);const dTL=seabedDip(t,e),dBL=seabedDip(t,e+1),dBR=seabedDip(t+1,e+1),dTR=seabedDip(t+1,e);s(c,l+bTL+dTL,f,nTL[0],nTL[1],nTL[2],cTL,1),s(c,l+bBL+dBL,h,nBL[0],nBL[1],nBL[2],cBL,1),s(d,l+bBR+dBR,h,nBR[0],nBR[1],nBR[2],cBR,1),s(c,l+bTL+dTL,f,nTL[0],nTL[1],nTL[2],cTL,1),s(d,l+bBR+dBR,h,nBR[0],nBR[1],nBR[2],cBR,1),s(d,l+bTR+dTR,f,nTR[0],nTR[1],nTR[2],cTR,1)}const i=new THREE.BufferGeometry;i.setAttribute("position",new THREE.Float32BufferAttribute(e,3)),i.setAttribute("normal",new THREE.Float32BufferAttribute(t,3)),i.setAttribute("color",new THREE.Float32BufferAttribute(r,3)),i.setAttribute("uv",new THREE.Float32BufferAttribute(n,2));const l=new THREE.MeshStandardMaterial({vertexColors:!0,roughness:.95,metalness:0,map:glNoiseTex()});l.map.repeat.set(1,1),fogPatch(l),terrainDetailPatch(l);const c=new THREE.Mesh(i,l);c.receiveShadow=!0,c.frustumCulled=!1,GL.scene.add(c),GL.terrain=c;{const wm=buildWaterGL();wm?(GL.scene.add(wm),GL.water=wm):GL.water=null}const f=new THREE.Mesh(new THREE.PlaneGeometry(14720,11520),new THREE.MeshBasicMaterial({color:725273}));f.rotation.x=-Math.PI/2,f.position.set(1472,-60,1152),f.frustumCulled=!1,GL.scene.add(f),GL.backdrop=f;buildSkirtGL(getCorner)}
 function buildSkirtGL(gc?){GL.skirt&&(GL.scene.remove(GL.skirt),GL.skirt.geometry.dispose());const W=2944,H=2304,EXT=1792,ST=64,x0=-EXT,z0=-EXT,nx=Math.round((W+2*EXT)/ST),nz=Math.round((H+2*EXT)/ST),V=(nx+1)*(nz+1),pos=new Float32Array(3*V),col=new Float32Array(3*V),dAt=(x,z)=>{const dx=x<0?-x:x>W?x-W:0,dz=z<0?-z:z>H?z-H:0;return Math.hypot(dx,dz)},sm=(a,b,v)=>{const t=Math.max(0,Math.min(1,(v-a)/(b-a)));return t*t*(3-2*t)},FOG=[11/255,17/255,25/255],props=[];
-for(let j=0;j<=nz;j++)for(let i=0;i<=nx;i++){const x=x0+i*ST,z=z0+j*ST,d=dAt(x,z),k=3*(j*(nx+1)+i),ecx=Math.max(0,Math.min(92,Math.round(x/32))),ecz=Math.max(0,Math.min(72,Math.round(z/32))),edgeH=cornerBump(ecx,ecz),n1=tfbm(.0022*x,.0022*z,71),n2=tfbm(.009*x,.009*z,83),hill=70+320*Math.pow(n1,1.4)+50*n2,s1=sm(0,380,d),fall=sm(1300,1800,d),h=d<=0?edgeH:edgeH*(1-s1)+hill*s1*(1-.85*fall)-40*fall;pos[k]=x,pos[k+1]=h,pos[k+2]=z;let r,g,b;const rockT=sm(120,260,hill*s1)+.3*sm(.55,.7,n2),forT=sm(.35,.6,tfbm(.006*x,.006*z,97))*(1-rockT);r=.29*(1-rockT)+.42*rockT,g=.4*(1-rockT)+.38*rockT,b=.2*(1-rockT)+.33*rockT,r=r*(1-.45*forT),g=g*(1-.3*forT),b=b*(1-.4*forT);const snow=sm(260,330,h);r+=(.86-r)*snow,g+=(.88-g)*snow,b+=(.9-b)*snow;const fz=sm(950,1750,d);r=Math.pow(r,2.2),g=Math.pow(g,2.2),b=Math.pow(b,2.2);if(gc){const ec=gc(ecx,ecz),eb=1-sm(0,220,d);r+=(.88*_s2l[Math.round(ec[0])]-r)*eb,g+=(.88*_s2l[Math.round(ec[1])]-g)*eb,b+=(.88*_s2l[Math.round(ec[2])]-b)*eb}const FL=[Math.pow(FOG[0],2.2),Math.pow(FOG[1],2.2),Math.pow(FOG[2],2.2)];col[k]=r+(FL[0]-r)*fz,col[k+1]=g+(FL[1]-g)*fz,col[k+2]=b+(FL[2]-b)*fz;if(d>40&&d<1100&&forT>.35&&rockT<.4&&tnoise(.05*x,.05*z,5)>.35)for(let t=0;t<2;t++){const px=x+(tnoise(.3*x,.3*z,t)-.5)*56,pz=z+(tnoise(.3*z,.3*x,t+9)-.5)*56;dAt(px,pz)>36&&props.push({kind:"tree",v:(i*7+j*3+t)%6,x:px,y:pz,z:h-1,r:tnoise(px,pz,3)*6.28})}}
+for(let j=0;j<=nz;j++)for(let i=0;i<=nx;i++){const x=x0+i*ST,z=z0+j*ST,d=dAt(x,z),k=3*(j*(nx+1)+i),ecx=Math.max(0,Math.min(92,Math.round(x/32))),ecz=Math.max(0,Math.min(72,Math.round(z/32))),edgeH=cornerBump(ecx,ecz),n1=tfbm(.0022*x,.0022*z,71),n2=tfbm(.009*x,.009*z,83),hill=70+320*Math.pow(n1,1.4)+50*n2,s1=sm(0,380,d),fall=sm(1300,1800,d),h=d<=0?edgeH:edgeH*(1-s1)+hill*s1*(1-.85*fall)-40*fall;pos[k]=x,pos[k+1]=h,pos[k+2]=z;let r,g,b;const rockT=sm(120,260,hill*s1)+.3*sm(.55,.7,n2),forT=sm(.35,.6,tfbm(.006*x,.006*z,97))*(1-rockT);r=.29*(1-rockT)+.42*rockT,g=.4*(1-rockT)+.38*rockT,b=.2*(1-rockT)+.33*rockT,r=r*(1-.45*forT),g=g*(1-.3*forT),b=b*(1-.4*forT);const snow=sm(260,330,h);r+=(.86-r)*snow,g+=(.88-g)*snow,b+=(.9-b)*snow;const fz=sm(950,1750,d);r=Math.pow(r,2.2),g=Math.pow(g,2.2),b=Math.pow(b,2.2);if(gc){const ec=gc(ecx,ecz),eb=1-sm(0,220,d);r+=(.88*_s2l[Math.round(ec[0])]-r)*eb,g+=(.88*_s2l[Math.round(ec[1])]-g)*eb,b+=(.88*_s2l[Math.round(ec[2])]-b)*eb}const FL=[Math.pow(FOG[0],2.2),Math.pow(FOG[1],2.2),Math.pow(FOG[2],2.2)];col[k]=r+(FL[0]-r)*fz,col[k+1]=g+(FL[1]-g)*fz,col[k+2]=b+(FL[2]-b)*fz;if(d>40&&d<1100&&forT>.35&&rockT<.4&&tnoise(.05*x,.05*z,5)>.35)for(let t=0;t<2;t++){const px=x+(tnoise(.3*x,.3*z,t)-.5)*56,pz=z+(tnoise(.3*z,.3*x,t+9)-.5)*56;dAt(px,pz)>36&&props.push({kind:"tree",v:G.snow?((i+j+t)%3?11:15):(i*7+j*3+t)%6,x:px,y:pz,z:h-1,r:tnoise(px,pz,3)*6.28})}}
 const idxs=[];for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const cx=x0+(i+.5)*ST,cz=z0+(j+.5)*ST;if(cx>0&&cx<W&&cz>0&&cz<H)continue;const a=j*(nx+1)+i,b=a+1,c=a+nx+1,d=c+1;idxs.push(a,c,b,b,c,d)}
-const geo=new THREE.BufferGeometry;geo.setAttribute("position",new THREE.BufferAttribute(pos,3)),geo.setAttribute("color",new THREE.BufferAttribute(col,3)),geo.setIndex(idxs),geo.computeVertexNormals();const mat=new THREE.MeshStandardMaterial({vertexColors:!0,roughness:.97,metalness:0,map:glNoiseTex()});fogPatch(mat);const m=new THREE.Mesh(geo,mat);m.receiveShadow=!0,m.frustumCulled=!1,GL.scene.add(m),GL.skirt=m,G.skirtProps=props}function glDisposeMesh(m){if(!m)return;GL.scene.remove(m),m.geometry&&m.geometry.dispose();const ms=Array.isArray(m.material)?m.material:[m.material];for(const t of ms)t&&(["map","bumpMap","normalMap"].forEach(k=>t[k]&&t[k].dispose()),t.dispose())}function rebuildTerrainGL(){GL&&(glDisposeMesh(GL.terrain),glDisposeMesh(GL.water),glDisposeMesh(GL.backdrop),GL.terrain=GL.water=GL.backdrop=null,buildTerrainGL())}function skySphere(){
+const geo=new THREE.BufferGeometry;geo.setAttribute("position",new THREE.BufferAttribute(pos,3)),geo.setAttribute("color",new THREE.BufferAttribute(col,3)),geo.setIndex(idxs),geo.computeVertexNormals();const mat=new THREE.MeshStandardMaterial({vertexColors:!0,roughness:.97,metalness:0,map:glNoiseTex()});fogPatch(mat),G.snow&&terrainDetailPatch(mat);const m=new THREE.Mesh(geo,mat);m.receiveShadow=!0,m.frustumCulled=!1,GL.scene.add(m),GL.skirt=m,G.skirtProps=props}function glDisposeMesh(m){if(!m)return;GL.scene.remove(m),m.geometry&&m.geometry.dispose();const ms=Array.isArray(m.material)?m.material:[m.material];for(const t of ms)t&&(["map","bumpMap","normalMap"].forEach(k=>t[k]&&t[k].dispose()),t.dispose())}function rebuildTerrainGL(){GL&&(glDisposeMesh(GL.terrain),glDisposeMesh(GL.water),glDisposeMesh(GL.backdrop),GL.terrain=GL.water=GL.backdrop=null,buildTerrainGL())}function skySphere(){
   const e=new THREE.SphereGeometry(4200,32,20),t=[],r=e.attributes.position;
   for(let i=0;i<r.count;i++){
     const y=Math.max(-1,Math.min(1,r.getY(i)/4200));
@@ -338,7 +347,7 @@ var MENU_CAM:any=null;function setMenuCam(c){MENU_CAM=c}
 // ---- tread marks: terrain decals laid along each vehicle's path. One
 // instanced mesh, a ring buffer of segments; each quad is tilted to the
 // ground under it and multiplies the terrain darker, fading with age.
-const TRK = { n: 2400, i: 0, mesh: null as any, fade: null as any, born: new Float32Array(2400), life: new Float32Array(2400), dirty: !1, lastT: 0 };
+const TRK = { n: 4000, i: 0, mesh: null as any, fade: null as any, born: new Float32Array(4000), life: new Float32Array(4000), dirty: !1, lastT: 0 };
 const _tkM = new THREE.Matrix4(), _tkX = new THREE.Vector3(), _tkY = new THREE.Vector3(), _tkZ = new THREE.Vector3();
 function trackMark(x: number, y: number, ang: number, w: number, l: number, life: number) {
   if (!GL || !GL.scene) { S.fx.push({ kind: "track", x, y, ang, w: .5 * w, l: .5 * l, t: 0, life: Math.min(life, 5) }); return; }
@@ -361,7 +370,8 @@ function glTrackInit() {
   g.setAttribute("aFade", fade);
   const m = new THREE.ShaderMaterial({
     vertexShader: "attribute float aFade;varying float vF;varying vec2 vUv;void main(){vF=aFade;vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*instanceMatrix*vec4(position,1.0);}",
-    fragmentShader: "varying float vF;varying vec2 vUv;void main(){float bar=0.55+0.45*step(0.45,fract(vUv.x*5.0));float edge=smoothstep(0.0,0.22,vUv.y)*smoothstep(1.0,0.78,vUv.y);float d=0.44*bar*edge*vF;gl_FragColor=vec4(vec3(1.0-d),1.0);}",
+    uniforms: { uSnow: { value: 0 } },
+    fragmentShader: "uniform float uSnow;varying float vF;varying vec2 vUv;void main(){float bar=mix(0.55+0.45*step(0.45,fract(vUv.x*5.0)),1.0,uSnow*0.6);float edge=smoothstep(0.0,0.22,vUv.y)*smoothstep(1.0,0.78,vUv.y);float d=mix(0.44,0.5,uSnow)*bar*edge*vF;vec3 tint=mix(vec3(1.0),vec3(0.95,0.88,0.7),uSnow);gl_FragColor=vec4(vec3(1.0)-d*tint,1.0);}",
     transparent: !0, depthWrite: !1, blending: THREE.CustomBlending, blendSrc: THREE.ZeroFactor, blendDst: THREE.SrcColorFactor, blendEquation: THREE.AddEquation,
     polygonOffset: !0, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
   });
@@ -374,15 +384,38 @@ function glTrackUpdate() {
   if (!TRK.mesh) return;
   if (S.time < TRK.lastT - 1) TRK.mesh.count = 0, TRK.i = 0; // new game
   TRK.lastT = S.time;
+  TRK.mesh.material.uniforms.uSnow.value = G.snow ? 1 : 0;
   if (TRK.mesh.parent !== GL.scene) GL.scene.add(TRK.mesh);
   const a = TRK.fade.array, n = TRK.mesh.count;
   for (let k = 0; k < n; k++) { const age = (S.time - TRK.born[k]) / (TRK.life[k] || 1); a[k] = age >= 1 ? 0 : age < .7 ? 1 : 1 - (age - .7) / .3; }
   TRK.fade.needsUpdate = !0;
   if (TRK.dirty) TRK.mesh.instanceMatrix.needsUpdate = !0, TRK.dirty = !1;
 }
+
+// ---- snowfall: a drifting field of flakes kept centred on the view.
+const SNOWF = { pts: null as any, pos: null as any, n: 2600, ph: null as any };
+function glSnowFall(on: boolean, cx: number, cy: number) {
+  if (!on) { SNOWF.pts && (SNOWF.pts.visible = !1); return; }
+  if (!SNOWF.pts) {
+    const g = new THREE.BufferGeometry(), p = new Float32Array(3 * SNOWF.n); SNOWF.ph = new Float32Array(SNOWF.n);
+    for (let i = 0; i < SNOWF.n; i++) p[3 * i] = rnd(-900, 900), p[3 * i + 1] = rnd(0, 900), p[3 * i + 2] = rnd(-900, 900), SNOWF.ph[i] = 6.283 * Math.random();
+    g.setAttribute("position", new THREE.BufferAttribute(p, 3));
+    const m = new THREE.PointsMaterial({ color: 0xffffff, size: 2.6, sizeAttenuation: !1, transparent: !0, opacity: .85, depthWrite: !1, fog: !1 });
+    SNOWF.pts = new THREE.Points(g, m), SNOWF.pts.frustumCulled = !1, SNOWF.pos = p;
+  }
+  SNOWF.pts.parent !== GL.scene && GL.scene.add(SNOWF.pts);
+  SNOWF.pts.visible = !0, SNOWF.pts.position.set(cx, 0, cy);
+  const p = SNOWF.pos, T = S.time, fall = 55 * RDT;
+  for (let i = 0; i < SNOWF.n; i++) {
+    const k = 3 * i; p[k + 1] -= fall * (.7 + .6 * (i % 7) / 7);
+    p[k] += Math.sin(.9 * T + SNOWF.ph[i]) * 18 * RDT + 10 * RDT, p[k + 2] += Math.cos(.7 * T + SNOWF.ph[i]) * 14 * RDT;
+    p[k + 1] < 0 && (p[k + 1] += 900); p[k] > 900 && (p[k] -= 1800); p[k] < -900 && (p[k] += 1800); p[k + 2] > 900 && (p[k + 2] -= 1800); p[k + 2] < -900 && (p[k + 2] += 1800);
+  }
+  SNOWF.pts.geometry.attributes.position.needsUpdate = !0;
+}
 function renderGL(){fpsGfxPre();glTrackUpdate();GL.waterU&&(GL.waterU.value=S.time);if(GL.water){const wm=GL.water.material;wm.map&&(wm.map.offset.x=.015*S.time,wm.map.offset.y=.006*S.time),wm.bumpMap&&(wm.bumpMap.offset.x=-.03*S.time,wm.bumpMap.offset.y=.012*S.time)}let e,t,r;if(FPS.on&&FPS.u)cam.x=FPS.u.x,cam.y=FPS.u.y,e=fpsRender(),t=r=620;else if(MENU_CAM)e=MENU_CAM,t=r=2600;else{e=GL.camera,t=CW/(GL_SX*cam.z)/2,r=CH/(GL_SY*cam.z)/2,e.left=-t,e.right=t,e.top=r,e.bottom=-r;const n=cam.x,a=cam.y;e.position.set(n+3200*GL_F[0],3200*GL_F[1],a+3200*GL_F[2]),e.lookAt(n,0,a),e.updateProjectionMatrix()}const n=cam.x,a=cam.y;GL.sky&&(GL.sky.position.set(n,0,a),GL.sky.rotation.y=.0035*S.time);
 const dph=S.time%DAY_LEN/DAY_LEN,elev=1.15*Math.sin(6.283*dph),ce=Math.cos(elev),se=Math.sin(elev),bmag=859,ux=-495/bmag,uz=-702/bmag,sdx=bmag*ce*ux,sdz=bmag*ce*uz,sdy=700*se,dayF=Math.max(0,se),nightF=Math.max(0,-se);
-const wMood=S.weather||"clear",isRain="rain"===wMood,wAmt="clear"===wMood?0:isRain?.85:.55;
+const wMood=S.weather||"clear",isRain="rain"===wMood,isSnow="snow"===wMood,wAmt="clear"===wMood?0:isRain?.85:isSnow?.45:.55;glSnowFall(isSnow,n,a);
 GL.sun.color.copy(_dawnCol).lerp(_noonCol,Math.min(1,dayF/.9)),GL.sun.intensity=(.05+dayF*2.05)*(1-.55*wAmt);
 GL.hemi.intensity=.1+.5*dayF+.05*nightF,GL.hemi.color.copy(_hemiDay).lerp(_hemiNight,nightF),GL.hemi.groundColor.copy(_hemiGroundDay).lerp(_hemiGroundNight,nightF);
 wAmt>0&&(GL.hemi.color.lerp(isRain?_hemiRain:_hemiOver,wAmt),GL.hemi.groundColor.lerp(isRain?_hemiGroundRain:_hemiGroundOver,wAmt));

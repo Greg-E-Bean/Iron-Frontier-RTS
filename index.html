@@ -1088,7 +1088,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function fbm(e, t, r) {
     return 0.6 * vnoise(e, t, r) + 0.3 * vnoise(2.3 * e, 2.3 * t, r + 9) + 0.1 * vnoise(5.1 * e, 5.1 * t, r + 17);
   }
-  var MAPS = [{ k: "basin", n: "IRON BASIN", s: "Twin lakes, corner bases", mp: 4 }, { k: "divide", n: "THE DIVIDE", s: "River, two crossings", mp: 4 }, { k: "high", n: "HIGHLANDS", s: "Rock chokepoints", mp: 4 }, { k: "dust", n: "DUSTBOWL", s: "Open ground, rich centre", mp: 4 }, { k: "lakes", n: "BROKEN LAKES", s: "Winding water", mp: 4 }, { k: "line", n: "FIRING LINE", s: "One pass, mirrored flanks", mp: 4 }, { k: "ring", n: "IRON RING", s: "Crater wall, rich core", mp: 4 }, { k: "city", n: "METRO SPRAWL", s: "8-way river metropolis \u2014 plazas, alleys, hill districts, tight ore", mp: 8 }, { k: "islands", n: "ARCHIPELAGO", s: "Scattered islands, no land bridges \u2014 naval & air only", mp: 4 }, { k: "atoll", n: "URBAN ATOLL", s: "Island townships linked by sea", mp: 4 }, { k: "harbor", n: "HARBOR SPRAWL", s: "River city, two bridge crossings", mp: 4 }, { k: "grand", n: "GRAND CROSSING", s: "Cross-river metropolis, four bridges, hill forts, capturable cannons", mp: 4 }, { k: "octagon", n: "OCTAGON FRONT", s: "Eight-way scramble, open lanes, contested high ground", mp: 8 }, { k: "bastion", n: "THE BASTION", s: "Highland forts, ramps to the peaks, one gate per base", mp: 6 }, { k: "boomtown", n: "BOOMTOWN", s: "Ore-choked plains, abundant deposits, fast economy", mp: 6 }, { k: "random", n: "RANDOM", s: "Surprise me", mp: 4 }];
+  var MAPS = [{ k: "basin", n: "IRON BASIN", s: "Twin lakes, corner bases", mp: 4 }, { k: "divide", n: "THE DIVIDE", s: "River, two crossings", mp: 4 }, { k: "high", n: "HIGHLANDS", s: "Rock chokepoints", mp: 4 }, { k: "dust", n: "DUSTBOWL", s: "Open ground, rich centre", mp: 4 }, { k: "lakes", n: "BROKEN LAKES", s: "Winding water", mp: 4 }, { k: "line", n: "FIRING LINE", s: "One pass, mirrored flanks", mp: 4 }, { k: "ring", n: "IRON RING", s: "Crater wall, rich core", mp: 4 }, { k: "city", n: "METRO SPRAWL", s: "8-way river metropolis \u2014 plazas, alleys, hill districts, tight ore", mp: 8 }, { k: "islands", n: "ARCHIPELAGO", s: "Scattered islands, no land bridges \u2014 naval & air only", mp: 4 }, { k: "atoll", n: "URBAN ATOLL", s: "Island townships linked by sea", mp: 4 }, { k: "harbor", n: "HARBOR SPRAWL", s: "River city, two bridge crossings", mp: 4 }, { k: "grand", n: "GRAND CROSSING", s: "Cross-river metropolis, four bridges, hill forts, capturable cannons", mp: 4 }, { k: "octagon", n: "OCTAGON FRONT", s: "Eight-way scramble, open lanes, contested high ground", mp: 8 }, { k: "bastion", n: "THE BASTION", s: "Highland forts, ramps to the peaks, one gate per base", mp: 6 }, { k: "boomtown", n: "BOOMTOWN", s: "Ore-choked plains, abundant deposits, fast economy", mp: 6 }, { k: "frost", n: "FROZEN PASS", s: "Snowbound valley, iced river \u2014 every step leaves a trail", mp: 4 }, { k: "random", n: "RANDOM", s: "Surprise me", mp: 4 }];
   function baseTerrain(e, t) {
     G.flatCorner.fill(0), G.flatCornerSet.fill(0);
     for (let r = 0; r < 72; r++) for (let n = 0; n < 92; n++) {
@@ -1383,13 +1383,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var CUSTOM_MAPS = {};
   function loadStaticMap(data, mapKey) {
-    G.map = mapKey, G.trees = [], S.traffic = [], G.roadLines = [];
+    G.map = mapKey, G.trees = [], S.traffic = [], G.roadLines = [], G.snow = data.snow || 0;
     G.flatCorner.fill(0), G.flatCornerSet.fill(0);
     G.terr = unpackArr(data.terr, Uint8Array, 6624), G.ore = unpackArr(data.ore, Float32Array, 6624), G.tib = data.tib ? unpackArr(data.tib, Uint8Array, 6624) : new Uint8Array(6624), G.blk = data.blk ? unpackArr(data.blk, Uint8Array, 6624) : new Uint8Array(6624), G.pave = data.pave ? unpackArr(data.pave, Uint8Array, 6624) : new Uint8Array(6624), G.elevOverride = data.elevOverride ? unpackArr(data.elevOverride, Float32Array, 6624) : new Float32Array(6624);
     G.occ = new Int32Array(6624), G.vis = new Uint8Array(6624), G.tint = new Uint8Array(6624);
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) G.tint[idx(x, y)] = Math.floor(7.999 * fbm(0.16 * x + 3 * G.seed, 0.16 * y, G.seed + 5));
     G.bridge = data.bridge ? unpackArr(data.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = data.bridgeHp ? unpackArr(data.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = data.bridgeSite ? unpackArr(data.bridgeSite, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHoriz = data.bridgeHoriz ? unpackArr(data.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624);
-    G.roadLines = data.roadLines || [], G.civ = (data.civ || []).map((c) => c.slice()), G.special = (data.special || []).map((c) => c.slice()), G.props = (data.props || []).map((p) => Object.assign({}, p)), G.oreSpots = (data.oreSpots || []).map((o) => Object.assign({}, o)), G.fall = [];
+    G.roadLines = data.roadLines || [], G.snow = data.snow || 0, G.civ = (data.civ || []).map((c) => c.slice()), G.special = (data.special || []).map((c) => c.slice()), G.props = (data.props || []).map((p) => Object.assign({}, p)), G.oreSpots = (data.oreSpots || []).map((o) => Object.assign({}, o)), G.fall = [];
     G.spots = (data.spots && data.spots.length ? data.spots : [[13, 13], [76, 56]]).map((s) => s.slice());
     computeMtnShore();
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) G.elev[idx(x, y)] = heightAt(32 * x + 16, 32 * y + 16);
@@ -1815,7 +1815,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     let r = t || "basin";
     "random" === r && (r = MAPS[Math.floor(Math.random() * (MAPS.length - 1))].k);
     if (CUSTOM_MAPS[r]) return void loadStaticMap(CUSTOM_MAPS[r], r);
-    G.map = r, G.trees = [], G.civ = [], G.oreSpots = [], S.traffic = [];
+    G.map = r, G.snow = "frost" === r ? 1 : 0, G.trees = [], G.civ = [], G.oreSpots = [], S.traffic = [];
     let n = [[13, 13], [76, 56]], a = [], o = [];
     if ("divide" === r) baseTerrain(e, 0.46), ridge(46, -4, 46, 76, 4.4, 2, 16, e), bridge(46, 18.72, 16, 9), bridge(46, 53.28, 16, 9), blob(46, 36, 5, 3), blob(92 * 0.2, 72 * 0.18, 4, 3), blob(92 * 0.8, 59.04, 4, 3), n = [[10, Math.round(36) - 6], [78, Math.round(36) - 6]], a = [[12, 14], [12, 56], [78, 14], [78, 56], [92 * 0.3, 36], [92 * 0.7, 36]], o = [[46, 18.72], [46, 53.28]];
     else if ("high" === r) {
@@ -1878,7 +1878,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const walls = [[57.5, 20.4], [69, 36], [57.5, 51.6], [34.5, 51.6], [23, 36], [34.5, 20.4]];
       for (const [wx, wy] of walls) blob(wx, wy, 7, 3);
       blob(46, 36, 4, 1), hillRoad(57.5, 20.4, 7), hillRoad(34.5, 51.6, 7), n = [[46, 12], [72, 24], [72, 48], [46, 60], [20, 48], [20, 24]], a = [[46, 19], [65, 27], [65, 44], [46, 53], [27, 44], [27, 27]], o = [[46, 36]];
-    } else if ("boomtown" === r) baseTerrain(e, 0.32), n = [[46, 9], [75, 23], [75, 50], [46, 63], [17, 50], [17, 23]], a = [[46, 16], [68, 26], [68, 46], [46, 56], [24, 46], [24, 26]], o = [[53, 27], [60, 36], [53, 46], [39, 46], [32, 36], [39, 27]], oreField(46, 36, 7, 2200, 1), oreField(60, 20, 4, 1800, 2), oreField(32, 52, 4, 1800, 2), oreField(20, 36, 4, 1600, 1), oreField(72, 36, 4, 1600, 1), oreField(46, 58, 4, 1600, 2), oreField(46, 14, 4, 1600, 2);
+    } else if ("frost" === r) baseTerrain(e, 0.5), ridge(-4, 38, 96, 34, 2.2, 2, 12, e), bridge(30, 36, 6, 12), bridge(62, 35, 6, 12), ridge(4, -4, 22, 24, 3.2, 3, 8, e + 3), ridge(88, 76, 70, 48, 3.2, 3, 8, e + 5), ridge(40, 6, 54, 14, 2.2, 3, 6, e + 7), ridge(38, 66, 52, 58, 2.2, 3, 6, e + 9), blob(80, 10, 4, 3), blob(12, 62, 4, 3), blob(46, 24, 2, 2), blob(46, 48, 2, 2), n = [[10, 14], [76, 52]], a = [[24, 22], [68, 50], [20, 52], [72, 20]], o = [[46, 26], [46, 46]];
+    else if ("boomtown" === r) baseTerrain(e, 0.32), n = [[46, 9], [75, 23], [75, 50], [46, 63], [17, 50], [17, 23]], a = [[46, 16], [68, 26], [68, 46], [46, 56], [24, 46], [24, 26]], o = [[53, 27], [60, 36], [53, 46], [39, 46], [32, 36], [39, 27]], oreField(46, 36, 7, 2200, 1), oreField(60, 20, 4, 1800, 2), oreField(32, 52, 4, 1800, 2), oreField(20, 36, 4, 1600, 1), oreField(72, 36, 4, 1600, 1), oreField(46, 58, 4, 1600, 2), oreField(46, 14, 4, 1600, 2);
     else baseTerrain(e, 0.5), blob(46, 15.84, 7, 2), blob(46, 72 * 0.78, 7, 2), blob(25.76, 44.64, 6, 3), blob(66.24, 27.36, 6, 3), blob(12.88, 14.4, 3, 3), blob(79.12, 57.6, 3, 3), ridge(62, 44, 70, 56, 2.2, 3, 7, e + 11), ridge(30, 16, 22, 28, 2.2, 3, 7, e + 13), n = [[13, 13], [76, 56]], a = [[14, 14], [78, 58], [20, 52], [72, 20], [30, 36], [62, 36]], o = [[46, 36], [46, 22], [46, 50]];
     if (2 === n.length) {
       const cx = 46, cy = 36, rot = (e2) => [clamp(Math.round(cx - (e2[1] - cy)), 6, 85), clamp(Math.round(cy + (e2[0] - cx)), 6, 65)];
@@ -1967,7 +1968,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function addProp(e, t, r, n) {
     const a = idx(t, r);
-    n && (G.blk[a] = 1), G.props.push({ tx: t, ty: r, kind: e, x: 32 * t + 8 + 16 * Math.random(), y: 32 * r + 8 + 16 * Math.random(), r: 6.283 * Math.random(), s: 0.82 + 0.42 * Math.random(), v: "tree" === e ? Math.random() < 0.08 ? 3 : pick([0, 1, 2, 4, 5, 6, 7]) : 4 * Math.random() | 0 });
+    n && (G.blk[a] = 1), G.props.push({ tx: t, ty: r, kind: e, x: 32 * t + 8 + 16 * Math.random(), y: 32 * r + 8 + 16 * Math.random(), r: 6.283 * Math.random(), s: 0.82 + 0.42 * Math.random(), v: "tree" === e ? G.snow ? pick([11, 11, 15]) : Math.random() < 0.08 ? 3 : pick([0, 1, 2, 4, 5, 6, 7]) : 4 * Math.random() | 0 });
   }
   function scatterScenery(mapKey, spawns) {
     G.props = [];
@@ -2014,6 +2015,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let i = 0; i < gN; i++) {
       const cx = irnd(2, 89), cy = irnd(2, 69);
       if (!freeTile(cx, cy) || 0 !== G.terr[idx(cx, cy)] || nearSpawn(cx, cy, 6)) continue;
+      if (G.snow) continue;
       const k = Math.random() < 0.18 ? "flower" : "grass";
       for (let j = 0; j < 1 + irnd(0, 2); j++) {
         const tx = cx + irnd(-1, 1), ty = cy + irnd(-1, 1);
@@ -2920,7 +2922,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var NO_TREAD = /hover|lasher|gattling|mastermind|shard|spore|cultivator|titan_allied|titan_yuri|terror|rift|drone/;
   function trackPair(e) {
-    if (NO_TREAD.test(e.key)) return;
+    if (!G.snow && NO_TREAD.test(e.key)) return;
     const L = e.lastTrk;
     if (L && Math.hypot(e.x - L.x, e.y - L.y) < 7) return;
     e.lastTrk = { x: e.x, y: e.y };
@@ -2928,7 +2930,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const dx = e.x - L.x, dy = e.y - L.y, len = Math.hypot(dx, dy);
     if (len > 40) return;
     const a = Math.atan2(dy, dx), r = e.d.radius, off = 0.48 * r, w = Math.max(3, 0.3 * r), mx = (e.x + L.x) / 2, my = (e.y + L.y) / 2;
-    for (const sd of [-1, 1]) trackMark(mx - Math.sin(a) * off * sd, my + Math.cos(a) * off * sd, a, w, len + 1.5, 16);
+    for (const sd of [-1, 1]) trackMark(mx - Math.sin(a) * off * sd, my + Math.cos(a) * off * sd, a, G.snow ? 1.25 * w : w, len + 1.5, G.snow ? 50 : 16);
+  }
+  function footStep(e) {
+    const L = e.lastStep;
+    if (L && Math.hypot(e.x - L.x, e.y - L.y) < 6.5) return;
+    const a = L ? Math.atan2(e.y - L.y, e.x - L.x) : e.ang;
+    e.lastStep = { x: e.x, y: e.y, s: L ? -L.s : 1 };
+    if (!L) return;
+    const s = e.lastStep.s;
+    trackMark(e.x - Math.sin(a) * 1.6 * s, e.y + Math.cos(a) * 1.6 * s, a, 2.2, 3.4, 40);
+  }
+  function snowTrails() {
+    if (!G.snow) return;
+    for (const u of S.units) {
+      if (u.dead || u.inside || u.d.fly || u.d.naval || (u.alt || 0) > 2 || !u.moving) continue;
+      "inf" === u.d.kind && footStep(u);
+    }
   }
   function tickUnit(e, t) {
     if (e.dead) return;
@@ -3510,6 +3528,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    snowTrails,
+    footStep,
     NO_TREAD,
     trackPair,
     canInfiltrate,
@@ -6223,16 +6243,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       for (const [x, y, z] of tops) blobs(3, x, y, z + 2, 3.5, 3, cols, 5.2);
       blobs(5, 0, 0, 26, 5, 4, cols, 6.4);
       blobs(3, 0, 0, 31, 2.6, 2, 7 === e ? ["gold", "autumn"] : ["green3", "green"], 4.4);
-    } else if (1 === e || 5 === e) {
-      const big = 1 === e, H = big ? 34 : 22;
+    } else if (1 === e % 10 || 5 === e % 10) {
+      const big = 1 === e % 10, H = big ? 34 : 22, snowy = e >= 10;
       trunk(H * 0.9, big ? 2.2 : 1.6, 0.7, 0);
       const n = big ? 6 : 4;
       for (let k = 0; k < n; k++) {
         const f = k / (n - 1), r = (big ? 12.5 : 9) * (1 - 0.72 * f) + 1, z = (big ? 7 : 5) + f * (H - 8), ox = (R(k) - 0.5) * 1.2, oy = (R(k + 5) - 0.5) * 1.2;
         t.push(P_(CONE(r * 1.04, r * 0.8, 1.6, 11), ox, oy, z - 1.2, "green2"));
         t.push(P_(CONE(r, r * 0.22, big ? 8 : 6.5, 11), ox, oy, z, "pine"));
+        snowy && t.push(P_(CONE(r * 0.86, r * 0.2, big ? 5.6 : 4.6, 11), ox, oy, z + 1.2, "white"));
       }
-      t.push(P_(CONE(big ? 2.6 : 2, 0.2, big ? 6 : 4.5, 8), 0, 0, H - 1, "pine"));
+      t.push(P_(CONE(big ? 2.6 : 2, 0.2, big ? 6 : 4.5, 8), 0, 0, H - 1, snowy ? "white" : "pine"));
     } else if (2 === e) {
       trunk(8, 3, 2.2, 1.6, 0.4);
       taper3(t, 1.2, 0.2, 7, -3.5, 2.5, 13, 1.4, 0.8, bark);
@@ -9394,6 +9415,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     else if (3 === t) c = [92, 95, 102];
     else if (1 === t) c = [130, 114, 80];
     else c = [72, 102, 62];
+    G.snow && 2 !== t && !(G.bridge && G.bridge[i] > 0) && (c = G.pave && G.pave[i] > 0 ? [168, 174, 184] : 3 === t ? [128, 132, 140] : 1 === t ? [214, 220, 230] : [228, 234, 242]);
     if (m > 0.04 && 2 !== t) {
       const k = Math.min(1, 1.3 * m);
       c = [c[0] + (118 - c[0]) * k, c[1] + (108 - c[1]) * k, c[2] + (96 - c[2]) * k];
@@ -11041,8 +11063,9 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
       prev && prev(sh, r);
       sh.uniforms.tDetail = { value: tex };
       sh.uniforms.tRoad = { value: rtex };
+      sh.uniforms.uSnow = { value: G.snow ? 1 : 0 };
       sh.vertexShader = "varying vec3 vTN;\n" + sh.vertexShader.replace("#include <beginnormal_vertex>", "#include <beginnormal_vertex>\nvTN = objectNormal;");
-      sh.fragmentShader = "uniform sampler2D tDetail;\nuniform sampler2D tRoad;\nvarying vec3 vTN;\n" + sh.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+      sh.fragmentShader = "uniform sampler2D tDetail;\nuniform sampler2D tRoad;\nuniform float uSnow;\nvarying vec3 vTN;\n" + sh.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
       { vec2 wp = vWorldFog.xz;
         float tdD1 = texture2D(tDetail, wp / 96.0).r, tdD2 = texture2D(tDetail, mat2(0.8, -0.6, 0.6, 0.8) * wp / 31.0).r;
         float tdM1 = texture2D(tDetail, wp / 700.0).g, tdM2 = texture2D(tDetail, wp / 190.0).g;
@@ -11077,6 +11100,14 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
         vec3 scree = mix(vec3(0.36, 0.33, 0.29), vec3(0.5, 0.46, 0.4), tdG) * (0.75 + 0.5 * tdD2);
         c = mix(c, scree, smoothstep(0.14, 0.28, slope) * (1.0 - cliffK) * 0.75);
         c = mix(c, rockC, cliffK);
+        // snow: flat and gentle ground under a white blanket; cliffs stay
+        // rock with drifts caught on the ledges.
+        if (uSnow > 0.5) {
+          float lie = 1.0 - smoothstep(0.3, 0.6, slope);
+          vec3 snowC = vec3(0.86, 0.9, 0.96) * (0.9 + 0.1 * tdD1) * (0.95 + 0.05 * tdG);
+          snowC = mix(snowC, vec3(0.78, 0.83, 0.92), smoothstep(0.55, 0.8, tdM1) * 0.5);
+          c = mix(c, snowC, max(lie, cliffK * smoothstep(0.2, 0.6, ledge) * 0.7) * 0.96);
+        }
         // roads: plain asphalt with patches and cracks, gravel shoulders,
         // darker worn edges.
         vec4 rd = texture2D(tRoad, wp / vec2(2944.0, 2304.0));
@@ -11088,6 +11119,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
           asph = mix(asph, asph * 1.25 + vec3(0.03, 0.025, 0.0), smoothstep(0.4, 0.6, tdM1) * 0.35);
           asph *= 1.0 - 0.12 * smoothstep(0.75, 0.58, rd.r);
           vec3 grav = mix(vec3(0.42, 0.38, 0.31), vec3(0.3, 0.27, 0.22), tdG) * (0.85 + 0.3 * tdD2);
+          if (uSnow > 0.5) { asph = mix(asph, vec3(0.66, 0.69, 0.74) * (0.85 + 0.2 * tdG), 0.55); grav = mix(grav, vec3(0.8, 0.83, 0.88), 0.7); }
           c = mix(c, grav, sMask * 0.85);
           c = mix(c, asph, rMask);
         }
@@ -11186,7 +11218,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
       col[k] = r + (FL[0] - r) * fz, col[k + 1] = g + (FL[1] - g) * fz, col[k + 2] = b + (FL[2] - b) * fz;
       if (d > 40 && d < 1100 && forT > 0.35 && rockT < 0.4 && tnoise(0.05 * x, 0.05 * z, 5) > 0.35) for (let t = 0; t < 2; t++) {
         const px = x + (tnoise(0.3 * x, 0.3 * z, t) - 0.5) * 56, pz = z + (tnoise(0.3 * z, 0.3 * x, t + 9) - 0.5) * 56;
-        dAt(px, pz) > 36 && props.push({ kind: "tree", v: (i * 7 + j * 3 + t) % 6, x: px, y: pz, z: h - 1, r: tnoise(px, pz, 3) * 6.28 });
+        dAt(px, pz) > 36 && props.push({ kind: "tree", v: G.snow ? (i + j + t) % 3 ? 11 : 15 : (i * 7 + j * 3 + t) % 6, x: px, y: pz, z: h - 1, r: tnoise(px, pz, 3) * 6.28 });
       }
     }
     const idxs = [];
@@ -11199,7 +11231,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)), geo.setAttribute("color", new THREE.BufferAttribute(col, 3)), geo.setIndex(idxs), geo.computeVertexNormals();
     const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97, metalness: 0, map: glNoiseTex() });
-    fogPatch(mat);
+    fogPatch(mat), G.snow && terrainDetailPatch(mat);
     const m = new THREE.Mesh(geo, mat);
     m.receiveShadow = true, m.frustumCulled = false, GL.scene.add(m), GL.skirt = m, G.skirtProps = props;
   }
@@ -11367,7 +11399,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
   function setMenuCam(c) {
     MENU_CAM = c;
   }
-  var TRK = { n: 2400, i: 0, mesh: null, fade: null, born: new Float32Array(2400), life: new Float32Array(2400), dirty: false, lastT: 0 };
+  var TRK = { n: 4e3, i: 0, mesh: null, fade: null, born: new Float32Array(4e3), life: new Float32Array(4e3), dirty: false, lastT: 0 };
   var _tkM = new THREE.Matrix4();
   var _tkX = new THREE.Vector3();
   var _tkY = new THREE.Vector3();
@@ -11397,7 +11429,8 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     g.setAttribute("aFade", fade);
     const m = new THREE.ShaderMaterial({
       vertexShader: "attribute float aFade;varying float vF;varying vec2 vUv;void main(){vF=aFade;vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*instanceMatrix*vec4(position,1.0);}",
-      fragmentShader: "varying float vF;varying vec2 vUv;void main(){float bar=0.55+0.45*step(0.45,fract(vUv.x*5.0));float edge=smoothstep(0.0,0.22,vUv.y)*smoothstep(1.0,0.78,vUv.y);float d=0.44*bar*edge*vF;gl_FragColor=vec4(vec3(1.0-d),1.0);}",
+      uniforms: { uSnow: { value: 0 } },
+      fragmentShader: "uniform float uSnow;varying float vF;varying vec2 vUv;void main(){float bar=mix(0.55+0.45*step(0.45,fract(vUv.x*5.0)),1.0,uSnow*0.6);float edge=smoothstep(0.0,0.22,vUv.y)*smoothstep(1.0,0.78,vUv.y);float d=mix(0.44,0.5,uSnow)*bar*edge*vF;vec3 tint=mix(vec3(1.0),vec3(0.95,0.88,0.7),uSnow);gl_FragColor=vec4(vec3(1.0)-d*tint,1.0);}",
       transparent: true,
       depthWrite: false,
       blending: THREE.CustomBlending,
@@ -11417,6 +11450,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     if (!TRK.mesh) return;
     if (S.time < TRK.lastT - 1) TRK.mesh.count = 0, TRK.i = 0;
     TRK.lastT = S.time;
+    TRK.mesh.material.uniforms.uSnow.value = G.snow ? 1 : 0;
     if (TRK.mesh.parent !== GL.scene) GL.scene.add(TRK.mesh);
     const a = TRK.fade.array, n = TRK.mesh.count;
     for (let k = 0; k < n; k++) {
@@ -11425,6 +11459,35 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     }
     TRK.fade.needsUpdate = true;
     if (TRK.dirty) TRK.mesh.instanceMatrix.needsUpdate = true, TRK.dirty = false;
+  }
+  var SNOWF = { pts: null, pos: null, n: 2600, ph: null };
+  function glSnowFall(on, cx, cy) {
+    if (!on) {
+      SNOWF.pts && (SNOWF.pts.visible = false);
+      return;
+    }
+    if (!SNOWF.pts) {
+      const g = new THREE.BufferGeometry(), p2 = new Float32Array(3 * SNOWF.n);
+      SNOWF.ph = new Float32Array(SNOWF.n);
+      for (let i = 0; i < SNOWF.n; i++) p2[3 * i] = rnd(-900, 900), p2[3 * i + 1] = rnd(0, 900), p2[3 * i + 2] = rnd(-900, 900), SNOWF.ph[i] = 6.283 * Math.random();
+      g.setAttribute("position", new THREE.BufferAttribute(p2, 3));
+      const m = new THREE.PointsMaterial({ color: 16777215, size: 2.6, sizeAttenuation: false, transparent: true, opacity: 0.85, depthWrite: false, fog: false });
+      SNOWF.pts = new THREE.Points(g, m), SNOWF.pts.frustumCulled = false, SNOWF.pos = p2;
+    }
+    SNOWF.pts.parent !== GL.scene && GL.scene.add(SNOWF.pts);
+    SNOWF.pts.visible = true, SNOWF.pts.position.set(cx, 0, cy);
+    const p = SNOWF.pos, T = S.time, fall = 55 * RDT;
+    for (let i = 0; i < SNOWF.n; i++) {
+      const k = 3 * i;
+      p[k + 1] -= fall * (0.7 + 0.6 * (i % 7) / 7);
+      p[k] += Math.sin(0.9 * T + SNOWF.ph[i]) * 18 * RDT + 10 * RDT, p[k + 2] += Math.cos(0.7 * T + SNOWF.ph[i]) * 14 * RDT;
+      p[k + 1] < 0 && (p[k + 1] += 900);
+      p[k] > 900 && (p[k] -= 1800);
+      p[k] < -900 && (p[k] += 1800);
+      p[k + 2] > 900 && (p[k + 2] -= 1800);
+      p[k + 2] < -900 && (p[k + 2] += 1800);
+    }
+    SNOWF.pts.geometry.attributes.position.needsUpdate = true;
   }
   function renderGL() {
     fpsGfxPre();
@@ -11445,7 +11508,8 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     const n = cam.x, a = cam.y;
     GL.sky && (GL.sky.position.set(n, 0, a), GL.sky.rotation.y = 35e-4 * S.time);
     const dph = S.time % DAY_LEN / DAY_LEN, elev = 1.15 * Math.sin(6.283 * dph), ce = Math.cos(elev), se = Math.sin(elev), bmag = 859, ux = -495 / bmag, uz = -702 / bmag, sdx = bmag * ce * ux, sdz = bmag * ce * uz, sdy = 700 * se, dayF = Math.max(0, se), nightF = Math.max(0, -se);
-    const wMood = S.weather || "clear", isRain = "rain" === wMood, wAmt = "clear" === wMood ? 0 : isRain ? 0.85 : 0.55;
+    const wMood = S.weather || "clear", isRain = "rain" === wMood, isSnow = "snow" === wMood, wAmt = "clear" === wMood ? 0 : isRain ? 0.85 : isSnow ? 0.45 : 0.55;
+    glSnowFall(isSnow, n, a);
     GL.sun.color.copy(_dawnCol).lerp(_noonCol, Math.min(1, dayF / 0.9)), GL.sun.intensity = (0.05 + dayF * 2.05) * (1 - 0.55 * wAmt);
     GL.hemi.intensity = 0.1 + 0.5 * dayF + 0.05 * nightF, GL.hemi.color.copy(_hemiDay).lerp(_hemiNight, nightF), GL.hemi.groundColor.copy(_hemiGroundDay).lerp(_hemiGroundNight, nightF);
     wAmt > 0 && (GL.hemi.color.lerp(isRain ? _hemiRain : _hemiOver, wAmt), GL.hemi.groundColor.lerp(isRain ? _hemiGroundRain : _hemiGroundOver, wAmt));
@@ -11626,8 +11690,8 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
   var FPS = { on: false, u: null, yaw: 0, pitch: -0.03, cam: null, mv: { f: 0, s: 0 }, firing: false, aiming: false, look: null, stick: null, vm: null, vvm: null, interact: null, entering: null, viewKick: 0, hitFlashT: 0, aimTarget: null, aimLockT: 0, thirdPerson: false, tpDist: null, sprinting: false, stamina: 1, crouching: false, lastStepT: 0, damageFlashT: 0, damageDir: 0, killFlashT: 0, lastEngineSfxT: 0, deathT: 0, jumpT: 0, jumpZ: 0, chargingGrenade: false, swimming: false, nextAmbientT: 0, shakeMag: 0, shakeX: 0, shakeY: 0, exitCD: 0, sprintLock: false };
   var fpsPromptTarget = null;
   var rotateTarget = null;
-  var FPS_INF_SC = 0.38;
-  var FPS_VEH_SC = 0.55;
+  var FPS_INF_SC = 0.22;
+  var FPS_VEH_SC = 0.34;
   function fpsUnitScale(e) {
     return FPS.on && e && e.d ? "inf" === e.d.kind ? FPS_INF_SC : FPS_VEH_SC : 1;
   }
@@ -11711,7 +11775,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     t.ang += clamp(angDiff(t.ang, FPS.yaw), -r * e, r * e), t.d.turret ? t.tang = FPS.yaw : t.tang = t.ang;
     const n = FPS.mv.f, a = FPS.mv.s, o = Math.hypot(n, a);
     if (o > 0.06) {
-      const r2 = t.d.speed * ("inf" === t.d.kind ? 1.25 : 0.85) * (t.slowT > 0 ? 0.5 : 1) * Math.min(1, o) * ("inf" === t.d.kind ? FPS.crouching ? 0.55 : sprintOk && FPS.stamina > 0 ? 1.5 : 1 : 1) * (FPS.swimming ? 0.5 : 1);
+      const r2 = t.d.speed * ("inf" === t.d.kind ? 1 : 0.7) * (t.slowT > 0 ? 0.5 : 1) * Math.min(1, o) * ("inf" === t.d.kind ? FPS.crouching ? 0.55 : sprintOk && FPS.stamina > 0 ? 1.5 : 1 : 1) * (FPS.swimming ? 0.5 : 1);
       let s, i;
       if ("inf" === t.d.kind) {
         const e2 = FPS.yaw;
@@ -17235,6 +17299,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     });
   }
   function pickWeather() {
+    if (G.snow) return "snow";
     const r = Math.random();
     return r < 0.55 ? "clear" : r < 0.8 ? "overcast" : "rain";
   }
@@ -17542,7 +17607,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return p.credits = rec.credits, p.power = rec.power, p.drain = rec.drain, p.queues = rec.queues || { bld: null, def: null, inf: null, veh: null, air: null }, p.ready = rec.ready || { bld: null, def: null }, p.kills = rec.kills || 0, p.lost = rec.lost || 0, p.defeated = !!rec.defeated, p.spawnX = rec.spawnX, p.spawnY = rec.spawnY, p.spyCD = rec.spyCD || 0, p.paradropCD = rec.paradropCD || 0, p.empCD = rec.empCD || 0, p.isAI && rec.ai && (p.ai.t = rec.ai.t, p.ai.wave = rec.ai.wave || 0, p.ai.expand = rec.ai.expand || 0, rec.ai.personality && (p.ai.personality = rec.ai.personality), p.ai.diffScale = rec.ai.diffScale || 1, p.ai.adaptT = rec.ai.adaptT || 0), p;
   }
   function serializeMap() {
-    return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), roadLines: G.roadLines || [], vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), bridge: packArr(G.bridge), bridgeHp: packArr(G.bridgeHp), bridgeSite: packArr(G.bridgeSite), bridgeHoriz: packArr(G.bridgeHoriz), elevOverride: packArr(G.elevOverride), flatCorner: packArr(G.flatCorner), flatCornerSet: packArr(G.flatCornerSet), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
+    return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), roadLines: G.roadLines || [], snow: G.snow || 0, vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), bridge: packArr(G.bridge), bridgeHp: packArr(G.bridgeHp), bridgeSite: packArr(G.bridgeSite), bridgeHoriz: packArr(G.bridgeHoriz), elevOverride: packArr(G.elevOverride), flatCorner: packArr(G.flatCorner), flatCornerSet: packArr(G.flatCornerSet), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
   }
   function restoreMap(rec) {
     G.map = rec.map, G.seed = rec.seed, G.terr = unpackArr(rec.terr, Uint8Array, 6624), G.ore = unpackArr(rec.ore, Float32Array, 6624), G.tib = unpackArr(rec.tib, Uint8Array, 6624), G.blk = unpackArr(rec.blk, Uint8Array, 6624), G.pave = unpackArr(rec.pave, Uint8Array, 6624), G.vis = unpackArr(rec.vis, Uint8Array, 6624), G.elev = unpackArr(rec.elev, Float32Array, 6624), G.mtn = unpackArr(rec.mtn, Float32Array, 6624), G.tint = unpackArr(rec.tint, Uint8Array, 6624), G.bridge = rec.bridge ? unpackArr(rec.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = rec.bridgeHp ? unpackArr(rec.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = rec.bridgeSite ? unpackArr(rec.bridgeSite, Uint8Array, 6624) : new Uint8Array(G.bridge), G.bridgeHoriz = rec.bridgeHoriz ? unpackArr(rec.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624), G.elevOverride = rec.elevOverride ? unpackArr(rec.elevOverride, Float32Array, 6624) : new Float32Array(6624), G.flatCorner = rec.flatCorner ? unpackArr(rec.flatCorner, Float32Array, 93 * 73) : new Float32Array(93 * 73), G.flatCornerSet = rec.flatCornerSet ? unpackArr(rec.flatCornerSet, Uint8Array, 93 * 73) : new Uint8Array(93 * 73), G.occ = new Int32Array(6624), G.civ = rec.civ || [], G.special = rec.special || [], G.props = rec.props || [], G.oreSpots = rec.oreSpots || [], G.fall = rec.fall || [], G.spots = rec.spots || [], G.trees = [];
@@ -19349,6 +19414,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     S.spyReveals && S.spyReveals.length && (S.spyReveals.forEach((r) => r.t -= e), S.spyReveals = S.spyReveals.filter((r) => r.t > 0));
     for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), tickProduction(t, e), t.isAI ? (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e)) : 0 === t.id && S.autopilot && (tickAI(t, e), aiMicro(t, e)));
     for (const t of S.units) tickUnit(t, e);
+    snowTrails();
     tickSeparation(e);
     for (const t of S.blds) tickBld(t, e);
     tickProjectiles(e), tickRads(e), tickTiberium(e), tickTraffic(e), tickRockets(e), tickGates(e);
