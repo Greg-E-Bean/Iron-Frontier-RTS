@@ -10331,30 +10331,6 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const a = new THREE.CanvasTexture(t);
     return a.wrapS = a.wrapT = THREE.RepeatWrapping, a.repeat.set(1, 1), a.anisotropy = 4, a;
   }
-  function glWaterTex() {
-    const e = 256, c = document.createElement("canvas");
-    c.width = c.height = e;
-    const ctx = c.getContext("2d"), img = ctx.createImageData(e, e);
-    for (let y = 0; y < e; y++) for (let x = 0; x < e; x++) {
-      const a = 0.55 * tfbm(x / e * 3, y / e * 11, 4) + 0.45 * tfbm(x / e * 9, y / e * 29, 10), v = Math.max(0, Math.min(1, 0.5 + 0.5 * a)), i = 4 * (y * e + x);
-      img.data[i] = Math.round(10 + 20 * v), img.data[i + 1] = Math.round(58 + 58 * v), img.data[i + 2] = Math.round(82 + 68 * v), img.data[i + 3] = 255;
-    }
-    ctx.putImageData(img, 0, 0);
-    const t = new THREE.CanvasTexture(c);
-    return t.wrapS = t.wrapT = THREE.RepeatWrapping, t.anisotropy = 4, t;
-  }
-  function glWaterBumpTex() {
-    const e = 128, c = document.createElement("canvas");
-    c.width = c.height = e;
-    const ctx = c.getContext("2d"), img = ctx.createImageData(e, e);
-    for (let y = 0; y < e; y++) for (let x = 0; x < e; x++) {
-      const a = 0.6 * tfbm(x / e * 5, y / e * 18, 6) + 0.4 * tfbm(x / e * 17, y / e * 46, 13), v = Math.max(0, Math.min(255, Math.round(128 + 110 * a))), i = 4 * (y * e + x);
-      img.data[i] = v, img.data[i + 1] = v, img.data[i + 2] = v, img.data[i + 3] = 255;
-    }
-    ctx.putImageData(img, 0, 0);
-    const t = new THREE.CanvasTexture(c);
-    return t.wrapS = t.wrapT = THREE.RepeatWrapping, t.anisotropy = 4, t;
-  }
   function cornerBumpBase(e, t) {
     for (let r2 = -1; r2 <= 0; r2++) for (let n = -1; n <= 0; n++) {
       const a = e + n, o = t + r2;
@@ -10469,10 +10445,173 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const v = fbm(0.31 * cx + 7, 0.31 * cy - 3, 91) - 0.5, v2 = fbm(0.9 * cx - 11, 0.9 * cy + 5, 37) - 0.5;
     return [r * (1 + 0.2 * v + 0.08 * v2), g * (1 + 0.26 * v + 0.08 * v2), b * (1 + 0.12 * v + 0.06 * v2)];
   }
+  var WSD = null;
+  function waterSDF() {
+    const W = 92, H = 72, INF = 1e9, dIn = new Float32Array(W * H), dOut = new Float32Array(W * H);
+    const isW = (i) => 2 === G.terr[i];
+    for (let i = 0; i < W * H; i++) dIn[i] = isW(i) ? INF : 0, dOut[i] = isW(i) ? 0 : INF;
+    const pass = (d) => {
+      const D = 1.4142;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x;
+        let v = d[i];
+        if (!v) continue;
+        x > 0 && (v = Math.min(v, d[i - 1] + 1)), y > 0 && (v = Math.min(v, d[i - W] + 1)), x > 0 && y > 0 && (v = Math.min(v, d[i - W - 1] + D)), x < W - 1 && y > 0 && (v = Math.min(v, d[i - W + 1] + D));
+        d[i] = v;
+      }
+      for (let y = H - 1; y >= 0; y--) for (let x = W - 1; x >= 0; x--) {
+        const i = y * W + x;
+        let v = d[i];
+        if (!v) continue;
+        x < W - 1 && (v = Math.min(v, d[i + 1] + 1)), y < H - 1 && (v = Math.min(v, d[i + W] + 1)), x < W - 1 && y < H - 1 && (v = Math.min(v, d[i + W + 1] + D)), x > 0 && y < H - 1 && (v = Math.min(v, d[i + W - 1] + D));
+        d[i] = v;
+      }
+    };
+    pass(dIn), pass(dOut);
+    const tsd = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) tsd[i] = isW(i) ? Math.min(dIn[i], 40) - 0.5 : -(Math.min(dOut[i], 40) - 0.5);
+    const sd = new Float32Array(93 * 73);
+    for (let cy = 0; cy < 73; cy++) for (let cx = 0; cx < 93; cx++) {
+      let s = 0, n = 0;
+      for (let dy = -1; dy <= 0; dy++) for (let dx = -1; dx <= 0; dx++) {
+        const x = Math.max(0, Math.min(W - 1, cx + dx)), y = Math.max(0, Math.min(H - 1, cy + dy));
+        s += tsd[y * W + x], n++;
+      }
+      sd[cy * 93 + cx] = s / n;
+    }
+    return WSD = sd;
+  }
+  var WATER_Y = 2;
+  function seabedDip(cx, cy) {
+    const s = WSD ? WSD[cy * 93 + cx] : -1;
+    return s > 0 ? -Math.min(34, 1.6 + 9 * Math.pow(s, 1.1)) : 0;
+  }
+  function shoreTint(cx, cy, c) {
+    if (!WSD) return c;
+    const s = WSD[cy * 93 + cx];
+    if (s < -2.6) return c;
+    const x = Math.max(0, Math.min(91, cx - 1)), y = Math.max(0, Math.min(71, cy - 1)), rocky = G.mtn && G.mtn[y * 92 + x] > 0.22;
+    const n = fbm(0.33 * cx + 11, 0.33 * cy - 7, 91), sand = rocky ? [128, 121, 108] : [205 + 14 * n, 186 + 12 * n, 136 + 10 * n];
+    const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+    if (s <= 0) {
+      const w = Math.max(0, Math.min(1, (s + 2.6 - 1.4 * n) / 2)), k = w * w * (3 - 2 * w);
+      let r = mix(c, sand, k);
+      s > -0.7 && (r = mix(r, [r[0] * 0.72, r[1] * 0.7, r[2] * 0.66], (s + 0.7) / 0.7));
+      return r;
+    }
+    const wet = [sand[0] * 0.68, sand[1] * 0.66, sand[2] * 0.6], bed = [58, 72, 66];
+    return mix(wet, bed, Math.min(1, s / 2.6));
+  }
+  function glWaterField() {
+    const N = 93 * 73, d = new Uint8Array(4 * N);
+    for (let i = 0; i < N; i++) {
+      const s = WSD ? WSD[i] : -4;
+      d[4 * i] = Math.max(0, Math.min(255, Math.round((s / 8 + 0.5) * 255))), d[4 * i + 1] = d[4 * i + 2] = 0, d[4 * i + 3] = 255;
+    }
+    const t = new THREE.DataTexture(d, 93, 73, THREE.RGBAFormat);
+    t.magFilter = t.minFilter = THREE.LinearFilter, t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping, t.needsUpdate = true;
+    return t;
+  }
+  var WATER_GLSL = `
+float wHash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float wNoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(wHash(i), wHash(i + vec2(1.0, 0.0)), f.x), mix(wHash(i + vec2(0.0, 1.0)), wHash(i + vec2(1.0, 1.0)), f.x), f.y); }
+float wWave(vec2 p, float t){
+  return sin(dot(p, vec2(0.021, 0.013)) + t * 1.1) * 0.5 + sin(dot(p, vec2(-0.017, 0.024)) + t * 0.9) * 0.4
+       + (wNoise(p * 0.045 + vec2(t * 0.05, t * 0.03)) - 0.5) * 1.3 + (wNoise(p * 0.12 - vec2(t * 0.09, 0.0)) - 0.5) * 0.55; }
+float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0.5) / 73.0); return (texture2D(uWField, fuv).r - 0.5) * 8.0; }
+`;
+  function buildWaterGL() {
+    if (!WSD || !WSD.some((v) => v > 0)) return null;
+    const u = { uWField: { value: glWaterField() }, uWTime: { value: 0 } };
+    const m = new THREE.MeshStandardMaterial({ color: 16777215, roughness: 0.1, metalness: 0, transparent: true, depthWrite: false });
+    fogPatch(m);
+    const fog = m.onBeforeCompile;
+    m.onBeforeCompile = (sh, r) => {
+      fog && fog(sh, r);
+      sh.uniforms.uWField = u.uWField, sh.uniforms.uWTime = u.uWTime;
+      sh.fragmentShader = "uniform sampler2D uWField;\nuniform float uWTime;\n" + WATER_GLSL + sh.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+        vec2 wp = vWorldFog.xz; float wt = uWTime;
+        float wsd = wSD(wp), wn = wNoise(wp * 0.03 + 7.0);
+        float wedge = wsd + (wn - 0.5) * 0.55 + (wNoise(wp * 0.11) - 0.5) * 0.18;
+        if (wedge < -0.04) discard;
+        float wdepth = clamp(wsd / 3.2, 0.0, 1.0);
+        vec3 wcol = mix(vec3(0.06, 0.34, 0.34), vec3(0.012, 0.07, 0.13), smoothstep(0.0, 0.85, wdepth));
+        wcol = mix(wcol, vec3(0.1, 0.3, 0.26), (1.0 - smoothstep(0.0, 0.25, wdepth)) * 0.5);
+        float wband = 1.0 - smoothstep(0.0, 0.7, wedge);
+        float wsurf = wband * (0.5 + 0.5 * sin(wedge * 10.0 - wt * 1.7 + wn * 6.0));
+        float wfn = wNoise(wp * 0.09 + vec2(wt * 0.25, -wt * 0.18));
+        float wFoam = clamp(wsurf * smoothstep(0.35, 0.75, wfn + wband * 0.35) + (1.0 - smoothstep(-0.04, 0.1, wedge)) * 0.85, 0.0, 1.0);
+        wFoam += smoothstep(0.78, 0.9, wNoise(wp * 0.06 + vec2(-wt * 0.12, wt * 0.07))) * 0.25 * (1.0 - wdepth * 0.6);
+        wFoam = clamp(wFoam, 0.0, 1.0);
+        diffuseColor.rgb = mix(wcol, vec3(0.82, 0.86, 0.86), wFoam);
+        diffuseColor.a = max(mix(0.5, 0.94, smoothstep(0.0, 0.55, wdepth)), wFoam * 0.92) * smoothstep(-0.04, 0.1, wedge);`).replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\n        roughnessFactor = mix(roughnessFactor, 0.85, wFoam);").replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+        { float e = 2.0, h0 = wWave(wp, wt), hx = wWave(wp + vec2(e, 0.0), wt), hz = wWave(wp + vec2(0.0, e), wt);
+          float k = 1.6 * (1.0 - wFoam * 0.7);
+          vec3 wn3 = normalize(vec3(-(hx - h0) / e * k, 1.0, -(hz - h0) / e * k));
+          normal = normalize((viewMatrix * vec4(wn3, 0.0)).xyz); }`);
+    };
+    const g = new THREE.PlaneGeometry(2944, 2304, 1, 1), mesh = new THREE.Mesh(g, m);
+    mesh.rotation.x = -Math.PI / 2, mesh.position.set(1472, WATER_Y, 1152), mesh.receiveShadow = true, mesh.frustumCulled = false, mesh.renderOrder = 2;
+    GL.waterU = u.uWTime;
+    return mesh;
+  }
+  var _detTex = null;
+  function glDetailTex() {
+    if (_detTex) return _detTex;
+    const N = 256, cv = document.createElement("canvas");
+    cv.width = cv.height = N;
+    const cx = cv.getContext("2d"), im = cx.createImageData(N, N), d = im.data;
+    const h = (x, y, p, s) => {
+      x = (x % p + p) % p, y = (y % p + p) % p;
+      const v = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453;
+      return v - Math.floor(v);
+    };
+    const vn = (u, v, p, s) => {
+      const x = u * p, y = v * p, xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+      return (h(xi, yi, p, s) * (1 - sx) + h(xi + 1, yi, p, s) * sx) * (1 - sy) + (h(xi, yi + 1, p, s) * (1 - sx) + h(xi + 1, yi + 1, p, s) * sx) * sy;
+    };
+    const fb = (u, v, p, s) => vn(u, v, p, s) * 0.5 + vn(u, v, 2 * p, s + 1) * 0.3 + vn(u, v, 4 * p, s + 2) * 0.2;
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const u = i / N, v = j / N, k = 4 * (j * N + i);
+      d[k] = 255 * Math.min(1, Math.max(0, fb(u, v, 16, 3) * 0.75 + 0.25 * h(i, j, N, 9)));
+      d[k + 1] = 255 * fb(u, v, 4, 17);
+      d[k + 2] = 255 * Math.min(1, Math.max(0, 0.5 + 0.5 * Math.sin(v * 6.283 * 9 + 5 * fb(u, v, 6, 29)) * (0.4 + 0.6 * fb(u, v, 16, 41))));
+      d[k + 3] = 255;
+    }
+    cx.putImageData(im, 0, 0);
+    const t = new THREE.CanvasTexture(cv);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping, t.anisotropy = 4;
+    return _detTex = t;
+  }
+  function terrainDetailPatch(m) {
+    const prev = m.onBeforeCompile, tex = glDetailTex();
+    m.onBeforeCompile = (sh, r) => {
+      prev && prev(sh, r);
+      sh.uniforms.tDetail = { value: tex };
+      sh.vertexShader = "varying vec3 vTN;\n" + sh.vertexShader.replace("#include <beginnormal_vertex>", "#include <beginnormal_vertex>\nvTN = objectNormal;");
+      sh.fragmentShader = "uniform sampler2D tDetail;\nvarying vec3 vTN;\n" + sh.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+      { vec2 wp = vWorldFog.xz;
+        float tdD1 = texture2D(tDetail, wp / 96.0).r, tdD2 = texture2D(tDetail, mat2(0.8, -0.6, 0.6, 0.8) * wp / 31.0).r;
+        float tdM1 = texture2D(tDetail, wp / 700.0).g, tdM2 = texture2D(tDetail, wp / 190.0).g;
+        vec3 c = diffuseColor.rgb;
+        float grass = clamp((c.g - max(c.r, c.b)) * 9.0, 0.0, 1.0);
+        c = mix(c, mix(c * vec3(0.82, 1.08, 0.84), c * vec3(1.25, 1.06, 0.66), smoothstep(0.35, 0.72, tdM1)), grass * 0.6);
+        float tdG = texture2D(tDetail, mat2(0.6, 0.8, -0.8, 0.6) * wp / 8.5).r;
+        c *= (0.74 + 0.52 * mix(tdD1, tdD2, 0.5)) * (0.86 + 0.28 * tdM2) * (0.86 + 0.28 * tdG);
+        float slope = 1.0 - clamp(normalize(vTN).y, 0.0, 1.0);
+        float strata = texture2D(tDetail, vec2(wp.x * 0.7 + wp.y * 0.7, vWorldFog.y * 1.6) / 37.0).b;
+        vec3 rockC = vec3(0.23, 0.21, 0.185) * (0.7 + 0.6 * strata) * (0.8 + 0.4 * tdD2);
+        c = mix(c, rockC, smoothstep(0.3, 0.62, slope) * 0.8);
+        diffuseColor.rgb = c; }`);
+    };
+    m.needsUpdate = true;
+  }
   function buildTerrainGL() {
+    waterSDF();
     const e = [], t = [], r = [], n = [], a = (e2) => 0, PALS = [GRASS, DIRT, WATER, ROCK], colBlend = (a2, e2, t2) => {
-      const o = 0.62 * tfbm(85e-4 * e2, 85e-4 * t2, 11) + 0.38 * tfbm(0.03 * e2, 0.03 * t2, 29), s2 = Math.max(0, Math.min(a2.length - 1.001, o * (a2.length - 1))), i2 = 0 | s2, l2 = Math.min(a2.length - 1, i2 + 1), c2 = s2 - i2, d2 = rgbOf(a2[i2]), f2 = rgbOf(a2[l2]);
-      return [d2[0] + (f2[0] - d2[0]) * c2, d2[1] + (f2[1] - d2[1]) * c2, d2[2] + (f2[2] - d2[2]) * c2];
+      const o = 0.62 * tfbm(85e-4 * e2, 85e-4 * t2, 11) + 0.38 * tfbm(0.03 * e2, 0.03 * t2, 29), s2 = Math.max(0, Math.min(a2.length - 1.001, o * (a2.length - 1))), i2 = 0 | s2, l2 = Math.min(a2.length - 1, i2 + 1), c2 = s2 - i2, d = rgbOf(a2[i2]), f2 = rgbOf(a2[l2]);
+      return [d[0] + (f2[0] - d[0]) * c2, d[1] + (f2[1] - d[1]) * c2, d[2] + (f2[2] - d[2]) * c2];
     }, cornerColor = (cx, cy) => {
       let rr = 0, gg = 0, bb = 0, cnt = 0;
       const wx = 32 * cx, wy = 32 * cy;
@@ -10484,7 +10623,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const col = colBlend(PALS[nn], wx, wy);
         rr += col[0], gg += col[1], bb += col[2], cnt++;
       }
-      const tc = tintCorner(cx, cy, cnt ? [rr / cnt, gg / cnt, bb / cnt] : [110, 110, 110]);
+      const tc = shoreTint(cx, cy, tintCorner(cx, cy, cnt ? [rr / cnt, gg / cnt, bb / cnt] : [110, 110, 110]));
       let pv = 0;
       if (G.pave) for (let dy = -1; dy <= 0; dy++) for (let dx = -1; dx <= 0; dx++) {
         const xx = cx + dx, yy = cy + dy;
@@ -10501,9 +10640,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const getCorner = (cx, cy) => {
       const ci = 93 * cy + cx;
       return [CCR[ci], CCG[ci], CCB[ci]];
-    }, s = (a2, o, s2, i2, l2, c2, d2, f2) => {
+    }, s = (a2, o, s2, i2, l2, c2, d, f2) => {
       e.push(a2, o, s2), t.push(i2, l2, c2);
-      const h = f2 * (0.72 + 0.32 * (0.62 * tfbm(a2 / 32 * 0.34, s2 / 32 * 0.34, 5) + 0.38 * tfbm(a2 / 32 * 1.15, s2 / 32 * 1.15, 17))), u = "string" == typeof d2 ? rgbOf(d2) : d2;
+      const h = f2 * (0.72 + 0.32 * (0.62 * tfbm(a2 / 32 * 0.34, s2 / 32 * 0.34, 5) + 0.38 * tfbm(a2 / 32 * 1.15, s2 / 32 * 1.15, 17))), u = "string" == typeof d ? rgbOf(d) : d;
       r.push(_s2l[Math.round(u[0])] * h, _s2l[Math.round(u[1])] * h, _s2l[Math.round(u[2])] * h), n.push(a2 / 48, s2 / 48);
     };
     for (let e2 = 0; e2 < 72; e2++) for (let t2 = 0; t2 < 92; t2++) {
@@ -10512,30 +10651,22 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const paved = G.pave && G.pave[r2];
       const flat = null;
       const cTL = flat || getCorner(t2, e2), cBL = flat || getCorner(t2, e2 + 1), cBR = flat || getCorner(t2 + 1, e2 + 1), cTR = flat || getCorner(t2 + 1, e2);
-      const c2 = 32 * t2, d2 = c2 + 32, f2 = 32 * e2, h = f2 + 32;
+      const c2 = 32 * t2, d = c2 + 32, f2 = 32 * e2, h = f2 + 32;
       const bTL = cornerBump(t2, e2), bBL = cornerBump(t2, e2 + 1), bBR = cornerBump(t2 + 1, e2 + 1), bTR = cornerBump(t2 + 1, e2);
       const nTL = cornerNormal(t2, e2), nBL = cornerNormal(t2, e2 + 1), nBR = cornerNormal(t2 + 1, e2 + 1), nTR = cornerNormal(t2 + 1, e2);
-      s(c2, l2 + bTL, f2, nTL[0], nTL[1], nTL[2], cTL, 1), s(c2, l2 + bBL, h, nBL[0], nBL[1], nBL[2], cBL, 1), s(d2, l2 + bBR, h, nBR[0], nBR[1], nBR[2], cBR, 1), s(c2, l2 + bTL, f2, nTL[0], nTL[1], nTL[2], cTL, 1), s(d2, l2 + bBR, h, nBR[0], nBR[1], nBR[2], cBR, 1), s(d2, l2 + bTR, f2, nTR[0], nTR[1], nTR[2], cTR, 1);
+      const dTL = seabedDip(t2, e2), dBL = seabedDip(t2, e2 + 1), dBR = seabedDip(t2 + 1, e2 + 1), dTR = seabedDip(t2 + 1, e2);
+      s(c2, l2 + bTL + dTL, f2, nTL[0], nTL[1], nTL[2], cTL, 1), s(c2, l2 + bBL + dBL, h, nBL[0], nBL[1], nBL[2], cBL, 1), s(d, l2 + bBR + dBR, h, nBR[0], nBR[1], nBR[2], cBR, 1), s(c2, l2 + bTL + dTL, f2, nTL[0], nTL[1], nTL[2], cTL, 1), s(d, l2 + bBR + dBR, h, nBR[0], nBR[1], nBR[2], cBR, 1), s(d, l2 + bTR + dTR, f2, nTR[0], nTR[1], nTR[2], cTR, 1);
     }
     const i = new THREE.BufferGeometry();
     i.setAttribute("position", new THREE.Float32BufferAttribute(e, 3)), i.setAttribute("normal", new THREE.Float32BufferAttribute(t, 3)), i.setAttribute("color", new THREE.Float32BufferAttribute(r, 3)), i.setAttribute("uv", new THREE.Float32BufferAttribute(n, 2));
     const l = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0, map: glNoiseTex() });
-    l.map.repeat.set(1, 1), fogPatch(l);
+    l.map.repeat.set(1, 1), fogPatch(l), terrainDetailPatch(l);
     const c = new THREE.Mesh(i, l);
     c.receiveShadow = true, c.frustumCulled = false, GL.scene.add(c), GL.terrain = c;
-    const d = [], wuv = [];
-    for (let e2 = 0; e2 < 72; e2++) for (let t2 = 0; t2 < 92; t2++) {
-      if (2 !== G.terr[idx(t2, e2)]) continue;
-      const r2 = 32 * t2, n2 = r2 + 32, a2 = 32 * e2, o = a2 + 32, s2 = 2.6;
-      d.push(r2, s2, a2, r2, s2, o, n2, s2, o, r2, s2, a2, n2, s2, o, n2, s2, a2), wuv.push(r2 / 256, a2 / 256, r2 / 256, o / 256, n2 / 256, o / 256, r2 / 256, a2 / 256, n2 / 256, o / 256, n2 / 256, a2 / 256);
+    {
+      const wm = buildWaterGL();
+      wm ? (GL.scene.add(wm), GL.water = wm) : GL.water = null;
     }
-    if (d.length) {
-      const e2 = new THREE.BufferGeometry();
-      e2.setAttribute("position", new THREE.Float32BufferAttribute(d, 3)), e2.setAttribute("uv", new THREE.Float32BufferAttribute(wuv, 2)), e2.computeVertexNormals();
-      const t2 = new THREE.MeshStandardMaterial({ color: 16777215, map: glWaterTex(), bumpMap: glWaterBumpTex(), bumpScale: 1.1, roughness: 0.78, metalness: 0, transparent: true, opacity: 0.94 });
-      const r2 = new THREE.Mesh(e2, t2);
-      r2.receiveShadow = true, r2.frustumCulled = false, GL.scene.add(r2), GL.water = r2;
-    } else GL.water = null;
     const f = new THREE.Mesh(new THREE.PlaneGeometry(14720, 11520), new THREE.MeshBasicMaterial({ color: 725273 }));
     f.rotation.x = -Math.PI / 2, f.position.set(1472, -60, 1152), f.frustumCulled = false, GL.scene.add(f), GL.backdrop = f;
     buildSkirtGL(getCorner);
@@ -10750,6 +10881,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function renderGL() {
     fpsGfxPre();
+    GL.waterU && (GL.waterU.value = S.time);
     if (GL.water) {
       const wm = GL.water.material;
       wm.map && (wm.map.offset.x = 0.015 * S.time, wm.map.offset.y = 6e-3 * S.time), wm.bumpMap && (wm.bumpMap.offset.x = -0.03 * S.time, wm.bumpMap.offset.y = 0.012 * S.time);

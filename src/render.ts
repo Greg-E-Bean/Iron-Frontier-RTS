@@ -6,7 +6,146 @@ function cornerOv(e,t){let ov=0,cnt=0;for(let n=-1;n<=0;n++)for(let a=-1;a<=0;a+
 const cidx=(e,t)=>93*t+e;
 function cornerBump(e,t){if(G.flatCornerSet&&G.flatCornerSet[cidx(e,t)])return G.flatCorner[cidx(e,t)];return cornerBumpBase(e,t)+22*cornerOv(e,t)}
 function patchTerrainGL(tx,ty,size){if(!GL||!GL.terrain)return;const posAttr=GL.terrain.geometry.attributes.position,nrmAttr=GL.terrain.geometry.attributes.normal;if(!posAttr||!nrmAttr)return;const pos=posAttr.array,nrm=nrmAttr.array,y0=Math.max(0,ty-1),y1=Math.min(72,ty+size+1),x0=Math.max(0,tx-1),x1=Math.min(92,tx+size+1);for(let ey=y0;ey<y1;ey++)for(let ex=x0;ex<x1;ex++){const bTL=cornerBump(ex,ey),bBL=cornerBump(ex,ey+1),bBR=cornerBump(ex+1,ey+1),bTR=cornerBump(ex+1,ey),nTL=cornerNormal(ex,ey),nBL=cornerNormal(ex,ey+1),nBR=cornerNormal(ex+1,ey+1),nTR=cornerNormal(ex+1,ey),off=(ey*92+ex)*18;pos[off+1]=bTL,nrm[off]=nTL[0],nrm[off+1]=nTL[1],nrm[off+2]=nTL[2];pos[off+4]=bBL,nrm[off+3]=nBL[0],nrm[off+4]=nBL[1],nrm[off+5]=nBL[2];pos[off+7]=bBR,nrm[off+6]=nBR[0],nrm[off+7]=nBR[1],nrm[off+8]=nBR[2];pos[off+10]=bTL,nrm[off+9]=nTL[0],nrm[off+10]=nTL[1],nrm[off+11]=nTL[2];pos[off+13]=bBR,nrm[off+12]=nBR[0],nrm[off+13]=nBR[1],nrm[off+14]=nBR[2];pos[off+16]=bTR,nrm[off+15]=nTR[0],nrm[off+16]=nTR[1],nrm[off+17]=nTR[2]}posAttr.needsUpdate=!0,nrmAttr.needsUpdate=!0}
-function flattenFootprint(tx,ty,size){let sumH=0,cnt=0;for(let dy=0;dy<=size;dy++)for(let dx=0;dx<=size;dx++)sumH+=cornerBump(tx+dx,ty+dy),cnt++;const targetH=sumH/cnt;for(let dy=0;dy<=size;dy++)for(let dx=0;dx<=size;dx++){const cx=tx+dx,cy=ty+dy;cx<0||cy<0||cx>92||cy>72||(G.flatCorner[cidx(cx,cy)]=targetH,G.flatCornerSet[cidx(cx,cy)]=1)}for(let dy=-1;dy<=size+1;dy++)for(let dx=-1;dx<=size+1;dx++){const cx=tx+dx,cy=ty+dy;inMap(cx,cy)&&(G.elev[idx(cx,cy)]=heightAt(32*cx,32*cy))}patchTerrainGL(tx-1,ty-1,size+2)}function cornerNormal(e,t){const r=cornerBump(e-1,t),n=cornerBump(e+1,t),a=cornerBump(e,t-1),o=cornerBump(e,t+1),s=(n-r)/64,i=(o-a)/64;let l=-s,c=1,d=-i;const f=Math.hypot(l,c,d)||1;return[l/f,c/f,d/f]}const _hasB=new Map;function turretHasBarrel(k,g,dep){const key=k+"|"+(g||"")+(dep?"D":"");let v=_hasB.get(key);return void 0===v&&(v=UTURRET(k,0,{gunKey:g}).some(q=>q.b),_hasB.set(key,v)),v}function groundTilt(e,yaw,turret?){if(e.d.fly||e.d.naval||"inf"===e.d.kind||e.inside)return null;const d=Math.max(8,.45*(e.d.radius||12));if(!turret||e._tiltT!==S.time){const gx=(heightAt(e.x+d,e.y)-heightAt(e.x-d,e.y))/(2*d),gyy=(heightAt(e.x,e.y+d)-heightAt(e.x,e.y-d))/(2*d),k=Math.min(1,.12+(e._tiltT===void 0?1:0));e._gx=(e._gx||0)+(gx-(e._gx||0))*k,e._gy=(e._gy||0)+(gyy-(e._gy||0))*k,e._tiltT=S.time}const c=Math.cos(yaw),s=Math.sin(yaw),fw=e._gx*c+e._gy*s,sd=-e._gx*s+e._gy*c,rk=turret?0:.07*(e.recoil||0)+(e.moving?.012*Math.sin(.9*(e.animT||0)+e.id):0);return[TILT_R*Math.atan(sd),TILT_P*Math.atan(fw)+rk]}const TILT_R=-1,TILT_P=1;function heightAt(e,t){const r=e/32,n=t/32,a=Math.floor(r),o=Math.floor(n),s=r-a,i=n-o,l=cornerBump(a,o),c=cornerBump(a+1,o),d=cornerBump(a,o+1),f=cornerBump(a+1,o+1),h=l+(c-l)*s,u=d+(f-d)*s;let p=h+(u-h)*i;const m=Math.max(0,Math.min(91,a)),g=Math.max(0,Math.min(71,o));if(inMap(m,g)){if(G.bridge&&G.bridge[idx(m,g)])return BRIDGE_DECK_H;const e=G.terr[idx(m,g)];p+=3===e?11:2===e?-5:0}return p}function tintCorner(cx,cy,c){const x=Math.min(91,Math.max(0,cx)),y=Math.min(71,Math.max(0,cy)),i=idx(x,y),land=G.terr[i]<2;let r=c[0],g=c[1],b=c[2];const sh=G.shore?G.shore[i]:0;if(land&&sh>.1){const k=.8*Math.min(1,2.4*(sh-.1));r+=(184-r)*k,g+=(168-g)*k,b+=(122-b)*k}const nn=cornerNormal(cx,cy),sl=1-nn[1];if(sl>.12){const k=Math.min(1,3.2*(sl-.12));r+=(121-r)*k,g+=(114-g)*k,b+=(103-b)*k}const h=cornerBump(cx,cy);if(land&&h>28){const k=Math.min(.3,(h-28)/160);r+=(176-r)*k,g+=(162-g)*k,b+=(112-b)*k}const v=fbm(.31*cx+7,.31*cy-3,91)-.5,v2=fbm(.9*cx-11,.9*cy+5,37)-.5;return[r*(1+.2*v+.08*v2),g*(1+.26*v+.08*v2),b*(1+.12*v+.06*v2)]}function buildTerrainGL(){const e=[],t=[],r=[],n=[],a=e=>0,PALS=[GRASS,DIRT,WATER,ROCK],colBlend=(a,e,t)=>{const o=.62*tfbm(.0085*e,.0085*t,11)+.38*tfbm(.03*e,.03*t,29),s=Math.max(0,Math.min(a.length-1.001,o*(a.length-1))),i=0|s,l=Math.min(a.length-1,i+1),c=s-i,d=rgbOf(a[i]),f=rgbOf(a[l]);return[d[0]+(f[0]-d[0])*c,d[1]+(f[1]-d[1])*c,d[2]+(f[2]-d[2])*c]},cornerColor=(cx,cy)=>{let rr=0,gg=0,bb=0,cnt=0;const wx=32*cx,wy=32*cy;for(let dy=-1;dy<=0;dy++)for(let dx=-1;dx<=0;dx++){const xx=cx+dx,yy=cy+dy;if(xx<0||yy<0||xx>=92||yy>=72)continue;let nn=G.terr[idx(xx,yy)];nn=nn>3?3:nn;const col=colBlend(PALS[nn],wx,wy);rr+=col[0],gg+=col[1],bb+=col[2],cnt++}const tc=tintCorner(cx,cy,cnt?[rr/cnt,gg/cnt,bb/cnt]:[110,110,110]);let pv=0;if(G.pave)for(let dy=-1;dy<=0;dy++)for(let dx=-1;dx<=0;dx++){const xx=cx+dx,yy=cy+dy;xx>=0&&yy>=0&&xx<92&&yy<72&&G.pave[idx(xx,yy)]&&pv++}if(!pv)return tc;const k=Math.min(1,pv/2.5),n=fbm(.7*cx+3,.7*cy-9,55)-.5,ar=86+14*n,ag=88+14*n,ab=86+12*n;return[tc[0]+(ar-tc[0])*k,tc[1]+(ag-tc[1])*k,tc[2]+(ab-tc[2])*k]},CCR=new Float32Array(93*73),CCG=new Float32Array(93*73),CCB=new Float32Array(93*73);for(let cy=0;cy<73;cy++)for(let cx=0;cx<93;cx++){const col=cornerColor(cx,cy),ci=93*cy+cx;CCR[ci]=col[0],CCG[ci]=col[1],CCB[ci]=col[2]}const getCorner=(cx,cy)=>{const ci=93*cy+cx;return[CCR[ci],CCG[ci],CCB[ci]]},s=(a,o,s,i,l,c,d,f)=>{e.push(a,o,s),t.push(i,l,c);const h=f*(.72+.32*(.62*tfbm(a/32*.34,s/32*.34,5)+.38*tfbm(a/32*1.15,s/32*1.15,17))),u="string"==typeof d?rgbOf(d):d;r.push(_s2l[Math.round(u[0])]*h,_s2l[Math.round(u[1])]*h,_s2l[Math.round(u[2])]*h),n.push(a/48,s/48)};for(let e=0;e<72;e++)for(let t=0;t<92;t++){const r=idx(t,e),n=G.terr[r];const l=a(n);const paved=G.pave&&G.pave[r];const flat=null;const cTL=flat||getCorner(t,e),cBL=flat||getCorner(t,e+1),cBR=flat||getCorner(t+1,e+1),cTR=flat||getCorner(t+1,e);const c=32*t,d=c+32,f=32*e,h=f+32;const bTL=cornerBump(t,e),bBL=cornerBump(t,e+1),bBR=cornerBump(t+1,e+1),bTR=cornerBump(t+1,e);const nTL=cornerNormal(t,e),nBL=cornerNormal(t,e+1),nBR=cornerNormal(t+1,e+1),nTR=cornerNormal(t+1,e);s(c,l+bTL,f,nTL[0],nTL[1],nTL[2],cTL,1),s(c,l+bBL,h,nBL[0],nBL[1],nBL[2],cBL,1),s(d,l+bBR,h,nBR[0],nBR[1],nBR[2],cBR,1),s(c,l+bTL,f,nTL[0],nTL[1],nTL[2],cTL,1),s(d,l+bBR,h,nBR[0],nBR[1],nBR[2],cBR,1),s(d,l+bTR,f,nTR[0],nTR[1],nTR[2],cTR,1)}const i=new THREE.BufferGeometry;i.setAttribute("position",new THREE.Float32BufferAttribute(e,3)),i.setAttribute("normal",new THREE.Float32BufferAttribute(t,3)),i.setAttribute("color",new THREE.Float32BufferAttribute(r,3)),i.setAttribute("uv",new THREE.Float32BufferAttribute(n,2));const l=new THREE.MeshStandardMaterial({vertexColors:!0,roughness:.95,metalness:0,map:glNoiseTex()});l.map.repeat.set(1,1),fogPatch(l);const c=new THREE.Mesh(i,l);c.receiveShadow=!0,c.frustumCulled=!1,GL.scene.add(c),GL.terrain=c;const d=[],wuv=[];for(let e=0;e<72;e++)for(let t=0;t<92;t++){if(2!==G.terr[idx(t,e)])continue;const r=32*t,n=r+32,a=32*e,o=a+32,s=2.6;d.push(r,s,a,r,s,o,n,s,o,r,s,a,n,s,o,n,s,a),wuv.push(r/256,a/256,r/256,o/256,n/256,o/256,r/256,a/256,n/256,o/256,n/256,a/256)}if(d.length){const e=new THREE.BufferGeometry;e.setAttribute("position",new THREE.Float32BufferAttribute(d,3)),e.setAttribute("uv",new THREE.Float32BufferAttribute(wuv,2)),e.computeVertexNormals();const t=new THREE.MeshStandardMaterial({color:16777215,map:glWaterTex(),bumpMap:glWaterBumpTex(),bumpScale:1.1,roughness:.78,metalness:0,transparent:!0,opacity:.94});const r=new THREE.Mesh(e,t);r.receiveShadow=!0,r.frustumCulled=!1,GL.scene.add(r),GL.water=r}else GL.water=null;const f=new THREE.Mesh(new THREE.PlaneGeometry(14720,11520),new THREE.MeshBasicMaterial({color:725273}));f.rotation.x=-Math.PI/2,f.position.set(1472,-60,1152),f.frustumCulled=!1,GL.scene.add(f),GL.backdrop=f;buildSkirtGL(getCorner)}
+function flattenFootprint(tx,ty,size){let sumH=0,cnt=0;for(let dy=0;dy<=size;dy++)for(let dx=0;dx<=size;dx++)sumH+=cornerBump(tx+dx,ty+dy),cnt++;const targetH=sumH/cnt;for(let dy=0;dy<=size;dy++)for(let dx=0;dx<=size;dx++){const cx=tx+dx,cy=ty+dy;cx<0||cy<0||cx>92||cy>72||(G.flatCorner[cidx(cx,cy)]=targetH,G.flatCornerSet[cidx(cx,cy)]=1)}for(let dy=-1;dy<=size+1;dy++)for(let dx=-1;dx<=size+1;dx++){const cx=tx+dx,cy=ty+dy;inMap(cx,cy)&&(G.elev[idx(cx,cy)]=heightAt(32*cx,32*cy))}patchTerrainGL(tx-1,ty-1,size+2)}function cornerNormal(e,t){const r=cornerBump(e-1,t),n=cornerBump(e+1,t),a=cornerBump(e,t-1),o=cornerBump(e,t+1),s=(n-r)/64,i=(o-a)/64;let l=-s,c=1,d=-i;const f=Math.hypot(l,c,d)||1;return[l/f,c/f,d/f]}const _hasB=new Map;function turretHasBarrel(k,g,dep){const key=k+"|"+(g||"")+(dep?"D":"");let v=_hasB.get(key);return void 0===v&&(v=UTURRET(k,0,{gunKey:g}).some(q=>q.b),_hasB.set(key,v)),v}function groundTilt(e,yaw,turret?){if(e.d.fly||e.d.naval||"inf"===e.d.kind||e.inside)return null;const d=Math.max(8,.45*(e.d.radius||12));if(!turret||e._tiltT!==S.time){const gx=(heightAt(e.x+d,e.y)-heightAt(e.x-d,e.y))/(2*d),gyy=(heightAt(e.x,e.y+d)-heightAt(e.x,e.y-d))/(2*d),k=Math.min(1,.12+(e._tiltT===void 0?1:0));e._gx=(e._gx||0)+(gx-(e._gx||0))*k,e._gy=(e._gy||0)+(gyy-(e._gy||0))*k,e._tiltT=S.time}const c=Math.cos(yaw),s=Math.sin(yaw),fw=e._gx*c+e._gy*s,sd=-e._gx*s+e._gy*c,rk=turret?0:.07*(e.recoil||0)+(e.moving?.012*Math.sin(.9*(e.animT||0)+e.id):0);return[TILT_R*Math.atan(sd),TILT_P*Math.atan(fw)+rk]}const TILT_R=-1,TILT_P=1;function heightAt(e,t){const r=e/32,n=t/32,a=Math.floor(r),o=Math.floor(n),s=r-a,i=n-o,l=cornerBump(a,o),c=cornerBump(a+1,o),d=cornerBump(a,o+1),f=cornerBump(a+1,o+1),h=l+(c-l)*s,u=d+(f-d)*s;let p=h+(u-h)*i;const m=Math.max(0,Math.min(91,a)),g=Math.max(0,Math.min(71,o));if(inMap(m,g)){if(G.bridge&&G.bridge[idx(m,g)])return BRIDGE_DECK_H;const e=G.terr[idx(m,g)];p+=3===e?11:2===e?-5:0}return p}function tintCorner(cx,cy,c){const x=Math.min(91,Math.max(0,cx)),y=Math.min(71,Math.max(0,cy)),i=idx(x,y),land=G.terr[i]<2;let r=c[0],g=c[1],b=c[2];const sh=G.shore?G.shore[i]:0;if(land&&sh>.1){const k=.8*Math.min(1,2.4*(sh-.1));r+=(184-r)*k,g+=(168-g)*k,b+=(122-b)*k}const nn=cornerNormal(cx,cy),sl=1-nn[1];if(sl>.12){const k=Math.min(1,3.2*(sl-.12));r+=(121-r)*k,g+=(114-g)*k,b+=(103-b)*k}const h=cornerBump(cx,cy);if(land&&h>28){const k=Math.min(.3,(h-28)/160);r+=(176-r)*k,g+=(162-g)*k,b+=(112-b)*k}const v=fbm(.31*cx+7,.31*cy-3,91)-.5,v2=fbm(.9*cx-11,.9*cy+5,37)-.5;return[r*(1+.2*v+.08*v2),g*(1+.26*v+.08*v2),b*(1+.12*v+.06*v2)]}// ---- water & shores: a signed distance field from the water tiles (tiles:
+// + inside water, - on land) drives smooth organic coastlines, beaches, a
+// sloping seabed and depth-based water colour, instead of per-tile squares.
+let WSD: Float32Array | null = null;
+function waterSDF() {
+  const W = 92, H = 72, INF = 1e9, dIn = new Float32Array(W * H), dOut = new Float32Array(W * H);
+  const isW = (i: number) => 2 === G.terr[i];
+  for (let i = 0; i < W * H; i++) dIn[i] = isW(i) ? INF : 0, dOut[i] = isW(i) ? 0 : INF;
+  const pass = (d: Float32Array) => {
+    const D = 1.4142;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x; let v = d[i]; if (!v) continue;
+      x > 0 && (v = Math.min(v, d[i - 1] + 1)), y > 0 && (v = Math.min(v, d[i - W] + 1)), x > 0 && y > 0 && (v = Math.min(v, d[i - W - 1] + D)), x < W - 1 && y > 0 && (v = Math.min(v, d[i - W + 1] + D)); d[i] = v; }
+    for (let y = H - 1; y >= 0; y--) for (let x = W - 1; x >= 0; x--) { const i = y * W + x; let v = d[i]; if (!v) continue;
+      x < W - 1 && (v = Math.min(v, d[i + 1] + 1)), y < H - 1 && (v = Math.min(v, d[i + W] + 1)), x < W - 1 && y < H - 1 && (v = Math.min(v, d[i + W + 1] + D)), x > 0 && y < H - 1 && (v = Math.min(v, d[i + W - 1] + D)); d[i] = v; }
+  };
+  pass(dIn), pass(dOut);
+  const tsd = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) tsd[i] = isW(i) ? Math.min(dIn[i], 40) - .5 : -(Math.min(dOut[i], 40) - .5);
+  const sd = new Float32Array(93 * 73);
+  for (let cy = 0; cy < 73; cy++) for (let cx = 0; cx < 93; cx++) { let s = 0, n = 0;
+    for (let dy = -1; dy <= 0; dy++) for (let dx = -1; dx <= 0; dx++) { const x = Math.max(0, Math.min(W - 1, cx + dx)), y = Math.max(0, Math.min(H - 1, cy + dy)); s += tsd[y * W + x], n++; }
+    sd[cy * 93 + cx] = s / n; }
+  return WSD = sd;
+}
+const WATER_Y = 2;
+// seabed drops away from the coast
+function seabedDip(cx: number, cy: number) { const s = WSD ? WSD[cy * 93 + cx] : -1; return s > 0 ? -Math.min(34, 1.6 + 9 * Math.pow(s, 1.1)) : 0; }
+// beach sand / pebbles / wet line on land near water, darkening seabed under it
+function shoreTint(cx: number, cy: number, c: number[]) {
+  if (!WSD) return c;
+  const s = WSD[cy * 93 + cx]; if (s < -2.6) return c;
+  const x = Math.max(0, Math.min(91, cx - 1)), y = Math.max(0, Math.min(71, cy - 1)), rocky = G.mtn && G.mtn[y * 92 + x] > .22;
+  const n = fbm(.33 * cx + 11, .33 * cy - 7, 91), sand = rocky ? [128, 121, 108] : [205 + 14 * n, 186 + 12 * n, 136 + 10 * n];
+  const mix = (a: number[], b: number[], k: number) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+  if (s <= 0) {
+    const w = Math.max(0, Math.min(1, (s + 2.6 - 1.4 * n) / 2)), k = w * w * (3 - 2 * w);
+    let r = mix(c, sand, k); s > -.7 && (r = mix(r, [r[0] * .72, r[1] * .7, r[2] * .66], (s + .7) / .7));
+    return r;
+  }
+  const wet = [sand[0] * .68, sand[1] * .66, sand[2] * .6], bed = [58, 72, 66];
+  return mix(wet, bed, Math.min(1, s / 2.6));
+}
+function glWaterField() {
+  const N = 93 * 73, d = new Uint8Array(4 * N);
+  for (let i = 0; i < N; i++) { const s = WSD ? WSD[i] : -4; d[4 * i] = Math.max(0, Math.min(255, Math.round((s / 8 + .5) * 255))), d[4 * i + 1] = d[4 * i + 2] = 0, d[4 * i + 3] = 255; }
+  const t = new THREE.DataTexture(d, 93, 73, THREE.RGBAFormat);
+  t.magFilter = t.minFilter = THREE.LinearFilter, t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping, t.needsUpdate = !0;
+  return t;
+}
+const WATER_GLSL = `
+float wHash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float wNoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(wHash(i), wHash(i + vec2(1.0, 0.0)), f.x), mix(wHash(i + vec2(0.0, 1.0)), wHash(i + vec2(1.0, 1.0)), f.x), f.y); }
+float wWave(vec2 p, float t){
+  return sin(dot(p, vec2(0.021, 0.013)) + t * 1.1) * 0.5 + sin(dot(p, vec2(-0.017, 0.024)) + t * 0.9) * 0.4
+       + (wNoise(p * 0.045 + vec2(t * 0.05, t * 0.03)) - 0.5) * 1.3 + (wNoise(p * 0.12 - vec2(t * 0.09, 0.0)) - 0.5) * 0.55; }
+float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0.5) / 73.0); return (texture2D(uWField, fuv).r - 0.5) * 8.0; }
+`;
+function buildWaterGL() {
+  if (!WSD || !WSD.some(v => v > 0)) return null;
+  const u = { uWField: { value: glWaterField() }, uWTime: { value: 0 } };
+  const m = new THREE.MeshStandardMaterial({ color: 16777215, roughness: .1, metalness: 0, transparent: !0, depthWrite: !1 });
+  fogPatch(m);
+  const fog = m.onBeforeCompile;
+  m.onBeforeCompile = (sh: any, r: any) => {
+    fog && fog(sh, r);
+    sh.uniforms.uWField = u.uWField, sh.uniforms.uWTime = u.uWTime;
+    sh.fragmentShader = "uniform sampler2D uWField;\nuniform float uWTime;\n" + WATER_GLSL + sh.fragmentShader
+      .replace("#include <color_fragment>", `#include <color_fragment>
+        vec2 wp = vWorldFog.xz; float wt = uWTime;
+        float wsd = wSD(wp), wn = wNoise(wp * 0.03 + 7.0);
+        float wedge = wsd + (wn - 0.5) * 0.55 + (wNoise(wp * 0.11) - 0.5) * 0.18;
+        if (wedge < -0.04) discard;
+        float wdepth = clamp(wsd / 3.2, 0.0, 1.0);
+        vec3 wcol = mix(vec3(0.06, 0.34, 0.34), vec3(0.012, 0.07, 0.13), smoothstep(0.0, 0.85, wdepth));
+        wcol = mix(wcol, vec3(0.1, 0.3, 0.26), (1.0 - smoothstep(0.0, 0.25, wdepth)) * 0.5);
+        float wband = 1.0 - smoothstep(0.0, 0.7, wedge);
+        float wsurf = wband * (0.5 + 0.5 * sin(wedge * 10.0 - wt * 1.7 + wn * 6.0));
+        float wfn = wNoise(wp * 0.09 + vec2(wt * 0.25, -wt * 0.18));
+        float wFoam = clamp(wsurf * smoothstep(0.35, 0.75, wfn + wband * 0.35) + (1.0 - smoothstep(-0.04, 0.1, wedge)) * 0.85, 0.0, 1.0);
+        wFoam += smoothstep(0.78, 0.9, wNoise(wp * 0.06 + vec2(-wt * 0.12, wt * 0.07))) * 0.25 * (1.0 - wdepth * 0.6);
+        wFoam = clamp(wFoam, 0.0, 1.0);
+        diffuseColor.rgb = mix(wcol, vec3(0.82, 0.86, 0.86), wFoam);
+        diffuseColor.a = max(mix(0.5, 0.94, smoothstep(0.0, 0.55, wdepth)), wFoam * 0.92) * smoothstep(-0.04, 0.1, wedge);`)
+      .replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\n        roughnessFactor = mix(roughnessFactor, 0.85, wFoam);")
+      .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+        { float e = 2.0, h0 = wWave(wp, wt), hx = wWave(wp + vec2(e, 0.0), wt), hz = wWave(wp + vec2(0.0, e), wt);
+          float k = 1.6 * (1.0 - wFoam * 0.7);
+          vec3 wn3 = normalize(vec3(-(hx - h0) / e * k, 1.0, -(hz - h0) / e * k));
+          normal = normalize((viewMatrix * vec4(wn3, 0.0)).xyz); }`);
+  };
+  const g = new THREE.PlaneGeometry(2944, 2304, 1, 1), mesh = new THREE.Mesh(g, m);
+  mesh.rotation.x = -Math.PI / 2, mesh.position.set(1472, WATER_Y, 1152), mesh.receiveShadow = !0, mesh.frustumCulled = !1, mesh.renderOrder = 2;
+  GL.waterU = u.uWTime;
+  return mesh;
+}
+// ---- ground detail: world-space albedo variation at three scales (breaks
+// up tiling), dry vs lush grass patches, rock strata on slopes.
+let _detTex: any = null;
+function glDetailTex() {
+  if (_detTex) return _detTex;
+  const N = 256, cv = document.createElement("canvas"); cv.width = cv.height = N;
+  const cx = cv.getContext("2d")!, im = cx.createImageData(N, N), d = im.data;
+  const h = (x: number, y: number, p: number, s: number) => { x = ((x % p) + p) % p, y = ((y % p) + p) % p; const v = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453; return v - Math.floor(v); };
+  const vn = (u: number, v: number, p: number, s: number) => { const x = u * p, y = v * p, xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+    return (h(xi, yi, p, s) * (1 - sx) + h(xi + 1, yi, p, s) * sx) * (1 - sy) + (h(xi, yi + 1, p, s) * (1 - sx) + h(xi + 1, yi + 1, p, s) * sx) * sy; };
+  const fb = (u: number, v: number, p: number, s: number) => (vn(u, v, p, s) * .5 + vn(u, v, 2 * p, s + 1) * .3 + vn(u, v, 4 * p, s + 2) * .2);
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const u = i / N, v = j / N, k = 4 * (j * N + i);
+    d[k] = 255 * Math.min(1, Math.max(0, fb(u, v, 16, 3) * .75 + .25 * h(i, j, N, 9)));
+    d[k + 1] = 255 * fb(u, v, 4, 17);
+    d[k + 2] = 255 * Math.min(1, Math.max(0, .5 + .5 * Math.sin(v * 6.283 * 9 + 5 * fb(u, v, 6, 29)) * (.4 + .6 * fb(u, v, 16, 41))));
+    d[k + 3] = 255; }
+  cx.putImageData(im, 0, 0);
+  const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping, t.anisotropy = 4;
+  return _detTex = t;
+}
+function terrainDetailPatch(m: any) {
+  const prev = m.onBeforeCompile, tex = glDetailTex();
+  m.onBeforeCompile = (sh: any, r: any) => {
+    prev && prev(sh, r);
+    sh.uniforms.tDetail = { value: tex };
+    sh.vertexShader = "varying vec3 vTN;\n" + sh.vertexShader.replace("#include <beginnormal_vertex>", "#include <beginnormal_vertex>\nvTN = objectNormal;");
+    sh.fragmentShader = "uniform sampler2D tDetail;\nvarying vec3 vTN;\n" + sh.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+      { vec2 wp = vWorldFog.xz;
+        float tdD1 = texture2D(tDetail, wp / 96.0).r, tdD2 = texture2D(tDetail, mat2(0.8, -0.6, 0.6, 0.8) * wp / 31.0).r;
+        float tdM1 = texture2D(tDetail, wp / 700.0).g, tdM2 = texture2D(tDetail, wp / 190.0).g;
+        vec3 c = diffuseColor.rgb;
+        float grass = clamp((c.g - max(c.r, c.b)) * 9.0, 0.0, 1.0);
+        c = mix(c, mix(c * vec3(0.82, 1.08, 0.84), c * vec3(1.25, 1.06, 0.66), smoothstep(0.35, 0.72, tdM1)), grass * 0.6);
+        float tdG = texture2D(tDetail, mat2(0.6, 0.8, -0.8, 0.6) * wp / 8.5).r;
+        c *= (0.74 + 0.52 * mix(tdD1, tdD2, 0.5)) * (0.86 + 0.28 * tdM2) * (0.86 + 0.28 * tdG);
+        float slope = 1.0 - clamp(normalize(vTN).y, 0.0, 1.0);
+        float strata = texture2D(tDetail, vec2(wp.x * 0.7 + wp.y * 0.7, vWorldFog.y * 1.6) / 37.0).b;
+        vec3 rockC = vec3(0.23, 0.21, 0.185) * (0.7 + 0.6 * strata) * (0.8 + 0.4 * tdD2);
+        c = mix(c, rockC, smoothstep(0.3, 0.62, slope) * 0.8);
+        diffuseColor.rgb = c; }`);
+  };
+  m.needsUpdate = !0;
+}
+function buildTerrainGL(){waterSDF();const e=[],t=[],r=[],n=[],a=e=>0,PALS=[GRASS,DIRT,WATER,ROCK],colBlend=(a,e,t)=>{const o=.62*tfbm(.0085*e,.0085*t,11)+.38*tfbm(.03*e,.03*t,29),s=Math.max(0,Math.min(a.length-1.001,o*(a.length-1))),i=0|s,l=Math.min(a.length-1,i+1),c=s-i,d=rgbOf(a[i]),f=rgbOf(a[l]);return[d[0]+(f[0]-d[0])*c,d[1]+(f[1]-d[1])*c,d[2]+(f[2]-d[2])*c]},cornerColor=(cx,cy)=>{let rr=0,gg=0,bb=0,cnt=0;const wx=32*cx,wy=32*cy;for(let dy=-1;dy<=0;dy++)for(let dx=-1;dx<=0;dx++){const xx=cx+dx,yy=cy+dy;if(xx<0||yy<0||xx>=92||yy>=72)continue;let nn=G.terr[idx(xx,yy)];nn=nn>3?3:nn;const col=colBlend(PALS[nn],wx,wy);rr+=col[0],gg+=col[1],bb+=col[2],cnt++}const tc=shoreTint(cx,cy,tintCorner(cx,cy,cnt?[rr/cnt,gg/cnt,bb/cnt]:[110,110,110]));let pv=0;if(G.pave)for(let dy=-1;dy<=0;dy++)for(let dx=-1;dx<=0;dx++){const xx=cx+dx,yy=cy+dy;xx>=0&&yy>=0&&xx<92&&yy<72&&G.pave[idx(xx,yy)]&&pv++}if(!pv)return tc;const k=Math.min(1,pv/2.5),n=fbm(.7*cx+3,.7*cy-9,55)-.5,ar=86+14*n,ag=88+14*n,ab=86+12*n;return[tc[0]+(ar-tc[0])*k,tc[1]+(ag-tc[1])*k,tc[2]+(ab-tc[2])*k]},CCR=new Float32Array(93*73),CCG=new Float32Array(93*73),CCB=new Float32Array(93*73);for(let cy=0;cy<73;cy++)for(let cx=0;cx<93;cx++){const col=cornerColor(cx,cy),ci=93*cy+cx;CCR[ci]=col[0],CCG[ci]=col[1],CCB[ci]=col[2]}const getCorner=(cx,cy)=>{const ci=93*cy+cx;return[CCR[ci],CCG[ci],CCB[ci]]},s=(a,o,s,i,l,c,d,f)=>{e.push(a,o,s),t.push(i,l,c);const h=f*(.72+.32*(.62*tfbm(a/32*.34,s/32*.34,5)+.38*tfbm(a/32*1.15,s/32*1.15,17))),u="string"==typeof d?rgbOf(d):d;r.push(_s2l[Math.round(u[0])]*h,_s2l[Math.round(u[1])]*h,_s2l[Math.round(u[2])]*h),n.push(a/48,s/48)};for(let e=0;e<72;e++)for(let t=0;t<92;t++){const r=idx(t,e),n=G.terr[r];const l=a(n);const paved=G.pave&&G.pave[r];const flat=null;const cTL=flat||getCorner(t,e),cBL=flat||getCorner(t,e+1),cBR=flat||getCorner(t+1,e+1),cTR=flat||getCorner(t+1,e);const c=32*t,d=c+32,f=32*e,h=f+32;const bTL=cornerBump(t,e),bBL=cornerBump(t,e+1),bBR=cornerBump(t+1,e+1),bTR=cornerBump(t+1,e);const nTL=cornerNormal(t,e),nBL=cornerNormal(t,e+1),nBR=cornerNormal(t+1,e+1),nTR=cornerNormal(t+1,e);const dTL=seabedDip(t,e),dBL=seabedDip(t,e+1),dBR=seabedDip(t+1,e+1),dTR=seabedDip(t+1,e);s(c,l+bTL+dTL,f,nTL[0],nTL[1],nTL[2],cTL,1),s(c,l+bBL+dBL,h,nBL[0],nBL[1],nBL[2],cBL,1),s(d,l+bBR+dBR,h,nBR[0],nBR[1],nBR[2],cBR,1),s(c,l+bTL+dTL,f,nTL[0],nTL[1],nTL[2],cTL,1),s(d,l+bBR+dBR,h,nBR[0],nBR[1],nBR[2],cBR,1),s(d,l+bTR+dTR,f,nTR[0],nTR[1],nTR[2],cTR,1)}const i=new THREE.BufferGeometry;i.setAttribute("position",new THREE.Float32BufferAttribute(e,3)),i.setAttribute("normal",new THREE.Float32BufferAttribute(t,3)),i.setAttribute("color",new THREE.Float32BufferAttribute(r,3)),i.setAttribute("uv",new THREE.Float32BufferAttribute(n,2));const l=new THREE.MeshStandardMaterial({vertexColors:!0,roughness:.95,metalness:0,map:glNoiseTex()});l.map.repeat.set(1,1),fogPatch(l),terrainDetailPatch(l);const c=new THREE.Mesh(i,l);c.receiveShadow=!0,c.frustumCulled=!1,GL.scene.add(c),GL.terrain=c;{const wm=buildWaterGL();wm?(GL.scene.add(wm),GL.water=wm):GL.water=null}const f=new THREE.Mesh(new THREE.PlaneGeometry(14720,11520),new THREE.MeshBasicMaterial({color:725273}));f.rotation.x=-Math.PI/2,f.position.set(1472,-60,1152),f.frustumCulled=!1,GL.scene.add(f),GL.backdrop=f;buildSkirtGL(getCorner)}
 function buildSkirtGL(gc?){GL.skirt&&(GL.scene.remove(GL.skirt),GL.skirt.geometry.dispose());const W=2944,H=2304,EXT=1792,ST=64,x0=-EXT,z0=-EXT,nx=Math.round((W+2*EXT)/ST),nz=Math.round((H+2*EXT)/ST),V=(nx+1)*(nz+1),pos=new Float32Array(3*V),col=new Float32Array(3*V),dAt=(x,z)=>{const dx=x<0?-x:x>W?x-W:0,dz=z<0?-z:z>H?z-H:0;return Math.hypot(dx,dz)},sm=(a,b,v)=>{const t=Math.max(0,Math.min(1,(v-a)/(b-a)));return t*t*(3-2*t)},FOG=[11/255,17/255,25/255],props=[];
 for(let j=0;j<=nz;j++)for(let i=0;i<=nx;i++){const x=x0+i*ST,z=z0+j*ST,d=dAt(x,z),k=3*(j*(nx+1)+i),ecx=Math.max(0,Math.min(92,Math.round(x/32))),ecz=Math.max(0,Math.min(72,Math.round(z/32))),edgeH=cornerBump(ecx,ecz),n1=tfbm(.0022*x,.0022*z,71),n2=tfbm(.009*x,.009*z,83),hill=70+320*Math.pow(n1,1.4)+50*n2,s1=sm(0,380,d),fall=sm(1300,1800,d),h=d<=0?edgeH:edgeH*(1-s1)+hill*s1*(1-.85*fall)-40*fall;pos[k]=x,pos[k+1]=h,pos[k+2]=z;let r,g,b;const rockT=sm(120,260,hill*s1)+.3*sm(.55,.7,n2),forT=sm(.35,.6,tfbm(.006*x,.006*z,97))*(1-rockT);r=.29*(1-rockT)+.42*rockT,g=.4*(1-rockT)+.38*rockT,b=.2*(1-rockT)+.33*rockT,r=r*(1-.45*forT),g=g*(1-.3*forT),b=b*(1-.4*forT);const snow=sm(260,330,h);r+=(.86-r)*snow,g+=(.88-g)*snow,b+=(.9-b)*snow;const fz=sm(950,1750,d);r=Math.pow(r,2.2),g=Math.pow(g,2.2),b=Math.pow(b,2.2);if(gc){const ec=gc(ecx,ecz),eb=1-sm(0,220,d);r+=(.88*_s2l[Math.round(ec[0])]-r)*eb,g+=(.88*_s2l[Math.round(ec[1])]-g)*eb,b+=(.88*_s2l[Math.round(ec[2])]-b)*eb}const FL=[Math.pow(FOG[0],2.2),Math.pow(FOG[1],2.2),Math.pow(FOG[2],2.2)];col[k]=r+(FL[0]-r)*fz,col[k+1]=g+(FL[1]-g)*fz,col[k+2]=b+(FL[2]-b)*fz;if(d>40&&d<1100&&forT>.35&&rockT<.4&&tnoise(.05*x,.05*z,5)>.35)for(let t=0;t<2;t++){const px=x+(tnoise(.3*x,.3*z,t)-.5)*56,pz=z+(tnoise(.3*z,.3*x,t+9)-.5)*56;dAt(px,pz)>36&&props.push({kind:"tree",v:(i*7+j*3+t)%6,x:px,y:pz,z:h-1,r:tnoise(px,pz,3)*6.28})}}
 const idxs=[];for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const cx=x0+(i+.5)*ST,cz=z0+(j+.5)*ST;if(cx>0&&cx<W&&cz>0&&cz<H)continue;const a=j*(nx+1)+i,b=a+1,c=a+nx+1,d=c+1;idxs.push(a,c,b,b,c,d)}
@@ -123,7 +262,7 @@ function buildRain(){
 }
 function buildSkyGL(){const e=skySphere();e.frustumCulled=!1,GL.scene.add(e),GL.sky=e,buildEnvGL();const s=buildSunDisc();s.frustumCulled=!1,GL.scene.add(s),GL.sunDisc=s;const m=buildMoonDisc();m.frustumCulled=!1,GL.scene.add(m),GL.moonDisc=m;const st=buildStarfield();st.frustumCulled=!1,GL.scene.add(st),GL.stars=st;const cl=buildClouds();cl.frustumCulled=!1,GL.sky.add(cl),GL.clouds=cl;const rn=buildRain();rn.frustumCulled=!1,GL.scene.add(rn),GL.rain=rn}// launch-menu backdrop: a perspective camera orbiting the whole map
 var MENU_CAM:any=null;function setMenuCam(c){MENU_CAM=c}
-function renderGL(){fpsGfxPre();if(GL.water){const wm=GL.water.material;wm.map&&(wm.map.offset.x=.015*S.time,wm.map.offset.y=.006*S.time),wm.bumpMap&&(wm.bumpMap.offset.x=-.03*S.time,wm.bumpMap.offset.y=.012*S.time)}let e,t,r;if(FPS.on&&FPS.u)cam.x=FPS.u.x,cam.y=FPS.u.y,e=fpsRender(),t=r=620;else if(MENU_CAM)e=MENU_CAM,t=r=2600;else{e=GL.camera,t=CW/(GL_SX*cam.z)/2,r=CH/(GL_SY*cam.z)/2,e.left=-t,e.right=t,e.top=r,e.bottom=-r;const n=cam.x,a=cam.y;e.position.set(n+3200*GL_F[0],3200*GL_F[1],a+3200*GL_F[2]),e.lookAt(n,0,a),e.updateProjectionMatrix()}const n=cam.x,a=cam.y;GL.sky&&(GL.sky.position.set(n,0,a),GL.sky.rotation.y=.0035*S.time);
+function renderGL(){fpsGfxPre();GL.waterU&&(GL.waterU.value=S.time);if(GL.water){const wm=GL.water.material;wm.map&&(wm.map.offset.x=.015*S.time,wm.map.offset.y=.006*S.time),wm.bumpMap&&(wm.bumpMap.offset.x=-.03*S.time,wm.bumpMap.offset.y=.012*S.time)}let e,t,r;if(FPS.on&&FPS.u)cam.x=FPS.u.x,cam.y=FPS.u.y,e=fpsRender(),t=r=620;else if(MENU_CAM)e=MENU_CAM,t=r=2600;else{e=GL.camera,t=CW/(GL_SX*cam.z)/2,r=CH/(GL_SY*cam.z)/2,e.left=-t,e.right=t,e.top=r,e.bottom=-r;const n=cam.x,a=cam.y;e.position.set(n+3200*GL_F[0],3200*GL_F[1],a+3200*GL_F[2]),e.lookAt(n,0,a),e.updateProjectionMatrix()}const n=cam.x,a=cam.y;GL.sky&&(GL.sky.position.set(n,0,a),GL.sky.rotation.y=.0035*S.time);
 const dph=S.time%DAY_LEN/DAY_LEN,elev=1.15*Math.sin(6.283*dph),ce=Math.cos(elev),se=Math.sin(elev),bmag=859,ux=-495/bmag,uz=-702/bmag,sdx=bmag*ce*ux,sdz=bmag*ce*uz,sdy=700*se,dayF=Math.max(0,se),nightF=Math.max(0,-se);
 const wMood=S.weather||"clear",isRain="rain"===wMood,wAmt="clear"===wMood?0:isRain?.85:.55;
 GL.sun.color.copy(_dawnCol).lerp(_noonCol,Math.min(1,dayF/.9)),GL.sun.intensity=(.05+dayF*2.05)*(1-.55*wAmt);
