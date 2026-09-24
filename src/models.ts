@@ -618,7 +618,8 @@ const CIVX:Record<string,any>={civ7:workshopModel,civ9:terraceModel,bridgehut:br
 // Refinery: a processing hall and crusher tower that tower over the
 // harvesters, ore tanks, and an unloading gantry whose arm reaches out over
 // the dock tile south of the building where harvesters park to unload.
-function refineryModel(n,t,r,l,rb){const A="allied"===t,O="soviet"===t;
+function refineryModel(n,t,r,l,rb){refineryCore(n,t,r,l,rb);rb>=4&&refineryLife(n,t,l)}
+function refineryCore(n,t,r,l,rb){const A="allied"===t,O="soviet"===t;
 if(!A&&!O){
 if(rb>=1)hive(n,{x:-12,y:-12,z:l,r:.27*r,h:22,crown:7,seg:10,pods:3,crest:!0,vein:"psi",body:"flesh",body2:"carapace2"});
 if(rb>=2){taper3(n,24,-20,l,24,-20,l+46,8,4.2,"carapace");for(let k=0;k<4;k++)ell(n,24,-20,l+6+10*k,8.6-.9*k,8.6-.9*k,2.4,"carapace2");n.push(P_(DOME(6,5,12),24,-20,l+45,"psi",{e:1,a:{spin:.5}}))}
@@ -643,6 +644,45 @@ n.push(P_(CONE(2.2,6.2,7.4,12),0,55,l+37.4,arm));n.push(P_(CYL(1.6,.8,10),0,55,l
 taper3(n,0,34,l+48,20,-11,l+50,2.2,2.2,"darkmetal");for(let k=0;k<4;k++)n.push(P_(DOME(1.3,1,6),5*k,34-11.2*k,l+50.2+.5*k,k%2?"tibGlit":"tibG",{e:1}));
 n.push(P_(BOXM(14,12,10,.5),32,26,l,hall));n.push(P_(BOXM(12,.5,3,.1),32,32.2,l+5.5,gl,{e:1}));n.push(P_(BOXM(15,13,1,.3),32,26,l+10,A?"armor3":"rust"));n.push(P_(CYL(.3,9,5),36,22,l+11,"darkmetal"));
 crate(n,38,40,l,4.5,"olive",.2);barrel(n,-40,-40,l);barrel(n,-36,-41,l)}}
+// Refinery depth + working machinery: ore riding the conveyor into the
+// tower, a bucket elevator, trommel drum and flywheel turning, piston
+// hammers, furnace glow; organic peristalsis and churning pools for the
+// Syndicate. Smoke / steam / spores come from BLD_AMB emitters in sim.ts.
+function refineryLife(n,t,l){const A="allied"===t,O="soviet"===t,PI=Math.PI;
+// ore chunks travelling up the conveyor from the unloading gantry into the tower
+const ore=(mat,glow)=>{for(let k=0;k<6;k++)n.push(P_(DOME(1.5,1.2,6),0,34,l+49.8,k%2?glow:mat,{e:1,a:{belt:.22,pw:-20,bdy:45,bdz:-2,pp:k/6}}))};
+if(!A&&!O){
+for(let k=0;k<8;k++){const g=k*.785+.2;ell(n,-12+Math.cos(g)*24,-12+Math.sin(g)*24,l,9,7,9,k%2?"carapace":"carapace2",{r:g})}
+for(const[x,y,h]of[[-32,-32,30],[4,-36,24]]){taper3(n,x,y,l,x+1,y-1,l+h,4.2,1.4,"carapace2");for(let k=0;k<3;k++)ell(n,x,y,l+5+k*h*.25,4-k*.8,4-k*.8,1.6,"carapace");n.push(P_(DOME(1.8,2.2,8),x+1,y-1,l+h-.6,"psi",{e:1,a:{bob:2.2,ba:.5}}))}
+n.push(P_(DOME(4,3.4,12),-12,-12,l+29,"flesh",{a:{bob:4.2,ba:.6}}));n.push(P_(DOME(2.6,2.4,10),-12,-12,l+31,"psi",{e:1,a:{bob:4.2,ba:.8}}));
+for(let k=0;k<6;k++)n.push(P_(DOME(1.6,1.5,8),0,34,l+46,k%2?"bile":"psi",{e:1,a:{belt:.3,pw:-22,bdy:46,bdz:4,pp:k/6}}));
+ell(n,-4,20,l-.6,11,8,1.8,"bile2");ell(n,-4,20,l+.2,9.4,6.6,1.4,"bile",{e:1});
+for(let k=0;k<5;k++){const g=k*1.257;n.push(P_(DOME(1.4,1.2,8),-4+Math.cos(g)*6,20+Math.sin(g)*4,l+1,k%2?"bile2":"psi",{e:1,a:{orbit:.7,pvx:-4,pvy:20,bob:1.6+.2*k,ba:.4}}))}
+for(const[x,y,ph]of[[-13,16,0],[4,24,2],[-6,27,4]]){for(let j=0;j<3;j++)n.push(P_(CONE(1.1-.3*j,.8-.3*j,4.4,6),x+.4*j,y,l+1+4*j,j?"flesh":"carapace2",{a:{rock:1.1,ra:.35,rph:ph,rpx:x,rpz:l+1}}));n.push(P_(DOME(.8,.8,6),x+1.2,y,l+13,"psi",{e:1,a:{rock:1.1,ra:.35,rph:ph,rpx:x,rpz:l+1}}))}
+for(let k=0;k<4;k++)n.push(P_(DOME(1.3,1.3,8),24+11,-20,l+14+8*k,"psi",{e:1,a:{orbit:.6+.15*k,pvx:24,pvy:-20}}));
+return}
+const M=A?"steel":"rust",D=A?"armor3":"concrete2";
+ore(A?"tibG":"tibG","tibGlit");
+// bucket elevator up the tower's south face
+n.push(P_(BOXM(7,1.2,44,.2),24,-10.4,l+2,"darkmetal"));for(let k=0;k<8;k++)n.push(P_(BOXM(2.6,2.4,1.8,.2),27,-8.6,l+44,k%2?M:"tibG",{a:{patrol:.18,pw:5.4,ph:40,pp:k/8}}));
+// trommel drum turning under the gantry, and a spoked flywheel on the tower
+for(const sy of[-1,1])n.push(P_(BOXM(2,2,7,.3),sy*8,20,l,"darkmetal"));
+n.push(P_(CYL(5,14,12),0,27,l+11,M,{tx:PI/2,a:{rock:1.4,rpx:0,rpz:l+11}}));for(let k=0;k<3;k++)n.push(P_(BOXM(10.4,15,.8,.1),0,20,l+10.6,"darkmetal",{a:{rock:1.4,rph:k*1.047,rpx:0,rpz:l+11}}));
+n.push(P_(BOXM(8,3,3,.3),37,-15.6,l+28.5,"darkmetal"));n.push(P_(CYL(6.4,1.6,16),40.5,-17.6,l+30,D,{tx:PI/2}));n.push(P_(CYL(1.4,2.6,8),40.5,-17,l+30,"darkmetal",{tx:PI/2}));for(let k=0;k<2;k++)n.push(P_(BOXM(12,1,1.2,.1),40.5,-19.8,l+29.4,M,{a:{rock:2.2,rph:k*1.571,rpx:40.5,rpz:l+30}}));
+// piston hammers on the hall roof
+for(let k=0;k<3;k++){const x=-30+k*8;n.push(P_(BOXM(5,5,4,.4),x,-2,l+26,"darkmetal"));n.push(P_(CYL(1.3,7,8),x,-2,l+28,A?"white":"steel",{a:{bob:3.4,ba:1.8,rph:k*2.1}}))}
+if(O){
+// buttresses, roof setback, blast furnace with a flickering tap, and the big chimney
+for(let k=0;k<6;k++)n.push(P_(BOXM(2.6,2.2,24,.3),-36+k*9.6,7.8,l,"concrete2"));for(let k=0;k<4;k++)n.push(P_(BOXM(2.2,2.6,24,.3),-40,-30+k*9,l,"concrete2"));
+n.push(P_(BOXM(28,16,9,.6),-20,-20,l+26,"concrete2"));n.push(P_(BOXM(28.6,.6,2.4,.1),-20,-11.8,l+30,"glow",{e:1}));n.push(P_(BOXM(29,17,1,.3),-20,-20,l+35,"rust"));
+n.push(P_(CONE(7,4.8,16,12),-14,21,l,"rust"));for(const z of[4,9,14])n.push(P_(CYL(7.3-z*.14,1,12),-14,21,l+z,"darkmetal"));n.push(P_(CYL(5,4,12),-14,21,l+16,"darkmetal"));
+n.push(P_(BOXM(4.2,.6,3.2,.1),-14,27.8,l+1.2,"glow",{e:1,a:{bob:9,ba:.25}}));n.push(P_(BOXM(3.4,3,.5,.1),-14,29.4,l+.2,"glow",{e:1}));
+stack(n,38,-38,l,3,58,"concrete2");for(const z of[20,40,54])n.push(P_(CYL(3.4,1.6,10),38,-38,l+z,"red"));
+}else{
+// Vanguard: roof fans and cooling vents
+for(const x of[-30,-18]){n.push(P_(CYL(4,1.6,14),x,-26,l+26,"darkmetal"));for(let k=0;k<2;k++)n.push(P_(BOXM(7,1,.4,.1),x,-26,l+27.4,"white",{r:k*1.571,a:{spin:7}}))}
+for(const x of[28,20])n.push(P_(BOXM(4,4,3,.4),x,-20,l+54,"steel"));
+}}
 // Foundations: buildings assembled from separate pieces (power plants,
 // refineries, stores, service bays) stand on a faction-styled plinth so they
 // read as one built structure; the rest of the model is raised onto it.
