@@ -763,7 +763,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 "use strict";
 (()=>{const mf=matchMedia("(pointer:fine)"),mc=matchMedia("(pointer:coarse)"),f=()=>document.body.classList.toggle("finepointer",mf.matches&&!mc.matches);f(),mf.addEventListener&&mf.addEventListener("change",f),window.addEventListener("touchstart",()=>document.body.classList.remove("finepointer"),{passive:!0,capture:!0})})();
-const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),elPwr=$("#power"),elPwrBar=$("#pwrBar");let hintT=0;function hint(e){const t=$("#hint");t.textContent=e,t.classList.add("show"),hintT=2.4}
+const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),elPwr=$("#power"),elPwrBar=$("#pwrBar");let hintT=0;function hint(e){const t=$("#hint");t.textContent=e,t.classList.add("show"),hintT=2.4;try{window.announceHint&&window.announceHint(e)}catch(_){}}
 </script>
 <script>/* BUNDLE:cards */</script>
 <script>/* BUNDLE:ui */</script>

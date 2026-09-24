@@ -484,9 +484,24 @@ function hdWeaponType(kind: string) {
 }
 function hdBeamCol(kind: string) { return "beam_temporal" === kind || "tesla" === kind ? "tesla" : "beam_drain" === kind || "psi" === kind ? "psi" : "crystal"; }
 
-const B_ = (a: any[], x: number, y: number, z: number, w: number, d: number, h: number, c: string, o?: any) => a.push(P_(BOXM(w, d, h, Math.min(w, d, h) * .22), x, y, z, c, o));
+// Plain 12-triangle box (base-anchored like BOXM) for the low-detail figures.
+function fgPlainBox(w: number, d: number, h: number) {
+  return meshOf("PB" + w.toFixed(2) + "_" + d.toFixed(2) + "_" + h.toFixed(2), () => {
+    const x = w / 2, y = d / 2, T: any[] = [], q = (a: number[], b: number[], c: number[], e: number[], n: number[]) => { T.push({ p: [a, b, c], n: [n, n, n] }, { p: [a, c, e], n: [n, n, n] }); };
+    q([x, -y, 0], [x, y, 0], [x, y, h], [x, -y, h], [1, 0, 0]), q([-x, y, 0], [-x, -y, 0], [-x, -y, h], [-x, y, h], [-1, 0, 0]);
+    q([x, y, 0], [-x, y, 0], [-x, y, h], [x, y, h], [0, 1, 0]), q([-x, -y, 0], [x, -y, 0], [x, -y, h], [-x, -y, h], [0, -1, 0]);
+    q([x, -y, h], [x, y, h], [-x, y, h], [-x, -y, h], [0, 0, 1]), q([x, y, 0], [x, -y, 0], [-x, -y, 0], [-x, y, 0], [0, 0, -1]);
+    return T;
+  });
+}
+const B_ = (a: any[], x: number, y: number, z: number, w: number, d: number, h: number, c: string, o?: any) => {
+  if (!FG.lod) return a.push(P_(BOXM(w, d, h, Math.min(w, d, h) * .22), x, y, z, c, o));
+  Math.max(w, d, h) >= .5 && a.push(P_(fgPlainBox(w, d, h), x, y, z, c, o));
+};
 const XC = (a: any[], x: number, y: number, z: number, r: number, l: number, c: string, n?: number, o?: any) => a.push(P_(CYL(r, l, n || 16), x, y, z, c, Object.assign({ ty: PI2 }, o || {})));
 
+// Full ellipsoid (ell() alone is the upper half-dome).
+function ellF(a: any[], x: number, y: number, z: number, rx: number, ry: number, rz: number, c: string, o?: any) { ell(a, x, y, z, rx, ry, rz, c, o), ell(a, x, y, z, rx, ry, rz, c, Object.assign({ tx: Math.PI }, o || {})); }
 function hdPelvis(a: any[], L: any) {
   ell(a, 0, 0, -.25, 1.22, 1.72, 1.3, L.pants);
   a.push(P_(CYL(1.7, .5, 22), 0, 0, .45, "dark2")), B_(a, 1.62, 0, .47, .22, .62, .46, "steel");
@@ -520,10 +535,10 @@ function hdTorso(a: any[], L: any) {
   if (L.tank) for (const y of [-.95, .95]) a.push(P_(CYL(.82, 4.1, 18), -2.25, y, 1.2, L.tank)), a.push(P_(DOME(.82, .6, 18), -2.25, y, 5.3, "steel")), a.push(P_(CYL(.3, .35, 10), -2.25, y, 5.85, "darkmetal"));
 }
 function hdHead(a: any[], L: any) {
-  a.push(P_(CYL(.55, 1.05, 16), 0, 0, 0, "skin"));
-  ell(a, .1, 0, 1.9, 1.02, .9, 1.18, "skin"), ell(a, .42, 0, 1.3, .74, .76, .62, "skin"), ell(a, 1.06, 0, 1.72, .2, .15, .3, "skin");
+  a.push(P_(CYL(.55, 1.5, 16), 0, 0, 0, "skin"));
+  ellF(a, .1, 0, 1.95, 1.02, .9, 1.12, "skin"), ellF(a, .42, 0, 1.45, .74, .76, .5, "skin"), ellF(a, 1.02, 0, 1.78, .2, .15, .28, "skin");
   for (const y of [-.36, .36]) ell(a, .96, y, 2.02, .1, .13, .09, "black"), B_(a, .98, y, 2.15, .18, .36, .1, "dark2");
-  for (const y of [-.94, .94]) ell(a, .05, y, 1.85, .18, .12, .3, "skin");
+  for (const y of [-.9, .9]) ellF(a, .05, y, 1.85, .18, .14, .3, "skin");
   const vg = GLOWS[L.visor] ? { e: 1 } : {};
   if (L.hood) {
     a.push(P_(CONE(1.5, .3, 2.9, 20), -.15, 0, 1.25, L.hood)), ell(a, -.35, 0, 2.2, 1.25, 1.3, 1.4, L.hood);
@@ -547,22 +562,22 @@ function hdHead(a: any[], L: any) {
   L.mask && (ell(a, .9, 0, 1.45, .35, .6, .45, "dark2"), a.push(P_(CYL(.3, .5, 12), 1.2, -.4, 1.2, "steel", { ty: PI2 })));
 }
 function hdUpperArm(a: any[], L: any) {
-  ell(a, 0, 0, .25, .95, .95, .95, L.cloth), a.push(P_(CONE(.8, .64, 3.0, 16), 0, 0, .25, L.cloth));
+  ellF(a, 0, 0, .25, .95, .95, .95, L.cloth), a.push(P_(CONE(.8, .64, 3.0, 16), 0, 0, .25, L.cloth));
   "yuri" !== L.fac && ell(a, 0, 0, .3, 1.02, 1.05, .8, L.vest);
-  ell(a, 0, 0, 3.2, .62, .62, .55, L.cloth);
+  ellF(a, 0, 0, 3.2, .62, .62, .55, L.cloth);
 }
 function hdForeArm(a: any[], L: any) {
   a.push(P_(CONE(.64, .5, 2.45, 16), 0, 0, 0, "soviet" === L.fac ? L.cloth : L.cloth)), a.push(P_(CYL(.56, .5, 14), 0, 0, 2.3, L.gear));
-  ell(a, .02, 0, 3.05, .42, .5, .55, "dark2"), ell(a, .3, 0, 3.4, .36, .46, .42, "dark2"), ell(a, -.15, .32, 2.95, .17, .17, .38, "dark2");
-  B_(a, .38, 0, 3.15, .14, .62, .3, "rubber");
+  ellF(a, .02, 0, 3.1, .44, .52, .5, "dark2"), ellF(a, .3, 0, 3.45, .36, .46, .38, "dark2"), ellF(a, -.15, .34, 3.0, .17, .17, .36, "dark2");
+  B_(a, .38, 0, 3.12, .14, .62, .3, "rubber");
 }
 function hdThigh(a: any[], L: any) {
-  ell(a, 0, 0, .4, 1.0, 1.0, 1.0, L.pants), a.push(P_(CONE(1.02, .76, 4.3, 16), 0, 0, .3, L.pants));
+  ellF(a, 0, 0, .4, 1.0, 1.0, 1.0, L.pants), a.push(P_(CONE(1.02, .76, 4.3, 16), 0, 0, .3, L.pants));
   for (const y of [-.92, .92]) B_(a, 0, y, 1.6, .85, .3, 1.2, L.pants);
-  ell(a, .6, 0, 4.5, .36, .62, .7, "dark2");
+  ellF(a, .6, 0, 4.4, .36, .62, .55, "dark2");
 }
 function hdShin(a: any[], L: any) {
-  ell(a, 0, 0, .1, .78, .78, .72, L.pants), a.push(P_(CONE(.78, .6, 3.5, 16), 0, 0, 0, L.pants));
+  ellF(a, 0, 0, .1, .78, .78, .6, L.pants), a.push(P_(CONE(.78, .6, 3.5, 16), 0, 0, 0, L.pants));
   a.push(P_(CONE(.66, .62, 1.55, 16), 0, 0, 3.0, "dark2")), B_(a, .6, 0, 3.2, .1, .3, 1.1, "black");
 }
 function hdFoot(a: any[]) {
@@ -577,8 +592,8 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
   const grip = (x: number) => B_(a, x, 0, -1.45, .52, .5, 1.25, F, { ty: .28 });
   const stock = () => {
     if ("soviet" === fac) B_(a, -2.3, 0, -.75, 2.5, .5, 1.1, "wood", { ty: -.14 }), B_(a, -3.55, 0, -1.0, .15, .55, 1.35, "rubber", { ty: -.14 });
-    else if ("yuri" === fac) ell(a, -2.3, 0, -.15, 1.45, .34, .62, "bone"), ell(a, -2.2, 0, .15, .9, .2, .3, "carapace");
-    else XC(a, -1.1, 0, .25, .22, 2.2, M, 10, { ty: -PI2 }), B_(a, -3.0, 0, -.5, 1.2, .52, 1.3, F), B_(a, -3.65, 0, -.55, .15, .56, 1.42, "rubber"), B_(a, -2.6, 0, .55, 1.1, .4, .28, F);
+    else if ("yuri" === fac) ellF(a, -1.9, 0, .05, 1.45, .34, .5, "bone"), ell(a, -1.8, 0, .3, .9, .2, .3, "carapace");
+    else XC(a, -.4, 0, .25, .22, 2.9, M, 10, { ty: -PI2 }), B_(a, -3.0, 0, -.5, 1.2, .52, 1.3, F), B_(a, -3.65, 0, -.55, .15, .56, 1.42, "rubber"), B_(a, -2.6, 0, .55, 1.1, .4, .28, F);
   };
   const trig = () => { B_(a, .25, 0, -.66, .9, .12, .1, M), B_(a, .3, 0, -.58, .08, .08, .3, M); };
   if ("rifle" === type || "long" === type) {
@@ -594,7 +609,7 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
     B_(a, 1.25, 0, -.55, .85, .66, .3, M), grip(-.35), trig(), stock();
     if ("soviet" === fac && !lg) B_(m, 1.25, 0, -1.3, .72, .5, 1.0, D, { ty: .1 }), B_(m, 1.5, 0, -2.2, .72, .5, 1.0, D, { ty: .38 });
     else if ("yuri" === fac) ell(m, 1.2, 0, -1.3, .5, .4, .95, "carapace"), B_(m, 1.2, 0, -2.0, .1, .42, 1.2, "psi", { e: 1 });
-    else B_(m, 1.25, 0, -1.9, .72, .5, lg ? 1.0 : 1.6, D, { ty: -.12 });
+    else B_(m, 1.25, 0, lg ? -1.4 : -1.9, .72, .5, lg ? 1.1 : 1.6, D, { ty: -.12 });
     if (lg) {
       XC(a, -.9, 0, 1.35, .36, 3.2, D, 16), XC(a, 2.1, 0, 1.35, .48, .7, D, 16), XC(a, -1.5, 0, 1.35, .42, .6, D, 16);
       a.push(P_(CYL(.4, .06, 16), 2.8, 0, 1.35, "glassdark", { ty: PI2, e: 1 })), a.push(P_(CYL(.3, .25, 10), .4, 0, 1.7, D)), a.push(P_(CYL(.3, .25, 10), .4, .38, 1.35, D, { tx: PI2 }));
@@ -605,7 +620,7 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
     } else if ("allied" === fac) {
       B_(a, .6, 0, .91, .9, .5, .2, D), XC(a, .2, 0, 1.3, .34, .9, D, 16), a.push(P_(CYL(.28, .05, 14), 1.12, 0, 1.3, "tesla", { ty: PI2, e: 1 }));
       W.sight = 1.3;
-    } else if ("yuri" === fac) { ell(a, .5, 0, 1.25, .55, .18, .25, "psi", { e: 1 }), W.sight = 1.25; }
+    } else if ("yuri" === fac) { ell(a, .5, 0, .95, .55, .18, .3, "psi", { e: 1 }), W.sight = 1.15; }
     else { B_(a, -.6, 0, .91, .3, .34, .32, M), W.sight = 1.1; }
     lg || B_(bo, .7, .36, .45, .55, .2, .2, M);
     "yuri" === fac && (B_(a, 2.0, .41, .3, 2.2, .04, .1, "psi", { e: 1 }), B_(a, 2.0, -.41, .3, 2.2, .04, .1, "psi", { e: 1 }));
@@ -613,7 +628,7 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
     B_(a, .9, 0, -.45, 4.6, 1.25, 1.25, D), B_(a, .9, 0, .8, 3.8, .9, .2, M);
     for (const y of [-.33, .33]) XC(a, 3.2, y, .35, .28, 4.6, M, 12), XC(a, 7.6, y, .35, .36, .6, D, 12);
     B_(a, 3.4, 0, -1.5, .45, .45, 1.2, F), grip(-.3), trig(), stock();
-    m.push(P_(CYL(1.0, .95, 20), 1.4, .48, -1.95, D, { tx: PI2 })), m.push(P_(CYL(.35, 1.0, 10), 1.4, .5, -1.95, M, { tx: PI2 }));
+    m.push(P_(CYL(1.0, .95, 20), 1.4, .48, -1.35, D, { tx: PI2 })), m.push(P_(CYL(.35, 1.0, 10), 1.4, .5, -1.35, M, { tx: PI2 }));
     B_(a, .2, 0, 1.0, .12, .7, .7, M), B_(a, 2.4, 0, 1.0, .12, .12, .5, M);
     W.muzzle = [8.3, 0, .35], W.lg = [3.4, 0, -1.0], W.sight = 1.5, W.eject = [1.2, .6, .2];
   } else if ("rocket" === type || "launcher" === type) {
@@ -704,19 +719,21 @@ function hdIK(s: any, t: any, a: number, b: number, pole: any, out: any) {
 }
 
 const HD = { hip: 9.85, hipW: 1.3, th: 4.6, sh: 4.5, ank: .95, ua: 3.2, fa: 3.05, shY: 5.35, shW: 2.45, neck: 6.45 };
-function hdBuildFigure(u: any, parent?: any) {
-  const L = hdLook(u), pal = palette(u.owner), kind = unitViewmodelKind(u), wt = hdWeaponType(kind), look = u.key + "|" + u.owner + "|";
+function hdBuildFigure(u: any, parent?: any, lod?: boolean) {
+  const L = hdLook(u), pal = palette(u.owner), kind = unitViewmodelKind(u), wt = hdWeaponType(kind), look = (lod ? "LOD|" : "") + u.key + "|" + u.owner + "|";
   const cloth = Object.assign({}, GL.mats, { metal: GL.mats.matte });
-  const G = (n: string, f: (a: any[]) => void) => hdObj(hdGeo(look + n, pal, f), cloth, !0);
+  const LG = (key: string, f: (a: any[]) => void) => hdGeo(key, pal, lod ? (a: any[]) => { FG.lod = 1; try { lowPoly(f)(a); } finally { FG.lod = 0; } } : f);
+  const G = (n: string, f: (a: any[]) => void) => hdObj(LG(look + n, f), cloth, !0);
   const root = new THREE.Group(), F: any = { root, u, wt, kind, parts: {} };
   const add = (n: string, o: any) => (root.add(o), F.parts[n] = o, o);
   add("pelvis", G("pelvis", a => hdPelvis(a, L))), add("torso", G("torso", a => hdTorso(a, L))), add("head", G("head", a => hdHead(a, L)));
   for (const s of ["L", "R"]) add("ua" + s, G("ua", a => hdUpperArm(a, L))), add("fa" + s, G("fa", a => hdForeArm(a, L))), add("th" + s, G("th", a => hdThigh(a, L))), add("sh" + s, G("sh", a => hdShin(a, L))), add("ft" + s, G("ft", hdFoot));
-  const W = hdWeapon(wt, L.fac, hdBeamCol(kind));
+  const W = lod ? (() => { FG.lod = 1; try { return lowPoly(hdWeapon)(wt, L.fac, hdBeamCol(kind)); } finally { FG.lod = 0; } })() : hdWeapon(wt, L.fac, hdBeamCol(kind));
   F.W = W;
-  if (!W.none) add("gun", hdObj(hdGeo(look + "gun" + wt + kind, pal, a => { for (const q of W.body.concat(W.mag, W.bolt)) a.push(q); }), GL.mats, !0));
+  if (!W.none) add("gun", hdObj(LG(look + "gun" + wt + kind, a => { for (const q of W.body.concat(W.mag, W.bolt)) a.push(q); }), GL.mats, !0));
   L.scale && root.scale.setScalar(L.scale);
   root.traverse((o: any) => { o.frustumCulled = !1; });
+  if (lod) return F;
   (parent || GL.scene).add(root);
   F.st = { mv: 0, aim: 0, ph: 0, lx: u.x, ly: u.y, spd: 0, dead: 0, crouch: 0 };
   return F;
@@ -820,6 +837,59 @@ function fpsHDSet() {
   }
   return set;
 }
+
+// Strategy view: the same figures, posed into the RTS animation frames
+// (walk cycle, aim, firing) at a lighter level of detail and baked into one
+// geometry per unit type / owner / frame for the instanced renderer.
+const _bakeM = new THREE.Matrix4();
+function hdBakeGeo(u: any, frame: number) {
+  const kind = unitViewmodelKind(u), key = "HB|" + u.key + "|" + u.owner + "|" + frame + "|" + kind;
+  let g = GLGEO.get(key);
+  if (g) return g;
+  const fake: any = { key: u.key, owner: u.owner, id: 0, d: u.d, x: 0, y: 0, ang: 0, heroMode: u.heroMode, deployed: u.deployed, animT: 7.5 * (frame & 3), moving: !!(frame & 3) || 0 === (frame & 4) && 1 === (frame & 1), muzzle: frame & 8 ? .09 : 0, target: frame & 4 ? { dead: !1, x: 100, y: 0 } : null, hitT: 0 };
+  fake.moving = !(frame & 4) && (frame & 3) > 0;
+  const F = hdBuildFigure(fake, null, !0);
+  F.st = { mv: fake.moving ? 1 : 0, aim: frame & 4 ? 1 : 0, ph: 0, lx: 0, ly: 0, spd: 0, dead: 0, crouch: u.deployed ? 1 : 0 };
+  fake.target && (fake.target.alt = heightAt(0, 0) - heightAt(100, 0));
+  const t0 = S.time; S.time = 0; try { hdPose(F, 10); } catch (e) { } S.time = t0;
+  F.root.updateMatrixWorld(!0);
+  const by: any = { metal: [], matte: [], emis: [] };
+  for (const n in F.parts) F.parts[n].traverse((o: any) => {
+    if (!o.isMesh) return;
+    const bucket = o.material === GL.mats.emis ? "emis" : o.material === GL.mats.metal && "gun" === n ? "metal" : "matte";
+    const cg = o.geometry.clone(); cg.applyMatrix4(_bakeM.copy(o.matrixWorld)), by[bucket].push(cg);
+  });
+  if (frame & 8 && F.parts.gun) {
+    const fl = glMerge([P_(CONE(.9, .1, 3.4, 8), 0, 0, 0, "lightY", { e: 1, ty: PI2 })], {}).emis, W = F.W;
+    fl && (fl.applyMatrix4(new THREE.Matrix4().makeTranslation(W.muzzle[0], W.muzzle[2], W.muzzle[1]).premultiply(F.parts.gun.matrixWorld)), by.emis.push(fl));
+  }
+  g = { anims: [] };
+  for (const k in by) g[k] = by[k].length ? fgMergeGeos(by[k]) : null;
+  for (const k in by) for (const x of by[k]) g[k] !== x && x.dispose();
+  GLGEO.set(key, g);
+  return g;
+}
+// Dev check: pose a figure and list parts not connected (via touching
+// bounding boxes) back to the feet.
+function hdFloatCheck(key: string, frame: number) {
+  const d = UNITS[key], fake: any = { key, owner: 0, id: 0, d, x: 0, y: 0, ang: 0, animT: 7.5 * (frame & 3), moving: !(frame & 4) && (frame & 3) > 0, muzzle: frame & 8 ? .09 : 0, target: frame & 4 ? { dead: !1, x: 100, y: 0, alt: heightAt(0, 0) - heightAt(100, 0) } : null, hitT: 0 };
+  const F = hdBuildFigure(fake, null, !0);
+  F.st = { mv: fake.moving ? 1 : 0, aim: frame & 4 ? 1 : 0, ph: 0, lx: 0, ly: 0, spd: 0, dead: 0, crouch: 0 };
+  hdPose(F, 10), F.root.updateMatrixWorld(!0);
+  const names = Object.keys(F.parts), box: any = {}, tol = .35;
+  for (const n of names) box[n] = new THREE.Box3().setFromObject(F.parts[n]).expandByScalar(tol);
+  const ok = new Set(["ftL", "ftR"]), st = ["ftL", "ftR"];
+  while (st.length) { const a = st.pop()!; for (const b of names) !ok.has(b) && box[a].intersectsBox(box[b]) && (ok.add(b), st.push(b)); }
+  return names.filter(n => !ok.has(n));
+}
+function hdPartLists(key: string, fac: string) {
+  const L = hdLook({ key, owner: 0, d: UNITS[key] }), out: any = {}; L.fac = fac;
+  const mk = (f: (a: any[]) => void) => { const a: any[] = []; f(a); return a; };
+  out.pelvis = mk(a => hdPelvis(a, L)), out.torso = mk(a => hdTorso(a, L)), out.head = mk(a => hdHead(a, L)), out.ua = mk(a => hdUpperArm(a, L)), out.fa = mk(a => hdForeArm(a, L)), out.th = mk(a => hdThigh(a, L)), out.sh = mk(a => hdShin(a, L)), out.ft = mk(hdFoot);
+  for (const wt of ["rifle", "long", "flak", "rocket", "launcher", "flamer", "beam", "tool", "pistol"]) { const W = hdWeapon(wt, fac, "tesla"); out["gun_" + wt] = W.body.concat(W.mag, W.bolt); }
+  return out;
+}
+function hdBakeOk(u: any) { return !!GL && QUALITY >= 1 && "inf" === u.d.kind && !u.d.fly && "rocketeer" !== u.key; }
 
 // Garrison interiors reuse the same figures, parented to the room.
 function fpsInteriorFig(u: any, parent: any) { const F = hdBuildFigure(u, parent); F.root.userData.F = F; return F.root; }
@@ -1079,4 +1149,4 @@ function fpsGfxPost() {
   r.autoClear = !1, r.clearDepth(), r.render(V.scene, V.cam), r.autoClear = !0;
 }
 
-Object.assign(window, { fpsGfxPre, fpsGfxShadow, fpsGfxPost, fgWindMat, WIND_KEYS, fx3dActive, fpsPixelRatio, FG, fpsHDSet, fpsBuildViewmodel, fpsViewmodelAnimate, fpsViewmodelThrow, fgDisposeRig, fpsInteriorFig, fpsPoseFig, fpsBuildCockpit, fpsCockpitAnimate, fpsSightOverlay, hdWeapon, hdBuildFigure });
+Object.assign(window, { fpsGfxPre, fpsGfxShadow, fpsGfxPost, fgWindMat, WIND_KEYS, fx3dActive, fpsPixelRatio, FG, fpsHDSet, fpsBuildViewmodel, fpsViewmodelAnimate, fpsViewmodelThrow, fgDisposeRig, hdBakeGeo, hdBakeOk, hdFloatCheck, hdPartLists, fpsInteriorFig, fpsPoseFig, fpsBuildCockpit, fpsCockpitAnimate, fpsSightOverlay, hdWeapon, hdBuildFigure });
