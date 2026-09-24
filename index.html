@@ -2895,8 +2895,44 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const rd = 0.82 * effRange(e);
     e.tx = clamp(r.x + Math.cos(e.flankAng) * rd, 6, 2938), e.ty = clamp(r.y + Math.sin(e.flankAng) * rd, 6, 2298), e.repath -= t, (!e.path || e.repath <= 0) && (repath(e), e.repath = 0.7), moveAlong(e, t);
   }
+  function canInfiltrate(e, b) {
+    return !!(e && e.d && e.d.c4 && b && "b" === b.e && !b.dead && b.owner !== e.owner && b.owner !== NEUTRAL && b.owner >= 0 && teamOf(b.owner) !== teamOf(e.owner) && !(b.bombT > 0));
+  }
+  function tickInfiltrate(e, t) {
+    const b = e.target;
+    if (e.inside) {
+      if ((e.plantT -= t) > 0 && !e.inside.dead) return;
+      const at = e.inside, n = nearestFree(Math.floor((e.entryX || at.x) / 32), Math.floor((e.entryY || at.y) / 32), walkable);
+      e.inside = null, e.alt = 0, n ? (e.x = 32 * n[0] + 16, e.y = 32 * n[1] + 16) : (e.x = e.entryX || at.x, e.y = e.entryY || at.y), e.order = "idle", e.target = null, e.path = null, e.moving = false;
+      const away = Math.atan2(e.y - at.y, e.x - at.x), fx = clamp(e.x + Math.cos(away) * 120, 8, 2936), fy = clamp(e.y + Math.sin(away) * 120, 8, 2296);
+      cmdMove([e], fx, fy);
+      return;
+    }
+    if (!canInfiltrate(e, b)) return e.order = "idle", void (e.target = null);
+    const gap = Math.hypot(Math.max(0, Math.abs(b.x - e.x) - 16 * b.size), Math.max(0, Math.abs(b.y - e.y) - 16 * b.size));
+    if (gap > 14) {
+      e.tx = b.x, e.ty = b.y, e.repath = (e.repath || 0) - t, (!e.path || e.repath <= 0) && (repath(e), e.repath = 1.2), e.infStuckT = void 0 !== e.infD && gap > e.infD - 0.3 ? (e.infStuckT || 0) + t : 0, e.infD = gap, moveAlong(e, t);
+      if (!(e.infStuckT > 2 && gap < 40)) return;
+    }
+    e.entryX = e.x, e.entryY = e.y, e.inside = b, e.x = b.x, e.y = b.y, e.moving = false, e.path = null, e.plantT = 1.6, e.infD = void 0, e.infStuckT = 0;
+    const fuse = 8;
+    b.bombT = fuse, b.bombFuse = fuse, b.bombOwner = e.owner, sfx("place"), textFx(b.x, b.y - 24, "C4 PLANTED", "#ff9a3c"), 0 === e.owner && hint("Charge set \u2014 " + fuse + "s!"), S.sel = S.sel.filter((u) => u !== e);
+  }
+  var NO_TREAD = /hover|lasher|gattling|mastermind|shard|spore|cultivator|titan_allied|titan_yuri|terror|rift|drone/;
+  function trackPair(e) {
+    if (NO_TREAD.test(e.key)) return;
+    const L = e.lastTrk;
+    if (L && Math.hypot(e.x - L.x, e.y - L.y) < 7) return;
+    e.lastTrk = { x: e.x, y: e.y };
+    if (!L) return;
+    const dx = e.x - L.x, dy = e.y - L.y, len = Math.hypot(dx, dy);
+    if (len > 40) return;
+    const a = Math.atan2(dy, dx), r = e.d.radius, off = 0.48 * r, w = Math.max(3, 0.3 * r), mx = (e.x + L.x) / 2, my = (e.y + L.y) / 2;
+    for (const sd of [-1, 1]) trackMark(mx - Math.sin(a) * off * sd, my + Math.cos(a) * off * sd, a, w, len + 1.5, 16);
+  }
   function tickUnit(e, t) {
-    if (e.dead || e.inside) return;
+    if (e.dead) return;
+    if (e.inside) return void ("infiltrate" === e.order && tickInfiltrate(e, t));
     if (e.fps) return;
     if (e.rollout) {
       const R = e.rollout, dx = R.x - e.x, dy = R.y - e.y, dd = Math.hypot(dx, dy), sp = Math.max(12, 0.5 * e.d.speed) * t;
@@ -2915,6 +2951,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (e.erase > 0 && !S.units.some((t2) => "chrono" === t2.d.role && !t2.dead && t2.target === e) && (e.erase = Math.max(0, e.erase - 0.35 * t)), r.fly) tickAir(e, t);
     else if (e.fixT = (e.fixT || 0) - t, e.fixT <= 0 && (e.fixT = 0.5, unstick(e)), e.vet >= 2 && e.hp < e.maxhp && (e.hp = Math.min(e.maxhp, e.hp + 0.012 * e.maxhp * t)), "terror" !== r.role) if ("chrono" !== r.role) {
       if ("capture" === e.order || "engineer" === r.role && "attack" === e.order) return e.order = "capture", void tickEngineer(e, t);
+      if ("infiltrate" === e.order) return void tickInfiltrate(e, t);
       if ("load" === e.order) return void tickLoadMove(e, t);
       if ("garrison" !== e.order) if (e.deployed && ("rad" === r.deploy && (!e.rad || e.rad.life <= 0 ? (e.rad = { x: e.x, y: e.y, r: 80, life: 0.5, owner: e.owner }, S.rads.push(e.rad)) : (e.rad.life = 0.5, e.rad.x = e.x, e.rad.y = e.y)), e.moving = false, e.path = null), e.hitT > 0 && (e.hitT -= t), e.muzzle > 0 && (e.muzzle -= t), e.recoil > 0 && (e.recoil = Math.max(0, e.recoil - 6 * t)), "garrison" === r.deploy && e.deployed && tickTitanGarrison(e, t), e.cool > 0 && (e.cool -= t), e.revealT > 0 && (e.revealT -= t), e.reloadT > 0 && (e.reloadT -= t) <= 0 && (e.ammo = r.ammo, e.reloadT = 0), "miner" !== r.role) {
         if (("idle" === e.order || "amove" === e.order || "guard" === e.order) && aaShouldRecheck(e, t, heroWpn(e))) {
@@ -2956,7 +2993,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.d.turret ? e.tang = angLerp(e.tang, n, Math.min(1, 6 * r)) : (e.ang = angLerp(e.ang, n, Math.min(1, 5 * r)), e.tang = e.ang);
     const a = e.d.turret ? e.tang : e.ang;
     if (!(Math.abs((n - a + 3 * Math.PI) % (2 * Math.PI) - Math.PI) > 0.25 || w.minRange && dist2(e.x, e.y, t.x, t.y) < w.minRange * w.minRange || e.cool > 0 || e.d.ammo && e.ammo <= 0 && !e.d.fly)) {
-      if (e.cool = w.rof * vRof(e), "mind" !== e.d.role) return e.d.c4 && "b" === t.e ? (e.cool = 2.2, S.fx.push({ kind: "ring", x: t.x, y: t.y, z: 6, s: 0.8, c: "#ff9a3c", t: 0, life: 0.5 }), damage(t, 900 * vDmg(e), e.owner, e), boom(t.x, t.y, 2.2, "#ffae3a"), void sfx("cannon")) : (fire(e, "inf" === e.d.kind && "b" === t.e && t.garrison && t.garrison.length ? pick(t.garrison.filter((u) => !u.dead)) || t : t, w), e.d.c4 && "u" === t.e && "inf" !== t.d.armor && Math.random() < 0.02 && (damage(t, 0.2 * t.maxhp, e.owner, e), spark(t.x, t.y, "#fff6cf"), sfx("cannon")), void (e.d.ammo && !e.d.fly && (e.ammo--, e.ammo <= 0 && (e.reloadT = 6))));
+      if (e.cool = w.rof * vRof(e), "mind" !== e.d.role) return e.d.c4 && "b" === t.e ? void ("attack" === e.order && canInfiltrate(e, t) ? (e.order = "infiltrate", e.target = t, e.path = null) : (e.target = null, "attack" === e.order && (e.order = "idle"))) : (fire(e, "inf" === e.d.kind && "b" === t.e && t.garrison && t.garrison.length ? pick(t.garrison.filter((u) => !u.dead)) || t : t, w), e.d.c4 && "u" === t.e && "inf" !== t.d.armor && Math.random() < 0.02 && (damage(t, 0.2 * t.maxhp, e.owner, e), spark(t.x, t.y, "#fff6cf"), sfx("cannon")), void (e.d.ammo && !e.d.fly && (e.ammo--, e.ammo <= 0 && (e.reloadT = 6))));
       mindTick(e, t);
     }
   }
@@ -3005,7 +3042,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     passableAt(g, y, e) || (passableAt(g, e.y, e) ? y = e.y : passableAt(e.x, y, e) ? g = e.x : (g = e.x, y = e.y, e.stuck += t));
     const x = Math.hypot(g - e.x, y - e.y);
-    x < 0.03 ? e.stuck += t : e.stuck = 0, e.stuck > 0.8 && (e.stuck = 0, repath(e), e.path || (e.order = "miner" === e.d.role ? "harvest" : "idle")), e.x = clamp(g, 6, 2938), e.y = clamp(y, 6, 2298), e.animT = (e.animT || 0) + x, e.moving = x > 0.12, e.key.startsWith("titan_") && !e.d.crush && titanStep(e), e.d.crush && e.moving && crushInfantry(e), e.d.turret ? idleTurret(e, t) : e.tang = e.ang, e.moving && "inf" !== e.d.kind && (e.d.naval ? (Math.random() < 0.15 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }), !e.d.sub && (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.22, S.fx.push({ kind: "wake", x: e.x - Math.cos(e.ang) * 0.8 * e.d.radius, y: e.y - Math.sin(e.ang) * 0.8 * e.d.radius, s: e.d.radius, t: 0, life: 1.4 }))) : (Math.random() < 0.025 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 2, s: 0.22, c: "#8a7f6a", t: 0, life: 0.45 }), (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.16, S.fx.push({ kind: "track", x: e.x - Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y + Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }), S.fx.push({ kind: "track", x: e.x + Math.sin(e.ang) * 0.55 * e.d.radius, y: e.y - Math.cos(e.ang) * 0.55 * e.d.radius, ang: e.ang, w: 0.15 * e.d.radius, l: 0.85 * e.d.radius, t: 0, life: 5 }))));
+    x < 0.03 ? e.stuck += t : e.stuck = 0, e.stuck > 0.8 && (e.stuck = 0, repath(e), e.path || (e.order = "miner" === e.d.role ? "harvest" : "idle")), e.x = clamp(g, 6, 2938), e.y = clamp(y, 6, 2298), e.animT = (e.animT || 0) + x, e.moving = x > 0.12, e.key.startsWith("titan_") && !e.d.crush && titanStep(e), e.d.crush && e.moving && crushInfantry(e), e.d.turret ? idleTurret(e, t) : e.tang = e.ang, e.moving && "inf" !== e.d.kind && (e.d.naval ? (Math.random() < 0.15 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }), !e.d.sub && (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.22, S.fx.push({ kind: "wake", x: e.x - Math.cos(e.ang) * 0.8 * e.d.radius, y: e.y - Math.sin(e.ang) * 0.8 * e.d.radius, s: e.d.radius, t: 0, life: 1.4 }))) : (Math.random() < 0.025 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 2, s: 0.22, c: "#8a7f6a", t: 0, life: 0.45 }), trackPair(e)));
   }
   function sepOk(u) {
     return !u.dead && !u.inside && !u.attached && !((u.alt || 0) > 2) && !u.rollout;
@@ -3473,6 +3510,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    NO_TREAD,
+    trackPair,
+    canInfiltrate,
+    tickInfiltrate,
     inBuildZone,
     zoneAnchor,
     DEPLOY_RANGE,
@@ -4105,26 +4146,34 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function w2sx(e, t, r) {
     if (FPS.on && FPS.cam) {
-      const n = fpsProject(e, t, r);
+      const n = fpsProject(e, t, (r || 0) + heightAt(e, t));
       return n.z >= 1 ? -99999 : (n.x + 1) / 2 * CW;
     }
     return (isoX(e, t) - isoX(cam.x, cam.y)) * cam.z + CW / 2;
   }
   function w2sy(e, t, r) {
     if (FPS.on && FPS.cam) {
-      const n = fpsProject(e, t, r);
+      const n = fpsProject(e, t, (r || 0) + heightAt(e, t));
       return n.z >= 1 ? -99999 : (1 - n.y) / 2 * CH;
     }
-    return (isoY(e, t) - isoY(cam.x, cam.y)) * cam.z + CH / 2 - (r || 0) * ZH * cam.z;
+    return (isoY(e, t) - isoY(cam.x, cam.y)) * cam.z + CH / 2 - ((r || 0) + heightAt(e, t)) * ZH * cam.z;
   }
   function fpsScale(e, t) {
     if (!FPS.on || !FPS.cam || !FPS.u) return cam.z;
     const r = Math.max(1, Math.hypot(e - FPS.u.x, t - FPS.u.y)), n = FPS.cam.fov * Math.PI / 180;
     return CH / 2 / Math.tan(n / 2) / r;
   }
-  function s2w(e, t) {
+  function s2wFlat(e, t) {
     const r = (e - CW / 2) / cam.z + isoX(cam.x, cam.y), n = (t - CH / 2) / cam.z + isoY(cam.x, cam.y);
     return { x: n / 0.5 / 2 + r / 2, y: n / 0.5 / 2 - r / 2 };
+  }
+  function s2w(e, t) {
+    let p = s2wFlat(e, t);
+    for (let k = 0; k < 4; k++) {
+      const h = heightAt(clamp(p.x, 0, 2943), clamp(p.y, 0, 2303));
+      p = s2wFlat(e, t + h * ZH * cam.z);
+    }
+    return p;
   }
   var QUALITY = 2;
   var lastQualityChange = -1e9;
@@ -9095,7 +9144,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (e.d.naval) return Math.sin(1.7 * T + ph) * 1.1 + (e.moving ? 0.35 * Math.sin(5.5 * T + ph) : 0);
     if ("hover" === e.key) return 1.6 + Math.sin(3.4 * T + ph) * 1.1;
     if (GAIT4[e.key]) return e.moving ? 0.9 * Math.abs(Math.sin((e.animT || 0) * Math.PI / 12)) : 0.35 * Math.sin(1.6 * T + ph);
-    return Math.sin((e.moving ? 8 : 3) * T + ph) * (e.moving ? 1.6 : 0.55);
+    if (NO_TREAD.test(e.key)) return Math.sin((e.moving ? 6 : 2) * T + ph) * (e.moving ? 0.8 : 0.25);
+    return e.moving ? 0.22 * Math.sin(23 * T + ph) + 0.12 * Math.sin(37 * T + 2 * ph) : 0.05 * Math.sin(17 * T + ph);
   }
   var YORG = { lasher: 1, gattling: 1, shard: 1, mastermind: 1, rift: 1, titan_yuri: 1 };
   function unitFrame(e) {
@@ -9193,7 +9243,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let i = r - 1; i >= 0; i--) pts.push([e + i, t + r]);
     for (let i = r - 1; i > 0; i--) pts.push([e, t + i]);
     pts.forEach((p, k) => {
-      const h = heightAt(32 * p[0], 32 * p[1]) + 0.6, x = w2sx(32 * p[0], 32 * p[1], h), y = w2sy(32 * p[0], 32 * p[1], h);
+      const h = 0.6, x = w2sx(32 * p[0], 32 * p[1], h), y = w2sy(32 * p[0], 32 * p[1], h);
       k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
     }), ctx.closePath();
   }
@@ -9283,7 +9333,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       for (let ty = 0; ty < 72; ty++) for (let tx = 0; tx < 92; tx++) inBuildZone(0, tx, ty, isNaval) && (_zoneMask[ty * 92 + tx] = 1);
     }
     const M = _zoneMask, Z = (x, y) => x >= 0 && y >= 0 && x < 92 && y < 72 && M[y * 92 + x], P = (x, y) => {
-      const h = heightAt(32 * x, 32 * y) + 0.6;
+      const h = 0.6;
       return [w2sx(32 * x, 32 * y, h), w2sy(32 * x, 32 * y, h)];
     };
     ctx.beginPath();
@@ -9443,7 +9493,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const n = r.getBoundingClientRect();
       return n.width && n.height ? "b" === t ? Math.max(0, CH - n.top) : "t" === t ? Math.max(0, n.bottom) : "r" === t ? Math.max(0, CW - n.left) : Math.max(0, n.right) : 0;
     };
-    return _vpIns = { l: 0, r: 0, t: e("top", "t"), b: e("side", "b") }, _vpIns;
+    const sd = document.getElementById("side"), sr = sd && !sd.classList.contains("hidden") ? sd.getBoundingClientRect() : null, col = !!sr && sr.width > 0 && sr.height > 0.45 * CH && sr.width < 0.6 * CW;
+    return _vpIns = { l: 0, r: col ? Math.max(0, CW - sr.left) : 0, t: e("top", "t"), b: col ? 0 : e("side", "b") }, _vpIns;
   }
   function fc(e) {
     return e < 0 ? "#9c968a" : S.players[e].color || S.players[e].f.color;
@@ -10149,6 +10200,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const n of e) if ("u" === n.e && "b" === t.e) {
       if ("engineer" === n.d.role) {
         n.order = "capture", n.target = t, n.path = null, r = true;
+        continue;
+      }
+      if (canInfiltrate(n, t)) {
+        n.order = "infiltrate", n.target = t, n.path = null, r = true;
         continue;
       }
       if (n.d.garrison && garrisonable(t, n.owner) && t.owner !== n.owner) {
@@ -11312,8 +11367,68 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
   function setMenuCam(c) {
     MENU_CAM = c;
   }
+  var TRK = { n: 2400, i: 0, mesh: null, fade: null, born: new Float32Array(2400), life: new Float32Array(2400), dirty: false, lastT: 0 };
+  var _tkM = new THREE.Matrix4();
+  var _tkX = new THREE.Vector3();
+  var _tkY = new THREE.Vector3();
+  var _tkZ = new THREE.Vector3();
+  function trackMark(x, y, ang, w, l, life) {
+    if (!GL || !GL.scene) {
+      S.fx.push({ kind: "track", x, y, ang, w: 0.5 * w, l: 0.5 * l, t: 0, life: Math.min(life, 5) });
+      return;
+    }
+    if (!TRK.mesh) glTrackInit();
+    const k = TRK.i, c = Math.cos(ang), s = Math.sin(ang), h = heightAt(x, y);
+    const hf = heightAt(x + c * 4, y + s * 4) - heightAt(x - c * 4, y - s * 4), hs = heightAt(x - s * 4, y + c * 4) - heightAt(x + s * 4, y - c * 4);
+    _tkX.set(c, hf / 8, s).normalize().multiplyScalar(l);
+    _tkZ.set(-s, hs / 8, c).normalize().multiplyScalar(w);
+    _tkY.crossVectors(_tkZ, _tkX).normalize();
+    _tkM.makeBasis(_tkX, _tkY, _tkZ).setPosition(x, h + 0.45, y);
+    TRK.mesh.setMatrixAt(k, _tkM);
+    TRK.born[k] = S.time, TRK.life[k] = life;
+    TRK.i = (k + 1) % TRK.n, TRK.dirty = true;
+    TRK.mesh.count = Math.max(TRK.mesh.count, k + 1);
+  }
+  function glTrackInit() {
+    const g = new THREE.PlaneGeometry(1, 1);
+    g.rotateX(-Math.PI / 2);
+    const fade = new THREE.InstancedBufferAttribute(new Float32Array(TRK.n), 1);
+    fade.setUsage(THREE.DynamicDrawUsage);
+    g.setAttribute("aFade", fade);
+    const m = new THREE.ShaderMaterial({
+      vertexShader: "attribute float aFade;varying float vF;varying vec2 vUv;void main(){vF=aFade;vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*instanceMatrix*vec4(position,1.0);}",
+      fragmentShader: "varying float vF;varying vec2 vUv;void main(){float bar=0.55+0.45*step(0.45,fract(vUv.x*5.0));float edge=smoothstep(0.0,0.22,vUv.y)*smoothstep(1.0,0.78,vUv.y);float d=0.44*bar*edge*vF;gl_FragColor=vec4(vec3(1.0-d),1.0);}",
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.CustomBlending,
+      blendSrc: THREE.ZeroFactor,
+      blendDst: THREE.SrcColorFactor,
+      blendEquation: THREE.AddEquation,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2
+    });
+    const mesh = new THREE.InstancedMesh(g, m, TRK.n);
+    mesh.count = 0, mesh.frustumCulled = false, mesh.renderOrder = 1;
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    GL.scene.add(mesh), TRK.mesh = mesh, TRK.fade = fade;
+  }
+  function glTrackUpdate() {
+    if (!TRK.mesh) return;
+    if (S.time < TRK.lastT - 1) TRK.mesh.count = 0, TRK.i = 0;
+    TRK.lastT = S.time;
+    if (TRK.mesh.parent !== GL.scene) GL.scene.add(TRK.mesh);
+    const a = TRK.fade.array, n = TRK.mesh.count;
+    for (let k = 0; k < n; k++) {
+      const age = (S.time - TRK.born[k]) / (TRK.life[k] || 1);
+      a[k] = age >= 1 ? 0 : age < 0.7 ? 1 : 1 - (age - 0.7) / 0.3;
+    }
+    TRK.fade.needsUpdate = true;
+    if (TRK.dirty) TRK.mesh.instanceMatrix.needsUpdate = true, TRK.dirty = false;
+  }
   function renderGL() {
     fpsGfxPre();
+    glTrackUpdate();
     GL.waterU && (GL.waterU.value = S.time);
     if (GL.water) {
       const wm = GL.water.material;
@@ -11480,7 +11595,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     }
     fpsGfxPost();
   }
-  Object.assign(window, { setMenuCam });
+  Object.assign(window, { setMenuCam, trackMark });
   Object.assign(window, {
     glMerge,
     fogPatch,
@@ -11640,7 +11755,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
         FPS.swimming = inMap(wtx, wty) && G.terr[idx(wtx, wty)] >= 2;
       } else FPS.swimming = false;
       const h = Math.hypot(t.x - d, t.y - f);
-      t.animT = (t.animT || 0) + h, t.moving = h > 0.05, t.moving && "inf" === t.d.kind && !t.inside && !(FPS.jumpT > 0) && (t.animT - (FPS.lastStepT || 0) >= (FPS.crouching ? 17 : sprintOk && FPS.stamina > 0 ? 30 : 22) && (FPS.lastStepT = t.animT, sfx(FPS.swimming ? "splash" : "step"))), t.moving && "inf" !== t.d.kind && (t.animT - (FPS.lastEngineSfxT || 0) >= (t.d.fly ? 26 : t.d.naval ? 40 : 18) && (FPS.lastEngineSfxT = t.animT, sfx(t.d.fly ? "engine_air" : t.d.naval ? "engine_sea" : "engine_gnd")), t.d.naval ? Math.random() < 0.18 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }) : (Math.random() < 0.06 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 2, s: 0.35, c: "#8a7f6a", t: 0, life: 0.55 }), (t.trackT = (t.trackT || 0) - e) <= 0 && (t.trackT = 0.16, S.fx.push({ kind: "track", x: t.x, y: t.y, ang: t.ang, w: 0.35 * t.d.radius, l: 0.9 * t.d.radius, t: 0, life: 6 }))));
+      t.animT = (t.animT || 0) + h, t.moving = h > 0.05, t.moving && "inf" === t.d.kind && !t.inside && !(FPS.jumpT > 0) && (t.animT - (FPS.lastStepT || 0) >= (FPS.crouching ? 17 : sprintOk && FPS.stamina > 0 ? 30 : 22) && (FPS.lastStepT = t.animT, sfx(FPS.swimming ? "splash" : "step"))), t.moving && "inf" !== t.d.kind && (t.animT - (FPS.lastEngineSfxT || 0) >= (t.d.fly ? 26 : t.d.naval ? 40 : 18) && (FPS.lastEngineSfxT = t.animT, sfx(t.d.fly ? "engine_air" : t.d.naval ? "engine_sea" : "engine_gnd")), t.d.naval ? Math.random() < 0.18 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }) : (Math.random() < 0.06 && S.fx.push({ kind: "smoke", x: t.x - Math.cos(t.ang) * t.d.radius, y: t.y - Math.sin(t.ang) * t.d.radius, z: 2, s: 0.35, c: "#8a7f6a", t: 0, life: 0.55 }), trackPair(t)));
     } else t.moving = false;
     if ("inf" === t.d.kind) {
       if (t.inside) FPS.interact = t.inside;
@@ -11651,7 +11766,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
           const dx = b.x - t.x, dy = b.y - t.y, dst = Math.hypot(dx, dy), thr = 16 * b.size + 55;
           dst < thr && dst < bd && (bd = dst, bb = b);
         }
-        FPS.interact = bb, bb && bd < 16 * bb.size + 8 && S.time > (FPS.exitCD || 0) && enterGarrison(t, bb) && fpsEnterDoor(t, bb);
+        FPS.interact = bb, bb && Math.hypot(Math.max(0, Math.abs(bb.x - t.x) - 16 * bb.size), Math.max(0, Math.abs(bb.y - t.y) - 16 * bb.size)) < 14 && S.time > (FPS.exitCD || 0) && enterGarrison(t, bb) && fpsEnterDoor(t, bb);
       }
     } else FPS.interact = null;
     fpsUpdateAim(t, e), FPS.firing && fpsShoot(t);

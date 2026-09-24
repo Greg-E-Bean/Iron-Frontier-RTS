@@ -485,6 +485,11 @@ declare global {
   function captureBld(u: Unit, b: Building): void;
   function tickRads(dt: number): void;
   function tickEngineer(u: Unit, dt: number): void;
+  function tickInfiltrate(u: any, dt: number): void;
+  function trackPair(u: any): void;
+  const NO_TREAD: RegExp;
+  function trackMark(x: number, y: number, ang: number, w: number, l: number, life: number): void;
+  function canInfiltrate(u: any, b: any): boolean;
   function killUnitSilent(u: Unit): void;
   function deployMCV(u: Unit): void;
   function packUpBld(b: Building): void;
