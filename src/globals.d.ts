@@ -646,6 +646,12 @@ declare global {
   function musicTrackInfo(i: number): { name: string; style: string; mood: string; fac: string; secs: number } | null;
   function mapTileRGB(i: number): number[];
   function showMusicMenu(): void;
+  function menuBgStart(): void;
+  function menuBgStop(): void;
+  function menuBgSetMap(key: string): void;
+  function menuBgFrame(dt: number): void;
+  function menuBgActive(): boolean;
+  function setMenuCam(c: any): void;
   function showMainSettings(): void;
   const MUSIC_TRACKS: { name: string; [k: string]: any }[];
   function musicModeOptions(): string[];

@@ -227,6 +227,54 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 .editorPaletteCard:active{transform:scale(.96)}
 .editorPaletteCard.sel{border-color:var(--amber);background:#1e1608ee;color:var(--amber2)}
 .editorPaletteCard .assetThumb{width:36px;height:36px}
+
+/* ---- launch screen: live map backdrop + recon-feed overlay + glass UI ---- */
+#menuFx{position:fixed;inset:0;z-index:29;pointer-events:none;overflow:hidden}
+#menuFx.hidden{display:none}
+#menuFx canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;mix-blend-mode:screen;opacity:.08}
+#menuFx .scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);animation:mfxRoll 7s linear infinite}
+#menuFx .roll{position:absolute;left:0;right:0;height:18vh;background:linear-gradient(180deg,transparent,rgba(170,210,230,.06),transparent);animation:mfxBar 5.5s linear infinite}
+#menuFx .vig{position:absolute;inset:0;background:radial-gradient(ellipse at 60% 50%,transparent 45%,rgba(2,6,8,.55) 78%,rgba(2,5,7,.92) 100%)}
+#menuFx .tint{position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,10,12,.78) 0%,rgba(4,10,12,.35) 34%,transparent 60%)}
+#menuFx .brk{position:absolute;width:38px;height:38px;border:2px solid rgba(240,167,44,.55)}
+#menuFx .b1{top:16px;right:16px;border-left:0;border-bottom:0}#menuFx .b2{bottom:16px;right:16px;border-left:0;border-top:0}
+#menuFx .b3{top:16px;left:16px;border-right:0;border-bottom:0}#menuFx .b4{bottom:16px;left:16px;border-right:0;border-top:0}
+#menuFx .hud{position:absolute;top:30px;right:34px;text-align:right;font:600 11px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#cfe3ea;letter-spacing:2px;text-shadow:0 0 8px #000}
+#menuFx .hud .live{color:#ff5a4a}#menuFx .hud .live:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4a3a;margin-right:6px;box-shadow:0 0 8px #ff4a3a;animation:mfxBlink 1.2s steps(2) infinite}
+#menuFx .hud .map{font:700 26px/1.2 system-ui,sans-serif;letter-spacing:5px;color:#fff;margin-top:6px}
+#menuFx .hud .msub{font:500 12px/1.4 system-ui,sans-serif;letter-spacing:1px;color:#b9cbd4;max-width:340px;margin-left:auto}
+#menuFx .tc{position:absolute;bottom:30px;right:34px;font:600 11px ui-monospace,Menlo,Consolas,monospace;color:#9fb4bf;letter-spacing:2px}
+@keyframes mfxRoll{to{background-position:0 60px}}@keyframes mfxBar{0%{top:-20vh}100%{top:110vh}}@keyframes mfxBlink{50%{opacity:.15}}
+@media (max-width:899px){#menuFx .hud{top:auto;bottom:52px;right:24px}#menuFx .hud .map{font-size:18px}#menuFx .tint{background:rgba(4,10,12,.45)}}
+#menu.live{background:transparent}
+@media (min-width:900px){#menu.live{justify-content:flex-start;padding-left:max(28px,5vw)}}
+#menu.live .panel{background:linear-gradient(160deg,rgba(18,28,34,.78),rgba(8,13,16,.84));backdrop-filter:blur(12px) saturate(1.2);-webkit-backdrop-filter:blur(12px) saturate(1.2);
+  border:1px solid rgba(170,200,220,.14);border-radius:18px;clip-path:none;box-shadow:0 24px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07)}
+#menu.live .titleArt{border-radius:17px 17px 0 0;mask-image:linear-gradient(180deg,#000 70%,transparent);-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent)}
+#menu.live .fld select,#menu.live .pRow select{appearance:none;-webkit-appearance:none;background:rgba(255,255,255,.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239fb4c4'/%3E%3C/svg%3E") no-repeat right 8px center;
+  border:1px solid rgba(170,200,220,.16);border-radius:8px;color:#dce8ef;transition:border-color .15s,background-color .15s}
+#menu.live .fld select{padding:10px 26px 10px 10px;font-size:13px}
+#menu.live .pRow select{padding:7px 14px 7px 4px;border-radius:6px}
+#menu.live .fld select:hover,#menu.live .pRow select:hover{border-color:rgba(240,167,44,.6);background-color:rgba(240,167,44,.06)}
+#menu.live .addBtn{border-radius:10px;border-style:dashed;background:rgba(255,255,255,.03)}
+#menu.live #mapPreview{border-radius:10px;border:1px solid rgba(170,200,220,.14)}
+#menu.live #play{border-radius:12px;clip-path:none;border:0;padding:16px;font-weight:700;letter-spacing:4px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#46c35a 0%,#23a36a 55%,#138c7c 100%);box-shadow:0 10px 28px rgba(35,163,106,.35),inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .15s,box-shadow .2s,filter .2s}
+#menu.live #play:after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:mSheen 3.2s ease-in-out infinite}
+#menu.live #play:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(35,163,106,.5),inset 0 1px 0 rgba(255,255,255,.4);filter:brightness(1.06)}
+#menu.live #play:active{transform:translateY(0) scale(.98)}
+@keyframes mSheen{0%,55%{left:-60%}100%{left:130%}}
+.mGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.mBtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 10px;border-radius:10px;border:1px solid rgba(170,200,220,.18);
+  background:rgba(255,255,255,.045);color:#d6e2ec;font-size:12px;font-weight:600;letter-spacing:2px;cursor:pointer;
+  transition:transform .15s,border-color .15s,background .15s,box-shadow .2s,color .15s}
+.mBtn .ic{font-size:14px;opacity:.85}
+.mBtn:hover{transform:translateY(-1px);border-color:rgba(240,167,44,.65);background:rgba(240,167,44,.09);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.35),0 0 0 3px rgba(240,167,44,.08)}
+.mBtn:active{transform:scale(.97)}
+.mBtn.wide{grid-column:1 / -1}
+.mLink{display:block;margin:12px auto 0;padding:6px 16px;border-radius:20px;border:1px solid rgba(170,200,220,.16);background:transparent;color:#8fa3b0;font-size:11px;letter-spacing:1px;cursor:pointer;transition:color .15s,border-color .15s}
+.mLink:hover{color:#dce8ef;border-color:rgba(240,167,44,.5)}
 @keyframes panelIn{0%{opacity:0;transform:translateY(14px) scale(.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
 .panel h1{margin:0 0 2px;font-size:23px;color:#e8f0f4;letter-spacing:3px;text-align:center;
   text-shadow:0 0 20px #5ad04455}
@@ -703,6 +751,7 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
 
 <div id="hint"></div>
 
+<div id="menuFx" class="hidden"><canvas></canvas><div class="tint"></div><div class="roll"></div><div class="scan"></div><div class="vig"></div><div class="brk b1"></div><div class="brk b2"></div><div class="brk b3"></div><div class="brk b4"></div><div class="hud"><div class="live">LIVE RECON FEED</div><div class="map" id="mfxMap"></div><div class="msub" id="mfxSub"></div></div><div class="tc" id="mfxTime"></div></div>
 <div id="menu">
   <div class="panel" id="panelMain">
     <img class="titleArt" src="icons/logo-banner.jpg" alt="Frontier Command" width="1024" height="250">
@@ -714,7 +763,7 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
       <div class="fld"><label>Map</label><select id="mapSel"></select><div id="mapPreview"></div></div>
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
     </div>
-    <button id="play">START SKIRMISH</button><button id="tutorialBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">TUTORIAL</button><button id="campaignBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CAMPAIGN</button><button id="loadBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><div style="display:flex;gap:8px;margin-top:8px"><button id="musicBtn" style="flex:1;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">♪ MUSIC</button><button id="setBtn" style="flex:1;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SETTINGS</button></div><button id="accountBtn" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">ACCOUNT</button><button id="adminBtn" style="display:block;margin:10px auto 0;padding:6px 16px;border-radius:20px;border:1px solid #5b5b5b;background:#2a2a2a;color:#9aa0a6;font-size:11px;letter-spacing:.5px">+ IMPORT / CREATE</button>
+    <button id="play">START SKIRMISH</button><div class="mGrid"><button id="campaignBtn" class="mBtn"><span class="ic">★</span>CAMPAIGN</button><button id="tutorialBtn" class="mBtn"><span class="ic">◎</span>TUTORIAL</button><button id="loadBtn" class="mBtn"><span class="ic">⤓</span>LOAD GAME</button><button id="musicBtn" class="mBtn"><span class="ic">♪</span>MUSIC</button><button id="setBtn" class="mBtn"><span class="ic">⚙</span>SETTINGS</button><button id="accountBtn" class="mBtn"><span class="ic">◉</span>ACCOUNT</button></div><button id="adminBtn" class="mLink">+ IMPORT / CREATE</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
       Tap a build card again to queue more · ▾ expands the build panel.<br>
       <b style="color:#e0b050">Ore:</b> amber ore feeds your economy, pale gem veins pay far more,
