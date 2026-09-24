@@ -1214,9 +1214,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       chosen.push(c);
     }
     for (const c of chosen) {
+      const bdir = bridgeRunDir(Array.from({ length: c.len }, (_, i) => [c.horiz ? c.tx + i : c.tx, c.horiz ? c.ty : c.ty + i, c.horiz]));
       for (let i = 0; i < c.len; i++) {
         const tx = c.horiz ? c.tx + i : c.tx, ty = c.horiz ? c.ty : c.ty + i, id = idx(tx, ty);
-        G.bridge[id] = 1, G.bridgeHp[id] = BRIDGE_MAX_HP, G.bridgeSite[id] = 1, G.bridgeHoriz[id] = c.horiz ? 1 : 0, G.props.push({ tx, ty, kind: "bridge", x: 32 * tx + 16, y: 32 * ty + 16, r: c.horiz ? 0 : Math.PI / 2, v: 0, s: 1 });
+        layBridgePair(tx, ty, c.horiz, bdir);
       }
       placeBridgeHuts(c);
     }
@@ -1255,8 +1256,26 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (!G.bridgeSite[i] || G.bridgeHp[i] >= BRIDGE_MAX_HP) continue;
       if (dist(32 * tx + 16, 32 * ty + 16, e.x, e.y) > BRIDGE_REPAIR_RANGE) continue;
       const wasDown = !G.bridge[i];
-      G.bridgeHp[i] = Math.min(BRIDGE_MAX_HP, G.bridgeHp[i] + BRIDGE_REPAIR_RATE * t), wasDown && G.bridgeHp[i] > 0 && (G.bridge[i] = 1, G.props.push({ tx, ty, kind: "bridge", x: 32 * tx + 16, y: 32 * ty + 16, r: G.bridgeHoriz[i] ? 0 : Math.PI / 2, v: 0, s: 1 }));
+      G.bridgeHp[i] = Math.min(BRIDGE_MAX_HP, G.bridgeHp[i] + BRIDGE_REPAIR_RATE * t), wasDown && G.bridgeHp[i] > 0 && (G.bridge[i] = 1, G.props.push({ tx, ty, kind: "bridge", x: 32 * tx + 16, y: 32 * ty + 16, r: 1 & G.bridgeHoriz[i] ? 0 : -Math.PI / 2, v: G.bridgeHoriz[i] >> 1, s: 1 }));
     }
+  }
+  function layBridgeTile(x, y, h, side) {
+    const id = idx(x, y);
+    if (G.bridge[id]) return;
+    G.bridge[id] = 1, G.bridgeHp[id] = BRIDGE_MAX_HP, G.bridgeSite[id] = 1, G.bridgeHoriz[id] = (h ? 1 : 0) | side << 1, G.props.push({ tx: x, ty: y, kind: "bridge", x: 32 * x + 16, y: 32 * y + 16, r: h ? 0 : -Math.PI / 2, v: side, s: 1 });
+  }
+  function bridgeRunDir(tiles) {
+    let p = 0, m = 0;
+    for (const [x, y, h] of tiles) {
+      const w = (dx, dy) => inMap(x + dx, y + dy) && 2 === G.terr[idx(x + dx, y + dy)];
+      h ? (w(0, 1) && p++, w(0, -1) && m++) : (w(1, 0) && p++, w(-1, 0) && m++);
+    }
+    return p || m ? p >= m ? 1 : -1 : 0;
+  }
+  function layBridgePair(x, y, h, dir) {
+    if (!dir) return void layBridgeTile(x, y, h, 0);
+    const px = h ? x : x + dir, py = h ? y + dir : y, pi = idx(px, py), ok = inMap(px, py) && !G.bridge[pi] && (2 === G.terr[pi] || G.terr[pi] < 2 && !G.occ[pi] && !G.blk[pi] && G.mtn[pi] < 0.12 && G.elev[pi] <= MTN_WALK_LIMIT);
+    layBridgeTile(x, y, h, dir > 0 ? 1 : 2), ok && layBridgeTile(px, py, h, dir > 0 ? 2 : 1);
   }
   function placeBridgeHuts(c) {
     const ends = c.horiz ? [[c.tx - 1, c.ty], [c.tx + c.len, c.ty]] : [[c.tx, c.ty - 1], [c.tx, c.ty + c.len]];
@@ -1412,9 +1431,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       let ok = true;
       for (const [x, y] of run) (!inMap(x, y) || 2 !== G.terr[idx(x, y)]) && (ok = false);
       if (!ok) continue;
+      const bdir = 1;
       for (const [x, y, h] of run) {
         const id = idx(x, y);
-        G.bridge[id] || (G.bridge[id] = 1, G.bridgeHp[id] = BRIDGE_MAX_HP, G.bridgeSite[id] = 1, G.bridgeHoriz[id] = h ? 1 : 0, G.props.push({ tx: x, ty: y, kind: "bridge", x: 32 * x + 16, y: 32 * y + 16, r: h ? 0 : Math.PI / 2, v: 0, s: 1 }));
+        G.bridge[id] || layBridgePair(x, y, h, bdir);
       }
       const [x0, y0, h0] = run[0], c = { tx: Math.min(...run.map((r) => r[0])), ty: Math.min(...run.map((r) => r[1])), len: run.length, horiz: !!h0 };
       placeBridgeHuts(c);
@@ -2092,7 +2112,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let e2 = r; e2 < r + a; e2++) for (let r2 = t; r2 < t + a; r2++) {
       if (!inMap(r2, e2)) return false;
       const t2 = idx(r2, e2);
-      if (G.terr[t2] >= 2 || 0 !== G.occ[t2] || G.ore[t2] > 0) return false;
+      if (G.terr[t2] >= 2 || 0 !== G.occ[t2] || G.ore[t2] > 0 || G.bridge[t2]) return false;
     }
     if (isNaval && !nearWater(t, r, a, 2)) return false;
     if (!isFlatFooting(t, r, a)) return false;
@@ -2463,13 +2483,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     e.muzzle = 0.12, e.recoil = 1;
     if ("u" === t.e && (t.alt || 0) > 6) {
       for (const sd2 of [-1, 1]) {
-        const ox2 = e.x + c * 6 + px * sd2 * 24, oy2 = e.y + s * 6 + py * sd2 * 24;
-        S.projs.push({ x: ox2, y: oy2, z: 30, z0: 30, t0: 0, dur: Math.max(0.4, a / 330), tgt: t, dmg: 0.55 * dmg, owner: e.owner, by: e, sp: 330, kind: "missile", ang: ta + sd2 * 0.25, life: 6, splash: 14, arc: 0, fall: 0, tx0: t.x, ty0: t.y, d0: a });
+        const ox2 = e.x + c * 6 + px * sd2 * 14, oy2 = e.y + s * 6 + py * sd2 * 14;
+        S.projs.push({ x: ox2, y: oy2, z: 28, z0: 28, t0: 0, dur: Math.max(0.4, a / 330), tgt: t, dmg: 0.55 * dmg, owner: e.owner, by: e, sp: 330, kind: "missile", ang: ta + sd2 * 0.25, life: 6, splash: 14, arc: 0, fall: 0, tx0: t.x, ty0: t.y, d0: a });
         for (let k = 0; k < 2; k++) S.fx.push({ kind: "smoke", x: ox2 - c * (4 + 5 * k), y: oy2 - s * (4 + 5 * k), z: 30, s: 0.5, c: "#d6d2c8", t: 0, life: 0.7 });
       }
       return void sfx("rocket");
     }
-    const sd = e.jugSide = -(e.jugSide || 1), ox = e.x + c * 62 + px * sd * 12, oy = e.y + s * 62 + py * sd * 12;
+    const sd = e.jugSide = -(e.jugSide || 1), ox = e.x + c * 46 + px * sd * 5, oy = e.y + s * 46 + py * sd * 5;
     S.fx.push({ kind: "boom", x: ox, y: oy, z: 26, s: 0.55, c: "#ff7a22", t: 0, life: 0.28 });
     S.fx.push({ kind: "ring", x: ox, y: oy, z: 26, s: 0.4, c: "#ffb060", t: 0, life: 0.25 });
     for (let k = 0; k < 5; k++) S.fx.push({ kind: "smoke", x: ox + c * 5 * k + rnd(-4, 4), y: oy + s * 5 * k + rnd(-4, 4), z: 26, s: 0.7 + 0.18 * k, c: k < 2 ? "#ff8a2a" : "#6b625a", t: 0, life: 0.5 + 0.25 * k });
@@ -5351,7 +5371,6 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return scale2(a);
   }
   var JUG_Z = 21;
-  var JUG_T = 19;
   function juggernautHull(t) {
     const p = tankHull(64, 30, t, { wheels: 8, skirt: true, th: 13, trkW: 12, fac: "soviet" });
     for (const sg of [-1, 1]) {
@@ -5365,31 +5384,31 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return p;
   }
   function juggernautTurret() {
-    const a = [], z = JUG_Z, T = JUG_T, P2 = PI2;
-    a.push(P_(CYL(0.95 * T, 2.6, 14), 0, 0, z - 2.4, "dark"));
-    a.push(P_(SLAB(turretProfile(2.1 * T, 1.75 * T, "soviet"), 8.5, 2.6, "jugT"), -0.08 * T, 0, z, "body"));
-    a.push(P_(SLAB(turretProfile(1.5 * T, 1.25 * T, "soviet"), 1.8, 0.8, "jugT2"), -0.25 * T, 0, z + 8.5, "armor2"));
-    a.push(P_(BOXM(6, 1.5 * T, 8, 1.4), 1.05 * T, 0, z + 0.6, "gunmetal"));
-    for (const sy of [-6, 6]) {
-      const bz = z + 4.6;
-      a.push(P_(CYL(3.2, 9, 12), 1.05 * T + 2, sy, bz, "darkmetal", { ty: P2, b: 1 }));
-      a.push(P_(CYL(2.1, 40, 12), 1.05 * T + 2, sy, bz, "gunmetal", { ty: P2, b: 1 }));
-      for (const f of [0.35, 0.62]) a.push(P_(CYL(2.5, 3, 12), 1.05 * T + 2 + 40 * f, sy, bz, "armor3", { ty: P2, b: 1 }));
-      a.push(P_(CYL(3, 6, 12), 1.05 * T + 2 + 36, sy, bz, "steel", { ty: P2, b: 1 }));
-      a.push(P_(BOXM(2, 7.4, 6.4, 0.4), 1.05 * T + 2 + 41, sy, bz - 3.2, "gunmetal", { b: 1 }));
+    const a = [], z = JUG_Z, P2 = PI2, TL = 30, TW = 22, tx = -2, MX = tx + 0.5 * TL, BL = 30;
+    a.push(P_(CYL(0.42 * TW, 2.4, 14), tx, 0, z - 2.2, "dark"));
+    a.push(P_(SLAB(turretProfile(TL, TW, "soviet"), 7, 2.2, "jugT"), tx, 0, z, "body"));
+    a.push(P_(SLAB(turretProfile(0.7 * TL, 0.72 * TW, "soviet"), 1.6, 0.7, "jugT2"), tx - 0.12 * TL, 0, z + 7, "armor2"));
+    a.push(P_(BOXM(5, 0.62 * TW, 6.4, 1.2), MX, 0, z + 0.5, "gunmetal"));
+    for (const sy of [-4.4, 4.4]) {
+      const bz = z + 3.8;
+      a.push(P_(CYL(2.6, 7, 12), MX + 1.5, sy, bz, "darkmetal", { ty: P2, b: 1 }));
+      a.push(P_(CYL(1.75, BL, 12), MX + 1.5, sy, bz, "gunmetal", { ty: P2, b: 1 }));
+      for (const f of [0.35, 0.62]) a.push(P_(CYL(2.05, 2.4, 12), MX + 1.5 + BL * f, sy, bz, "armor3", { ty: P2, b: 1 }));
+      a.push(P_(CYL(2.4, 4.6, 12), MX + 1.5 + BL - 3.4, sy, bz, "steel", { ty: P2, b: 1 }));
+      a.push(P_(BOXM(1.6, 5.6, 5, 0.3), MX + 1.5 + BL + 0.8, sy, bz - 2.5, "gunmetal", { b: 1 }));
     }
     for (const sy of [-1, 1]) {
-      const px = -0.12 * T, py = sy * (1.02 * T + 4.2), pz = z + 1.2;
-      a.push(P_(BOXM(4, 4, 5, 0.6), px, sy * (1.02 * T + 0.6), pz + 1, "darkmetal"));
-      a.push(P_(BOXM(15, 7.4, 8.2, 1), px, py, pz, "body"));
-      a.push(P_(BOXM(15.4, 7.8, 1, 0.3), px, py, pz + 8.2, "rust"));
-      for (const oy of [-1.8, 1.8]) for (const oz of [2, 5.2]) a.push(P_(CYL(1.25, 0.9, 8), px + 7.2, py + oy, pz + oz, "dark2", { ty: P2 })), a.push(P_(CYL(0.8, 0.5, 8), px + 7.9, py + oy, pz + oz, "red", { ty: P2, e: 1 }));
+      const px = tx - 0.1 * TL, py = sy * (0.5 * TW + 3.4), pz = z + 1;
+      a.push(P_(BOXM(3.4, 3, 4, 0.5), px, sy * (0.5 * TW + 0.8), pz + 1, "darkmetal"));
+      a.push(P_(BOXM(12, 5.6, 6.4, 0.8), px, py, pz, "body"));
+      a.push(P_(BOXM(12.3, 5.9, 0.8, 0.25), px, py, pz + 6.4, "rust"));
+      for (const oy of [-1.3, 1.3]) for (const oz of [1.7, 4.3]) a.push(P_(CYL(1, 0.8, 8), px + 5.8, py + oy, pz + oz, "dark2", { ty: P2 })), a.push(P_(CYL(0.65, 0.45, 8), px + 6.4, py + oy, pz + oz, "red", { ty: P2, e: 1 }));
     }
-    a.push(P_(CYL(2.6, 2.2, 10), -0.45 * T, -0.5 * T, z + 10.3, "darkmetal"));
-    a.push(P_(DOME(2.2, 1.4, 10), -0.45 * T, -0.5 * T, z + 12.5, "gunmetal"));
-    for (const k of [-1, 1]) a.push(P_(BOXM(1.4, 1.2, 1.2, 0.2), -0.45 * T + 2.2, -0.5 * T + k * 1.4, z + 11.6, "glassdark", { e: 1 }));
-    a.push(P_(CYL(0.3, 9, 5), -0.8 * T, 0.55 * T, z + 10.3, "darkmetal"));
-    for (const k of [-1, 1]) for (let q = 0; q < 3; q++) a.push(P_(CYL(0.7, 2.2, 6), 0.3 * T - 2 * q, k * 0.86 * T, z + 8.2, "dark2", { ty: -0.9 }));
+    a.push(P_(CYL(2.2, 1.8, 10), tx - 0.2 * TL, -0.2 * TW, z + 8.7, "darkmetal"));
+    a.push(P_(DOME(1.9, 1.2, 10), tx - 0.2 * TL, -0.2 * TW, z + 10.5, "gunmetal"));
+    for (const k of [-1, 1]) a.push(P_(BOXM(1.2, 1, 1, 0.2), tx - 0.2 * TL + 1.9, -0.2 * TW + k * 1.2, z + 9.7, "glassdark", { e: 1 }));
+    a.push(P_(CYL(0.28, 8, 5), tx - 0.38 * TL, 0.3 * TW, z + 8.7, "darkmetal"));
+    for (const k of [-1, 1]) for (let q = 0; q < 3; q++) a.push(P_(CYL(0.6, 1.9, 6), tx + 0.12 * TL - 1.7 * q, k * 0.44 * TW, z + 7, "dark2", { ty: -0.9 }));
     return a;
   }
   function titanYuri(t, dep) {
@@ -5837,7 +5856,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   function muzzleDist(e) {
-    return "inf" === e.d.kind ? e.d.radius + 8 : "v3" === e.key || "kirov" === e.key || "harrier" === e.key || "eagle" === e.key ? e.d.radius + 4 : hasTurret(e.key) ? e.d.radius + 24 : e.d.radius + 10;
+    return "titan_soviet" === e.key ? 46 : "inf" === e.d.kind ? e.d.radius + 8 : "v3" === e.key || "kirov" === e.key || "harrier" === e.key || "eagle" === e.key ? e.d.radius + 4 : hasTurret(e.key) ? e.d.radius + 24 : e.d.radius + 10;
   }
   var _hasT = /* @__PURE__ */ new Map();
   var _hasBT = /* @__PURE__ */ new Map();
@@ -6134,11 +6153,25 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return "tree" === e ? treeModel(t) : "grass" === e ? grassModel(t) : "flower" === e ? flowerModel(t) : "rock" === e ? rockModel(t) : "scrub" === e ? scrubModel(t) : "lamp" === e ? lampModel() : "fall" === e ? fallModel(t) : "tower" === e ? towerModel(t) : "crater" === e ? craterModel(t) : "wreck" === e ? wreckModel(t) : "rubble" === e ? rubbleModel(t) : "bridge" === e ? bridgeModel(t) : "monument" === e ? monumentModel(t) : "stall" === e ? stallModel(t) : stoneModel(t);
   }
   function bridgeModel(v) {
-    const e = [], L = 32, W = 14 + 2 * (v % 2);
-    e.push(P_(BOXM(L, W, 1.6, 0.25), 0, 0, 0, "wood"));
-    e.push(P_(BOXM(L, 0.7, 2, 0.15), 0, -W / 2 - 0.1, 1.6, "rust"));
-    e.push(P_(BOXM(L, 0.7, 2, 0.15), 0, W / 2 + 0.1, 1.6, "rust"));
-    for (const dx of [-L / 2 + 2.5, L / 2 - 2.5]) for (const dy of [-W / 2 + 1.5, W / 2 - 1.5]) e.push(P_(CYL(0.85, 12, 7), dx, dy, -12, "darkmetal"));
+    const e = [], L = 32.3, side = v === 1 || v === 2 ? v : 0, sg = 1 === side ? -1 : 1, ASPH = "#34353a", LINE = "#d8d4c6", DASH = "#d9b23e";
+    const yIn = side ? -sg * 16 : -20, yOut = side ? sg * 19 : 20, W = Math.abs(yOut - yIn), yc = (yIn + yOut) / 2;
+    e.push(P_(BOXM(L, W, 1.7, 0.1), 0, yc, 0, ASPH));
+    e.push(P_(BOXM(L, W - 4, 2.6, 0.2), 0, yc, -2.6, "concrete2"));
+    for (const gy of side ? [yc - sg * 6, yc + sg * 7] : [-11, 11]) e.push(P_(BOXM(L, 2.2, 3.4, 0.2), 0, gy, -5.6, "gunmetal"));
+    const outs = side ? [sg] : [-1, 1];
+    for (const o of outs) {
+      const yo = side ? yOut : o * 20;
+      e.push(P_(BOXM(L, 3, 1.1, 0.2), 0, yo - o * 1.5, 1.7, "concrete2"));
+      e.push(P_(BOXM(L, 0.55, 0.05), 0, yo - o * 4, 1.72, LINE));
+      for (const px of [-12, -4, 4, 12]) e.push(P_(BOXM(0.7, 0.7, 3.2), px, yo - o * 0.9, 2.8, "darkmetal"));
+      e.push(P_(BOXM(L, 0.5, 0.9, 0.1), 0, yo - o * 0.9, 5.2, "steel"));
+      e.push(P_(BOXM(L, 0.4, 0.6, 0.1), 0, yo - o * 0.9, 3.9, "steel"));
+    }
+    const dy = side ? yIn : 0, dw = side ? 0.7 : 1.3;
+    for (const dx of [-8, 8]) e.push(P_(BOXM(9, dw, 0.05), dx, dy + (side ? sg * dw / 2 : 0), 1.72, DASH));
+    e.push(P_(BOXM(L, W, 0.06), 0, yc, 1.7, ASPH));
+    e.push(P_(BOXM(5, side ? W - 7 : W - 10, 16, 0.4), 0, yc, -18, "concrete2"));
+    e.push(P_(BOXM(6.4, (side ? W - 7 : W - 10) + 1.4, 2, 0.3), 0, yc, -19, "concrete"));
     return e;
   }
   function craterModel(v) {
