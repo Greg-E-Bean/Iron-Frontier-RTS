@@ -358,7 +358,7 @@ function fgFx(on: boolean) {
   const near = (x: number, y: number) => Math.abs(x - FPS.u.x) + Math.abs(y - FPS.u.y) < 1500;
   for (const e of S.fx) {
     if (e.t < 0 || !near(e.x, e.y)) continue;
-    const r = Math.min(1, e.t / e.life), g = gz(e.x, e.y) + (e.z || 0);
+    const r = Math.min(1, e.t / e.life), g = gz(e.x, e.y) + (e.z || 0) * (FPS_INF_SC + .1);
     switch (e.kind) {
       case "boom": {
         const R = (7 + 24 * e.s) * (.35 + r) * 1.25;
@@ -382,7 +382,7 @@ function fgFx(on: boolean) {
       case "text": case "strike": break;
       default:
         if (void 0 !== e.x2) {
-          const z1 = g, x2 = e.x2, y2 = e.y2, z2 = gz(x2, y2) + (e.z2 || 6), op = 1 - .8 * r, col = e.c || "#fff";
+          const z1 = g, x2 = e.x2, y2 = e.y2, z2 = gz(x2, y2) + (e.z2 || 6) * (FPS_INF_SC + .1), op = 1 - .8 * r, col = e.c || "#fff";
           const w = "prism" === e.kind ? 2.2 : "tesla" === e.kind ? 1.3 : "psi" === e.kind ? 1.6 : 1.1;
           if ("tesla" === e.kind) {
             let px = e.x, py = e.y, pz = z1;
@@ -400,7 +400,7 @@ function fgFx(on: boolean) {
   // Projectiles: tracers, exhaust and fire, over the 3D projectile models.
   for (const p of S.projs) {
     if (p.dead || 2 !== visAt(p.x, p.y) || !near(p.x, p.y)) continue;
-    const z = gz(p.x, p.y) + (p.z || 0), c = Math.cos(p.ang), s = Math.sin(p.ang);
+    const z = gz(p.x, p.y) + (p.z || 0) * (FPS.on ? FPS_INF_SC + .1 : 1), c = Math.cos(p.ang), s = Math.sin(p.ang);
     if ("bullet" === p.kind) beam(p.x - 11 * c, p.y - 11 * s, z, p.x, p.y, z, .3, "#ffd27a", .95), beam(p.x - 5 * c, p.y - 5 * s, z, p.x, p.y, z, .9, "#ff9a40", .35);
     else if ("shell" === p.kind && p.fire) beam(p.x - 26 * c, p.y - 26 * s, z, p.x, p.y, z, 3, "#ff7a20", .8), spr(p.x, p.y, z, 7 + Math.sin(60 * S.time) * 1.5, T.glow, "#ffb040", 1, !0), spr(p.x, p.y, z, 3.5, T.glow, "#fff6d0", 1, !0);
     else if ("shell" === p.kind) beam(p.x - 22 * c, p.y - 22 * s, z, p.x, p.y, z, 1, "#ffd890", .85), spr(p.x, p.y, z, 3.4, T.glow, "#fff0c0", .9, !0);
@@ -831,7 +831,9 @@ function fpsHDSet() {
   for (const u of want) if (!figs.has(u.id)) figs.set(u.id, hdBuildFigure(u));
   for (const F of figs.values()) {
     const u = F.u;
-    F.root.position.set(u.x, heightAt(u.x, u.y) + (u.alt || 0) - (F.deathSink || 0), u.y);
+    F.bs == null && (F.bs = F.root.scale.x);
+    const k = fpsUnitScale(u); F.root.scale.setScalar(F.bs * k);
+    F.root.position.set(u.x, heightAt(u.x, u.y) + (u.alt || 0) - (F.deathSink || 0) * k, u.y);
     F.root.rotation.y = -(u === me ? FPS.yaw : u.ang);
     try { hdPose(F, dt); } catch (e) { }
     u.dead || set.add(u);

@@ -275,6 +275,8 @@ export interface MapData {
   pendingBridges?: any[];
   strategic?: any[];
   townHints?: any[];
+  towns?: any[];
+  roadLines?: number[][][];
   expansions?: any[];
   plateaus?: any[];
   stratSpecial?: any[];

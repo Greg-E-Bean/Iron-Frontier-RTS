@@ -540,6 +540,8 @@ declare global {
   // === fps.js (first-person mode) ===
   const projModel: AnyFn;
   function fpsEyeH(u: Unit): number;
+  const FPS_INF_SC: number;
+  function fpsUnitScale(u: any): number;
   function enterFPS(u: Unit): boolean;
   function exitFPS(): void;
   function fpsTick(dt: number): void;
