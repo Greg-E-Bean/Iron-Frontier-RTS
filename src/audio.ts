@@ -316,7 +316,19 @@ function setMuted(e){muted=e,masterGain&&(masterGain.gain.value=e?0:masterVol),c
 // ahead of time with an OfflineAudioContext and played back as one buffer,
 // so gameplay frame hitches can never make the music stutter.
 let musicOn = false, musicGen = 0;
-const MUSIC_TRACKS: any[] = (window as any).MUSIC_SONGS || [];
+// Arranger: songs are written with short sections; a song that would run
+// under ~105s gets a reprise of its closing sections, a whole tone up with
+// the drums pushed harder, instead of looping the same bars for longer.
+const DRUM_LIFT: Record<string, string> = { light: "ride", ride: "rock", half: "rock", rock: "drive", pulse: "rock", groove: "drive", pop: "popdrive", house: "edm", breaks: "edm" };
+function musicArrange(song: any) {
+  const f = song.form, len = (x: any[]) => x.reduce((a, s) => a + s.bars * 240 / song.bpm, 0);
+  if (f.length < 4 || len(f) >= 105) return song;
+  const body = f.slice(1, -1); let k = 1;
+  while (k < body.length && len(f) + len(body.slice(-k)) < 105) k++;
+  const rep = body.slice(-k).map((s: any) => ({ ...s, tr: (s.tr || 0) + 2, d: DRUM_LIFT[s.d] || s.d }));
+  return { ...song, form: [...f.slice(0, -1), ...rep, { ...f[f.length - 1], tr: 2 }] };
+}
+const MUSIC_TRACKS: any[] = ((window as any).MUSIC_SONGS || []).map(musicArrange);
 
 // ---- music DSP: everything in here is self-contained so it can run in a Web
 // Worker (built from this function's source) and keep the game thread free.
@@ -386,9 +398,14 @@ function musicDSP() {
     roll: { K: "x...x...x...x...", p: "x.x.x.x.xxxxxxxx" },
     pop: { K: "x.......x.x.....", S: "....X.......X...", h: "x.x.x.x.x.x.x.x." },
     popdrive: { K: "x...x...x...x...", S: "....X.......X...", h: "xxxxxxxxxxxxxxxx" },
+    // march / anthem kits (H = gang "HEY!" shout)
+    stomp: { k: "x.x.....x.x.....", p: "....X.......X..." },
+    marchrock: { k: "x...x...x...x...", s: "..x...x.X.x.x.xx", h: "x.x.x.x.x.x.x.x." },
+    shout: { k: "x...x...x...x...", s: "....X.......X...", h: "x.x.x.x.x.x.x.x.", H: "....x.......x..." },
+    anthem: { k: "x.......x.......", s: "........X.......", H: "............x...", h: "x...x...x...x..." },
     none: {},
   };
-  const NOFILL = new Set(["edm", "house", "hats", "roll", "pop", "popdrive", "breaks"]);
+  const NOFILL = new Set(["edm", "house", "hats", "roll", "pop", "popdrive", "breaks", "stomp"]);
 
   // ---- DSP: notes are synthesised in plain JS into sample buffers (polyBLEP
   // oscillators, RBJ biquads, per-note envelopes). A section then needs only a
@@ -449,7 +466,7 @@ function musicDSP() {
   }
   // Lead: guitar (drive applied per section) or synth, with glide + delayed vibrato.
   function leadNote(out: Float32Array, sr: number, t: number, m: number, dur: number, prev: number | null, vel: number, kind: string) {
-    const synth = "gtr" !== kind, g0 = prev ? mtof(prev) / mtof(m) : 1, depth = dur > .3 ? synth ? 12 : 22 : 0, vr = Math.min(dur, .45), f = mtof(m);
+    const synth = "gtr" !== kind, g0 = prev ? mtof(prev) / mtof(m) : 1, depth = dur > .3 ? synth ? 10 : 14 : 0, vr = Math.min(dur, .45), f = mtof(m);
     voice(out, sr, t, {
       osc: "saw" === kind ? [[0, f * cents(-9), .6], [0, f * cents(9), .6], [0, f * 2, .18]] : [[synth ? 1 : 0, f, 1]], a: .012, hold: Math.max(.02, dur - .05), rel: synth ? .14 : .25, peak: ("saw" === kind ? .3 : synth ? .2 : .3) * vel,
       fr: tt => (tt < .045 ? Math.pow(g0, 1 - tt / .045) : 1) * (depth ? cents(depth * Math.min(1, tt / vr) * Math.sin(35.19 * tt)) : 1),
@@ -469,7 +486,7 @@ function musicDSP() {
   function synthBass(out: Float32Array, sr: number, t: number, m: number, dur: number, vel: number, kind: string) {
     const f = mtof(m);
     if ("reese" === kind) voice(out, sr, t, { osc: [[0, f * cents(-14), .7], [0, f * cents(14), .7], [2, f / 2, .5]], a: .006, hold: Math.max(.01, dur - .05), rel: .1, peak: .42 * vel, lp: ["lowpass", 1.4, tt => 700 + 300 * Math.sin(tt * 3)] });
-    else voice(out, sr, t, { osc: [[0, f, 1], [1, f / 2, .5]], a: .003, hold: Math.max(.01, dur - .04), rel: .07, peak: .42 * vel, lp: ["lowpass", 4, sweep(2600, 260, Math.min(.2, dur + .05))] });
+    else voice(out, sr, t, { osc: [[0, f, 1], [1, f / 2, .5]], a: .003, hold: Math.max(.01, dur - .04), rel: .07, peak: .42 * vel, lp: ["lowpass", 2.4, sweep(2200, 260, Math.min(.2, dur + .05))] });
   }
   // arpeggiator pluck
   function arpNote(out: Float32Array, sr: number, t: number, m: number, dur: number, vel: number) {
@@ -481,6 +498,46 @@ function musicDSP() {
     for (const [out, dets] of [[L, [-19, -7, 3, 13]], [R, [-13, -3, 7, 19]]] as any[]) {
       const osc: number[][] = []; for (const m of midis) for (const d of dets) osc.push([0, mtof(m) * cents(d), 1]);
       voice(out, sr, t, { osc, ...env });
+    }
+  }
+  // ---- gang chant: formant-synthesised male voices (some an octave down),
+  // each with its own pitch/timing jitter and vibrato, through vowel formants.
+  // Syllables like "ha", "hey", "ra", "gi", "on": the vowel picks the
+  // formants, the first letter adds a consonant (h breath, plosive burst,
+  // rolled r, s/f hiss, soft onset for voiced letters).
+  const VOW: Record<string, number[][]> = { a: [[730, 1, 6], [1090, .5, 8], [2440, .22, 9]], o: [[570, 1, 6], [840, .6, 7], [2410, .18, 9]], u: [[330, 1, 5], [870, .4, 7], [2240, .12, 9]], e: [[530, 1, 6], [1840, .42, 9], [2480, .25, 9]], i: [[300, 1, 5], [2290, .32, 10], [3010, .2, 10]] };
+  function chantNote(L: Float32Array, R: Float32Array, sr: number, t: number, m: number, dur: number, vel: number, syl: string, fall?: number) {
+    const w = syl.toLowerCase(), vi = w.search(/[aeiou]/), v = vi < 0 ? "a" : w[vi], c = vi > 0 ? w[0] : "", F = VOW[v];
+    const plos = "bdgkpt".includes(c) && !!c, soft = "lmnwyv".includes(c) && !!c, len = Math.ceil((dur + .3) * sr), i0 = Math.round(t * sr);
+    const src = new Float32Array(len), nz = NZ(), off = Math.floor(Math.random() * 65536);
+    const on = plos ? .018 : "h" === c ? .05 : 0, a = soft ? .08 : plos ? .015 : .045, hold = Math.max(.02, dur - on - a - .04), rel = .16;
+    for (let k = 0; k < 6; k++) {
+      const f0 = mtof(m) * (2 === k % 3 ? .5 : 1) * cents((Math.random() * 2 - 1) * 16), j = on + Math.random() * .028, vp = Math.random() * 6, vr = 4.6 + Math.random();
+      let p = Math.random();
+      for (let i = Math.floor(j * sr); i < len; i++) {
+        const tt = i / sr - j, fr = cents(9 * Math.sin(vr * 6.283 * tt + vp) - (fall ? fall * 100 * Math.min(1, tt / dur) : 0)), dt = f0 * fr / sr;
+        p += dt, p >= 1 && (p -= 1);
+        const e = tt < a ? tt / a : tt < a + hold ? 1 : Math.exp(-9.2 * (tt - a - hold) / rel);
+        if (e < 1e-4 && tt > a) break;
+        src[i] += (2 * p - 1 - blep(p, dt)) * e;
+      }
+    }
+    // breath / consonant noise into the same formants
+    for (let i = 0; i < len; i++) {
+      const tt = i / sr; let n = .05;
+      "h" === c && tt < .07 && (n += 1.2 * (1 - tt / .07));
+      plos && tt < .016 && (n += 3 * (1 - tt / .016));
+      src[i] += n * nz[(off + i) & 65535] * (tt < dur + .1 ? 1 : 0);
+      "r" === c && tt < .09 && (src[i] *= .55 + .45 * Math.cos(6.283 * 27 * tt));
+    }
+    const bq = F.map(([f, , q]) => { const b = BQ(); b.set("bandpass", f, q, sr); return b; }), lp = BQ(); lp.set("lowpass", 1400, .7, sr);
+    const hs = "sf".includes(c) && !!c ? BQ() : null; hs && hs.set("highpass", 3500, .7, sr);
+    const g = .3 * vel, dly = Math.round(.009 * sr);
+    for (let i = 0; i < len; i++) {
+      const x = src[i]; let y = .12 * lp.run(x);
+      for (let k = 0; k < 3; k++) y += F[k][1] * bq[k].run(x);
+      hs && i < .1 * sr && (y += .5 * hs.run(nz[(off + 7 * i) & 65535]) * (1 - i / (.1 * sr)));
+      const o = i0 + i; o < L.length && (L[o] += y * g); o + dly < R.length && (R[o + dly] += y * g * .92);
     }
   }
   const nzHit = (out: Float32Array, sr: number, t: number, type: string, f: number, q: number, d: number, g: number) => voice(out, sr, t, { osc: [[3, 0, 1]], a: .001, hold: 0, rel: d, peak: g, lp: [type, q, () => f] });
@@ -495,6 +552,7 @@ function musicDSP() {
     else if ("C" === lane) nzHit(out, sr, t, "highpass", 4500, .5, 1.9, .5);
     else if ("c" === lane) { for (const f of [850, 1330, 2150, 3400]) tnHit(out, sr, t, 2, f, f, 1, 0, .35, .09); nzHit(out, sr, t, "bandpass", 3000, 2, .08, .4); }
     else if ("t" === lane) tnHit(out, sr, t, 2, acc ? 140 : 190, acc ? 90 : 120, .2, 0, .35, .8);
+    else if ("H" === lane) chantNote(out, out, sr, t, acc ? 57 : 55, .12, .8, "hey", 3);
     else if ("K" === lane) tnHit(out, sr, t, 2, 150, 44, .11, .05, .38, .8), nzHit(out, sr, t, "highpass", 3500, .7, .008, .22);
     else if ("p" === lane) { const gv = acc ? .9 : .7; for (const dt of [0, .011, .022]) nzHit(out, sr, t + dt, "bandpass", 1250, 1.3, dt < .02 ? .012 : .16, .75 * gv); }
     else if ("S" === lane) { voice(out, sr, t, { osc: [[3, 0, 1]], a: .001, hold: .16, rel: .05, peak: .35 * v, lp: ["bandpass", .6, () => 2200] }), nzHit(out, sr, t, "bandpass", 1900, .7, .12, .65 * v), tnHit(out, sr, t, 4, 210, 160, .08, 0, .12, .4 * v); }
@@ -503,13 +561,15 @@ function musicDSP() {
   // Synthesise every stem of one section into sample arrays.
   function synthSection(song: any, si: number, sr: number) {
     const sec = song.form[si], spb = 60 / song.bpm, barB = 4, bars = sec.bars, N = Math.ceil((bars * barB * spb + 2.4) * sr);
-    const T = (beat: number) => beat * spb + .02;
+    const T = (beat: number) => beat * spb + .02, tr = sec.tr || 0;
+    // key lift for reprises: transpose every pitched part
+    const A = (src: string, u: number) => { const r = abc(src, u); return tr ? { len: r.len, ev: r.ev.map((e: any) => ({ t: e.t, d: e.d, m: e.m, n: e.n.map((x: number) => x + tr) })) } : r; };
     const loopEach = (P: any, cb: (e: any, t: number) => void) => { if (!P.len) return; for (let off = 0; off < bars * barB - 1e-6; off += P.len) for (const e of P.ev) { const b = off + e.t; b < bars * barB - 1e-6 && cb(e, b); } };
     const bufs: Record<string, Float32Array> = {}, B = (k: string) => bufs[k] || (bufs[k] = new Float32Array(N));
     const gm = sec.g || null, clean = "clean" === gm, parts = song.parts || {};
     // rhythm guitars: two takes, hard left / right, bass following the riff
     if (sec.r && parts.riffs && parts.riffs[sec.r]) {
-      const P = abc(parts.riffs[sec.r], .25), oct = 12 * (song.riffOct ?? -2), L = B("gL"), R = B("gR");
+      const P = A(parts.riffs[sec.r], .25), oct = 12 * (song.riffOct ?? -2), L = B("gL"), R = B("gR");
       loopEach(P, (e, b) => {
         const root = e.n[0] + oct, voic = clean ? e.n.map((n: number) => n + oct + 12) : e.n.length > 1 ? e.n.map((n: number) => n + oct) : [root, root + 7, root + 12];
         const d = e.d * spb, mute = !!e.m || "mute" === gm;
@@ -518,19 +578,23 @@ function musicDSP() {
       });
       if (clean && !1 !== sec.bass) loopEach(P, (e, b) => { b % 2 < 1e-6 && bassNote(B("bass"), sr, T(b), e.n[0] + oct - 12, 2 * spb * .9, .7); });
     }
-    if (sec.bl && parts.bass && parts.bass[sec.bl]) { const bk = sec.bk || song.bassKind; loopEach(abc(parts.bass[sec.bl], .25), (e, b) => { const m = e.n[0] + 12 * (song.bassOct ?? -3), d = e.d * spb * .95; bk ? synthBass(B("bass"), sr, T(b), m, d, e.m ? .75 : 1, bk) : bassNote(B("bass"), sr, T(b), m, d, 1); }); }
+    if (sec.bl && parts.bass && parts.bass[sec.bl]) { const bk = sec.bk || song.bassKind; loopEach(A(parts.bass[sec.bl], .25), (e, b) => { const m = e.n[0] + 12 * (song.bassOct ?? -3), d = e.d * spb * .95; bk ? synthBass(B("bass"), sr, T(b), m, d, e.m ? .75 : 1, bk) : bassNote(B("bass"), sr, T(b), m, d, 1); }); }
     if (sec.l && parts.leads && parts.leads[sec.l]) {
       let prev: number | null = null;
-      loopEach(abc(parts.leads[sec.l], .5), (e, b) => { const m = e.n[0] + 12 * (song.leadOct ?? 0); leadNote(B("lead"), sr, T(b), m, e.d * spb, e.d * spb < .5 ? prev : null, e.m ? .7 : 1, leadKind(song, sec)); prev = m; });
+      loopEach(A(parts.leads[sec.l], .5), (e, b) => { const m = e.n[0] + 12 * (song.leadOct ?? 0); leadNote(B("lead"), sr, T(b), m, e.d * spb, e.d * spb < .5 ? prev : null, e.m ? .7 : 1, leadKind(song, sec)); prev = m; });
     }
-    if (sec.ar && parts.arps && parts.arps[sec.ar]) loopEach(abc(parts.arps[sec.ar], .25), (e, b) => arpNote(B("arp"), sr, T(b), e.n[0] + 12 * (song.arpOct ?? 0), e.d * spb, e.m ? .6 : 1));
-    if (sec.ss && parts.chords && parts.chords[sec.ss]) loopEach(abc(parts.chords[sec.ss], .25), (e, b) => supersaw(B("ssL"), B("ssR"), sr, T(b), e.n.map((n: number) => n + 12 * (song.chordOct ?? 0)), e.d * spb * .95, 1));
+    if (sec.ar && parts.arps && parts.arps[sec.ar]) loopEach(A(parts.arps[sec.ar], .25), (e, b) => arpNote(B("arp"), sr, T(b), e.n[0] + 12 * (song.arpOct ?? 0), e.d * spb, e.m ? .6 : 1));
+    if (sec.ss && parts.chords && parts.chords[sec.ss]) loopEach(A(parts.chords[sec.ss], .25), (e, b) => supersaw(B("ssL"), B("ssR"), sr, T(b), e.n.map((n: number) => n + 12 * (song.chordOct ?? 0)), e.d * spb * .95, 1));
     const secLen = bars * barB * spb;
     sec.riser && voice(B("fx"), sr, T(0), { osc: [[3, 0, 1]], a: secLen, hold: 0, rel: .25, peak: .22, lp: ["bandpass", 1.6, sweep(350, 7500, secLen)] });
     sec.impact && (tnHit(B("fx"), sr, T(0), 2, 110, 28, 1.1, .1, 1.3, .9), nzHit(B("fx"), sr, T(0), "lowpass", 900, .7, 1.4, .5));
+    if (sec.ch && parts.chants && parts.chants[sec.ch]) {
+      const C = parts.chants[sec.ch], syl = String(C.v).split(/[\s|]+/).filter(Boolean), P = A(C.n, .5);
+      loopEach(P, (e, b) => chantNote(B("chL"), B("chR"), sr, T(b), e.n[0] + 12 * (song.chantOct ?? 0), e.d * spb, e.m ? .7 : 1, syl[P.ev.indexOf(e) % syl.length] || "a"));
+    }
     const stk = sec.stk || song.stabKind || "brass";
-    if (sec.st && parts.stabs && parts.stabs[sec.st]) loopEach(abc(parts.stabs[sec.st], .25), (e, b) => stabHit(B("stab"), sr, T(b), e.n.map((n: number) => n + 12 * (song.stabOct ?? -1)), e.d * spb, stk, 1));
-    if (sec.pd && parts.pads && parts.pads[sec.pd]) loopEach(abc(parts.pads[sec.pd], 1), (e, b) => padChord(B("pad"), sr, T(b), e.n.map((n: number) => n + 12 * (song.padOct ?? -1)), e.d * spb, 1));
+    if (sec.st && parts.stabs && parts.stabs[sec.st]) loopEach(A(parts.stabs[sec.st], .25), (e, b) => stabHit(B("stab"), sr, T(b), e.n.map((n: number) => n + 12 * (song.stabOct ?? -1)), e.d * spb, stk, 1));
+    if (sec.pd && parts.pads && parts.pads[sec.pd]) loopEach(A(parts.pads[sec.pd], 1), (e, b) => padChord(B("pad"), sr, T(b), e.n.map((n: number) => n + 12 * (song.padOct ?? -1)), e.d * spb, 1));
     // drums
     const kit = DRUM_KITS[sec.d || "none"] || {}, fill = sec.fill !== !1 && "none" !== sec.d && !NOFILL.has(sec.d);
     for (let bar = 0; bar < bars; bar++) {
@@ -541,6 +605,12 @@ function musicDSP() {
         drumHit(B("drums"), sr, "o" === c ? "o" : "f" === c ? "f" : lane, T(bar * 4 + st / 4), "X" === c);
       }
       if (lastBar && fill) for (let st = 8; st < 16; st++) drumHit(B("drums"), sr, st < 12 ? "s" : "t", T(bar * 4 + st / 4), st >= 14);
+      // turnarounds so long sections keep moving: a short snare pickup every
+      // 4 bars on rock kits, a clap roll every 8 bars on electronic ones
+      if (!lastBar && "none" !== sec.d && sec.d) {
+        if (!NOFILL.has(sec.d) && 3 === bar % 4) for (const st of [13, 14, 15]) drumHit(B("drums"), sr, "s", T(bar * 4 + st / 4), 15 === st);
+        else if (NOFILL.has(sec.d) && 7 === bar % 8 && "hats" !== sec.d) for (const st of [12, 13, 14, 15]) drumHit(B("drums"), sr, "p", T(bar * 4 + st / 4), 15 === st);
+      }
       0 === bar && "none" !== sec.d && !sec.noCrash && drumHit(B("drums"), sr, "C", T(0), !0);
     }
     // sidechain pump: synths duck on every beat under the kick
@@ -569,7 +639,7 @@ function mkMix(ctx: any, spb: number) {
   glue.connect(out), out.connect(lim), lim.connect(sd);
   sd.connect(mrg, 0, 0), sd.connect(mrg, 1, 1), verb.connect(mrg, 0, 2), mrg.connect(ctx.destination);
   const dly = ctx.createDelay(2), fb = ctx.createGain(), dlp = ctx.createBiquadFilter(), dout = ctx.createGain();
-  dly.delayTime.value = Math.min(1.9, .75 * spb), fb.gain.value = .32, dlp.type = "lowpass", dlp.frequency.value = 3000, dout.gain.value = .3;
+  dly.delayTime.value = Math.min(1.9, .75 * spb), fb.gain.value = .2, dlp.type = "lowpass", dlp.frequency.value = 2200, dout.gain.value = .22;
   dly.connect(dlp), dlp.connect(fb), fb.connect(dly), dlp.connect(dout), dout.connect(glue);
   return { glue, verb, dly };
 }
@@ -585,13 +655,13 @@ function chan(ctx: any, M: any, g: number, pan: number, verb: number, delay?: nu
 }
 // Distorted rhythm guitar bus: notes -> drive -> cabinet voicing.
 function guitarAmp(ctx: any, dest: any, gain: number, clean?: boolean) {
-  const pre = ctx.createGain(); pre.gain.value = clean ? .6 : 1.6;
+  const pre = ctx.createGain(); pre.gain.value = clean ? .6 : 1.25;
   let n: any = pre;
-  if (!clean) { const sh = ctx.createWaveShaper(); sh.curve = drive(9), sh.oversample = "2x", pre.connect(sh), n = sh; }
+  if (!clean) { const sh = ctx.createWaveShaper(); sh.curve = drive(6.5), sh.oversample = "2x", pre.connect(sh), n = sh; }
   const hp = ctx.createBiquadFilter(); hp.type = "highpass", hp.frequency.value = clean ? 120 : 85, hp.Q.value = .7;
   const scoop = ctx.createBiquadFilter(); scoop.type = "peaking", scoop.frequency.value = 700, scoop.Q.value = .9, scoop.gain.value = clean ? 0 : -5;
-  const pres = ctx.createBiquadFilter(); pres.type = "peaking", pres.frequency.value = 2600, pres.Q.value = 1, pres.gain.value = clean ? 2 : 5;
-  const lp1 = ctx.createBiquadFilter(); lp1.type = "lowpass", lp1.frequency.value = clean ? 5200 : 5000, lp1.Q.value = .6;
+  const pres = ctx.createBiquadFilter(); pres.type = "peaking", pres.frequency.value = 2600, pres.Q.value = 1, pres.gain.value = clean ? 1.5 : 2.5;
+  const lp1 = ctx.createBiquadFilter(); lp1.type = "lowpass", lp1.frequency.value = clean ? 5200 : 4300, lp1.Q.value = .6;
   const lp2 = ctx.createBiquadFilter(); lp2.type = "lowpass", lp2.frequency.value = 7800, lp2.Q.value = .5;
   const og = ctx.createGain(); og.gain.value = gain;
   n.connect(hp), hp.connect(scoop), scoop.connect(pres), pres.connect(lp1), lp1.connect(lp2), lp2.connect(og), og.connect(dest);
@@ -628,7 +698,7 @@ async function renderSection(song: any, si: number, sr: number) {
   bufs.drums && src([bufs.drums], drumBus);
 
   if (bufs.stab) {
-    if ("choir" === stk) { const pre = ctx.createGain(); for (const [f, q, l] of [[700, 6, 1], [1150, 8, .8], [2700, 10, .35]]) { const b = ctx.createBiquadFilter(); b.type = "bandpass", b.frequency.value = f, b.Q.value = q; const bg = ctx.createGain(); bg.gain.value = 2.2 * l, pre.connect(b), b.connect(bg), bg.connect(ch.stab); } src([bufs.stab], pre); }
+    if ("choir" === stk) { const pre = ctx.createGain(); for (const [f, q, l] of [[700, 3.5, 1], [1150, 4.5, .8], [2700, 5, .3]]) { const b = ctx.createBiquadFilter(); b.type = "bandpass", b.frequency.value = f, b.Q.value = q; const bg = ctx.createGain(); bg.gain.value = 1.6 * l, pre.connect(b), b.connect(bg), bg.connect(ch.stab); } src([bufs.stab], pre); }
     else src([bufs.stab], ch.stab);
   }
   // optional filter sweep across the section (intros, builds, outros)
@@ -638,13 +708,14 @@ async function renderSection(song: any, si: number, sr: number) {
   };
   bufs.arp && src([bufs.arp], swp(chan(ctx, M, .5, .12, .3, .38)));
   bufs.fx && src([bufs.fx], chan(ctx, M, .5, 0, .5));
+  bufs.chL && src([bufs.chL, bufs.chR], chan(ctx, M, .6, 0, .45));
   bufs.pad && (() => { const lp = ctx.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = 1400, lp.connect(swp(ch.pad)), src([bufs.pad], lp); })();
   bufs.ssL && src([bufs.ssL, bufs.ssR], swp(chan(ctx, M, .42, 0, .3, .12), 7000));
   if (bufs.lead) {
     const lk = musicLeadKind(song, sec), synth = "gtr" !== lk;
-    const lp = ctx.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = "saw" === lk ? 5200 : synth ? 2600 : 4200, lp.Q.value = "square" === lk ? 3 : .7, lp.connect(ch.lead);
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = "saw" === lk ? 4600 : synth ? 2600 : 3400, lp.Q.value = .7, lp.connect(ch.lead);
     if (synth) src([bufs.lead], lp);
-    else { const pg = ctx.createGain(), sh = ctx.createWaveShaper(); pg.gain.value = 1.4, sh.curve = drive(6), sh.oversample = "2x", pg.connect(sh), sh.connect(lp), src([bufs.lead], pg); }
+    else { const pg = ctx.createGain(), sh = ctx.createWaveShaper(); pg.gain.value = 1.1, sh.curve = drive(4), sh.oversample = "2x", pg.connect(sh), sh.connect(lp), src([bufs.lead], pg); }
   }
   for (const [chans, dest] of pend) {
     const b = ctx.createBuffer(chans.length, N, sr); chans.forEach((c, i) => b.copyToChannel(c, i));

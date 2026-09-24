@@ -6592,19 +6592,6 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     switch (e) {
       case "power":
         if (A) {
-          for (const py of [-0.2 * r, -0.33 * r]) for (const px of [-0.28 * r, -0.09 * r, 0.1 * r]) {
-            n.push(P_(CYL(0.5, 2.2, 6), px, py, l + 1.1, "steel"));
-            const T = { orbit: 0.25, amp: 0.4, pvx: px, pvy: py };
-            n.push(P_(BOXM(10, 6, 0.5, 0.1), px, py, l + 3.3, "darkmetal", { a: T }));
-            n.push(P_(BOXM(9.4, 5.4, 0.3, 0.1), px, py, l + 3.8, "crystal", { e: 1, a: T }));
-          }
-          vawt(n, 0.3 * r, -0.04 * r, l + 1.1, 20);
-          n.push(P_(BOXM(6, 5, 5, 0.5), 0.3 * r, 0.15 * r, l + 1.1, "darkmetal"));
-          for (const k of [-1.6, 0, 1.6]) n.push(P_(BOXM(6.4, 0.4, 4.4, 0.05), 0.3 * r, 0.15 * r + k, l + 1.4, "steel")), n.push(P_(CYL(0.5, 2.4, 6), 0.3 * r + k * 1.2, 0.15 * r, l + 6.1, "white"));
-          for (let k = 0; k < 3; k++) {
-            const ang = 2.094 * k;
-            n.push(P_(DOME(0.9, 0.8, 6), 2.2 * Math.cos(ang), 2.2 * Math.sin(ang), l + 0.27 * r, "white", { a: { orbit: 4, pvx: 0, pvy: 0 } }));
-          }
         } else if (O) {
           n.push(P_(BOXM(36, 12, 11, 0.6), 0, -0.27 * r, l + 1.1, "concrete2"));
           n.push(P_(BOXM(37, 13, 1.2, 0.2), 0, -0.27 * r, l + 12.1, "darkmetal"));
@@ -6629,30 +6616,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           }
         }
         break;
-      case "refinery": {
-        const hop = A ? "steel" : O ? "rust" : "flesh", bz = l + 6.4;
-        for (const lx of [-2.5, 2.5]) for (const ly of [-2.5, 2.5]) n.push(P_(CYL(0.6, 6, 6), 2 + lx, 0.3 * r + ly, l + 1.1, "darkmetal"));
-        n.push(P_(CONE(4, 9, 8, 12), 2, 0.3 * r, l + 6.5, hop));
-        n.push(P_(DOME(8, 2.2, 12), 2, 0.3 * r, l + 13.6, "tibG", { e: 1 }));
-        n.push(P_(BOXM(26, 4.4, 0.9, 0.2), -15, 0.28 * r, bz, "darkmetal"));
-        for (const sy of [-1, 1]) n.push(P_(BOXM(26, 0.5, 1.2, 0.1), -15, 0.28 * r + sy * 2.4, bz + 0.4, "steel"));
-        for (const lx of [-24, -15, -6]) n.push(P_(CYL(0.6, 5.3, 6), lx, 0.28 * r, l + 1.1, "darkmetal"));
-        for (let k = 0; k < 4; k++) n.push(P_(DOME(1.5, 1.1, 6), -4, 0.28 * r, bz + 0.9, k % 2 ? "tibGlit" : "tibG", { e: 1, a: { belt: 0.35, pw: 24, pp: 0.25 * k } }));
-        n.push(P_(BOXM(9, 9, 12, 0.6), -0.33 * r, 0.28 * r, l + 1.1, hop));
-        n.push(P_(BOXM(0.5, 5, 4, 0.1), -0.33 * r + 4.6, 0.28 * r, bz - 0.4, "black"));
-        if (A) {
-          radarSpin(n, -12, -8, l + 0.32 * s + 0.3, 7, 0.9);
-          vent(n, 12, -10, l + 0.32 * s, 6, 6, "steel");
-        } else if (O) {
-          stack(n, -0.31 * r, -0.31 * r, l + 1.1, 2.4, 34, "rust");
-          n.push(P_(BOXM(8, 0.6, 4.5, 0.2), 0, -0.17 * r - 0.4, l + 1.4, "glow", { e: 1 }));
-          n.push(P_(BOXM(10, 1, 6, 0.3), 0, -0.17 * r - 0.9, l + 1.1, "darkmetal"));
-        } else {
-          for (const [bx, by] of [[-0.3 * r, -0.27 * r], [-0.22 * r, -0.36 * r], [-0.36 * r, -0.37 * r]]) n.push(P_(DOME(4, 3.4, 10), bx, by, l + 1, "bile", { e: 1, a: { bob: 1.4 + bx * 3e-3, ba: 0.8 } }));
-          n.push(P_(CONE(2.4, 0.8, 7, 8), -0.29 * r, -0.31 * r, l + 1.1, "carapace2"));
-        }
+      case "refinery":
         break;
-      }
       case "barracks":
         flagPole(n, -0.37 * r, 0, l + 1.1, 26, "body");
         if (Y) {
@@ -6937,12 +6902,126 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return n;
   }
   var CIVX = { civ7: workshopModel, civ9: terraceModel, bridgehut: bridgeHutModel, oilDerek: oilDerrickModel, paradropHangar: paraHangarModel, empTower: empSpireModel, rogueDen: rogueDenModel };
+  function refineryModel(n, t, r, l, rb) {
+    const A = "allied" === t, O = "soviet" === t;
+    if (!A && !O) {
+      if (rb >= 1) hive(n, { x: -12, y: -12, z: l, r: 0.27 * r, h: 22, crown: 7, seg: 10, pods: 3, crest: true, vein: "psi", body: "flesh", body2: "carapace2" });
+      if (rb >= 2) {
+        taper3(n, 24, -20, l, 24, -20, l + 46, 8, 4.2, "carapace");
+        for (let k = 0; k < 4; k++) ell(n, 24, -20, l + 6 + 10 * k, 8.6 - 0.9 * k, 8.6 - 0.9 * k, 2.4, "carapace2");
+        n.push(P_(DOME(6, 5, 12), 24, -20, l + 45, "psi", { e: 1, a: { spin: 0.5 } }));
+      }
+      if (rb >= 3) {
+        ell(n, -34, 18, l, 10, 10, 24, "bile2");
+        ell(n, -34, 18, l + 6, 8, 8, 19, "bile", { e: 1, a: { bob: 1.3, ba: 0.5 } });
+        ell(n, -28, 38, l, 7, 7, 18, "bile2");
+        ell(n, -28, 38, l + 5, 5.6, 5.6, 14, "bile", { e: 1, a: { bob: 1.6, ba: 0.5 } });
+        for (const sx of [-1, 1]) taper3(n, sx * 15, 32, l, sx * 5, 38, l + 43, 3, 1.6, "bone"), taper3(n, sx * 15, 32, l, sx * 22, 28, l + 2, 2.4, 1.2, "flesh");
+      }
+      if (rb >= 4) {
+        taper3(n, 0, 30, l + 44, 0, 56, l + 41, 4, 2.2, "flesh");
+        ell(n, 0, 56, l + 37.5, 4, 4, 5, "carapace2");
+        n.push(P_(DOME(2.6, 1.4, 10), 0, 56, l + 36.4, "psi", { e: 1, tx: Math.PI }));
+        taper3(n, 0, 34, l + 44, 22, -12, l + 40, 2.6, 2.2, "flesh");
+        for (let k = 0; k < 5; k++) n.push(P_(DOME(1.2, 1, 8), 4.4 * k, 34 - 9.2 * k, l + 46.2 - 0.8 * k, "psi", { e: 1, a: { bob: 1 + 0.3 * k, ba: 0.4 } }));
+        veins(n, -12, -12, l + 14, 20, 3, 10, "psi");
+        for (const [bx, by] of [[32, 22], [36, 34], [26, 40]]) n.push(P_(DOME(4, 3.2, 10), bx, by, l, "bile", { e: 1, a: { bob: 1.5 + 0.01 * bx, ba: 0.6 } }));
+      }
+      return;
+    }
+    const hall = A ? "armor" : "concrete", tow = A ? "white" : "concrete2", tank = A ? "steel" : "rust", arm = A ? "steel" : "rust", gl = A ? "glass" : "glassdark", lit = A ? "crystal" : "glow";
+    if (rb >= 1) {
+      tier(n, 54, 42, rb >= 2 ? 26 : 13, -12, -14, l, hall, "rfH" + t + (rb >= 2 ? 1 : 0), 0.96);
+    }
+    if (rb >= 2) {
+      for (let k = 0; k < 5; k++) n.push(P_(BOXM(6.4, 0.6, 3.2, 0.1), -32 + k * 10, 7.3, l + 13, gl, { e: 1 }));
+      for (let k = 0; k < 3; k++) n.push(P_(BOXM(0.6, 6, 3, 0.1), -39.4, -26 + k * 10, l + 13, "tibG", { e: 1 }));
+      n.push(P_(BOXM(18, 18, rb >= 3 ? 52 : 26, 0.6), 24, -20, l, tow));
+      if (A) {
+        vent(n, -26, -22, l + 26, 8, 10, "steel");
+        radarSpin(n, -4, -26, l + 26, 6, 0.8);
+      } else {
+        for (let k = 0; k < 3; k++) n.push(P_(BOXM(50, 2.2, 3.4, 0.3), -12, -30 + k * 10, l + 26, "rust", { tx: -0.35 }));
+        stack(n, -33, -30, l + 26, 2.2, 24, "rust");
+        stack(n, -25, -31, l + 26, 1.8, 20, "rust");
+      }
+    }
+    if (rb >= 3) {
+      if (A) {
+        n.push(P_(BOXM(18.6, 18.6, 3, 0.3), 24, -20, l + 38, "glass", { e: 1 }));
+        n.push(P_(BOXM(20, 20, 2, 0.4), 24, -20, l + 52, "armor3"));
+        n.push(P_(DOME(2.4, 2, 10), 24, -20, l + 54, lit, { e: 1 }));
+      } else {
+        for (const z of [16, 34]) n.push(P_(BOXM(19, 19, 2.2, 0.3), 24, -20, l + z, "rust"));
+        n.push(P_(BOXM(22, 14, 8, 0.5), 24, -20, l + 52, "rust"));
+        n.push(P_(BOXM(12, 0.5, 2.2, 0.1), 24, -27.3, l + 55, lit, { e: 1 }));
+      }
+      silo(n, -34, 18, l, 9, 34, tank);
+      silo(n, -28, 38, l, 7, 26, tank);
+      pipeRun(n, -34, 12, -34, 6, l + 9, 1.3, tank);
+      pipeRun(n, -28, 31, -31, 26, l + 6, 1, tank);
+      for (const sx of [-1, 1]) {
+        n.push(P_(BOXM(3.4, 3.4, 46, 0.4), sx * 14, 34, l, arm));
+        strut3(n, sx * 14, 34, l + 18, sx * 5, 34, l + 44, 0.6, "darkmetal");
+      }
+      n.push(P_(BOXM(34, 4.4, 4, 0.4), 0, 34, l + 44, arm));
+      hazard(n, 0, 36.4, l + 44.2, 24, 0);
+    }
+    if (rb >= 4) {
+      n.push(P_(BOXM(7, 24, 3.4, 0.4), 0, 46, l + 44.6, arm));
+      for (const sx of [-1, 1]) strut3(n, sx * 3, 36, l + 36, sx * 3, 56, l + 44.6, 0.45, "darkmetal");
+      n.push(P_(CONE(2.2, 6.2, 7.4, 12), 0, 55, l + 37.4, arm));
+      n.push(P_(CYL(1.6, 0.8, 10), 0, 55, l + 36.6, "tibG", { e: 1 }));
+      spinBeacon(n, 0, 57, l + 48, "lightY");
+      taper3(n, 0, 34, l + 48, 20, -11, l + 50, 2.2, 2.2, "darkmetal");
+      for (let k = 0; k < 4; k++) n.push(P_(DOME(1.3, 1, 6), 5 * k, 34 - 11.2 * k, l + 50.2 + 0.5 * k, k % 2 ? "tibGlit" : "tibG", { e: 1 }));
+      n.push(P_(BOXM(14, 12, 10, 0.5), 32, 26, l, hall));
+      n.push(P_(BOXM(12, 0.5, 3, 0.1), 32, 32.2, l + 5.5, gl, { e: 1 }));
+      n.push(P_(BOXM(15, 13, 1, 0.3), 32, 26, l + 10, A ? "armor3" : "rust"));
+      n.push(P_(CYL(0.3, 9, 5), 36, 22, l + 11, "darkmetal"));
+      crate(n, 38, 40, l, 4.5, "olive", 0.2);
+      barrel(n, -40, -40, l);
+      barrel(n, -36, -41, l);
+    }
+  }
+  var FOUNDED = { power: 1, refinery: 1, silo: 1 };
+  var foundH = (e, t) => FOUNDED[e] ? "yuri" === t ? 1.4 : "soviet" === t ? 2.4 : 2 : 0;
+  function bldFoundation(n, e, t, r) {
+    const H = foundH(e, t);
+    if (!H) return;
+    const W = 0.94 * r, z0 = 2.2, top = 3.6 + H, A = "allied" === t, O = "soviet" === t, k = r + "_" + H;
+    if (!A && !O) {
+      ell(n, 0, 0, z0, 0.53 * W, 0.53 * W, 0.9, "flesh");
+      ell(n, 0, 0, z0, 0.5 * W, 0.5 * W, top - z0 + 0.9, "carapace2");
+      for (let q = 0; q < 9; q++) {
+        const g = q * 0.698 + 0.3, c = Math.cos(g), si = Math.sin(g);
+        taper3(n, c * 0.3 * W, si * 0.3 * W, top - 0.2, c * 0.56 * W, si * 0.56 * W, z0 + 0.6, 1.3, 0.35, "flesh");
+        q % 3 || n.push(P_(DOME(1.4, 1, 8), c * 0.44 * W, si * 0.44 * W, top - 0.9, "psi", { e: 1, a: { bob: 1.2 + 0.2 * q, ba: 0.3 } }));
+      }
+      return;
+    }
+    n.push(P_(SLAB(roundRectProfile(W + 5, W + 5, 5, 3), 1.8, 0.8, "fdL" + k), 0, 0, z0, O ? "darkmetal" : "concrete2"));
+    n.push(P_(SLAB(roundRectProfile(W, W, 3, 3), top - z0, 0.5, "fdU" + k), 0, 0, z0, O ? "concrete2" : "concrete"));
+    const h = W / 2;
+    if (A) {
+      for (const [sx, sy, w, d] of [[0, -h, W - 6, 0.5], [0, h, W - 6, 0.5], [-h, 0, 0.5, W - 6], [h, 0, 0.5, W - 6]]) n.push(P_(BOXM(w, d, 0.35, 0.1), sx, sy, top - 0.45, "white"));
+      for (const sx of [-1, 1]) for (const sy of [-1, 1]) n.push(P_(BOXM(6, 0.4, 0.45, 0.1), sx * (h - 6), sy * (h + 2.3), z0 + 1, "tesla", { e: 1 }));
+      n.push(P_(BOXM(18, 4.5, top - z0 - 0.9, 0.2), 0, h + 1.6, z0, "concrete2"));
+      n.push(P_(BOXM(18, 2.4, top - z0 - 0.3, 0.2), 0, h + 0.5, z0, "concrete"));
+    } else {
+      for (const [sx, sy, w, d] of [[0, -h - 0.2, W + 0.4, 0.7], [0, h + 0.2, W + 0.4, 0.7], [-h - 0.2, 0, 0.7, W + 0.4], [h + 0.2, 0, 0.7, W + 0.4]]) n.push(P_(BOXM(w, d, 0.9, 0.1), sx, sy, z0 + 1.6, "darkmetal"));
+      bolts(n, 0, h + 0.7, z0 + 2.05, W - 8, 0, Math.max(4, W / 9 | 0), "rust");
+      for (const sx of [-1, 1]) for (const sy of [-1, 1]) n.push(P_(BOXM(3.4, 3.4, top - z0 + 0.5, 0.3), sx * (h - 1.4), sy * (h - 1.4), z0, "rust"));
+      hazard(n, 0, h - 1.8, top + 0.02, Math.min(30, W - 12), 0);
+    }
+  }
   var _bFac = null;
   function BMODEL_(e, t, dep, cn, rot, prod, doorT = 0) {
     cn = cn || 0;
     _bFac = t;
     const r = 32 * BLD[e].size, n = [], a = "allied" === t, o = "soviet" === t, d = false !== dep;
-    const s = 0.3 * r, i = 0.24 * r, l = 3.6, c = l + s;
+    const s = 0.3 * r, i = 0.24 * r, l = 3.6 + foundH(e, t), c = l + s;
+    bldFoundation(n, e, t, r);
     const riseBucket = hasStagedBuild(e) ? Math.round(4 * Math.max(0, Math.min(1, +dep || 0))) : 4;
     if ("orerig" === e) return oreRigModel(t || "allied", l);
     if (CIVX[e]) return CIVX[e](r, l, t);
@@ -7112,18 +7191,29 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         n.push(P_(SLAB(roundRectProfile(0.88 * r, 0.88 * r, 3, 3), 1.1, 0.5, "pwpad"), 0, 0, l, "asphalt"));
         if (a) {
           if (riseBucket >= 1) {
-            n.push(P_(BOXM(0.22 * r, 0.18 * r, 0.1 * r, 0.25), 0, 0, l, "armor"));
-            railPosts(n, 0.24 * r, 0.2 * r, l + 0.1 * r, 1.6);
+            n.push(P_(BOXM(20, 13, 8, 0.4), 0, 0, l, "armor"));
+            n.push(P_(BOXM(21, 14, 0.8, 0.2), 0, 0, l + 8, "white"));
           }
           if (riseBucket >= 2) {
-            windows(n, 0.18 * r, 0.14 * r, l + 0.04 * r, 0.05 * r, 2);
-            n.push(P_(CYL(0.035 * r, 0.16 * r, 10), 0, 0, l + 0.1 * r, "steel"));
+            for (const sx of [-5.5, 0, 5.5]) n.push(P_(BOXM(3.6, 0.5, 2.4, 0.1), sx, 6.6, l + 3.4, "glass", { e: 1 }));
+            acUnit(n, -5, -2, l + 8.8, 5, 4, 0);
+            n.push(P_(CYL(0.3, 7, 6), 6, -3, l + 8.8, "darkmetal"));
+            n.push(P_(DOME(0.8, 0.8, 8), 6, -3, l + 15.8, "tesla", { e: 1 }));
           }
           if (riseBucket >= 3) {
-            solarPanels(n, 0, 0.22 * r, l + 0.02 * r, 0.5 * r, 0.34 * r);
+            for (const py of [-19, 19]) for (const px of [-19, 0, 19]) {
+              for (const sx of [-4, 4]) n.push(P_(CYL(0.35, 2.6, 6), px + sx, py, l, "steel"));
+              n.push(P_(BOXM(13.4, 8.4, 0.35, 0.1), px, py, l + 2.6, "darkmetal", { tx: -0.42 }));
+              n.push(P_(BOXM(12.6, 7.6, 0.3, 0.05), px, py + 0.1, l + 2.85, "crystal", { e: 1, tx: -0.42 }));
+              for (const gx of [-3.1, 0, 3.1]) n.push(P_(BOXM(0.18, 7.7, 0.34, 0.02), px + gx, py + 0.1, l + 2.9, "white", { tx: -0.42 }));
+            }
+            for (const py of [-13, 13]) n.push(P_(BOXM(50, 1.2, 0.6, 0.1), 0, py, l, "darkmetal"));
           }
           if (riseBucket >= 4) {
-            n.push(P_(CYL(0.025 * r, 0.03 * r, 8), 0, 0, l + 0.26 * r, "glow", { e: 1 }));
+            vawt(n, -27, 0, l, 15);
+            vawt(n, 27, 0, l, 15);
+            n.push(P_(BOXM(6, 5, 5, 0.5), -15, 1, l, "darkmetal"));
+            for (const k of [-1.6, 0, 1.6]) n.push(P_(BOXM(6.4, 0.4, 4.4, 0.05), -15, 1 + k, l + 0.3, "steel"));
           }
         } else if (o) {
           if (riseBucket >= 1) {
@@ -7162,66 +7252,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
       }
       case "refinery": {
-        n.push(P_(SLAB(roundRectProfile(0.9 * r, 0.9 * r, 3, 3), 1.1, 0.5, "rfpad"), 0, 0, l, "asphalt"));
-        if (a) {
-          if (riseBucket >= 1) {
-            tier(n, 0.44 * r, 0.34 * r, 0.32 * s, 0, 0, l, "armor", "rfv1", 0.95);
-          }
-          const bz = l + 0.32 * s;
-          if (riseBucket >= 2) {
-            windows(n, 0.4 * r, 0.3 * r, l + 0.13 * s, 0.11 * s, 2);
-            n.push(P_(BOXM(0.1 * r, 0.08 * r, 0.3, 0.15), 0, -0.19 * r, bz, "darkmetal"));
-            n.push(P_(BOXM(0.09 * r, 0.07 * r, 0.25, 0.12), 0, -0.19 * r, bz + 0.3, "crystal", { e: 1, ty: 0.28 }));
-          }
-          if (riseBucket >= 3) {
-            silo(n, 0.28 * r, -0.3 * r, l, 0.08 * r, 0.3 * r, "steel");
-            silo(n, 0.38 * r, -0.22 * r, l, 0.07 * r, 0.26 * r, "steel");
-            drum(n, 0.24 * r, 0.3 * r, l + 0.08 * r, 0.1 * r, 0.12 * r, "steel", 1.5);
-          }
-          if (riseBucket >= 4) {
-            n.push(P_(CYL(1.8, 2.8, 12), 0.34 * r, 0.18 * r, l + 0.12 * r, "steel", { a: { spin: 2 } }));
-            n.push(P_(CYL(1.8, 2.8, 12), 0.34 * r, 0.28 * r, l + 0.12 * r, "crystal", { a: { spin: 1.8 } }));
-          }
-        } else if (o) {
-          if (riseBucket >= 1) {
-            tier(n, 0.46 * r, 0.36 * r, 0.34 * s, 0, 0, l, "concrete", "rfl1", 0.96);
-          }
-          const bz = l + 0.34 * s;
-          if (riseBucket >= 2) {
-            windows(n, 0.42 * r, 0.32 * r, l + 0.12 * s, 0.09 * s, 2, "glassdark");
-            stack(n, 0, -0.2 * r, bz, 0.03 * r, 0.13 * r, "rust");
-          }
-          if (riseBucket >= 3) {
-            silo(n, 0.28 * r, -0.3 * r, l, 0.085 * r, 0.32 * r, "rust");
-            silo(n, 0.39 * r, -0.22 * r, l, 0.075 * r, 0.28 * r, "rust");
-            drum(n, 0.22 * r, 0.3 * r, l + 0.08 * r, 0.1 * r, 0.13 * r, "rust", 1.4);
-            pipeRun(n, -0.12 * r, 0.16 * r, 0.14 * r, 0.16 * r, l + 0.1 * r, 1.4, "rust");
-          }
-          if (riseBucket >= 4) {
-            n.push(P_(CYL(1.9, 2.8, 12), 0.34 * r, 0.18 * r, l + 0.12 * r, "rust", { a: { spin: 1.9 } }));
-            n.push(P_(CYL(1.9, 2.8, 12), 0.34 * r, 0.28 * r, l + 0.12 * r, "darkmetal", { a: { spin: 1.7 } }));
-          }
-        } else {
-          if (riseBucket >= 1) {
-            n.push(P_(TSLAB(circleProfile(0.18 * r, 8), 0.08 * s, 0.9, "rffound"), 0, 0, l, "carapace2"));
-          }
-          if (riseBucket >= 2) {
-            hive(n, { x: 0, y: 0, z: l, r: 0.16 * r, h: 0.9 * s, crown: 0.06 * r, seg: 8, pods: 2, crest: true, vein: "psi", body: "flesh", body2: "bile2" });
-          }
-          if (riseBucket >= 3) {
-            for (let e2 = 0; e2 < 2; e2++) {
-              n.push(P_(CYL(0.08 * r, 0.2 * r, 12), 0.26 * r + e2 * r * 0.12, 0.3 * r, l, "flesh"));
-              n.push(P_(DOME(0.08 * r, 0.06 * r, 10), 0.26 * r + e2 * r * 0.12, 0.3 * r, l + 0.2 * r, "psi", { e: 1, a: { spin: 1.1 } }));
-            }
-          }
-          if (riseBucket >= 4) {
-            n.push(P_(CYL(2, 2.5, 12), 0.34 * r, 0.18 * r, l + 0.1 * r, "psi", { e: 1, a: { spin: 1.6 } }));
-            n.push(P_(CYL(1.6, 2.2, 10), 0.34 * r, 0.28 * r, l + 0.1 * r, "bile2", { a: { spin: 1.4 } }));
-          }
-        }
-        hazard(n, -0.28 * r, 0, 4, 0.2 * r, 0);
-        crate(n, -0.34 * r, 0.16 * r, l, 4.5, "olive", 0.2);
-        barrel(n, -0.38 * r, -0.14 * r, l);
+        refineryModel(n, t, r, l, riseBucket);
         break;
       }
       case "hive": {
@@ -7497,7 +7528,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const PAD_Q = [[-1, -1], [1, -1], [-1, 1], [1, 1]], pw = 0.4 * r, pd = 0.4 * r;
         for (let pi = 0; pi < 4; pi++) {
           const px = 26 * PAD_Q[pi][0], py = 26 * PAD_Q[pi][1];
-          n.push(P_(SLAB(roundRectProfile(pw, pd, 4, 3), 1.4, 0.45, "afp" + pi), px, py, 2.6, "asphalt"));
+          n.push(P_(SLAB(roundRectProfile(pw, pd, 4, 3), 1.65, 0.45, "afp" + pi), px, py, 2.35, "asphalt"));
           if (riseBucket >= 1) {
             for (const cx of [-1, 1]) for (const cy of [-1, 1]) n.push(P_(BOXM(3.2, 3.2, 0.35, 0.12), px + cx * pw * 0.4, py + cy * pd * 0.4, 4, "white", { r: PI2 / 8 }));
             hazard(n, px, py, 4, 0.42 * Math.min(pw, pd), 0);
@@ -7578,7 +7609,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         break;
       }
       case "repair": {
-        n.push(P_(SLAB(roundRectProfile(0.86 * r, 0.86 * r, 4, 3), 1.8, 0.6, "rpp"), 0, 0, l, "asphalt"));
+        n.push(P_(SLAB(roundRectProfile(0.86 * r, 0.86 * r, 4, 3), 1.8, 0.6, "rpp"), 0, 0, l - 0.4, "concrete2"));
         for (let e2 = 0; e2 < 20; e2++) {
           const t2 = e2 / 20 * Math.PI * 2;
           n.push(P_(BOXM(4, 1.4, 0.4, 0.12), Math.cos(t2) * r * 0.3, Math.sin(t2) * r * 0.3, 5.5, "gold", { r: t2 + PI2 }));
@@ -7648,7 +7679,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         tier(n, 0.64 * r, 0.64 * r, 0.52 * r, 0, 0, l, "neutral", "cv2", 0.94), n.push(P_(SLAB(roundRectProfile(0.72 * r, 0.72 * r, 3, 3), 2.8, 0.8, "cv2r"), 0, 0, l + 0.52 * r, "concrete2")), windows(n, 0.6 * r, 0.6 * r, l + 0.12 * r, 0.1 * r, 3, "glassdark"), windows(n, 0.6 * r, 0.6 * r, l + 0.34 * r, 0.1 * r, 3, "glassdark"), roofFarm(n, 0.46 * r, 0.46 * r, l + 0.52 * r + 2.8, 81), n.push(P_(CYL(1.4, 0.12 * r, 10), 0.22 * r, 0.22 * -r, l + 0.52 * r + 2.8, "darkmetal"));
         break;
       case "navalyard": {
-        n.push(P_(SLAB(roundRectProfile(0.88 * r, 0.6 * r, 4, 3), 1.6, 0.6, "nydk"), 0, -0.1 * r, l, "asphalt"));
+        n.push(P_(SLAB(roundRectProfile(0.88 * r, 0.6 * r, 4, 3), 1.6, 0.6, "nydk"), 0, -0.1 * r, l, "concrete2"));
         if (a) {
           if (riseBucket >= 1) {
             n.push(P_(BOXM(0.24 * r, 0.22 * r, 0.46 * r, 1.2), -0.16 * r, -0.06 * r, l, "armor"));
@@ -7912,7 +7943,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var GROUND_DROP = 3.8;
   function groundModel(m) {
-    return m.filter((q) => !(q && "asphalt" === q.c && (q.z || 0) > 2.5 && (q.z || 0) < 4.5)).map((q) => q ? Object.assign({}, q, { z: (q.z || 0) - GROUND_DROP }) : q);
+    return m.filter((q) => !(q && "asphalt" === q.c && (q.z || 0) > 2.5 && (q.z || 0) < 6.5)).map((q) => q ? Object.assign({}, q, { z: (q.z || 0) - GROUND_DROP }) : q);
   }
   function partBox(a) {
     const r = a.r || 0, o = Math.cos(r), s = Math.sin(r), i = a.tx || 0, l = a.ty || 0, c = Math.cos(i), d = Math.sin(i), f = Math.cos(l), h = Math.sin(l), g = a.sx || 1, y = a.sy || 1, x = a.sz || 1, mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
@@ -8168,6 +8199,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   Object.assign(window, {
     attachFloating,
+    partBox,
     DOME,
     BOXM,
     ell,
@@ -13388,14 +13420,14 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, st: "H", stk: "choir", d: "march", pd: "P" },
-        { bars: 16, r: "A", d: "march" },
+        { bars: 8, r: "A", d: "march" },
         { bars: 8, r: "B", l: "A", d: "rock", st: "H", stk: "brass" },
         { bars: 8, r: "A", d: "drive" },
         { bars: 8, r: "B", l: "A", d: "rock" },
         { bars: 8, r: "C", l: "B", synth: true, d: "half", pd: "P" },
         { bars: 4, r: "D", d: "none", st: "H", stk: "choir" },
         { bars: 4, r: "A", d: "build" },
-        { bars: 16, r: "B", l: "A", d: "drive", st: "H", stk: "brass" },
+        { bars: 8, r: "B", l: "A", d: "drive", st: "H", stk: "brass" },
         { bars: 4, r: "D", d: "rock", fill: false }
       ]
     },
@@ -13410,14 +13442,14 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, r: "C", d: "drive" },
-        { bars: 16, r: "A", d: "thrash" },
+        { bars: 8, r: "A", d: "thrash" },
         { bars: 8, r: "B", d: "thrash" },
         { bars: 8, r: "C", l: "A", d: "punk" },
-        { bars: 16, r: "A", d: "thrash" },
+        { bars: 8, r: "A", d: "thrash" },
         { bars: 8, r: "D", l: "B", d: "gallop" },
         { bars: 8, r: "B", d: "half" },
         { bars: 4, r: "A", d: "build" },
-        { bars: 16, r: "C", l: "A", d: "punk" },
+        { bars: 8, r: "C", l: "A", d: "punk" },
         { bars: 4, r: "D", d: "thrash" }
       ]
     },
@@ -13434,12 +13466,12 @@ varying vec3 vFgWN;
       form: [
         { bars: 4, st: "H", d: "light" },
         { bars: 8, r: "A", d: "drive" },
-        { bars: 16, r: "A", d: "rock" },
+        { bars: 8, r: "A", d: "rock" },
         { bars: 8, r: "B", l: "A", d: "drive", st: "H" },
         { bars: 8, r: "A", d: "rock" },
         { bars: 8, r: "B", l: "A", d: "drive" },
         { bars: 8, r: "C", l: "B", d: "half" },
-        { bars: 16, r: "B", l: "A", d: "drive", st: "H" },
+        { bars: 8, r: "B", l: "A", d: "drive", st: "H" },
         { bars: 4, r: "A", d: "rock" }
       ]
     },
@@ -13464,7 +13496,7 @@ varying vec3 vFgWN;
         { bars: 8, r: "B", l: "A", st: "H2", d: "drive" },
         { bars: 8, r: "C", l: "B", d: "half", pd: "P" },
         { bars: 4, st: "H", d: "none", pd: "P" },
-        { bars: 12, r: "B", l: "A", st: "H2", d: "drive" },
+        { bars: 8, r: "B", l: "A", st: "H2", d: "drive" },
         { bars: 4, r: "A", d: "march" }
       ]
     },
@@ -13482,13 +13514,13 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, pd: "P", d: "none", st: "H" },
-        { bars: 8, r: "C", d: "pulse", pd: "P" },
-        { bars: 8, r: "A", d: "half" },
-        { bars: 8, r: "B", l: "A", synth: true, d: "rock", pd: "P" },
-        { bars: 8, r: "A", d: "groove" },
-        { bars: 8, r: "B", l: "A", synth: true, d: "rock", st: "H" },
-        { bars: 8, r: "C", l: "B", synth: true, d: "pulse", pd: "P" },
-        { bars: 8, r: "B", l: "A", d: "drive" },
+        { bars: 4, r: "C", d: "pulse", pd: "P" },
+        { bars: 4, r: "A", d: "half" },
+        { bars: 4, r: "B", l: "A", synth: true, d: "rock", pd: "P" },
+        { bars: 4, r: "A", d: "groove" },
+        { bars: 4, r: "B", l: "A", synth: true, d: "rock", st: "H" },
+        { bars: 4, r: "C", l: "B", synth: true, d: "pulse", pd: "P" },
+        { bars: 4, r: "B", l: "A", d: "drive" },
         { bars: 4, r: "A", d: "half" }
       ]
     },
@@ -13505,13 +13537,13 @@ varying vec3 vFgWN;
       form: [
         { bars: 4, l: "A", synth: true, d: "pulse" },
         { bars: 8, r: "A", l: "A", synth: true, d: "drive" },
-        { bars: 16, r: "B", d: "punk" },
+        { bars: 8, r: "B", d: "punk" },
         { bars: 8, r: "C", l: "B", d: "drive", st: "H" },
         { bars: 8, r: "A", l: "A", synth: true, d: "drive" },
-        { bars: 16, r: "B", l: "B", d: "punk" },
+        { bars: 8, r: "B", l: "B", d: "punk" },
         { bars: 8, r: "C", l: "A", synth: true, d: "half" },
         { bars: 4, r: "A", d: "build" },
-        { bars: 12, r: "C", l: "B", d: "drive", st: "H" },
+        { bars: 8, r: "C", l: "B", d: "drive", st: "H" },
         { bars: 4, r: "A", d: "drive" }
       ]
     },
@@ -13528,13 +13560,13 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, r: "A", g: "clean", d: "none" },
-        { bars: 8, r: "A", d: "half" },
-        { bars: 8, r: "B", l: "A", d: "half" },
-        { bars: 8, r: "C", d: "groove" },
-        { bars: 8, r: "A", l: "A", d: "half", st: "H" },
-        { bars: 8, r: "B", l: "B", d: "groove" },
-        { bars: 8, r: "C", d: "drive" },
-        { bars: 8, r: "A", l: "B", d: "half", st: "H" }
+        { bars: 4, r: "A", d: "half" },
+        { bars: 4, r: "B", l: "A", d: "half" },
+        { bars: 4, r: "C", d: "groove" },
+        { bars: 4, r: "A", l: "A", d: "half", st: "H" },
+        { bars: 4, r: "B", l: "B", d: "groove" },
+        { bars: 4, r: "C", d: "drive" },
+        { bars: 4, r: "A", l: "B", d: "half", st: "H" }
       ]
     },
     {
@@ -13548,14 +13580,14 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, r: "B", d: "drive" },
-        { bars: 16, r: "A", d: "punk" },
+        { bars: 8, r: "A", d: "punk" },
         { bars: 8, r: "B", l: "A", d: "drive" },
-        { bars: 16, r: "A", d: "thrash" },
+        { bars: 8, r: "A", d: "thrash" },
         { bars: 8, r: "B", l: "A", d: "drive" },
         { bars: 8, r: "C", l: "B", d: "gallop" },
         { bars: 8, r: "C", l: "B", d: "thrash" },
         { bars: 4, r: "A", d: "build" },
-        { bars: 16, r: "B", l: "A", d: "drive" },
+        { bars: 8, r: "B", l: "A", d: "drive" },
         { bars: 8, r: "A", d: "punk" },
         { bars: 4, r: "C", d: "drive" }
       ]
@@ -13572,12 +13604,12 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, r: "A", g: "clean", d: "none", pd: "P" },
-        { bars: 8, r: "A", g: "clean", d: "light", l: "A" },
-        { bars: 8, r: "A", g: "clean", d: "ride", l: "B", pd: "P" },
-        { bars: 8, r: "D", d: "half", l: "A" },
-        { bars: 8, r: "A", g: "clean", d: "light", l: "B" },
-        { bars: 8, r: "D", d: "rock", l: "B", pd: "P" },
-        { bars: 8, r: "A", g: "clean", d: "none", pd: "P" }
+        { bars: 4, r: "A", g: "clean", d: "light", l: "A" },
+        { bars: 4, r: "A", g: "clean", d: "ride", l: "B", pd: "P" },
+        { bars: 4, r: "D", d: "half", l: "A" },
+        { bars: 4, r: "A", g: "clean", d: "light", l: "B" },
+        { bars: 4, r: "D", d: "rock", l: "B", pd: "P" },
+        { bars: 4, r: "A", g: "clean", d: "none", pd: "P" }
       ]
     },
     {
@@ -13592,13 +13624,13 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, pd: "P", d: "pulse" },
-        { bars: 8, r: "A", g: "mute", d: "light", pd: "P" },
-        { bars: 8, r: "A", g: "mute", l: "A", synth: true, d: "rock" },
-        { bars: 8, r: "B", l: "B", d: "rock", pd: "P" },
-        { bars: 8, r: "A", g: "mute", l: "A", synth: true, d: "ride" },
-        { bars: 8, r: "B", l: "B", d: "drive" },
-        { bars: 8, r: "A", g: "clean", pd: "P", d: "light" },
-        { bars: 8, r: "B", l: "A", d: "rock", pd: "P" },
+        { bars: 4, r: "A", g: "mute", d: "light", pd: "P" },
+        { bars: 4, r: "A", g: "mute", l: "A", synth: true, d: "rock" },
+        { bars: 4, r: "B", l: "B", d: "rock", pd: "P" },
+        { bars: 4, r: "A", g: "mute", l: "A", synth: true, d: "ride" },
+        { bars: 4, r: "B", l: "B", d: "drive" },
+        { bars: 4, r: "A", g: "clean", pd: "P", d: "light" },
+        { bars: 4, r: "B", l: "A", d: "rock", pd: "P" },
         { bars: 4, pd: "P", d: "none" }
       ]
     },
@@ -13614,12 +13646,12 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, pd: "P", d: "none" },
-        { bars: 8, r: "A", g: "clean", d: "none", pd: "P" },
-        { bars: 8, r: "A", g: "clean", d: "light", l: "A" },
-        { bars: 8, r: "B", l: "B", d: "half", pd: "P" },
-        { bars: 8, r: "A", g: "clean", d: "ride", l: "A" },
-        { bars: 8, r: "B", l: "B", d: "half" },
-        { bars: 8, r: "A", g: "clean", d: "none", pd: "P" }
+        { bars: 4, r: "A", g: "clean", d: "none", pd: "P" },
+        { bars: 4, r: "A", g: "clean", d: "light", l: "A" },
+        { bars: 4, r: "B", l: "B", d: "half", pd: "P" },
+        { bars: 4, r: "A", g: "clean", d: "ride", l: "A" },
+        { bars: 4, r: "B", l: "B", d: "half" },
+        { bars: 4, r: "A", g: "clean", d: "none", pd: "P" }
       ]
     },
     {
@@ -13634,11 +13666,11 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 4, r: "A", g: "clean", d: "none" },
-        { bars: 8, r: "A", g: "clean", d: "light", l: "A" },
-        { bars: 8, r: "B", d: "half", l: "B", pd: "P" },
-        { bars: 8, r: "A", g: "clean", d: "ride", l: "A", pd: "P" },
-        { bars: 8, r: "B", d: "rock", l: "B", pd: "P" },
-        { bars: 8, r: "B", d: "half", l: "A" },
+        { bars: 4, r: "A", g: "clean", d: "light", l: "A" },
+        { bars: 4, r: "B", d: "half", l: "B", pd: "P" },
+        { bars: 4, r: "A", g: "clean", d: "ride", l: "A", pd: "P" },
+        { bars: 4, r: "B", d: "rock", l: "B", pd: "P" },
+        { bars: 4, r: "B", d: "half", l: "A" },
         { bars: 4, r: "A", g: "clean", d: "none", pd: "P" }
       ]
     },
@@ -13662,10 +13694,10 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 8, ar: "A", d: "hats", sweep: [300, 3e3] },
-        { bars: 16, ar: "A", bl: "A", ss: "S", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, ar: "A", bl: "A", ss: "S", l: "A", d: "edm", pump: 1, impact: 1 },
         { bars: 8, ar: "A", pd: "P", l: "B", lk: "square", d: "none" },
         { bars: 4, ar: "A", bl: "A", d: "roll", riser: 1, sweep: [500, 6e3] },
-        { bars: 16, r: "R", ar: "A", bl: "A", ss: "S", l: "B", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, r: "R", ar: "A", bl: "A", ss: "S", l: "B", d: "edm", pump: 1, impact: 1 },
         { bars: 8, ar: "A", pd: "P", d: "house" },
         { bars: 8, r: "R", ar: "A", bl: "A", ss: "S", l: "A", d: "edm", pump: 1 },
         { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [4e3, 300] }
@@ -13697,7 +13729,7 @@ varying vec3 vFgWN;
         { bars: 8, r: "B", l: "B", ar: "A", d: "rock" },
         { bars: 8, ar: "A", pd: "P", l: "A", synth: true, d: "half" },
         { bars: 4, r: "A", d: "build", riser: 1 },
-        { bars: 16, r: "B", l: "B", ar: "A", d: "drive" },
+        { bars: 8, r: "B", l: "B", ar: "A", d: "drive" },
         { bars: 4, r: "D", pd: "P", d: "rock", fill: false }
       ]
     },
@@ -13721,12 +13753,12 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 8, ar: "A", d: "none", sweep: [300, 4e3] },
-        { bars: 16, r: "A", l: "A", synth: true, d: "punk" },
+        { bars: 8, r: "A", l: "A", synth: true, d: "punk" },
         { bars: 8, r: "B", ar: "A", d: "rock" },
-        { bars: 16, r: "B", ss: "S", l: "B", lk: "saw", ar: "A", d: "drive" },
+        { bars: 8, r: "B", ss: "S", l: "B", lk: "saw", ar: "A", d: "drive" },
         { bars: 8, ar: "A", pd: "P", d: "half" },
         { bars: 4, r: "A", d: "build", riser: 1 },
-        { bars: 16, r: "B", ss: "S", l: "B", lk: "saw", ar: "A", d: "drive" },
+        { bars: 8, r: "B", ss: "S", l: "B", lk: "saw", ar: "A", d: "drive" },
         { bars: 4, r: "D", pd: "P", d: "rock", fill: false }
       ]
     },
@@ -13752,10 +13784,10 @@ varying vec3 vFgWN;
       form: [
         { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [300, 3e3] },
         { bars: 8, ar: "A", bl: "A", d: "house", riser: 1 },
-        { bars: 16, ss: "S", bl: "B", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, ss: "S", bl: "B", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
         { bars: 8, pd: "P", ar: "A", l: "B", lk: "square", d: "none" },
         { bars: 4, bl: "A", ar: "A", d: "roll", riser: 1, sweep: [400, 6e3] },
-        { bars: 16, ss: "S", bl: "B", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, ss: "S", bl: "B", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
         { bars: 8, pd: "P", ar: "A", l: "B", lk: "square", d: "house" },
         { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [3e3, 300] }
       ]
@@ -13777,13 +13809,13 @@ varying vec3 vFgWN;
         pads: { P: "[GBd]4 | [D^FA]4 | [EGB]4 | [CEG]4 |" }
       },
       form: [
-        { bars: 8, r: "A", g: "clean", pd: "P", d: "none" },
-        { bars: 16, r: "A", g: "clean", bass: false, bl: "A", l: "A", synth: true, d: "light" },
-        { bars: 8, ar: "A", pd: "P", bl: "A", l: "B", d: "ride" },
-        { bars: 8, r: "A", g: "clean", pd: "P", d: "none" },
-        { bars: 16, r: "A", g: "clean", bass: false, ar: "A", bl: "A", l: "A", synth: true, d: "light" },
-        { bars: 8, ar: "A", pd: "P", bl: "A", l: "B", d: "ride" },
-        { bars: 8, r: "A", g: "clean", pd: "P", d: "none" }
+        { bars: 4, r: "A", g: "clean", pd: "P", d: "none" },
+        { bars: 4, r: "A", g: "clean", bass: false, bl: "A", l: "A", synth: true, d: "light" },
+        { bars: 4, ar: "A", pd: "P", bl: "A", l: "B", d: "ride" },
+        { bars: 4, r: "A", g: "clean", pd: "P", d: "none" },
+        { bars: 4, r: "A", g: "clean", bass: false, ar: "A", bl: "A", l: "A", synth: true, d: "light" },
+        { bars: 4, ar: "A", pd: "P", bl: "A", l: "B", d: "ride" },
+        { bars: 4, r: "A", g: "clean", pd: "P", d: "none" }
       ]
     },
     // ======================================================= Syndicate: synthpop / EDM
@@ -13809,12 +13841,12 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 8, pd: "P", st: "H", d: "none", sweep: [300, 2500] },
-        { bars: 16, bl: "A", ar: "A", d: "breaks" },
+        { bars: 8, bl: "A", ar: "A", d: "breaks" },
         { bars: 4, ar: "A", d: "roll", riser: 1 },
-        { bars: 16, ss: "S", bl: "B", bk: "saw", l: "A", lk: "square", ar: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, ss: "S", bl: "B", bk: "saw", l: "A", lk: "square", ar: "A", d: "edm", pump: 1, impact: 1 },
         { bars: 8, st: "H", pd: "P", l: "B", lk: "saw", d: "none" },
         { bars: 4, bl: "A", d: "roll", riser: 1 },
-        { bars: 16, ss: "S", bl: "B", bk: "saw", l: "B", lk: "saw", ar: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, ss: "S", bl: "B", bk: "saw", l: "B", lk: "saw", ar: "A", d: "edm", pump: 1, impact: 1 },
         { bars: 8, bl: "A", pd: "P", d: "hats", sweep: [3e3, 300] }
       ]
     },
@@ -13836,11 +13868,11 @@ varying vec3 vFgWN;
       },
       form: [
         { bars: 8, ar: "A", pd: "P", d: "none" },
-        { bars: 16, bl: "A", ar: "A", l: "A", d: "pop" },
-        { bars: 16, bl: "A", ss: "S", l: "B", d: "popdrive" },
+        { bars: 8, bl: "A", ar: "A", l: "A", d: "pop" },
+        { bars: 8, bl: "A", ss: "S", l: "B", d: "popdrive" },
         { bars: 8, pd: "P", ar: "A", d: "half" },
         { bars: 8, bl: "A", ar: "A", l: "A", d: "pop" },
-        { bars: 16, bl: "A", ss: "S", l: "B", ar: "A", d: "popdrive" },
+        { bars: 8, bl: "A", ss: "S", l: "B", ar: "A", d: "popdrive" },
         { bars: 8, ar: "A", pd: "P", d: "none" }
       ]
     },
@@ -13865,10 +13897,10 @@ varying vec3 vFgWN;
       form: [
         { bars: 4, st: "H", pd: "P", d: "none" },
         { bars: 4, bl: "A", ar: "A", d: "roll", riser: 1 },
-        { bars: 16, bl: "A", ss: "S", l: "A", d: "edm", pump: 1, impact: 1 },
-        { bars: 16, bl: "A", ar: "A", st: "H", l: "B", lk: "square", d: "breaks" },
+        { bars: 8, bl: "A", ss: "S", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, bl: "A", ar: "A", st: "H", l: "B", lk: "square", d: "breaks" },
         { bars: 4, ar: "A", d: "roll", riser: 1 },
-        { bars: 16, bl: "A", ss: "S", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, bl: "A", ss: "S", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
         { bars: 8, pd: "P", st: "H", stk: "choir", d: "none" },
         { bars: 8, bl: "A", ss: "S", l: "B", lk: "square", d: "edm", pump: 1 },
         { bars: 4, st: "H", d: "none" }
@@ -13891,12 +13923,12 @@ varying vec3 vFgWN;
         pads: { P: "[B,D^F]4 | [G,B,D]4 | [D^FA]4 | [A,^CE]4 |" }
       },
       form: [
-        { bars: 8, ar: "A", pd: "P", d: "none", sweep: [500, 4e3] },
-        { bars: 16, ar: "A", pd: "P", bl: "A", l: "A", d: "light" },
-        { bars: 16, ar: "A", pd: "P", bl: "A", l: "B", d: "pop" },
-        { bars: 8, pd: "P", l: "A", d: "none" },
-        { bars: 16, ar: "A", pd: "P", bl: "A", l: "B", d: "pop" },
-        { bars: 8, ar: "A", pd: "P", d: "none", sweep: [4e3, 400] }
+        { bars: 4, ar: "A", pd: "P", d: "none", sweep: [500, 4e3] },
+        { bars: 4, ar: "A", pd: "P", bl: "A", l: "A", d: "light" },
+        { bars: 4, ar: "A", pd: "P", bl: "A", l: "B", d: "pop" },
+        { bars: 4, pd: "P", l: "A", d: "none" },
+        { bars: 4, ar: "A", pd: "P", bl: "A", l: "B", d: "pop" },
+        { bars: 4, ar: "A", pd: "P", d: "none", sweep: [4e3, 400] }
       ]
     },
     {
@@ -13916,13 +13948,112 @@ varying vec3 vFgWN;
         pads: { P: "[FAc]4 | [EGc]4 | [DFA]4 | [DF_B]4 |" }
       },
       form: [
-        { bars: 8, ar: "A", pd: "P", d: "none" },
-        { bars: 16, ar: "A", pd: "P", bl: "A", l: "A", d: "pop" },
-        { bars: 16, ss: "S", bl: "A", ar: "A", l: "B", d: "popdrive", pump: 1 },
-        { bars: 8, pd: "P", ar: "A", d: "none" },
-        { bars: 8, bl: "A", ar: "A", l: "A", d: "pop" },
-        { bars: 16, ss: "S", bl: "A", l: "B", d: "popdrive", pump: 1 },
-        { bars: 8, ar: "A", pd: "P", d: "none", sweep: [4e3, 400] }
+        { bars: 4, ar: "A", pd: "P", d: "none" },
+        { bars: 4, ar: "A", pd: "P", bl: "A", l: "A", d: "pop" },
+        { bars: 4, ss: "S", bl: "A", ar: "A", l: "B", d: "popdrive", pump: 1 },
+        { bars: 4, pd: "P", ar: "A", d: "none" },
+        { bars: 4, bl: "A", ar: "A", l: "A", d: "pop" },
+        { bars: 4, ss: "S", bl: "A", l: "B", d: "popdrive", pump: 1 },
+        { bars: 4, ar: "A", pd: "P", d: "none", sweep: [4e3, 400] }
+      ]
+    },
+    // ======================================================= Legion: march / chant rock
+    //  chants: 1/8 units at sung pitch, n = notes, v = one syllable per note.
+    {
+      name: "Iron Legion",
+      mood: "battle",
+      style: "rock",
+      fac: "soviet",
+      bpm: 112,
+      riffOct: -2,
+      parts: {
+        riffs: {
+          A: ".D.D.D.D D4 .D.D.D.D F2E2 | .D.D.D.D D4 .D.D.D.D A2G2 | ._B,._B,._B,._B, _B,4 ._B,._B,._B,._B, C2D2 | .C.C.C.C C4 .A,.A,.A,.A, A,4 |",
+          B: "D8 D4 F4 | _B,8 _B,4 C4 | F8 F4 E4 | A,8 A,8 |",
+          D: "D16 | _B,16 | C16 | D16 |"
+        },
+        chants: {
+          A: { n: "D,2 D,2 F,2 A,2 | G,3 F, E,2 D,2 | D,2 D,2 F,2 A,2 | C4 A,4 |", v: "ha ha ho ha | le gi o na | ha ha ho ha | u ra" },
+          B: { n: "A,2 z A, A,2 z2 | D2 D2 C2 A,2 | A,2 z A, A,2 z2 | E,4 ^C,4 |", v: "hey hey ho | le gi o na | hey hey ho | u ra" }
+        },
+        leads: { A: "d2 f2 a2 d'2 | c'2 _b a g2 f2 | _b2 a g f2 d2 | ^c4 e4 |" },
+        stabs: { H: "[DFA]2z6[DFA]2z6 | [DFA]2z6[DFA]2z6 | [_B,DF]2z6[_B,DF]2z6 | [CEG]2z6[A,^CE]2z6 |" },
+        pads: { P: "[DFA]4 | [DFA]4 | [_B,DF]4 | [A,^CE]4 |" }
+      },
+      form: [
+        { bars: 4, ch: "A", d: "stomp" },
+        { bars: 4, r: "A", st: "H", d: "march" },
+        { bars: 8, r: "A", ch: "A", d: "marchrock" },
+        { bars: 8, r: "B", ch: "B", st: "H", d: "drive" },
+        { bars: 4, r: "A", l: "A", d: "rock" },
+        { bars: 4, ch: "A", pd: "P", d: "stomp" },
+        { bars: 4, r: "A", d: "build" },
+        { bars: 8, r: "B", ch: "B", l: "A", st: "H", d: "shout" },
+        { bars: 4, r: "D", st: "H", stk: "choir", d: "march", fill: false }
+      ]
+    },
+    {
+      name: "Red Anthem",
+      mood: "battle",
+      style: "rock",
+      fac: "soviet",
+      bpm: 88,
+      riffOct: -2,
+      stabKind: "choir",
+      parts: {
+        riffs: {
+          A: "A8 .A.A.A.A G4 | F8 .F.F.F.F E4 | D8 .D.D.D.D E4 | A8 A8 |",
+          B: "A4 .A.A.A.A A4 .A.A.A.A | F4 .F.F.F.F F4 .F.F.F.F | G4 .G.G.G.G G4 .G.G.G.G | E4 .E.E.E.E E4 .E.E.E.E |"
+        },
+        chants: {
+          A: { n: "A,4 C4 | E4 D2 C2 | B,4 A,2 G,2 | A,8 |", v: "o o | o a o | o a o | o" },
+          B: { n: "E4 E2 D2 | C4 A,4 | D4 C2 B,2 | ^G,8 |", v: "u ra ra | le gi | o na ha | hey" }
+        },
+        leads: { B: "e'4 c'2 a2 | c'4 f4 | d'2 c'2 b2 g2 | ^g8 |" },
+        stabs: { H: "[Ace]16 | [FAc]16 | [GBd]16 | [E^GB]16 |" },
+        pads: { P: "[Ace]4 | [FAc]4 | [GBd]4 | [E^GB]4 |", Q: "[Ace]4 | [FAc]4 | [DFA]4 | [Ace]4 |" }
+      },
+      form: [
+        { bars: 4, ch: "A", pd: "Q", d: "none" },
+        { bars: 4, r: "A", ch: "A", d: "half" },
+        { bars: 4, r: "B", ch: "B", st: "H", d: "anthem" },
+        { bars: 4, r: "B", l: "B", d: "rock" },
+        { bars: 4, ch: "A", pd: "Q", d: "stomp" },
+        { bars: 4, r: "B", ch: "B", st: "H", d: "anthem" },
+        { bars: 4, r: "B", ch: "B", l: "B", d: "rock" },
+        { bars: 4, r: "A", pd: "Q", d: "half", fill: false }
+      ]
+    },
+    {
+      name: "Forward March",
+      mood: "battle",
+      style: "rock",
+      fac: "soviet",
+      bpm: 150,
+      riffOct: -2,
+      parts: {
+        riffs: {
+          A: ".E.E.E.E G2 .E.E A2 .E.E ^A2 B2",
+          B: "E6 G2 A4 G4 | C6 B,2 A,4 B,4 | E6 G2 A4 B4 | D4 C4 B,8 |",
+          D: "E16 | C16 | D16 | E16 |"
+        },
+        chants: {
+          A: { n: "E,2 E,2 G,2 E,2 | A,2 G,2 E,4 | E,2 E,2 G,2 B,2 | A,4 G,4 |", v: "ho ha ho ha | fo ward on | ho ha ho ha | ma ah" },
+          B: { n: "B,2 z2 B,2 z2 | E4 E4 | B,2 z2 B,2 z2 | ^D4 B,4 |", v: "hey hey | fo ward | hey hey | ma arch" }
+        },
+        leads: { A: "e2 g2 b2 e'2 | d'2 c' b a4 | g2 a2 b2 g2 | ^f4 ^d4 |" },
+        stabs: { H: "[EGB]2z2[EGB]2z10 | [CEG]2z2[CEG]2z10 | [EGB]2z2[EGB]2z10 | [D^FA]2z2[B,^D^F]2z10 |" }
+      },
+      form: [
+        { bars: 4, ch: "B", d: "march" },
+        { bars: 4, r: "A", d: "punk" },
+        { bars: 8, r: "A", ch: "A", d: "marchrock" },
+        { bars: 8, r: "B", ch: "B", st: "H", d: "shout" },
+        { bars: 8, r: "A", l: "A", d: "punk" },
+        { bars: 4, ch: "A", d: "stomp" },
+        { bars: 4, r: "A", d: "build" },
+        { bars: 8, r: "B", ch: "B", st: "H", l: "A", d: "shout" },
+        { bars: 4, r: "D", st: "H", d: "march", fill: false }
       ]
     }
   ];
@@ -14430,7 +14561,17 @@ varying vec3 vFgWN;
   }
   var musicOn = false;
   var musicGen = 0;
-  var MUSIC_TRACKS = window.MUSIC_SONGS || [];
+  var DRUM_LIFT = { light: "ride", ride: "rock", half: "rock", rock: "drive", pulse: "rock", groove: "drive", pop: "popdrive", house: "edm", breaks: "edm" };
+  function musicArrange(song) {
+    const f = song.form, len = (x) => x.reduce((a, s) => a + s.bars * 240 / song.bpm, 0);
+    if (f.length < 4 || len(f) >= 105) return song;
+    const body = f.slice(1, -1);
+    let k = 1;
+    while (k < body.length && len(f) + len(body.slice(-k)) < 105) k++;
+    const rep = body.slice(-k).map((s) => ({ ...s, tr: (s.tr || 0) + 2, d: DRUM_LIFT[s.d] || s.d }));
+    return { ...song, form: [...f.slice(0, -1), ...rep, { ...f[f.length - 1], tr: 2 }] };
+  }
+  var MUSIC_TRACKS = (window.MUSIC_SONGS || []).map(musicArrange);
   function musicDSP() {
     function abcParse(src, unitBeats) {
       const out = [];
@@ -14533,9 +14674,14 @@ varying vec3 vFgWN;
       roll: { K: "x...x...x...x...", p: "x.x.x.x.xxxxxxxx" },
       pop: { K: "x.......x.x.....", S: "....X.......X...", h: "x.x.x.x.x.x.x.x." },
       popdrive: { K: "x...x...x...x...", S: "....X.......X...", h: "xxxxxxxxxxxxxxxx" },
+      // march / anthem kits (H = gang "HEY!" shout)
+      stomp: { k: "x.x.....x.x.....", p: "....X.......X..." },
+      marchrock: { k: "x...x...x...x...", s: "..x...x.X.x.x.xx", h: "x.x.x.x.x.x.x.x." },
+      shout: { k: "x...x...x...x...", s: "....X.......X...", h: "x.x.x.x.x.x.x.x.", H: "....x.......x..." },
+      anthem: { k: "x.......x.......", s: "........X.......", H: "............x...", h: "x...x...x...x..." },
       none: {}
     };
-    const NOFILL = /* @__PURE__ */ new Set(["edm", "house", "hats", "roll", "pop", "popdrive", "breaks"]);
+    const NOFILL = /* @__PURE__ */ new Set(["edm", "house", "hats", "roll", "pop", "popdrive", "breaks", "stomp"]);
     let _nz = null;
     const NZ = () => {
       if (!_nz) {
@@ -14601,7 +14747,7 @@ varying vec3 vFgWN;
       voice(out, sr, t, { osc: [[0, mtof(m), 1], [2, mtof(m), 0.6]], a: 4e-3, hold: Math.max(0.01, dur - 0.04), rel: 0.08, peak: 0.5 * vel, lp: ["lowpass", 1.2, sweep(1100, 380, Math.min(0.25, dur))] });
     }
     function leadNote(out, sr, t, m, dur, prev, vel, kind) {
-      const synth = "gtr" !== kind, g0 = prev ? mtof(prev) / mtof(m) : 1, depth = dur > 0.3 ? synth ? 12 : 22 : 0, vr2 = Math.min(dur, 0.45), f = mtof(m);
+      const synth = "gtr" !== kind, g0 = prev ? mtof(prev) / mtof(m) : 1, depth = dur > 0.3 ? synth ? 10 : 14 : 0, vr2 = Math.min(dur, 0.45), f = mtof(m);
       voice(out, sr, t, {
         osc: "saw" === kind ? [[0, f * cents(-9), 0.6], [0, f * cents(9), 0.6], [0, f * 2, 0.18]] : [[synth ? 1 : 0, f, 1]],
         a: 0.012,
@@ -14625,7 +14771,7 @@ varying vec3 vFgWN;
     function synthBass(out, sr, t, m, dur, vel, kind) {
       const f = mtof(m);
       if ("reese" === kind) voice(out, sr, t, { osc: [[0, f * cents(-14), 0.7], [0, f * cents(14), 0.7], [2, f / 2, 0.5]], a: 6e-3, hold: Math.max(0.01, dur - 0.05), rel: 0.1, peak: 0.42 * vel, lp: ["lowpass", 1.4, (tt) => 700 + 300 * Math.sin(tt * 3)] });
-      else voice(out, sr, t, { osc: [[0, f, 1], [1, f / 2, 0.5]], a: 3e-3, hold: Math.max(0.01, dur - 0.04), rel: 0.07, peak: 0.42 * vel, lp: ["lowpass", 4, sweep(2600, 260, Math.min(0.2, dur + 0.05))] });
+      else voice(out, sr, t, { osc: [[0, f, 1], [1, f / 2, 0.5]], a: 3e-3, hold: Math.max(0.01, dur - 0.04), rel: 0.07, peak: 0.42 * vel, lp: ["lowpass", 2.4, sweep(2200, 260, Math.min(0.2, dur + 0.05))] });
     }
     function arpNote(out, sr, t, m, dur, vel) {
       voice(out, sr, t, { osc: [[0, mtof(m) * cents(-6), 0.7], [1, mtof(m) * cents(6), 0.45]], a: 2e-3, hold: Math.min(0.03, dur * 0.3), rel: 0.2, peak: 0.26 * vel, lp: ["lowpass", 2, sweep(5200, 650, 0.14)] });
@@ -14636,6 +14782,50 @@ varying vec3 vFgWN;
         const osc = [];
         for (const m of midis) for (const d of dets) osc.push([0, mtof(m) * cents(d), 1]);
         voice(out, sr, t, { osc, ...env });
+      }
+    }
+    const VOW = { a: [[730, 1, 6], [1090, 0.5, 8], [2440, 0.22, 9]], o: [[570, 1, 6], [840, 0.6, 7], [2410, 0.18, 9]], u: [[330, 1, 5], [870, 0.4, 7], [2240, 0.12, 9]], e: [[530, 1, 6], [1840, 0.42, 9], [2480, 0.25, 9]], i: [[300, 1, 5], [2290, 0.32, 10], [3010, 0.2, 10]] };
+    function chantNote(L, R, sr, t, m, dur, vel, syl, fall) {
+      const w = syl.toLowerCase(), vi = w.search(/[aeiou]/), v = vi < 0 ? "a" : w[vi], c = vi > 0 ? w[0] : "", F = VOW[v];
+      const plos = "bdgkpt".includes(c) && !!c, soft = "lmnwyv".includes(c) && !!c, len = Math.ceil((dur + 0.3) * sr), i0 = Math.round(t * sr);
+      const src = new Float32Array(len), nz = NZ(), off = Math.floor(Math.random() * 65536);
+      const on = plos ? 0.018 : "h" === c ? 0.05 : 0, a = soft ? 0.08 : plos ? 0.015 : 0.045, hold = Math.max(0.02, dur - on - a - 0.04), rel = 0.16;
+      for (let k = 0; k < 6; k++) {
+        const f0 = mtof(m) * (2 === k % 3 ? 0.5 : 1) * cents((Math.random() * 2 - 1) * 16), j = on + Math.random() * 0.028, vp = Math.random() * 6, vr2 = 4.6 + Math.random();
+        let p = Math.random();
+        for (let i = Math.floor(j * sr); i < len; i++) {
+          const tt = i / sr - j, fr = cents(9 * Math.sin(vr2 * 6.283 * tt + vp) - (fall ? fall * 100 * Math.min(1, tt / dur) : 0)), dt = f0 * fr / sr;
+          p += dt, p >= 1 && (p -= 1);
+          const e = tt < a ? tt / a : tt < a + hold ? 1 : Math.exp(-9.2 * (tt - a - hold) / rel);
+          if (e < 1e-4 && tt > a) break;
+          src[i] += (2 * p - 1 - blep(p, dt)) * e;
+        }
+      }
+      for (let i = 0; i < len; i++) {
+        const tt = i / sr;
+        let n = 0.05;
+        "h" === c && tt < 0.07 && (n += 1.2 * (1 - tt / 0.07));
+        plos && tt < 0.016 && (n += 3 * (1 - tt / 0.016));
+        src[i] += n * nz[off + i & 65535] * (tt < dur + 0.1 ? 1 : 0);
+        "r" === c && tt < 0.09 && (src[i] *= 0.55 + 0.45 * Math.cos(6.283 * 27 * tt));
+      }
+      const bq = F.map(([f, , q]) => {
+        const b = BQ();
+        b.set("bandpass", f, q, sr);
+        return b;
+      }), lp = BQ();
+      lp.set("lowpass", 1400, 0.7, sr);
+      const hs = "sf".includes(c) && !!c ? BQ() : null;
+      hs && hs.set("highpass", 3500, 0.7, sr);
+      const g = 0.3 * vel, dly = Math.round(9e-3 * sr);
+      for (let i = 0; i < len; i++) {
+        const x = src[i];
+        let y = 0.12 * lp.run(x);
+        for (let k = 0; k < 3; k++) y += F[k][1] * bq[k].run(x);
+        hs && i < 0.1 * sr && (y += 0.5 * hs.run(nz[off + 7 * i & 65535]) * (1 - i / (0.1 * sr)));
+        const o = i0 + i;
+        o < L.length && (L[o] += y * g);
+        o + dly < R.length && (R[o + dly] += y * g * 0.92);
       }
     }
     const nzHit = (out, sr, t, type, f, q, d, g) => voice(out, sr, t, { osc: [[3, 0, 1]], a: 1e-3, hold: 0, rel: d, peak: g, lp: [type, q, () => f] });
@@ -14654,6 +14844,7 @@ varying vec3 vFgWN;
         for (const f of [850, 1330, 2150, 3400]) tnHit(out, sr, t, 2, f, f, 1, 0, 0.35, 0.09);
         nzHit(out, sr, t, "bandpass", 3e3, 2, 0.08, 0.4);
       } else if ("t" === lane) tnHit(out, sr, t, 2, acc ? 140 : 190, acc ? 90 : 120, 0.2, 0, 0.35, 0.8);
+      else if ("H" === lane) chantNote(out, out, sr, t, acc ? 57 : 55, 0.12, 0.8, "hey", 3);
       else if ("K" === lane) tnHit(out, sr, t, 2, 150, 44, 0.11, 0.05, 0.38, 0.8), nzHit(out, sr, t, "highpass", 3500, 0.7, 8e-3, 0.22);
       else if ("p" === lane) {
         const gv = acc ? 0.9 : 0.7;
@@ -14664,7 +14855,11 @@ varying vec3 vFgWN;
     }
     function synthSection(song, si, sr) {
       const sec = song.form[si], spb = 60 / song.bpm, barB = 4, bars = sec.bars, N = Math.ceil((bars * barB * spb + 2.4) * sr);
-      const T = (beat) => beat * spb + 0.02;
+      const T = (beat) => beat * spb + 0.02, tr = sec.tr || 0;
+      const A = (src, u) => {
+        const r = abc(src, u);
+        return tr ? { len: r.len, ev: r.ev.map((e) => ({ t: e.t, d: e.d, m: e.m, n: e.n.map((x) => x + tr) })) } : r;
+      };
       const loopEach = (P2, cb) => {
         if (!P2.len) return;
         for (let off = 0; off < bars * barB - 1e-6; off += P2.len) for (const e of P2.ev) {
@@ -14675,7 +14870,7 @@ varying vec3 vFgWN;
       const bufs = {}, B = (k) => bufs[k] || (bufs[k] = new Float32Array(N));
       const gm = sec.g || null, clean = "clean" === gm, parts = song.parts || {};
       if (sec.r && parts.riffs && parts.riffs[sec.r]) {
-        const P2 = abc(parts.riffs[sec.r], 0.25), oct = 12 * (song.riffOct ?? -2), L = B("gL"), R = B("gR");
+        const P2 = A(parts.riffs[sec.r], 0.25), oct = 12 * (song.riffOct ?? -2), L = B("gL"), R = B("gR");
         loopEach(P2, (e, b) => {
           const root = e.n[0] + oct, voic = clean ? e.n.map((n) => n + oct + 12) : e.n.length > 1 ? e.n.map((n) => n + oct) : [root, root + 7, root + 12];
           const d = e.d * spb, mute = !!e.m || "mute" === gm;
@@ -14688,27 +14883,31 @@ varying vec3 vFgWN;
       }
       if (sec.bl && parts.bass && parts.bass[sec.bl]) {
         const bk = sec.bk || song.bassKind;
-        loopEach(abc(parts.bass[sec.bl], 0.25), (e, b) => {
+        loopEach(A(parts.bass[sec.bl], 0.25), (e, b) => {
           const m = e.n[0] + 12 * (song.bassOct ?? -3), d = e.d * spb * 0.95;
           bk ? synthBass(B("bass"), sr, T(b), m, d, e.m ? 0.75 : 1, bk) : bassNote(B("bass"), sr, T(b), m, d, 1);
         });
       }
       if (sec.l && parts.leads && parts.leads[sec.l]) {
         let prev = null;
-        loopEach(abc(parts.leads[sec.l], 0.5), (e, b) => {
+        loopEach(A(parts.leads[sec.l], 0.5), (e, b) => {
           const m = e.n[0] + 12 * (song.leadOct ?? 0);
           leadNote(B("lead"), sr, T(b), m, e.d * spb, e.d * spb < 0.5 ? prev : null, e.m ? 0.7 : 1, leadKind(song, sec));
           prev = m;
         });
       }
-      if (sec.ar && parts.arps && parts.arps[sec.ar]) loopEach(abc(parts.arps[sec.ar], 0.25), (e, b) => arpNote(B("arp"), sr, T(b), e.n[0] + 12 * (song.arpOct ?? 0), e.d * spb, e.m ? 0.6 : 1));
-      if (sec.ss && parts.chords && parts.chords[sec.ss]) loopEach(abc(parts.chords[sec.ss], 0.25), (e, b) => supersaw(B("ssL"), B("ssR"), sr, T(b), e.n.map((n) => n + 12 * (song.chordOct ?? 0)), e.d * spb * 0.95, 1));
+      if (sec.ar && parts.arps && parts.arps[sec.ar]) loopEach(A(parts.arps[sec.ar], 0.25), (e, b) => arpNote(B("arp"), sr, T(b), e.n[0] + 12 * (song.arpOct ?? 0), e.d * spb, e.m ? 0.6 : 1));
+      if (sec.ss && parts.chords && parts.chords[sec.ss]) loopEach(A(parts.chords[sec.ss], 0.25), (e, b) => supersaw(B("ssL"), B("ssR"), sr, T(b), e.n.map((n) => n + 12 * (song.chordOct ?? 0)), e.d * spb * 0.95, 1));
       const secLen = bars * barB * spb;
       sec.riser && voice(B("fx"), sr, T(0), { osc: [[3, 0, 1]], a: secLen, hold: 0, rel: 0.25, peak: 0.22, lp: ["bandpass", 1.6, sweep(350, 7500, secLen)] });
       sec.impact && (tnHit(B("fx"), sr, T(0), 2, 110, 28, 1.1, 0.1, 1.3, 0.9), nzHit(B("fx"), sr, T(0), "lowpass", 900, 0.7, 1.4, 0.5));
+      if (sec.ch && parts.chants && parts.chants[sec.ch]) {
+        const C = parts.chants[sec.ch], syl = String(C.v).split(/[\s|]+/).filter(Boolean), P2 = A(C.n, 0.5);
+        loopEach(P2, (e, b) => chantNote(B("chL"), B("chR"), sr, T(b), e.n[0] + 12 * (song.chantOct ?? 0), e.d * spb, e.m ? 0.7 : 1, syl[P2.ev.indexOf(e) % syl.length] || "a"));
+      }
       const stk = sec.stk || song.stabKind || "brass";
-      if (sec.st && parts.stabs && parts.stabs[sec.st]) loopEach(abc(parts.stabs[sec.st], 0.25), (e, b) => stabHit(B("stab"), sr, T(b), e.n.map((n) => n + 12 * (song.stabOct ?? -1)), e.d * spb, stk, 1));
-      if (sec.pd && parts.pads && parts.pads[sec.pd]) loopEach(abc(parts.pads[sec.pd], 1), (e, b) => padChord(B("pad"), sr, T(b), e.n.map((n) => n + 12 * (song.padOct ?? -1)), e.d * spb, 1));
+      if (sec.st && parts.stabs && parts.stabs[sec.st]) loopEach(A(parts.stabs[sec.st], 0.25), (e, b) => stabHit(B("stab"), sr, T(b), e.n.map((n) => n + 12 * (song.stabOct ?? -1)), e.d * spb, stk, 1));
+      if (sec.pd && parts.pads && parts.pads[sec.pd]) loopEach(A(parts.pads[sec.pd], 1), (e, b) => padChord(B("pad"), sr, T(b), e.n.map((n) => n + 12 * (song.padOct ?? -1)), e.d * spb, 1));
       const kit = DRUM_KITS[sec.d || "none"] || {}, fill = sec.fill !== false && "none" !== sec.d && !NOFILL.has(sec.d);
       for (let bar = 0; bar < bars; bar++) {
         const lastBar = bar === bars - 1;
@@ -14719,6 +14918,10 @@ varying vec3 vFgWN;
           drumHit(B("drums"), sr, "o" === c ? "o" : "f" === c ? "f" : lane, T(bar * 4 + st / 4), "X" === c);
         }
         if (lastBar && fill) for (let st = 8; st < 16; st++) drumHit(B("drums"), sr, st < 12 ? "s" : "t", T(bar * 4 + st / 4), st >= 14);
+        if (!lastBar && "none" !== sec.d && sec.d) {
+          if (!NOFILL.has(sec.d) && 3 === bar % 4) for (const st of [13, 14, 15]) drumHit(B("drums"), sr, "s", T(bar * 4 + st / 4), 15 === st);
+          else if (NOFILL.has(sec.d) && 7 === bar % 8 && "hats" !== sec.d) for (const st of [12, 13, 14, 15]) drumHit(B("drums"), sr, "p", T(bar * 4 + st / 4), 15 === st);
+        }
         0 === bar && "none" !== sec.d && !sec.noCrash && drumHit(B("drums"), sr, "C", T(0), true);
       }
       if (sec.pump) for (const k of ["ssL", "ssR", "pad", "arp", "bass"]) {
@@ -14752,7 +14955,7 @@ varying vec3 vFgWN;
     glue.connect(out), out.connect(lim), lim.connect(sd);
     sd.connect(mrg, 0, 0), sd.connect(mrg, 1, 1), verb.connect(mrg, 0, 2), mrg.connect(ctx.destination);
     const dly = ctx.createDelay(2), fb = ctx.createGain(), dlp = ctx.createBiquadFilter(), dout = ctx.createGain();
-    dly.delayTime.value = Math.min(1.9, 0.75 * spb), fb.gain.value = 0.32, dlp.type = "lowpass", dlp.frequency.value = 3e3, dout.gain.value = 0.3;
+    dly.delayTime.value = Math.min(1.9, 0.75 * spb), fb.gain.value = 0.2, dlp.type = "lowpass", dlp.frequency.value = 2200, dout.gain.value = 0.22;
     dly.connect(dlp), dlp.connect(fb), fb.connect(dly), dlp.connect(dout), dout.connect(glue);
     return { glue, verb, dly };
   }
@@ -14783,20 +14986,20 @@ varying vec3 vFgWN;
   }
   function guitarAmp(ctx, dest, gain, clean) {
     const pre = ctx.createGain();
-    pre.gain.value = clean ? 0.6 : 1.6;
+    pre.gain.value = clean ? 0.6 : 1.25;
     let n = pre;
     if (!clean) {
       const sh = ctx.createWaveShaper();
-      sh.curve = drive(9), sh.oversample = "2x", pre.connect(sh), n = sh;
+      sh.curve = drive(6.5), sh.oversample = "2x", pre.connect(sh), n = sh;
     }
     const hp = ctx.createBiquadFilter();
     hp.type = "highpass", hp.frequency.value = clean ? 120 : 85, hp.Q.value = 0.7;
     const scoop = ctx.createBiquadFilter();
     scoop.type = "peaking", scoop.frequency.value = 700, scoop.Q.value = 0.9, scoop.gain.value = clean ? 0 : -5;
     const pres = ctx.createBiquadFilter();
-    pres.type = "peaking", pres.frequency.value = 2600, pres.Q.value = 1, pres.gain.value = clean ? 2 : 5;
+    pres.type = "peaking", pres.frequency.value = 2600, pres.Q.value = 1, pres.gain.value = clean ? 1.5 : 2.5;
     const lp1 = ctx.createBiquadFilter();
-    lp1.type = "lowpass", lp1.frequency.value = clean ? 5200 : 5e3, lp1.Q.value = 0.6;
+    lp1.type = "lowpass", lp1.frequency.value = clean ? 5200 : 4300, lp1.Q.value = 0.6;
     const lp2 = ctx.createBiquadFilter();
     lp2.type = "lowpass", lp2.frequency.value = 7800, lp2.Q.value = 0.5;
     const og = ctx.createGain();
@@ -14849,11 +15052,11 @@ varying vec3 vFgWN;
     if (bufs.stab) {
       if ("choir" === stk) {
         const pre = ctx.createGain();
-        for (const [f, q, l] of [[700, 6, 1], [1150, 8, 0.8], [2700, 10, 0.35]]) {
+        for (const [f, q, l] of [[700, 3.5, 1], [1150, 4.5, 0.8], [2700, 5, 0.3]]) {
           const b = ctx.createBiquadFilter();
           b.type = "bandpass", b.frequency.value = f, b.Q.value = q;
           const bg = ctx.createGain();
-          bg.gain.value = 2.2 * l, pre.connect(b), b.connect(bg), bg.connect(ch.stab);
+          bg.gain.value = 1.6 * l, pre.connect(b), b.connect(bg), bg.connect(ch.stab);
         }
         src([bufs.stab], pre);
       } else src([bufs.stab], ch.stab);
@@ -14867,6 +15070,7 @@ varying vec3 vFgWN;
     };
     bufs.arp && src([bufs.arp], swp(chan(ctx, M, 0.5, 0.12, 0.3, 0.38)));
     bufs.fx && src([bufs.fx], chan(ctx, M, 0.5, 0, 0.5));
+    bufs.chL && src([bufs.chL, bufs.chR], chan(ctx, M, 0.6, 0, 0.45));
     bufs.pad && (() => {
       const lp = ctx.createBiquadFilter();
       lp.type = "lowpass", lp.frequency.value = 1400, lp.connect(swp(ch.pad)), src([bufs.pad], lp);
@@ -14875,11 +15079,11 @@ varying vec3 vFgWN;
     if (bufs.lead) {
       const lk = musicLeadKind(song, sec), synth = "gtr" !== lk;
       const lp = ctx.createBiquadFilter();
-      lp.type = "lowpass", lp.frequency.value = "saw" === lk ? 5200 : synth ? 2600 : 4200, lp.Q.value = "square" === lk ? 3 : 0.7, lp.connect(ch.lead);
+      lp.type = "lowpass", lp.frequency.value = "saw" === lk ? 4600 : synth ? 2600 : 3400, lp.Q.value = 0.7, lp.connect(ch.lead);
       if (synth) src([bufs.lead], lp);
       else {
         const pg = ctx.createGain(), sh = ctx.createWaveShaper();
-        pg.gain.value = 1.4, sh.curve = drive(6), sh.oversample = "2x", pg.connect(sh), sh.connect(lp), src([bufs.lead], pg);
+        pg.gain.value = 1.1, sh.curve = drive(4), sh.oversample = "2x", pg.connect(sh), sh.connect(lp), src([bufs.lead], pg);
       }
     }
     for (const [chans, dest] of pend) {

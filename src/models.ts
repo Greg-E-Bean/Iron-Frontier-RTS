@@ -564,11 +564,10 @@ function bldExtras(n,e,t,r,l,s,rb,cn){const O="soviet"===t,Y="yuri"===t,A=!O&&!Y
 if("wall"===e){const h=.68*r,thin=.08*r,full=r;if(10===cn||5===cn){const hz=10===cn,BX=(al,ac,hh)=>hz?BOXM(al,ac,hh,.1):BOXM(ac,al,hh,.1),AX=v=>hz?[v,0]:[0,v];n.push(P_(BX(full,1.3*thin,.9),0,0,l+h,A?"armor3":O?"darkmetal":"carapace2"));if(A)n.push(P_(BX(.96*full,.5,.35),0,0,l+h+.9,"tesla",{e:1}));else if(O){for(const v of[-.4,0,.4]){const[px,py]=AX(v*full);n.push(P_(CYL(.25,3,5),px,py,l+h+.9,"darkmetal"))}const[bx,by]=AX(-.5*full);n.push(P_(CYL(.85,full,6),bx,by,l+h+2.4,"dark2",{ty:hz?PI2:0,tx:hz?0:-PI2}))}else for(const v of[-.32,0,.32]){const[px,py]=AX(v*full);n.push(P_(CONE(1.3,.1,4.2,6),px,py,l+h+.9,"carapace2"))}}return}
 if(rb<4)return;
 switch(e){
-case"power":if(A){for(const py of[-.2*r,-.33*r])for(const px of[-.28*r,-.09*r,.1*r]){n.push(P_(CYL(.5,2.2,6),px,py,l+1.1,"steel"));const T={orbit:.25,amp:.4,pvx:px,pvy:py};n.push(P_(BOXM(10,6,.5,.1),px,py,l+3.3,"darkmetal",{a:T}));n.push(P_(BOXM(9.4,5.4,.3,.1),px,py,l+3.8,"crystal",{e:1,a:T}))}vawt(n,.3*r,-.04*r,l+1.1,20);n.push(P_(BOXM(6,5,5,.5),.3*r,.15*r,l+1.1,"darkmetal"));for(const k of[-1.6,0,1.6])n.push(P_(BOXM(6.4,.4,4.4,.05),.3*r,.15*r+k,l+1.4,"steel")),n.push(P_(CYL(.5,2.4,6),.3*r+k*1.2,.15*r,l+6.1,"white"));for(let k=0;k<3;k++){const ang=2.094*k;n.push(P_(DOME(.9,.8,6),2.2*Math.cos(ang),2.2*Math.sin(ang),l+.27*r,"white",{a:{orbit:4,pvx:0,pvy:0}}))}}
+case"power":if(A){}
 else if(O){n.push(P_(BOXM(36,12,11,.6),0,-.27*r,l+1.1,"concrete2"));n.push(P_(BOXM(37,13,1.2,.2),0,-.27*r,l+12.1,"darkmetal"));n.push(P_(BOXM(30,.5,2.4,.1),0,-.27*r-6.2,l+6,"glassdark"));bolts(n,0,-.27*r-6.1,l+2.6,32,0,9,"rust");for(const fx of[-6,6]){n.push(P_(CYL(3.2,1.2,12),fx,-.27*r,l+13.3,"darkmetal"));n.push(P_(BOXM(5.6,.9,.3,.1),fx,-.27*r,l+14.3,"steel",{a:{spin:6}}));n.push(P_(BOXM(.9,5.6,.3,.1),fx,-.27*r,l+14.3,"steel",{a:{spin:6}}))}stack(n,-14,-.27*r,l+13.3,1.7,15,"rust");pipeRun(n,-.22*r,-.1*r,-.22*r,.05*r,l+6,1.2,"rust")}
 else{for(let k=0;k<3;k++){const ang=2.094*k;n.push(P_(DOME(1.7,1.7,8),20*Math.cos(ang),20*Math.sin(ang),l+17,"psi",{e:1,a:{orbit:.55,pvx:0,pvy:0,bob:1.3+.2*k,ba:1.6}}))}for(let k=0;k<4;k++){const ang=1.2+1.571*k,bx=24*Math.cos(ang),by=24*Math.sin(ang);n.push(P_(DOME(3,2.6,10),bx,by,l+1,"bile",{e:1,a:{bob:1.8+.3*k,ba:.6}}));strut3(n,0,0,l+4,.24*r*Math.cos(ang-.8),.24*r*Math.sin(ang-.8),l+2,.8,"flesh")}}break;
-case"refinery":{const hop=A?"steel":O?"rust":"flesh",bz=l+6.4;for(const lx of[-2.5,2.5])for(const ly of[-2.5,2.5])n.push(P_(CYL(.6,6,6),2+lx,.3*r+ly,l+1.1,"darkmetal"));n.push(P_(CONE(4,9,8,12),2,.3*r,l+6.5,hop));n.push(P_(DOME(8,2.2,12),2,.3*r,l+13.6,"tibG",{e:1}));n.push(P_(BOXM(26,4.4,.9,.2),-15,.28*r,bz,"darkmetal"));for(const sy of[-1,1])n.push(P_(BOXM(26,.5,1.2,.1),-15,.28*r+sy*2.4,bz+.4,"steel"));for(const lx of[-24,-15,-6])n.push(P_(CYL(.6,5.3,6),lx,.28*r,l+1.1,"darkmetal"));for(let k=0;k<4;k++)n.push(P_(DOME(1.5,1.1,6),-4,.28*r,bz+.9,k%2?"tibGlit":"tibG",{e:1,a:{belt:.35,pw:24,pp:.25*k}}));n.push(P_(BOXM(9,9,12,.6),-.33*r,.28*r,l+1.1,hop));n.push(P_(BOXM(.5,5,4,.1),-.33*r+4.6,.28*r,bz-.4,"black"));
-if(A){radarSpin(n,-12,-8,l+.32*s+.3,7,.9);vent(n,12,-10,l+.32*s,6,6,"steel")}else if(O){stack(n,-.31*r,-.31*r,l+1.1,2.4,34,"rust");n.push(P_(BOXM(8,.6,4.5,.2),0,-.17*r-.4,l+1.4,"glow",{e:1}));n.push(P_(BOXM(10,1,6,.3),0,-.17*r-.9,l+1.1,"darkmetal"))}else{for(const[bx,by]of[[-.3*r,-.27*r],[-.22*r,-.36*r],[-.36*r,-.37*r]])n.push(P_(DOME(4,3.4,10),bx,by,l+1,"bile",{e:1,a:{bob:1.4+bx*.003,ba:.8}}));n.push(P_(CONE(2.4,.8,7,8),-.29*r,-.31*r,l+1.1,"carapace2"))}break}
+case"refinery":break;
 case"barracks":flagPole(n,-.37*r,0,l+1.1,26,"body");if(Y){for(const bx of[-10,0,10])n.push(P_(DOME(3,4,10),bx,.34*r,l+1,"bile",{e:1,a:{bob:1.6+.1*bx,ba:.7}}))}else{for(const bx of[-9,0,9]){n.push(P_(CYL(.3,4.4,5),bx,.34*r,l+1.1,"wood"));n.push(P_(BOXM(3.6,.4,3.6,.1),bx,.34*r,l+4.6,"white"));n.push(P_(BOXM(1.4,.5,1.4,.1),bx,.34*r-.1,l+5.7,"red"))}n.push(P_(BOXM(26,1,.9,.2),0,.28*r,l+1.1,O?"sand":"armor3"))}if(O){n.push(P_(CYL(.4,9,6),8,-6,l+.42*s,"darkmetal"));for(const ang of[.6,-2.5])n.push(P_(CONE(.6,1.6,2.6,8),8+Math.cos(ang),-6+Math.sin(ang),l+.42*s+7,"steel",{r:ang,ty:1.3}))}break;
 case"cannon":{n.push(P_(TSLAB(circleProfile(22,8),5,.9,"cnemp"),0,0,l,"concrete2"));n.push(P_(CYL(15,.6,20),0,0,l+5,"darkmetal"));sandbagRing(n,25,l);crate(n,-20,20,l+5,5,"olive",.3);crate(n,-14,23,l+5,4,"olive",-.2);for(let k=0;k<5;k++)n.push(P_(CYL(.9,4.2,8),16+1.9*k,-20+.6*k,l+5,"gold"));hazard(n,0,-19,l+5.1,14,0);break}
 case"def2":if(A)for(let k=0;k<3;k++){const ang=2.094*k;n.push(P_(CONE(1.1,.1,4,6),7*Math.cos(ang),7*Math.sin(ang),24,"crystal",{e:1,a:{orbit:1.3,pvx:0,pvy:0,bob:2,ba:.8}}))}else if(O){for(let k=0;k<3;k++){const ang=2.094*k;n.push(P_(DOME(.8,.8,6),5*Math.cos(ang),5*Math.sin(ang),32.5,"tesla",{e:1,a:{orbit:3.6,pvx:0,pvy:0}}));n.push(P_(DOME(.6,.6,6),6.5*Math.cos(ang+1),6.5*Math.sin(ang+1),29,"white",{e:1,a:{orbit:-2.4,pvx:0,pvy:0}}))}}else for(let k=0;k<4;k++){const ang=1.571*k;n.push(P_(DOME(1,1,8),7*Math.cos(ang),7*Math.sin(ang),23,"psi",{e:1,a:{orbit:-1.2,pvx:0,pvy:0,bob:1.6+.2*k,ba:1.4}}))}break;
@@ -616,7 +615,51 @@ function paraHangarModel(r,l){const n=[],hw=.3*r,hd=.38*r;n.push(P_(CYL(hw,hd*2,
 function empSpireModel(r,l){const n=[];n.push(P_(CYL(.3*r,3,16),0,0,l,"concrete2"));for(let k=0;k<4;k++){const a=k*1.571+.78,x=Math.cos(a)*.26*r,y=Math.sin(a)*.26*r;n.push(P_(BOXM(5,5,7,.4),x,y,l+3,"armor3")),n.push(P_(CYL(1.2,3,8),x,y,l+10,"tesla",{e:1})),strut3(n,x,y,l+3,0,0,l+44,.6,"darkmetal")}n.push(P_(CYL(4,40,12),0,0,l+3,"darkmetal"));for(let k=0;k<5;k++)n.push(P_(CYL(7.5-.8*k,1.4,16),0,0,l+10+7*k,"tesla",{e:1,a:{bob:1.2+.25*k,ba:.8}}));n.push(P_(CYL(5,3,14),0,0,l+43,"steel")),n.push(P_(DOME(4.6,4,14),0,0,l+46,"crystal",{e:1})),n.push(P_(BOXM(12,.6,.6,.1),0,0,l+48,"tesla",{e:1,a:{spin:2.4}})),n.push(P_(BOXM(.6,12,.6,.1),0,0,l+48,"tesla",{e:1,a:{spin:2.4}}));return n}
 function rogueDenModel(r,l){const n=[];n.push(P_(BOXM(20,14,10,.3),-8,-6,l,"rust")),n.push(P_(WEDGE(21,15,1,4),-8,-6,l+10,"steel"));for(let k=0;k<5;k++)n.push(P_(BOXM(.3,14.2,10,.05),-17+4.5*k,-6,l,"darkmetal"));n.push(P_(BOXM(6,.4,7,.1),-4,1.2,l,"black")),n.push(P_(BOXM(8,.3,3,.1),-12,1.3,l+5,"#b0402a"));n.push(P_(BOXM(12,10,8,.3),12,-10,l,"#6f6555")),n.push(P_(WEDGE(13,11,.4,3),12,-10,l+8,"rust"));n.push(P_(BOXM(16,10,.3,.05),6,8,l+8,"#7a8a5a",{tx:.12}));for(const[x,y]of[[-1,3.5],[13,3.5],[-1,12.5],[13,12.5]])n.push(P_(CYL(.3,8,5),x,y,l,"wood"));ell(n,6,8,l,3,3,.6,"rock3");for(let k=0;k<6;k++){const a=k*1.047;n.push(P_(DOME(.8,.6,6),6+Math.cos(a)*3,8+Math.sin(a)*3,l,"rock2"))}n.push(P_(CONE(1.8,.2,3.6,6),6,8,l+.5,"glow",{e:1,a:{bob:3.4,ba:.35}})),n.push(P_(CONE(1.1,.1,2.6,6),6.6,7.6,l+.5,"lightY",{e:1,a:{bob:4.1,ba:.4}}));for(let k=0;k<4;k++)barrel(n,-16+3*k,10,l);crate(n,16,6,l,5,"wood",.4);n.push(P_(BOXM(12,5.4,4,.8),12,14,l,"#5a2a24")),n.push(P_(BOXM(6,4.8,2.4,.6),13,14,l+4,"#5a2a24")),n.push(P_(BOXM(4,4.8,1.8,.2),10,14,l+4.2,"glassdark"));for(const x of[8,16])for(const y of[11.6,16.4])n.push(P_(CYL(1.4,1.2,10),x,y,l+.6,"rubber",{tx:Math.PI/2}));n.push(P_(CYL(.2,9,5),-17,-12,l+10,"darkmetal")),n.push(P_(BOXM(.2,4,2.4,.05),-17,-10,l+16,"black",{a:{orbit:2,amp:.3,pvx:-17,pvy:-12}}));return n}
 const CIVX:Record<string,any>={civ7:workshopModel,civ9:terraceModel,bridgehut:bridgeHutModel,oilDerek:oilDerrickModel,paradropHangar:paraHangarModel,empTower:empSpireModel,rogueDen:rogueDenModel};
-let _bFac:any=null;function BMODEL_(e,t,dep,cn,rot,prod,doorT=0){cn=cn||0;_bFac=t;const r=32*BLD[e].size,n=[],a="allied"===t,o="soviet"===t,d=!1!==dep;const s=.3*r,i=.24*r,l=3.6,c=l+s;
+// Refinery: a processing hall and crusher tower that tower over the
+// harvesters, ore tanks, and an unloading gantry whose arm reaches out over
+// the dock tile south of the building where harvesters park to unload.
+function refineryModel(n,t,r,l,rb){const A="allied"===t,O="soviet"===t;
+if(!A&&!O){
+if(rb>=1)hive(n,{x:-12,y:-12,z:l,r:.27*r,h:22,crown:7,seg:10,pods:3,crest:!0,vein:"psi",body:"flesh",body2:"carapace2"});
+if(rb>=2){taper3(n,24,-20,l,24,-20,l+46,8,4.2,"carapace");for(let k=0;k<4;k++)ell(n,24,-20,l+6+10*k,8.6-.9*k,8.6-.9*k,2.4,"carapace2");n.push(P_(DOME(6,5,12),24,-20,l+45,"psi",{e:1,a:{spin:.5}}))}
+if(rb>=3){ell(n,-34,18,l,10,10,24,"bile2");ell(n,-34,18,l+6,8,8,19,"bile",{e:1,a:{bob:1.3,ba:.5}});ell(n,-28,38,l,7,7,18,"bile2");ell(n,-28,38,l+5,5.6,5.6,14,"bile",{e:1,a:{bob:1.6,ba:.5}});
+for(const sx of[-1,1])taper3(n,sx*15,32,l,sx*5,38,l+43,3,1.6,"bone"),taper3(n,sx*15,32,l,sx*22,28,l+2,2.4,1.2,"flesh")}
+if(rb>=4){taper3(n,0,30,l+44,0,56,l+41,4,2.2,"flesh");ell(n,0,56,l+37.5,4,4,5,"carapace2");n.push(P_(DOME(2.6,1.4,10),0,56,l+36.4,"psi",{e:1,tx:Math.PI}));
+taper3(n,0,34,l+44,22,-12,l+40,2.6,2.2,"flesh");for(let k=0;k<5;k++)n.push(P_(DOME(1.2,1,8),4.4*k,34-9.2*k,l+46.2-.8*k,"psi",{e:1,a:{bob:1+.3*k,ba:.4}}));
+veins(n,-12,-12,l+14,20,3,10,"psi");for(const[bx,by]of[[32,22],[36,34],[26,40]])n.push(P_(DOME(4,3.2,10),bx,by,l,"bile",{e:1,a:{bob:1.5+.01*bx,ba:.6}}))}
+return}
+const hall=A?"armor":"concrete",tow=A?"white":"concrete2",tank=A?"steel":"rust",arm=A?"steel":"rust",gl=A?"glass":"glassdark",lit=A?"crystal":"glow";
+if(rb>=1){tier(n,54,42,rb>=2?26:13,-12,-14,l,hall,"rfH"+t+(rb>=2?1:0),.96)}
+if(rb>=2){for(let k=0;k<5;k++)n.push(P_(BOXM(6.4,.6,3.2,.1),-32+k*10,7.3,l+13,gl,{e:1}));for(let k=0;k<3;k++)n.push(P_(BOXM(.6,6,3,.1),-39.4,-26+k*10,l+13,"tibG",{e:1}));
+n.push(P_(BOXM(18,18,rb>=3?52:26,.6),24,-20,l,tow));
+if(A){vent(n,-26,-22,l+26,8,10,"steel");radarSpin(n,-4,-26,l+26,6,.8)}else{for(let k=0;k<3;k++)n.push(P_(BOXM(50,2.2,3.4,.3),-12,-30+k*10,l+26,"rust",{tx:-.35}));stack(n,-33,-30,l+26,2.2,24,"rust");stack(n,-25,-31,l+26,1.8,20,"rust")}}
+if(rb>=3){if(A){n.push(P_(BOXM(18.6,18.6,3,.3),24,-20,l+38,"glass",{e:1}));n.push(P_(BOXM(20,20,2,.4),24,-20,l+52,"armor3"));n.push(P_(DOME(2.4,2,10),24,-20,l+54,lit,{e:1}))}
+else{for(const z of[16,34])n.push(P_(BOXM(19,19,2.2,.3),24,-20,l+z,"rust"));n.push(P_(BOXM(22,14,8,.5),24,-20,l+52,"rust"));n.push(P_(BOXM(12,.5,2.2,.1),24,-27.3,l+55,lit,{e:1}))}
+silo(n,-34,18,l,9,34,tank);silo(n,-28,38,l,7,26,tank);pipeRun(n,-34,12,-34,6,l+9,1.3,tank);pipeRun(n,-28,31,-31,26,l+6,1,tank);
+for(const sx of[-1,1]){n.push(P_(BOXM(3.4,3.4,46,.4),sx*14,34,l,arm));strut3(n,sx*14,34,l+18,sx*5,34,l+44,.6,"darkmetal")}
+n.push(P_(BOXM(34,4.4,4,.4),0,34,l+44,arm));hazard(n,0,36.4,l+44.2,24,0)}
+if(rb>=4){n.push(P_(BOXM(7,24,3.4,.4),0,46,l+44.6,arm));for(const sx of[-1,1])strut3(n,sx*3,36,l+36,sx*3,56,l+44.6,.45,"darkmetal");
+n.push(P_(CONE(2.2,6.2,7.4,12),0,55,l+37.4,arm));n.push(P_(CYL(1.6,.8,10),0,55,l+36.6,"tibG",{e:1}));spinBeacon(n,0,57,l+48,"lightY");
+taper3(n,0,34,l+48,20,-11,l+50,2.2,2.2,"darkmetal");for(let k=0;k<4;k++)n.push(P_(DOME(1.3,1,6),5*k,34-11.2*k,l+50.2+.5*k,k%2?"tibGlit":"tibG",{e:1}));
+n.push(P_(BOXM(14,12,10,.5),32,26,l,hall));n.push(P_(BOXM(12,.5,3,.1),32,32.2,l+5.5,gl,{e:1}));n.push(P_(BOXM(15,13,1,.3),32,26,l+10,A?"armor3":"rust"));n.push(P_(CYL(.3,9,5),36,22,l+11,"darkmetal"));
+crate(n,38,40,l,4.5,"olive",.2);barrel(n,-40,-40,l);barrel(n,-36,-41,l)}}
+// Foundations: buildings assembled from separate pieces (power plants,
+// refineries, stores, service bays) stand on a faction-styled plinth so they
+// read as one built structure; the rest of the model is raised onto it.
+const FOUNDED:Record<string,1>={power:1,refinery:1,silo:1};
+const foundH=(e,t)=>FOUNDED[e]?("yuri"===t?1.4:"soviet"===t?2.4:2):0;
+function bldFoundation(n,e,t,r){const H=foundH(e,t);if(!H)return;const W=.94*r,z0=2.2,top=3.6+H,A="allied"===t,O="soviet"===t,k=r+"_"+H;
+if(!A&&!O){ell(n,0,0,z0,.53*W,.53*W,.9,"flesh");ell(n,0,0,z0,.5*W,.5*W,top-z0+.9,"carapace2");for(let q=0;q<9;q++){const g=q*.698+.3,c=Math.cos(g),si=Math.sin(g);taper3(n,c*.3*W,si*.3*W,top-.2,c*.56*W,si*.56*W,z0+.6,1.3,.35,"flesh");q%3||n.push(P_(DOME(1.4,1,8),c*.44*W,si*.44*W,top-.9,"psi",{e:1,a:{bob:1.2+.2*q,ba:.3}}))}return}
+n.push(P_(SLAB(roundRectProfile(W+5,W+5,5,3),1.8,.8,"fdL"+k),0,0,z0,O?"darkmetal":"concrete2"));
+n.push(P_(SLAB(roundRectProfile(W,W,3,3),top-z0,.5,"fdU"+k),0,0,z0,O?"concrete2":"concrete"));
+const h=W/2;
+if(A){for(const[sx,sy,w,d]of[[0,-h,W-6,.5],[0,h,W-6,.5],[-h,0,.5,W-6],[h,0,.5,W-6]])n.push(P_(BOXM(w,d,.35,.1),sx,sy,top-.45,"white"));
+for(const sx of[-1,1])for(const sy of[-1,1])n.push(P_(BOXM(6,.4,.45,.1),sx*(h-6),sy*(h+2.3),z0+1,"tesla",{e:1}));
+n.push(P_(BOXM(18,4.5,top-z0-.9,.2),0,h+1.6,z0,"concrete2"));n.push(P_(BOXM(18,2.4,top-z0-.3,.2),0,h+.5,z0,"concrete"))}
+else{for(const[sx,sy,w,d]of[[0,-h-.2,W+.4,.7],[0,h+.2,W+.4,.7],[-h-.2,0,.7,W+.4],[h+.2,0,.7,W+.4]])n.push(P_(BOXM(w,d,.9,.1),sx,sy,z0+1.6,"darkmetal"));
+bolts(n,0,h+.7,z0+2.05,W-8,0,Math.max(4,W/9|0),"rust");for(const sx of[-1,1])for(const sy of[-1,1])n.push(P_(BOXM(3.4,3.4,top-z0+.5,.3),sx*(h-1.4),sy*(h-1.4),z0,"rust"));
+hazard(n,0,h-1.8,top+.02,Math.min(30,W-12),0)}}
+let _bFac:any=null;function BMODEL_(e,t,dep,cn,rot,prod,doorT=0){cn=cn||0;_bFac=t;const r=32*BLD[e].size,n=[],a="allied"===t,o="soviet"===t,d=!1!==dep;const s=.3*r,i=.24*r,l=3.6+foundH(e,t),c=l+s;bldFoundation(n,e,t,r);
 // Construction reveal stage (0=bare pad+crane, 4=fully built). Only keys in
 // hasStagedBuild() actually vary this - render.ts passes the live rise
 // fraction (0-1) via dep for them, and bakes the resulting bucket into the
@@ -717,20 +760,12 @@ break;}
 case"power":{
 n.push(P_(SLAB(roundRectProfile(.88*r,.88*r,3,3),1.1,.5,"pwpad"),0,0,l,"asphalt"));
 if(a){
-if(riseBucket>=1){
-n.push(P_(BOXM(.22*r,.18*r,.1*r,.25),0,0,l,"armor"));
-railPosts(n,.24*r,.2*r,l+.1*r,1.6);
-}
-if(riseBucket>=2){
-windows(n,.18*r,.14*r,l+.04*r,.05*r,2);
-n.push(P_(CYL(.035*r,.16*r,10),0,0,l+.1*r,"steel"));
-}
-if(riseBucket>=3){
-solarPanels(n,0,.22*r,l+.02*r,.5*r,.34*r);
-}
-if(riseBucket>=4){
-n.push(P_(CYL(.025*r,.03*r,8),0,0,l+.26*r,"glow",{e:1}));
-}
+// Solar Array: battery/inverter house between two rows of tilted panel racks
+if(riseBucket>=1){n.push(P_(BOXM(20,13,8,.4),0,0,l,"armor"));n.push(P_(BOXM(21,14,.8,.2),0,0,l+8,"white"));}
+if(riseBucket>=2){for(const sx of[-5.5,0,5.5])n.push(P_(BOXM(3.6,.5,2.4,.1),sx,6.6,l+3.4,"glass",{e:1}));acUnit(n,-5,-2,l+8.8,5,4,0);n.push(P_(CYL(.3,7,6),6,-3,l+8.8,"darkmetal"));n.push(P_(DOME(.8,.8,8),6,-3,l+15.8,"tesla",{e:1}));}
+if(riseBucket>=3){for(const py of[-19,19])for(const px of[-19,0,19]){for(const sx of[-4,4])n.push(P_(CYL(.35,2.6,6),px+sx,py,l,"steel"));n.push(P_(BOXM(13.4,8.4,.35,.1),px,py,l+2.6,"darkmetal",{tx:-.42}));n.push(P_(BOXM(12.6,7.6,.3,.05),px,py+.1,l+2.85,"crystal",{e:1,tx:-.42}));for(const gx of[-3.1,0,3.1])n.push(P_(BOXM(.18,7.7,.34,.02),px+gx,py+.1,l+2.9,"white",{tx:-.42}))}
+for(const py of[-13,13])n.push(P_(BOXM(50,1.2,.6,.1),0,py,l,"darkmetal"));}
+if(riseBucket>=4){vawt(n,-27,0,l,15);vawt(n,27,0,l,15);n.push(P_(BOXM(6,5,5,.5),-15,1,l,"darkmetal"));for(const k of[-1.6,0,1.6])n.push(P_(BOXM(6.4,.4,4.4,.05),-15,1+k,l+.3,"steel"));}
 }else if(o){
 if(riseBucket>=1){
 n.push(P_(BOXM(.24*r,.18*r,.1*r,.3),0,0,l,"concrete"));
@@ -766,68 +801,7 @@ veins(n,0,0,l+2,.24*r,.16*r,8,"glow");
 crate(n,.3*r,.3*r,l,4,"olive",.2);
 hazard(n,.15*r,.35*r,3.5,.25*r,0);
 break;}
-case"refinery":{
-n.push(P_(SLAB(roundRectProfile(.9*r,.9*r,3,3),1.1,.5,"rfpad"),0,0,l,"asphalt"));
-if(a){
-if(riseBucket>=1){
-tier(n,.44*r,.34*r,.32*s,0,0,l,"armor","rfv1",.95);
-}
-const bz=l+.32*s;
-if(riseBucket>=2){
-windows(n,.4*r,.3*r,l+.13*s,.11*s,2);
-n.push(P_(BOXM(.1*r,.08*r,.3,.15),0,-.19*r,bz,"darkmetal"));
-n.push(P_(BOXM(.09*r,.07*r,.25,.12),0,-.19*r,bz+.3,"crystal",{e:1,ty:.28}));
-}
-if(riseBucket>=3){
-silo(n,.28*r,-.3*r,l,.08*r,.3*r,"steel");
-silo(n,.38*r,-.22*r,l,.07*r,.26*r,"steel");
-drum(n,.24*r,.3*r,l+.08*r,.1*r,.12*r,"steel",1.5);
-}
-if(riseBucket>=4){
-n.push(P_(CYL(1.8,2.8,12),.34*r,.18*r,l+.12*r,"steel",{a:{spin:2}}));
-n.push(P_(CYL(1.8,2.8,12),.34*r,.28*r,l+.12*r,"crystal",{a:{spin:1.8}}));
-}
-}else if(o){
-if(riseBucket>=1){
-tier(n,.46*r,.36*r,.34*s,0,0,l,"concrete","rfl1",.96);
-}
-const bz=l+.34*s;
-if(riseBucket>=2){
-windows(n,.42*r,.32*r,l+.12*s,.09*s,2,"glassdark");
-stack(n,0,-.2*r,bz,.03*r,.13*r,"rust");
-}
-if(riseBucket>=3){
-silo(n,.28*r,-.3*r,l,.085*r,.32*r,"rust");
-silo(n,.39*r,-.22*r,l,.075*r,.28*r,"rust");
-drum(n,.22*r,.3*r,l+.08*r,.1*r,.13*r,"rust",1.4);
-pipeRun(n,-.12*r,.16*r,.14*r,.16*r,l+.1*r,1.4,"rust");
-}
-if(riseBucket>=4){
-n.push(P_(CYL(1.9,2.8,12),.34*r,.18*r,l+.12*r,"rust",{a:{spin:1.9}}));
-n.push(P_(CYL(1.9,2.8,12),.34*r,.28*r,l+.12*r,"darkmetal",{a:{spin:1.7}}));
-}
-}else{
-if(riseBucket>=1){
-n.push(P_(TSLAB(circleProfile(.18*r,8),.08*s,.9,"rffound"),0,0,l,"carapace2"));
-}
-if(riseBucket>=2){
-hive(n,{x:0,y:0,z:l,r:.16*r,h:.9*s,crown:.06*r,seg:8,pods:2,crest:!0,vein:"psi",body:"flesh",body2:"bile2"});
-}
-if(riseBucket>=3){
-for(let e=0;e<2;e++){
-n.push(P_(CYL(.08*r,.2*r,12),.26*r+e*r*.12,.3*r,l,"flesh"));
-n.push(P_(DOME(.08*r,.06*r,10),.26*r+e*r*.12,.3*r,l+.2*r,"psi",{e:1,a:{spin:1.1}}));
-}
-}
-if(riseBucket>=4){
-n.push(P_(CYL(2,2.5,12),.34*r,.18*r,l+.1*r,"psi",{e:1,a:{spin:1.6}}));
-n.push(P_(CYL(1.6,2.2,10),.34*r,.28*r,l+.1*r,"bile2",{a:{spin:1.4}}));
-}
-}
-hazard(n,-.28*r,0,4,.2*r,0);
-crate(n,-.34*r,.16*r,l,4.5,"olive",.2);
-barrel(n,-.38*r,-.14*r,l);
-break;}
+case"refinery":{refineryModel(n,t,r,l,riseBucket);break;}
 case"hive":{
 const hl=1.02*r,hw=.46*r,hh=.3*s;
 n.push(P_(SLAB(roundRectProfile(.58*r,.42*r,3,3),1,.4,"hvpad"),0,0,l,"asphalt"));
@@ -1101,7 +1075,7 @@ if(riseBucket>=3){for(let e=0;e<3;e++){const t=2.09*e+.5;n.push(P_(CONE(2.2,.4,.
 const PAD_Q=[[-1,-1],[1,-1],[-1,1],[1,1]],pw=.4*r,pd=.4*r;
 for(let pi=0;pi<4;pi++){
 const px=26*PAD_Q[pi][0],py=26*PAD_Q[pi][1];
-n.push(P_(SLAB(roundRectProfile(pw,pd,4,3),1.4,.45,"afp"+pi),px,py,2.6,"asphalt"));
+n.push(P_(SLAB(roundRectProfile(pw,pd,4,3),1.65,.45,"afp"+pi),px,py,2.35,"asphalt"));
 if(riseBucket>=1){
 for(const cx of[-1,1])for(const cy of[-1,1])n.push(P_(BOXM(3.2,3.2,.35,.12),px+cx*pw*.4,py+cy*pd*.4,4,"white",{r:PI2/8}));
 hazard(n,px,py,4,.42*Math.min(pw,pd),0);
@@ -1141,9 +1115,9 @@ barrel(n,-.46*r,-.46*r,2.6,"olive");
 crate(n,.46*r,.46*r,2.6,4,"olive",.2);
 containerBox(n,-.46*r,.46*r,2.6,5.5,2.8,2.4,"body",.15);
 break;}
-case"def1":def1Bits(n,a?"allied":o?"soviet":"yuri",0,0,l,r,"",!0);break;case"aa":aaBits(n,a?"allied":o?"soviet":"yuri",0,0,l,r,"",!0);break;case"def2":if(a){tier(n,.52*r,.52*r,.24*r,0,0,l,"armor","d2v",.9),n.push(P_(CYL(.2*r,.34*r,18),0,0,l+.24*r,"armor3")),ribs(n,0,0,l+.24*r,.2*r,.34*r,3,"darkmetal"),windows(n,.19*r,.19*r,l+.3*r,.1*r,2,"glass"),railPosts(n,.5*r,.5*r,l+.6*r,1.6),n.push(P_(CONE(.17*r,.06*r,.36*r,14),0,0,l+.58*r,"crystal",{e:1}));for(let e=0;e<3;e++){const t=2.09*e;n.push(P_(CYL(1.3,.26*r,8),Math.cos(t)*r*.17,Math.sin(t)*r*.17,l+.28*r,"steel"))}}else if(o){tier(n,.58*r,.58*r,.26*r,0,0,l,"concrete","d2l",.9),n.push(P_(CYL(.16*r,.46*r,16),0,0,l+.26*r,"armor2")),hazard(n,0,.56*-r,l+.4,.66*r,0);for(let e=0;e<4;e++)n.push(P_(CYL(.2*r,1.9,16),0,0,l+.32*r+e*r*.11,"rust"));n.push(P_(CYL(.23*r,3.4,16),0,0,l+.72*r,"darkmetal"));for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(CYL(1.4,.2*r,8),5*Math.cos(t),5*Math.sin(t),l+.76*r,"steel"))}n.push(P_(DOME(4.6,4,14),0,0,l+.9*r,"glow",{e:1})),ladder(n,.17*r,0,l+.26*r,.46*r,0)}else{n.push(P_(CONE(.34*r,.18*r,.28*r,18),0,0,l,"carapace")),n.push(P_(CYL(.13*r,.38*r,14),0,0,l+.28*r,"carapace2")),veins(n,0,0,l+.32*r,.15*r,.2*r,8,"psi"),n.push(P_(DOME(.16*r,.18*r,16),0,0,l+.66*r,"psi",{e:1}));for(let e=0;e<6;e++){const t=1.047*e;spine(n,Math.cos(t)*r*.3,Math.sin(t)*r*.3,7.6,.15*r,.5,"carapace2")}}break;case"silo":{const e=.3*r;if(a){for(const t of[-1,1])silo(n,t*r*.2,0,l,.62*e,.5*r,"steel");pipeRun(n,.2*-r,0,.2*r,0,l+.34*r,1.6,"steel")}else o?(silo(n,0,0,l,.86*e,.52*r,"rust"),n.push(P_(BOXM(.3*r,.16*r,.16*r,1.2),.3*-r,.24*r,l,"concrete2")),ladder(n,.86*e,0,l,.52*r,0)):(n.push(P_(TSLAB(circleProfile(.9*e,7),.34*r,.8,"ysl"),0,0,l,"carapace2")),n.push(P_(DOME(.78*e,.3*r,7),0,0,l+.34*r,"carapace")),veins(n,0,0,6.6,.86*e,.26*r,7,"psi"));n.push(P_(BOXM(.36*r,.24*r,3.2,.8),.22*r,.24*-r,l,"darkmetal")),hazard(n,.22*r,.24*-r,l+3.2,.3*r,0);break}case"repair":{n.push(P_(SLAB(roundRectProfile(.86*r,.86*r,4,3),1.8,.6,"rpp"),0,0,l,"asphalt"));for(let e=0;e<20;e++){const t=e/20*Math.PI*2;n.push(P_(BOXM(4,1.4,.4,.12),Math.cos(t)*r*.3,Math.sin(t)*r*.3,5.5,"gold",{r:t+PI2}))}if(a||o){const e=a?"armor":"concrete";for(const t of[-1,1])n.push(P_(BOXM(.14*r,.14*r,.34*r,1.6),t*r*.34,.3*-r,l,e)),n.push(P_(BOXM(.14*r,.14*r,.34*r,1.6),t*r*.34,.3*r,l,e))}else for(const t of[-1,1])for(const u of[-1,1])hive(n,{x:t*r*.34,y:u*.3*r,z:l,r:.07*r,h:.3*r,crown:.045*r,seg:6,crest:!1,vein:"psi"});if(a||o)n.push(P_(BOXM(.8*r,.1*r,.09*r,1),0,.3*-r,l+.34*r,"steel")),n.push(P_(BOXM(.8*r,.1*r,.09*r,1),0,.3*r,l+.34*r,"steel")),n.push(P_(CYL(.06*r,.06*r,14),0,0,l+.38*r,"darkmetal")),n.push(P_(BOXM(.52*r,.09*r,.07*r,.9),.14*r,0,l+.42*r,"steel")),n.push(P_(BOXM(.1*r,.14*r,.12*r,.7),.36*r,0,l+.34*r,"gold")),n.push(P_(CYL(1.4,1.4,10),.36*r,0,l+.3*r,"glow",{e:1})),crate(n,.3*-r,.28*r,l,6.5,"olive",.3),barrel(n,.3*r,.3*r,l);else{const zt=l+.3*r;for(const sy of[-1,1]){const y=sy*.3*r,pts=[[-.34*r,zt],[-.2*r,zt+.1*r],[0,zt+.15*r],[.2*r,zt+.1*r],[.34*r,zt]];for(let k=0;k<4;k++){taper3(n,pts[k][0],y,pts[k][1],pts[k+1][0],y,pts[k+1][1],2.6-.25*Math.abs(k-1.5),2.4-.25*Math.abs(k-1.5),"bone");n.push(P_(CONE(.7,.05,2.6,6),pts[k+1][0],y,pts[k+1][1]+1.4,"bone",{ty:.3*sy}))}taper3(n,-.3*r,y+sy*1.6,zt+1,.3*r,y+sy*1.6,zt+1,.3,.3,"psi",{e:1})}for(let k=0;k<5;k++){const x=(-.24+.12*k)*r;taper3(n,x,-.3*r,zt+.08*r+1.2*Math.cos((k-2)*.5),x,.3*r,zt+.08*r+1.2*Math.cos((k-2)*.5),.9,.9,k%2?"carapace2":"carapace")}ell(n,0,0,zt+.1*r,.3*r,.26*r,1.2,"flesh",{tx:Math.PI});n.push(P_(DOME(.07*r,.06*r,12),0,0,zt+.02*r,"flesh"));for(let k=0;k<5;k++){const a=k*1.2566;n.push(P_(DOME(1.8,1.4,8),Math.cos(a)*.3*r,Math.sin(a)*.3*r,5.4,"bile",{e:1}))}}break}case"super":if(a){tier(n,.62*r,.62*r,.9*s,0,0,l,"armor","swv",.93),windows(n,.58*r,.58*r,l+.34*s,.28*s,4),railPosts(n,.6*r,.6*r,l+.9*s,2.6),n.push(P_(CYL(.2*r,.34*r,18),0,0,l+.9*s,"armor3")),ribs(n,0,0,l+.9*s,.2*r,.34*r,4,"darkmetal");for(let e=0;e<6;e++){const t=1.047*e;n.push(P_(CYL(1.6,.46*r,8),Math.cos(t)*r*.2,Math.sin(t)*r*.2,l+.9*s,"steel")),n.push(P_(CYL(2,2,10),Math.cos(t)*r*.2,Math.sin(t)*r*.2,l+.9*s+.46*r,"crystal",{e:1}))}n.push(P_(CONE(.15*r,.05*r,.3*r,14),0,0,l+.9*s+.34*r,"crystal",{e:1,a:{spin:1.5}})),n.push(P_(DOME(.09*r,.11*r,12),0,0,l+.9*s+.64*r,"glass",{e:1})),lattice(n,.34*-r,.32*r,l,.34*r,2.2,"steel")}else if(o){tier(n,.9*r,.9*r,.62*s,0,0,l,"concrete","swl",.95),railPosts(n,.86*r,.86*r,l+.62*s,2.8),n.push(P_(CYL(.26*r,2.4,20),0,0,l+.62*s,"darkmetal")),n.push(P_(CYL(.22*r,3,20),0,0,l+.62*s-3,"black"));for(const e of[-1,1])n.push(P_(SLAB(roundRectProfile(.3*r,.16*r,2,2),2.2,.6,"swd"),e*r*.26,0,l+.62*s+1,"armor2",{ty:d?.9*e:.15*e}));if(d){n.push(P_(CYL(.115*r,.52*r,14),0,0,l+.62*s,"white")),n.push(P_(CONE(.115*r,.02*r,.2*r,14),0,0,l+.62*s+.52*r,"red"));for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(BOXM(.1*r,1.6,.14*r,.4),Math.cos(t)*r*.1,Math.sin(t)*r*.1,l+.62*s+.04*r,"red",{r:t}))}}for(const e of[-1,1])stack(n,e*r*.36,.34*-r,l+.62*s,3.6,.2*r,"rust");gantry(n,0,.34*r,l,.56*r,.3*r,0),sandbagRing(n,.5*r,l)}else{hive(n,{x:0,y:0,z:l,r:.34*r,h:.86*s,crown:.14*r,seg:8,spines:1,pods:4,crest:!1});const riseZ=d?.26*s:0,dg=d?{spin:.6,bob:1.3}:null,gz=l+1.02*s+riseZ,orbR=.26*r,mz0=l+.32*s,mastH=gz-mz0;n.push(P_(CYL(.08*r,mastH,10),0,0,mz0+mastH/2,"darkmetal")),n.push(P_(CYL(.14*r,.1*r,12),0,0,gz-.06*r,"armor2")),n.push(P_(DOME(orbR,orbR,18),0,0,gz,"psi",Object.assign({e:1},dg?{a:dg}:{}))),n.push(P_(CYL(1.35*orbR,.16*orbR,20),0,0,gz+.15*orbR,"crystal",Object.assign({e:1},dg?{a:{spin:1.8*-dg.spin}}:{})));for(let e=0;e<6;e++){const t=1.047*e;n.push(P_(CONE(2.2,.4,.34*r,6),Math.cos(t)*r*.16,Math.sin(t)*r*.16,l+1.02*s+.2*r+.3*riseZ,"crystal",d?{r:t,ty:.42,e:1,a:{spin:-1}}:{r:t,ty:.42,e:1}))}}
+case"def1":def1Bits(n,a?"allied":o?"soviet":"yuri",0,0,l,r,"",!0);break;case"aa":aaBits(n,a?"allied":o?"soviet":"yuri",0,0,l,r,"",!0);break;case"def2":if(a){tier(n,.52*r,.52*r,.24*r,0,0,l,"armor","d2v",.9),n.push(P_(CYL(.2*r,.34*r,18),0,0,l+.24*r,"armor3")),ribs(n,0,0,l+.24*r,.2*r,.34*r,3,"darkmetal"),windows(n,.19*r,.19*r,l+.3*r,.1*r,2,"glass"),railPosts(n,.5*r,.5*r,l+.6*r,1.6),n.push(P_(CONE(.17*r,.06*r,.36*r,14),0,0,l+.58*r,"crystal",{e:1}));for(let e=0;e<3;e++){const t=2.09*e;n.push(P_(CYL(1.3,.26*r,8),Math.cos(t)*r*.17,Math.sin(t)*r*.17,l+.28*r,"steel"))}}else if(o){tier(n,.58*r,.58*r,.26*r,0,0,l,"concrete","d2l",.9),n.push(P_(CYL(.16*r,.46*r,16),0,0,l+.26*r,"armor2")),hazard(n,0,.56*-r,l+.4,.66*r,0);for(let e=0;e<4;e++)n.push(P_(CYL(.2*r,1.9,16),0,0,l+.32*r+e*r*.11,"rust"));n.push(P_(CYL(.23*r,3.4,16),0,0,l+.72*r,"darkmetal"));for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(CYL(1.4,.2*r,8),5*Math.cos(t),5*Math.sin(t),l+.76*r,"steel"))}n.push(P_(DOME(4.6,4,14),0,0,l+.9*r,"glow",{e:1})),ladder(n,.17*r,0,l+.26*r,.46*r,0)}else{n.push(P_(CONE(.34*r,.18*r,.28*r,18),0,0,l,"carapace")),n.push(P_(CYL(.13*r,.38*r,14),0,0,l+.28*r,"carapace2")),veins(n,0,0,l+.32*r,.15*r,.2*r,8,"psi"),n.push(P_(DOME(.16*r,.18*r,16),0,0,l+.66*r,"psi",{e:1}));for(let e=0;e<6;e++){const t=1.047*e;spine(n,Math.cos(t)*r*.3,Math.sin(t)*r*.3,7.6,.15*r,.5,"carapace2")}}break;case"silo":{const e=.3*r;if(a){for(const t of[-1,1])silo(n,t*r*.2,0,l,.62*e,.5*r,"steel");pipeRun(n,.2*-r,0,.2*r,0,l+.34*r,1.6,"steel")}else o?(silo(n,0,0,l,.86*e,.52*r,"rust"),n.push(P_(BOXM(.3*r,.16*r,.16*r,1.2),.3*-r,.24*r,l,"concrete2")),ladder(n,.86*e,0,l,.52*r,0)):(n.push(P_(TSLAB(circleProfile(.9*e,7),.34*r,.8,"ysl"),0,0,l,"carapace2")),n.push(P_(DOME(.78*e,.3*r,7),0,0,l+.34*r,"carapace")),veins(n,0,0,6.6,.86*e,.26*r,7,"psi"));n.push(P_(BOXM(.36*r,.24*r,3.2,.8),.22*r,.24*-r,l,"darkmetal")),hazard(n,.22*r,.24*-r,l+3.2,.3*r,0);break}case"repair":{n.push(P_(SLAB(roundRectProfile(.86*r,.86*r,4,3),1.8,.6,"rpp"),0,0,l-.4,"concrete2"));for(let e=0;e<20;e++){const t=e/20*Math.PI*2;n.push(P_(BOXM(4,1.4,.4,.12),Math.cos(t)*r*.3,Math.sin(t)*r*.3,5.5,"gold",{r:t+PI2}))}if(a||o){const e=a?"armor":"concrete";for(const t of[-1,1])n.push(P_(BOXM(.14*r,.14*r,.34*r,1.6),t*r*.34,.3*-r,l,e)),n.push(P_(BOXM(.14*r,.14*r,.34*r,1.6),t*r*.34,.3*r,l,e))}else for(const t of[-1,1])for(const u of[-1,1])hive(n,{x:t*r*.34,y:u*.3*r,z:l,r:.07*r,h:.3*r,crown:.045*r,seg:6,crest:!1,vein:"psi"});if(a||o)n.push(P_(BOXM(.8*r,.1*r,.09*r,1),0,.3*-r,l+.34*r,"steel")),n.push(P_(BOXM(.8*r,.1*r,.09*r,1),0,.3*r,l+.34*r,"steel")),n.push(P_(CYL(.06*r,.06*r,14),0,0,l+.38*r,"darkmetal")),n.push(P_(BOXM(.52*r,.09*r,.07*r,.9),.14*r,0,l+.42*r,"steel")),n.push(P_(BOXM(.1*r,.14*r,.12*r,.7),.36*r,0,l+.34*r,"gold")),n.push(P_(CYL(1.4,1.4,10),.36*r,0,l+.3*r,"glow",{e:1})),crate(n,.3*-r,.28*r,l,6.5,"olive",.3),barrel(n,.3*r,.3*r,l);else{const zt=l+.3*r;for(const sy of[-1,1]){const y=sy*.3*r,pts=[[-.34*r,zt],[-.2*r,zt+.1*r],[0,zt+.15*r],[.2*r,zt+.1*r],[.34*r,zt]];for(let k=0;k<4;k++){taper3(n,pts[k][0],y,pts[k][1],pts[k+1][0],y,pts[k+1][1],2.6-.25*Math.abs(k-1.5),2.4-.25*Math.abs(k-1.5),"bone");n.push(P_(CONE(.7,.05,2.6,6),pts[k+1][0],y,pts[k+1][1]+1.4,"bone",{ty:.3*sy}))}taper3(n,-.3*r,y+sy*1.6,zt+1,.3*r,y+sy*1.6,zt+1,.3,.3,"psi",{e:1})}for(let k=0;k<5;k++){const x=(-.24+.12*k)*r;taper3(n,x,-.3*r,zt+.08*r+1.2*Math.cos((k-2)*.5),x,.3*r,zt+.08*r+1.2*Math.cos((k-2)*.5),.9,.9,k%2?"carapace2":"carapace")}ell(n,0,0,zt+.1*r,.3*r,.26*r,1.2,"flesh",{tx:Math.PI});n.push(P_(DOME(.07*r,.06*r,12),0,0,zt+.02*r,"flesh"));for(let k=0;k<5;k++){const a=k*1.2566;n.push(P_(DOME(1.8,1.4,8),Math.cos(a)*.3*r,Math.sin(a)*.3*r,5.4,"bile",{e:1}))}}break}case"super":if(a){tier(n,.62*r,.62*r,.9*s,0,0,l,"armor","swv",.93),windows(n,.58*r,.58*r,l+.34*s,.28*s,4),railPosts(n,.6*r,.6*r,l+.9*s,2.6),n.push(P_(CYL(.2*r,.34*r,18),0,0,l+.9*s,"armor3")),ribs(n,0,0,l+.9*s,.2*r,.34*r,4,"darkmetal");for(let e=0;e<6;e++){const t=1.047*e;n.push(P_(CYL(1.6,.46*r,8),Math.cos(t)*r*.2,Math.sin(t)*r*.2,l+.9*s,"steel")),n.push(P_(CYL(2,2,10),Math.cos(t)*r*.2,Math.sin(t)*r*.2,l+.9*s+.46*r,"crystal",{e:1}))}n.push(P_(CONE(.15*r,.05*r,.3*r,14),0,0,l+.9*s+.34*r,"crystal",{e:1,a:{spin:1.5}})),n.push(P_(DOME(.09*r,.11*r,12),0,0,l+.9*s+.64*r,"glass",{e:1})),lattice(n,.34*-r,.32*r,l,.34*r,2.2,"steel")}else if(o){tier(n,.9*r,.9*r,.62*s,0,0,l,"concrete","swl",.95),railPosts(n,.86*r,.86*r,l+.62*s,2.8),n.push(P_(CYL(.26*r,2.4,20),0,0,l+.62*s,"darkmetal")),n.push(P_(CYL(.22*r,3,20),0,0,l+.62*s-3,"black"));for(const e of[-1,1])n.push(P_(SLAB(roundRectProfile(.3*r,.16*r,2,2),2.2,.6,"swd"),e*r*.26,0,l+.62*s+1,"armor2",{ty:d?.9*e:.15*e}));if(d){n.push(P_(CYL(.115*r,.52*r,14),0,0,l+.62*s,"white")),n.push(P_(CONE(.115*r,.02*r,.2*r,14),0,0,l+.62*s+.52*r,"red"));for(let e=0;e<4;e++){const t=e*PI2+.78;n.push(P_(BOXM(.1*r,1.6,.14*r,.4),Math.cos(t)*r*.1,Math.sin(t)*r*.1,l+.62*s+.04*r,"red",{r:t}))}}for(const e of[-1,1])stack(n,e*r*.36,.34*-r,l+.62*s,3.6,.2*r,"rust");gantry(n,0,.34*r,l,.56*r,.3*r,0),sandbagRing(n,.5*r,l)}else{hive(n,{x:0,y:0,z:l,r:.34*r,h:.86*s,crown:.14*r,seg:8,spines:1,pods:4,crest:!1});const riseZ=d?.26*s:0,dg=d?{spin:.6,bob:1.3}:null,gz=l+1.02*s+riseZ,orbR=.26*r,mz0=l+.32*s,mastH=gz-mz0;n.push(P_(CYL(.08*r,mastH,10),0,0,mz0+mastH/2,"darkmetal")),n.push(P_(CYL(.14*r,.1*r,12),0,0,gz-.06*r,"armor2")),n.push(P_(DOME(orbR,orbR,18),0,0,gz,"psi",Object.assign({e:1},dg?{a:dg}:{}))),n.push(P_(CYL(1.35*orbR,.16*orbR,20),0,0,gz+.15*orbR,"crystal",Object.assign({e:1},dg?{a:{spin:1.8*-dg.spin}}:{})));for(let e=0;e<6;e++){const t=1.047*e;n.push(P_(CONE(2.2,.4,.34*r,6),Math.cos(t)*r*.16,Math.sin(t)*r*.16,l+1.02*s+.2*r+.3*riseZ,"crystal",d?{r:t,ty:.42,e:1,a:{spin:-1}}:{r:t,ty:.42,e:1}))}}
 break;case"civ1":tier(n,.78*r,.72*r,.34*r,0,0,l,"neutral","cv1",.96),n.push(P_(SLAB(roundRectProfile(.86*r,.8*r,3,3),2.8,.8,"cv1r"),0,0,l+.34*r,"rust")),windows(n,.74*r,.68*r,l+.12*r,.1*r,3,"glassdark"),roofFarm(n,.6*r,.56*r,l+.34*r+2.8,71),n.push(P_(CYL(3,.16*r,14),.24*r,0,l+.34*r+2.8,"rust"));break;case"civ2":tier(n,.64*r,.64*r,.52*r,0,0,l,"neutral","cv2",.94),n.push(P_(SLAB(roundRectProfile(.72*r,.72*r,3,3),2.8,.8,"cv2r"),0,0,l+.52*r,"concrete2")),windows(n,.6*r,.6*r,l+.12*r,.1*r,3,"glassdark"),windows(n,.6*r,.6*r,l+.34*r,.1*r,3,"glassdark"),roofFarm(n,.46*r,.46*r,l+.52*r+2.8,81),n.push(P_(CYL(1.4,.12*r,10),.22*r,.22*-r,l+.52*r+2.8,"darkmetal"));break;case"navalyard":{
-n.push(P_(SLAB(roundRectProfile(.88*r,.6*r,4,3),1.6,.6,"nydk"),0,-.1*r,l,"asphalt"));
+n.push(P_(SLAB(roundRectProfile(.88*r,.6*r,4,3),1.6,.6,"nydk"),0,-.1*r,l,"concrete2"));
 if(a){
 if(riseBucket>=1){
 n.push(P_(BOXM(.24*r,.22*r,.46*r,1.2),-.16*r,-.06*r,l,"armor"));
@@ -1206,7 +1180,7 @@ const cand=[];for(let k=0;k<10;k++){const a=k/10*6.283+.2;for(const rr of[.08,.1
 if("factory"===key){const hd=.25*r,tp=H(0,0);for(let i=0;i<5;i++){const x=(-.34+.17*i)*r,h0=Math.max(H(x,-hd+1),base);taper3(out,x,-hd-1,h0-1,x,-.5*hd,tp+4,1.2,1,"bone");taper3(out,x,-.5*hd,tp+4,x,.5*hd,tp+5.5,1,1,"bone");taper3(out,x,.5*hd,tp+5.5,x,hd+1,h0-1,1,1.2,"bone")}}
 picks.forEach(([x0,y0,h0],k)=>{const g=Math.atan2(y0,x0)||k*2.1,z0=h0-.8,A={orbit:.6+.23*k,amp:.28,pvx:x0,pvy:y0};let px=x0,py=y0,pz=z0;const segs=[[1.5*Math.cos(g),1.5*Math.sin(g),4.4],[2.4*Math.cos(g+.6),2.4*Math.sin(g+.6),3.6],[1.6*Math.cos(g+1.2),1.6*Math.sin(g+1.2),2.6]];out.push(P_(DOME(1.7,1.3,8),x0,y0,z0-.3,"flesh"));segs.forEach(([dx,dy,dz],i)=>{const dh=Math.hypot(dx,dy),L=Math.hypot(dh,dz);out.push(P_(CONE(1.1-.3*i,.8-.3*i,L,8),px,py,pz,i%2?"carapace2":"carapace",{ty:Math.atan2(dh,dz),r:Math.atan2(dy,dx),a:A}));px+=dx,py+=dy,pz+=dz});out.push(P_(DOME(.7,.6,7),px,py,pz-.2,"psi",{e:1,a:A}))});
 return out}
-const GROUND_DROP=3.8;function groundModel(m){return m.filter(q=>!(q&&"asphalt"===q.c&&(q.z||0)>2.5&&(q.z||0)<4.5)).map(q=>q?Object.assign({},q,{z:(q.z||0)-GROUND_DROP}):q)}
+const GROUND_DROP=3.8;function groundModel(m){return m.filter(q=>!(q&&"asphalt"===q.c&&(q.z||0)>2.5&&(q.z||0)<6.5)).map(q=>q?Object.assign({},q,{z:(q.z||0)-GROUND_DROP}):q)}
 // Model hygiene: finds parts that aren't connected (through touching parts)
 // to the ground and fixes them — near misses are nudged into contact, low
 // strays settle onto the ground, and anything higher gets a support strut.
@@ -1427,7 +1401,7 @@ function renderThumbInto(imgEl, key, kind, faction, size?) {
 }
 
 Object.assign(window, {
-  attachFloating, DOME, BOXM, ell, taper3, lowPoly, SLAB, TSLAB, INF_FAC,
+  attachFloating, partBox, DOME, BOXM, ell, taper3, lowPoly, SLAB, TSLAB, INF_FAC,
   cv, mm, cam, ctx, mctx, CYL, CONE, isoX, isoY, faceAng, PI2, ZH, MINE_TOOL, MINE_DEFAULT,
   roundRectProfile, circleProfile, polyProfile, triN, pushTri, fanCap, nrm3, wallMeshSG, wallMesh,
   boxMesh, cylMesh, coneMesh, domeMesh, slabMesh, wedgeMesh, taperSlabMesh, hexProfile, filletPoly,
