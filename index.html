@@ -14504,31 +14504,115 @@ varying vec3 vFgWN;
     if (d.hero || /tanya|reaper|phantom|titan/.test(u.key)) return "hero";
     return d.fly ? "air" : d.naval ? "sea" : "inf" === d.kind ? "inf" : "veh";
   }
+  var P_ = (acc, g, p = 1, r = 1) => ({ acc, g, p, r });
+  var PERSONA_ALLIED = {
+    gi: P_("us", "m"),
+    engineer: P_("ie", "m", 1.02),
+    guardian: P_("za", "m", 0.97),
+    marksman: P_("us", "f"),
+    vindicator: P_("rp", "m"),
+    tanya: P_("rp", "f", 1.04, 1.02),
+    chrono: P_("rp", "f", 0.98),
+    grizzly: P_("us", "m", 0.95),
+    ifv: P_("au", "m"),
+    hover: P_("us", "f", 1.02, 1.04),
+    prism: P_("rp", "m", 0.96),
+    bulwark: P_("north", "m", 0.93, 0.97),
+    titan_allied: P_("scot", "m", 0.9, 0.95),
+    longbow: P_("rp", "m", 0.94),
+    rocketeer: P_("us", "f", 1.03, 1.05),
+    harrier: P_("us", "m", 0.97, 1.05),
+    kestrel: P_("us", "f", 1.02, 1.05),
+    chinook: P_("au", "m"),
+    interceptor: P_("us", "m", 1, 1.06),
+    frigate: P_("rp", "m", 0.95, 0.97),
+    barracuda: P_("au", "m", 0.97),
+    lst: P_("au", "f"),
+    mcv: P_("north", "m", 0.92, 0.97),
+    bastion: P_("scot", "m", 0.93, 0.96),
+    restorer: P_("ie", "f"),
+    miner_allied: P_("north", "m", 0.96)
+  };
+  var ACCENT_LANG = { us: /^en[-_]US/i, rp: /^en[-_]GB/i, north: /^en[-_]GB/i, scot: /^en[-_]GB/i, au: /^en[-_](AU|NZ)/i, ie: /^en[-_]IE/i, za: /^en[-_]ZA/i, ru: /^ru/i, slav: /^(uk|be|bg|sr|pl|cs|sk)/i };
+  var ACCENT_LINES = {
+    us: {
+      inf: { sel: ["Squad's ready, Commander.", "Go ahead, we're listening.", "Standing by for orders.", "What do you need?", "Locked and loaded."], go: ["Roger that, moving.", "On it.", "Copy, heading out.", "You got it.", "Moving, moving!"] },
+      veh: { sel: ["Tank crew ready.", "Armor's warmed up, Commander.", "Crew standing by.", "Talk to me."], go: ["Rolling.", "Copy, advancing.", "We're Oscar Mike.", "Moving to the grid."] },
+      air: { sel: ["Hornet on station.", "Pilot here, go ahead.", "Wings level, awaiting tasking.", "Eyes in the sky, Commander."], go: ["Roger, inbound.", "Vector copied.", "On my way, hold tight.", "Commencing attack run."] },
+      sea: { sel: ["Bridge here.", "Helm's ready."], go: ["Aye aye, Commander.", "Setting course."] }
+    },
+    rp: {
+      inf: { sel: ["Ready when you are, sir.", "At your service.", "Awaiting instructions.", "Standing by, Commander."], go: ["Right away.", "Understood, moving now.", "Consider it done.", "On our way."] },
+      veh: { sel: ["Crew ready, Commander.", "Engines running, sir.", "Quite ready, thank you."], go: ["Advancing.", "Proceeding now.", "Moving up, sir."] },
+      air: { sel: ["Flight ready, sir.", "Airborne and awaiting orders."], go: ["Heading in.", "Understood, inbound."] },
+      sea: { sel: ["Bridge standing by.", "Ship's company ready, sir."], go: ["Making way.", "Steady as she goes."] }
+    },
+    north: {
+      inf: { sel: ["Ey up, Commander.", "Right then, what're we doin'?", "Aye, we're ready.", "Go on then, what's the job?"], go: ["Right, we're off.", "Aye, on me way.", "Champion, movin' now.", "Righto."] },
+      veh: { sel: ["She's warmed up, boss.", "Engine's grand, ready when you are.", "Aye, what d'you need?"], go: ["Right, off we go.", "Shiftin' her now.", "On us way.", "Steady does it."] },
+      sup: { sel: ["Ey up. Where d'you want us?", "Right then, where are we settin' up?", "Big lass is ready, boss.", "Aye, point us at some flat ground."], go: ["Right, shiftin' the lot.", "Takin' her steady.", "On us way, mind yer backs.", "No bother, off we go."] }
+    },
+    scot: {
+      inf: { sel: ["Aye, Commander?", "Och, what is it now?", "Ready, so we are."], go: ["Aye, on ma way.", "Nae bother.", "Right ye are."] },
+      hero: { sel: ["Aye, Commander? Walker's ready.", "Point me at 'em.", "Och, finally, some proper work.", "Big lad's awake."], go: ["Aye, on ma way.", "Nae bother at all.", "Stompin' over now.", "Right ye are, here we go."] }
+    },
+    au: {
+      inf: { sel: ["G'day, Commander.", "Ready to go, mate.", "What's the plan, boss?"], go: ["No worries.", "On it, mate.", "Righto, movin'."] },
+      sea: { sel: ["G'day, Commander. Boat's ready.", "Periscope up, what's the go?", "Sub's ready, mate."], go: ["No worries, divin' now.", "Too easy, on our way.", "She'll be right, headin' there."] },
+      air: { sel: ["Chopper's hot, mate.", "Ready for a lift?"], go: ["Too easy.", "No worries, liftin' off."] }
+    },
+    ie: { inf: { sel: ["Grand, what're we at?", "Ready so, Commander.", "Go on, I'm listenin'."], go: ["Grand, on me way.", "Sure look, we're off.", "No bother at all."] } },
+    za: { inf: { sel: ["Ja, Commander?", "Ready, boss.", "Shot, what's the plan?"], go: ["Ja, moving now.", "Lekker, on our way.", "Sharp sharp."] } }
+  };
+  var HERO_LINES = {
+    tanya: { sel: ["Ghost here. Do try to keep up.", "You rang?", "Let's make this quick, shall we?", "Right, who needs sorting out?"], go: ["Leave it with me.", "On my way, darling.", "Quietly does it.", "Consider it handled."] }
+  };
+  function hashKey(k) {
+    let h = 7;
+    for (let i = 0; i < k.length; i++) h = h * 31 + k.charCodeAt(i) >>> 0;
+    return h;
+  }
+  function personaFor(fac, key, role) {
+    const h = hashKey(key || role || "x"), j = (a, b) => a + h % 97 / 96 * (b - a);
+    if ("soviet" === fac) return P_("ru", /reaper|desolator|flak|jackal/.test(key || "") ? "f" : "m", j(0.92, 1.04), j(0.95, 1.03));
+    if ("yuri" === fac) return "phantom" === key ? P_("en", "f", 0.98, 0.86) : P_(["rp", "us", "ie", "au"][h % 4], "m", j(0.8, 0.9), j(0.86, 0.93));
+    return key && PERSONA_ALLIED[key] || P_("rp", "f", 1.03, 1.02);
+  }
   var VOICE_LIST = [];
   function refreshVoiceList() {
     try {
       VOICE_LIST = speechSynthesis.getVoices() || [];
+      VOICE_CACHE = {};
     } catch (e) {
     }
   }
+  var VOICE_CACHE = {};
   try {
     "undefined" != typeof speechSynthesis && (refreshVoiceList(), speechSynthesis.onvoiceschanged = refreshVoiceList);
   } catch (e) {
   }
-  var FEM = /female|woman|samantha|victoria|karen|moira|tessa|fiona|zira|aria|jenny|libby|sonia|serena|kate|susan|hazel|emma|natasha|clara|google uk english female|google us english/i;
-  var MALE = /\bmale|daniel|david|george|fred|alex|guy|ryan|james|thomas|mark|arthur|oliver|google uk english male/i;
-  function pickVoice(fac) {
-    const vs = VOICE_LIST, en = (v) => /^en/i.test(v.lang);
-    if (!vs.length) return { v: null, ru: false };
-    if ("soviet" === fac) {
-      const ru = vs.find((v) => /^ru/i.test(v.lang)) || vs.find((v) => /^(uk|be|pl|cs|sk|bg|sr|hr|sl)/i.test(v.lang));
-      if (ru) return { v: ru, ru: /^(ru|uk|be|bg|sr)/i.test(ru.lang) };
-      return { v: vs.find((v) => en(v) && MALE.test(v.name) && !/female/i.test(v.name)) || vs.find(en), ru: false };
-    }
-    if ("yuri" === fac) return { v: vs.find((v) => en(v) && MALE.test(v.name) && !/female/i.test(v.name)) || vs.find(en), ru: false };
-    return { v: vs.find((v) => en(v) && FEM.test(v.name)) || vs.find(en), ru: false };
+  var FEM = /female|woman|samantha|victoria|karen|moira|tessa|fiona|zira|aria|jenny|libby|sonia|maisie|serena|kate|susan|hazel|emma|natasha|clara|emily|leah|neerja|michelle|ava|allison|nicole|catherine|svetlana|dariya|milena|katya|polina|zosia|google uk english female|google us english/i;
+  var MALE = /\bmale|daniel|david|george|fred|alex|guy|ryan|james|thomas|mark|arthur|oliver|william|connor|luke|davis|tony|jason|christopher|eric|brian|andrew|lee|dmitry|dmitri|yuri|pavel|ostap|google uk english male/i;
+  function voiceQuality(v) {
+    const n = v.name || "";
+    return (/natural|neural/i.test(n) ? 60 : 0) + (/online/i.test(n) ? 25 : 0) + (/premium|enhanced|siri/i.test(n) ? 40 : 0) + (/google/i.test(n) ? 20 : 0) - (/espeak|robot|compact/i.test(n) ? 80 : 0);
   }
-  var VOICE_STYLE = { allied: { pitch: 1.12, rate: 1.03 }, soviet: { pitch: 0.82, rate: 0.93, pitchEn: 0.72 }, yuri: { pitch: 0.1, rate: 0.8 } };
+  function pickVoiceFor(per, seed) {
+    const ck = per.acc + per.g + seed % 3;
+    if (ck in VOICE_CACHE) return VOICE_CACHE[ck];
+    const vs = VOICE_LIST, lang = ACCENT_LANG[per.acc], en = (v2) => /^en/i.test(v2.lang), gOk = (v2) => "f" === per.g ? FEM.test(v2.name) && !/\bmale/i.test(v2.name.replace(/female/i, "")) : MALE.test(v2.name) && !/female/i.test(v2.name);
+    const rank = (list) => list.sort((a, b) => voiceQuality(b) - voiceQuality(a));
+    let pool = [];
+    if ("scot" === per.acc) pool = vs.filter((v2) => /scot|fiona/i.test(v2.name + v2.lang));
+    if (!pool.length && lang) pool = vs.filter((v2) => lang.test(v2.lang));
+    if ("ru" === per.acc && !pool.length) pool = vs.filter((v2) => ACCENT_LANG.slav.test(v2.lang));
+    if (!pool.length) pool = vs.filter((v2) => /^en[-_]GB/i.test(v2.lang));
+    if (!pool.length) pool = vs.filter(en);
+    const gp = pool.filter(gOk), cand = rank(gp.length ? gp : pool), top = cand.filter((v2) => voiceQuality(v2) >= voiceQuality(cand[0]) - 5);
+    const v = top.length ? top[(seed + ("scot" === per.acc ? 1 : 0)) % top.length] : null;
+    return VOICE_CACHE[ck] = v;
+  }
+  var ANNOUNCER = { allied: P_("rp", "f", 1.02, 1.02), soviet: P_("ru", "f", 0.98, 0.98), yuri: P_("rp", "m", 0.84, 0.9) };
   var lastVoiceT = 0;
   var lastAnnT = {};
   var voicesEnabled = (() => {
@@ -14550,13 +14634,15 @@ varying vec3 vFgWN;
     const t = AC.currentTime + 5e-3;
     sNoise(t, { type: "bandpass", f: "yuri" === fac ? 900 : 2400, q: 2.5, g: 0.05, a: 2e-3, d: 0.07 }), sOsc(t, { w: "sine", f: "yuri" === fac ? 420 : 1350, g: 0.025, d: 0.045 });
   }
-  function speakLine(fac, line, urgent) {
+  function speakLine(fac, line, urgent, per, seed) {
     if (!voicesEnabled || muted || sfxVol <= 0 || "undefined" == typeof speechSynthesis || !line) return;
     try {
-      const pv = pickVoice(fac), st = VOICE_STYLE[fac] || VOICE_STYLE.allied, text = Array.isArray(line) ? pv.ru ? line[1] : line[0] : line;
+      per = per || ANNOUNCER[fac] || ANNOUNCER.allied;
+      const v = pickVoiceFor(per, seed || 0), ru = !!v && /^(ru|uk|be|bg|sr)/i.test(v.lang), text = Array.isArray(line) ? ru ? line[1] : line[0] : line;
       urgent ? speechSynthesis.cancel() : speechSynthesis.speaking && speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.pitch = "soviet" === fac && !pv.ru ? st.pitchEn : st.pitch, u.rate = st.rate, u.volume = Math.min(1, sfxVol * masterVol), pv.v && (u.voice = pv.v, u.lang = pv.v.lang);
+      const u = new SpeechSynthesisUtterance(text), gMiss = v && ("f" === per.g ? !FEM.test(v.name) : FEM.test(v.name));
+      u.pitch = Math.max(0.75, Math.min(1.2, per.p * (gMiss ? "f" === per.g ? 1.12 : 0.88 : 1) * (0.98 + 0.04 * Math.random()))), u.rate = per.r * (0.97 + 0.06 * Math.random()), u.volume = Math.min(1, sfxVol * masterVol);
+      v && (u.voice = v, u.lang = v.lang);
       radioClick(fac), setTimeout(() => {
         try {
           speechSynthesis.speak(u);
@@ -14566,12 +14652,23 @@ varying vec3 vFgWN;
     } catch (e) {
     }
   }
-  function playVoiceLine(fac, category, role) {
+  function unitLines(fac, category, role, key, per) {
+    if (key && HERO_LINES[key]) return HERO_LINES[key][category];
+    if ("allied" === fac && per) {
+      const A = ACCENT_LINES[per.acc] || ACCENT_LINES.rp, b = A[role] || ("sup" === role || "hero" === role ? A.veh || A.inf : A.inf) || A.inf;
+      if (b && b[category]) return b[category];
+    }
+    const F = VOICE_LINES[fac] || VOICE_LINES.allied;
+    return (F[role || "inf"] || F.inf)[category];
+  }
+  function playVoiceLine(fac, category, role, key) {
     const now = performance.now();
     if (now - lastVoiceT < 900) return;
-    const F = VOICE_LINES[fac] || VOICE_LINES.allied, set = "sel" === category || "go" === category ? (F[role || "inf"] || F.inf)[category] : F[category];
+    const unitCat = "sel" === category || "go" === category;
+    const per = unitCat || "unit" === category && key ? personaFor(fac, key, role) : void 0;
+    const set = unitCat ? unitLines(fac, category, role || "inf", key, per) : "unit" === category && key && per ? unitLines(fac, "sel", role || "inf", key, per) : (VOICE_LINES[fac] || VOICE_LINES.allied)[category];
     if (!set || !set.length) return;
-    lastVoiceT = now, speakLine(fac, set[Math.floor(Math.random() * set.length)]);
+    lastVoiceT = now, speakLine(fac, set[Math.floor(Math.random() * set.length)], false, per, hashKey(key || role || ""));
   }
   function announce(ev) {
     const fac = S.players && S.players[0] && S.players[0].fac || "allied", F = VOICE_LINES[fac] || VOICE_LINES.allied, line = F.ann && F.ann[ev];
@@ -14586,7 +14683,7 @@ varying vec3 vFgWN;
     m.includes("under attack") ? announce("underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("construction yard deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
   }
   function sfx(e, u) {
-    ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u));
+    ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key);
     if (sfxBudget > 7 || !sOK()) return;
     sfxBudget++;
     const t = AC.currentTime + 4e-3, pn = (Math.random() - 0.5) * 0.5;

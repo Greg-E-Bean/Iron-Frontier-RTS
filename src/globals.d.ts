@@ -662,7 +662,7 @@ declare global {
   function refreshCustomMusic(): void;
   function totalTrackCount(): number;
   function trackName(i: number): string;
-  function playVoiceLine(fac: string, category: string, role?: string | null): void;
+  function playVoiceLine(fac: string, category: string, role?: string | null, key?: string | null): void;
   function setVoicesEnabled(v: boolean): void;
   var voicesEnabled: boolean;
   var lightningT: number;
