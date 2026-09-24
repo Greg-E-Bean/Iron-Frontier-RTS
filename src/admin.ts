@@ -23,8 +23,8 @@ const CATEGORY_OPTIONS = [
   { k: "def", n: "Defense" },
   { k: "none", n: "Hidden" },
 ];
-const MINIBTN = 'style="padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:11px;margin:2px 4px 2px 0"';
-const MINIBTN_DANGER = 'style="padding:6px 10px;border-radius:6px;border:1px solid #a04040;background:#2a1c1c;color:#f0a0a0;font-size:11px;margin:2px 4px 2px 0"';
+const MINIBTN = 'class="gBtn"';
+const MINIBTN_DANGER = 'class="gBtn danger"';
 const FACTION_LIST = [
   { k: "", n: "All factions" },
   { k: "allied", n: "Vanguard" },
@@ -825,6 +825,7 @@ function editorRedo() {
 }
 
 function openMapEditor(key) {
+  menuBgStop();
   const store = loadAdminMapStore();
   const entry = store[key];
   if (!entry) return;
