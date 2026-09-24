@@ -639,7 +639,10 @@ declare global {
   function startFpsAmbience(): void;
   function stopFpsAmbience(): void;
   function startMusic(): void;
-  const MUSIC_TRACKS: { name: string; step: number; [k: string]: unknown }[];
+  const MUSIC_TRACKS: { name: string; [k: string]: any }[];
+  function musicModeOptions(): string[];
+  function musicTrackLabel(i: number): string;
+  function musicNowPlaying(): string;
   function loadAdminMusic(): { id?: string; name: string; dataUrl: string; mime?: string }[];
   function saveAdminMusic(list: { id?: string; name: string; dataUrl: string; mime?: string }[]): boolean;
   function refreshCustomMusic(): void;

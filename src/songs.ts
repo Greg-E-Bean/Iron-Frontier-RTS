@@ -9,7 +9,13 @@ export {};
 //  pads:   1/4 units, chords.
 //  form:   sections {bars, r riff, g guitar mode, l lead, st stab, stk stab
 //          kind, pd pad, d drum kit, fill, noCrash}.
+//  Synth parts: bass (1/16, bl + bk/bassKind "saw" | "reese"), arps (1/16,
+//  ar), chords (1/16 supersaw chords, ss), lead kind lk "gtr" | "square" |
+//  "saw"; section flags pump (sidechain), riser, impact, sweep [from, to] Hz.
 // Battle tracks are heavy and driving; calm tracks carry the quieter moments.
+// style (rock / synthrock / edm / synthpop) and fac tune the Auto picker to
+// the player's faction: Legion leans rock, Vanguard synth rock + EDM,
+// Syndicate synthpop + EDM.
 const MUSIC_SONGS = [
   {
     name: "Hammer Down", mood: "battle", bpm: 128, riffOct: -2,
@@ -237,6 +243,221 @@ const MUSIC_SONGS = [
       { bars: 8, r: "B", d: "rock", l: "B", pd: "P" },
       { bars: 8, r: "B", d: "half", l: "A" },
       { bars: 4, r: "A", g: "clean", d: "none", pd: "P" },
+    ],
+  },
+  // ======================================================= Vanguard: synth rock / EDM
+  {
+    name: "Blue Protocol", mood: "battle", style: "edm", fac: "allied", bpm: 128, riffOct: -2, bassKind: "saw", lk: "saw",
+    parts: {
+      riffs: { R: ".A.A.A.A.A.A.A.A | .F.F.F.F.F.F.F.F | .C.C.C.C.C.C.C.C | .G.G.G.G.G.G.G.G |" },
+      bass: { A: "z2A2z2A2z2A2z2A2 | z2F2z2F2z2F2z2F2 | z2c2z2c2z2c2z2c2 | z2G2z2G2z2G2z2G2 |" },
+      arps: { A: "A c e a e c A c e a e c e a c' a | F A c f c A F A c f c A c f a f | C E G c G E C E G c G E G c e c | G, B, D G D B, G, B, D G D B, D G B G |" },
+      chords: { S: "[Ace]3[Ace]3[Ace]2 z2[Ace]2 [Ace]2z2 | [FAc]3[FAc]3[FAc]2 z2[FAc]2 [FAc]2z2 | [EGc]3[EGc]3[EGc]2 z2[EGc]2 [EGc]2z2 | [DGB]3[DGB]3[DGB]2 z2[DGB]2 [DGB]2z2 |" },
+      leads: { A: "a2 g a e2 c2 | f2 e f c4 | e2 d e g2 c'2 | b2 a g d4 |", B: "c'2 b c' e'2 a2 | a2 g a f4 | g2 f g c'2 e'2 | d'4 b4 |" },
+      pads: { P: "[Ace]4 | [FAc]4 | [EGc]4 | [DGB]4 |" },
+    },
+    form: [
+      { bars: 8, ar: "A", d: "hats", sweep: [300, 3000] },
+      { bars: 16, ar: "A", bl: "A", ss: "S", l: "A", d: "edm", pump: 1, impact: 1 },
+      { bars: 8, ar: "A", pd: "P", l: "B", lk: "square", d: "none" },
+      { bars: 4, ar: "A", bl: "A", d: "roll", riser: 1, sweep: [500, 6000] },
+      { bars: 16, r: "R", ar: "A", bl: "A", ss: "S", l: "B", d: "edm", pump: 1, impact: 1 },
+      { bars: 8, ar: "A", pd: "P", d: "house" },
+      { bars: 8, r: "R", ar: "A", bl: "A", ss: "S", l: "A", d: "edm", pump: 1 },
+      { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [4000, 300] },
+    ],
+  },
+  {
+    name: "Chrono Shift", mood: "battle", style: "synthrock", fac: "allied", bpm: 140, riffOct: -2,
+    parts: {
+      riffs: {
+        A: ".E.EE2.E.EE2.E.EG2.E.E^F2 | .C.CC2.C.CC2.C.CE2.C.CD2 | .D.DD2.D.DD2.D.D^F2.D.DE2 | .B,.B,B,2.B,.B,B,2.B,.B,^D2.B,.B,^F2 |",
+        B: "E8 E4 G4 | C8 C4 E4 | D8 D4 ^F4 | B,8 B,8 |",
+        D: "E16 | C16 | D16 | B,16 |",
+      },
+      arps: { A: "E G B e B G E G B e B G B e g e | C E G c G E C E G c G E G c e c | D ^F A d A ^F D ^F A d A ^F A d ^f d | B, ^D ^F B ^F ^D B, ^D ^F B ^F ^D ^F B ^d B |" },
+      leads: { A: "e2 ^f g b2 g2 | c'2 b a g4 | a2 g ^f d2 ^f2 | ^d4 B4 |", B: "b2 e'2 d'2 b2 | c'2 b2 g4 | a2 b2 c'2 d'2 | ^d'4 b4 |" },
+      pads: { P: "[EGB]4 | [CEG]4 | [D^FA]4 | [B,^D^F]4 |" },
+    },
+    form: [
+      { bars: 4, ar: "A", d: "none", sweep: [400, 5000] },
+      { bars: 8, r: "A", ar: "A", d: "rock" },
+      { bars: 8, r: "A", l: "A", synth: true, d: "drive" },
+      { bars: 8, r: "B", l: "B", ar: "A", d: "rock" },
+      { bars: 8, r: "A", l: "A", synth: true, d: "drive" },
+      { bars: 8, r: "B", l: "B", ar: "A", d: "rock" },
+      { bars: 8, ar: "A", pd: "P", l: "A", synth: true, d: "half" },
+      { bars: 4, r: "A", d: "build", riser: 1 },
+      { bars: 16, r: "B", l: "B", ar: "A", d: "drive" },
+      { bars: 4, r: "D", pd: "P", d: "rock", fill: false },
+    ],
+  },
+  {
+    name: "Skyline Intercept", mood: "battle", style: "synthrock", fac: "allied", bpm: 156, riffOct: -2,
+    parts: {
+      riffs: {
+        A: ".D.D.D.D.D.D.D.D | ._B,._B,._B,._B,._B,._B,._B,._B, | .F.F.F.F.F.F.F.F | .C.C.C.C.C.C.C.C |",
+        B: "D4 D4 D2 F2 D4 | _B,4 _B,4 _B,2 D2 _B,4 | F4 F4 F2 A2 F4 | C4 C4 C2 E2 C4 |",
+        D: "D16 | _B,16 | F16 | C16 |",
+      },
+      arps: { A: "D F A d A F D F A d A F A d f d | _B, D F _B F D _B, D F _B F D F _B d _B | F A c f c A F A c f c A c f a f | C E G c G E C E G c G E G c e c |" },
+      chords: { S: "[DFA]16 | [_B,DF]16 | [CFA]16 | [CEG]16 |" },
+      leads: { A: "a2 a g f2 d2 | f2 f e d4 | c2 c d f2 a2 | g4 e4 |", B: "d'2 c' _b a2 f2 | _b2 a g f4 | a2 g f c'2 a2 | g8 |" },
+      pads: { P: "[DFA]4 | [_B,DF]4 | [CFA]4 | [CEG]4 |" },
+    },
+    form: [
+      { bars: 8, ar: "A", d: "none", sweep: [300, 4000] },
+      { bars: 16, r: "A", l: "A", synth: true, d: "punk" },
+      { bars: 8, r: "B", ar: "A", d: "rock" },
+      { bars: 16, r: "B", ss: "S", l: "B", lk: "saw", ar: "A", d: "drive" },
+      { bars: 8, ar: "A", pd: "P", d: "half" },
+      { bars: 4, r: "A", d: "build", riser: 1 },
+      { bars: 16, r: "B", ss: "S", l: "B", lk: "saw", ar: "A", d: "drive" },
+      { bars: 4, r: "D", pd: "P", d: "rock", fill: false },
+    ],
+  },
+  {
+    name: "Overclock", mood: "battle", style: "edm", fac: "allied", bpm: 132, bassOct: -2, bassKind: "saw", lk: "saw",
+    parts: {
+      bass: {
+        A: "z2C2z2C2z2C2z2C2 | z2_A,2z2_A,2z2_A,2z2_A,2 | z2_E2z2_E2z2_E2z2_E2 | z2_B,2z2_B,2z2_B,2z2_B,2 |",
+        B: "CCcC CCcC CCcC CCcC | _A,_A,_A_A, _A,_A,_A_A, _A,_A,_A_A, _A,_A,_A_A, | _E_E_e_E _E_E_e_E _E_E_e_E _E_E_e_E | _B,_B,_B_B, _B,_B,_B_B, _B,_B,_B_B, _B,_B,_B_B, |",
+      },
+      arps: { A: "C _E G c G _E C _E G c G _E G c _e c | _A, C _E _A _E C _A, C _E _A _E C _E _A c _A | _E G _B _e _B G _E G _B _e _B G _B _e g _e | _B, D F _B F D _B, D F _B F D F _B d _B |" },
+      chords: { S: "[C_EG]3[C_EG]3[C_EG]2 z2[C_EG]2 [C_EG]2z2 | [C_E_A]3[C_E_A]3[C_E_A]2 z2[C_E_A]2 [C_E_A]2z2 | [_B,_EG]3[_B,_EG]3[_B,_EG]2 z2[_B,_EG]2 [_B,_EG]2z2 | [_B,DF]3[_B,DF]3[_B,DF]2 z2[_B,DF]2 [_B,DF]2z2 |" },
+      leads: { A: "g2 _e c g2 _a2 | _a2 g _e c4 | _e2 f g _b2 g2 | f4 d4 |", B: "c'4 _b2 g2 | _a4 _e4 | g2 _a2 _b2 _e'2 | d'8 |" },
+      pads: { P: "[C_EG]4 | [C_E_A]4 | [_B,_EG]4 | [_B,DF]4 |" },
+    },
+    form: [
+      { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [300, 3000] },
+      { bars: 8, ar: "A", bl: "A", d: "house", riser: 1 },
+      { bars: 16, ss: "S", bl: "B", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+      { bars: 8, pd: "P", ar: "A", l: "B", lk: "square", d: "none" },
+      { bars: 4, bl: "A", ar: "A", d: "roll", riser: 1, sweep: [400, 6000] },
+      { bars: 16, ss: "S", bl: "B", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+      { bars: 8, pd: "P", ar: "A", l: "B", lk: "square", d: "house" },
+      { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [3000, 300] },
+    ],
+  },
+  {
+    name: "Clear Skies", mood: "calm", style: "synthrock", fac: "allied", bpm: 100, riffOct: -2, bassOct: -2, bassKind: "saw",
+    parts: {
+      riffs: { A: "G2B2d2g2d2B2G2D2 | D2^F2A2d2A2^F2D2A,2 | E2G2B2e2B2G2E2B,2 | C2E2G2c2G2E2C2G,2 |" },
+      bass: { A: "G4z2G2G4D4 | D4z2D2D4A,4 | E4z2E2E4B,4 | C4z2C2C4G,4 |" },
+      arps: { A: "G B d g d B G B d g d B d g b g | D ^F A d A ^F D ^F A d A ^F A d ^f d | E G B e B G E G B e B G B e g e | C E G c G E C E G c G E G c e c |" },
+      leads: { A: "d4 B2 G2 | A4 ^F4 | G2 A2 B2 e2 | d8 |", B: "g4 ^f2 e2 | ^f4 d4 | e2 ^f2 g2 b2 | a8 |" },
+      pads: { P: "[GBd]4 | [D^FA]4 | [EGB]4 | [CEG]4 |" },
+    },
+    form: [
+      { bars: 8, r: "A", g: "clean", pd: "P", d: "none" },
+      { bars: 16, r: "A", g: "clean", bass: false, bl: "A", l: "A", synth: true, d: "light" },
+      { bars: 8, ar: "A", pd: "P", bl: "A", l: "B", d: "ride" },
+      { bars: 8, r: "A", g: "clean", pd: "P", d: "none" },
+      { bars: 16, r: "A", g: "clean", bass: false, ar: "A", bl: "A", l: "A", synth: true, d: "light" },
+      { bars: 8, ar: "A", pd: "P", bl: "A", l: "B", d: "ride" },
+      { bars: 8, r: "A", g: "clean", pd: "P", d: "none" },
+    ],
+  },
+  // ======================================================= Syndicate: synthpop / EDM
+  {
+    name: "Hive Mind", mood: "battle", style: "edm", fac: "yuri", bpm: 126, bassOct: -2, bassKind: "reese", stabKind: "choir",
+    parts: {
+      bass: {
+        A: "F6 F2 F4 F4 | _D6 _D2 _D4 _D4 | _E6 _E2 _E4 _E4 | C6 C2 C4 C4 |",
+        B: "z2F2z2F2z2F2z2F2 | z2_D2z2_D2z2_D2z2_D2 | z2_E2z2_E2z2_E2z2_E2 | z2C2z2C2z2C2z2C2 |",
+      },
+      arps: { A: "F _A c f c _A F _A c f c _A c f _a f | _D F _A _d _A F _D F _A _d _A F _A _d f _d | _E G _B _e _B G _E G _B _e _B G _B _e g _e | C E G c G E C E G c G E G c e c |" },
+      chords: { S: "[F_Ac]2z2[F_Ac]2z2[F_Ac]2z2[F_Ac]2[F_Ac]2 | [F_A_d]2z2[F_A_d]2z2[F_A_d]2z2[F_A_d]2[F_A_d]2 | [G_B_e]2z2[G_B_e]2z2[G_B_e]2z2[G_B_e]2[G_B_e]2 | [EGc]2z2[EGc]2z2[EGc]2z2[EGc]2[EGc]2 |" },
+      stabs: { H: "[F_Ac]8 z8 | [F_A_d]8 z8 | [G_B_e]8 z8 | [EGc]8 z8 |" },
+      leads: { A: "c'2 _a f c'2 _d'2 | c'4 _a4 | _b2 g _e _b2 c'2 | e4 c4 |", B: "f'4 _e'2 c'2 | _d'4 _a4 | _b2 c'2 _d'2 _e'2 | e'8 |" },
+      pads: { P: "[F_Ac]4 | [F_A_d]4 | [G_B_e]4 | [EGc]4 |" },
+    },
+    form: [
+      { bars: 8, pd: "P", st: "H", d: "none", sweep: [300, 2500] },
+      { bars: 16, bl: "A", ar: "A", d: "breaks" },
+      { bars: 4, ar: "A", d: "roll", riser: 1 },
+      { bars: 16, ss: "S", bl: "B", bk: "saw", l: "A", lk: "square", ar: "A", d: "edm", pump: 1, impact: 1 },
+      { bars: 8, st: "H", pd: "P", l: "B", lk: "saw", d: "none" },
+      { bars: 4, bl: "A", d: "roll", riser: 1 },
+      { bars: 16, ss: "S", bl: "B", bk: "saw", l: "B", lk: "saw", ar: "A", d: "edm", pump: 1, impact: 1 },
+      { bars: 8, bl: "A", pd: "P", d: "hats", sweep: [3000, 300] },
+    ],
+  },
+  {
+    name: "Neon Cult", mood: "battle", style: "synthpop", fac: "yuri", bpm: 118, bassOct: -2, bassKind: "saw", lk: "square",
+    parts: {
+      bass: { A: "A,2A2A,2A2A,2A2A,2A2 | F,2F2F,2F2F,2F2F,2F2 | G,2G2G,2G2G,2G2G,2G2 | E,2E2E,2E2E,2E2E,2E2 |" },
+      arps: { A: "a e c e a e c e a e c e a e c e | a f c f a f c f a f c f a f c f | b g d g b g d g b g d g b g d g | b g e g b g e g b g e g b g e g |" },
+      chords: { S: "[Ace]16 | [FAc]16 | [GBd]16 | [EGB]16 |" },
+      leads: { A: "e2 e2 d c B2 | c4 A4 | B2 B2 c d e2 | B8 |", B: "a4 g2 e2 | f2 e2 c4 | d2 e2 g2 b2 | e'8 |" },
+      pads: { P: "[Ace]4 | [FAc]4 | [GBd]4 | [EGB]4 |" },
+    },
+    form: [
+      { bars: 8, ar: "A", pd: "P", d: "none" },
+      { bars: 16, bl: "A", ar: "A", l: "A", d: "pop" },
+      { bars: 16, bl: "A", ss: "S", l: "B", d: "popdrive" },
+      { bars: 8, pd: "P", ar: "A", d: "half" },
+      { bars: 8, bl: "A", ar: "A", l: "A", d: "pop" },
+      { bars: 16, bl: "A", ss: "S", l: "B", ar: "A", d: "popdrive" },
+      { bars: 8, ar: "A", pd: "P", d: "none" },
+    ],
+  },
+  {
+    name: "Psychic Dominion", mood: "battle", style: "edm", fac: "yuri", bpm: 140, bassOct: -2, bassKind: "saw", stabKind: "hit", lk: "saw",
+    parts: {
+      bass: { A: "EEeE EEeE EEeE EEeE | FFfF FFfF FFfF FFfF | EEeE EEeE EEeE EEeE | DDdD DDdD DDdD DDdD |" },
+      arps: { A: "e b g e b g e b g e b g e b g e | f c' a f c' a f c' a f c' a f c' a f | e b g e b g e b g e b g e b g e | d a ^f d a ^f d a ^f d a ^f d a ^f d |" },
+      chords: { S: "[EGB]4 z4 [EGB]2 z2 [EGB]4 | [FAc]4 z4 [FAc]2 z2 [FAc]4 | [EGB]4 z4 [EGB]2 z2 [EGB]4 | [D^FA]4 z4 [D^FA]2 z2 [D^FA]4 |" },
+      stabs: { H: "[EB]2 z14 | [FA]2 z14 | [EB]2 z14 | [DA]2 z14 |" },
+      leads: { A: "b2 c' b g2 e2 | f2 g a c'4 | b2 a g e2 g2 | ^f8 |", B: "e'4 f'4 | e'2 c'2 a4 | b4 g4 | a2 ^f2 d4 |" },
+      pads: { P: "[EGB]4 | [FAc]4 | [EGB]4 | [D^FA]4 |" },
+    },
+    form: [
+      { bars: 4, st: "H", pd: "P", d: "none" },
+      { bars: 4, bl: "A", ar: "A", d: "roll", riser: 1 },
+      { bars: 16, bl: "A", ss: "S", l: "A", d: "edm", pump: 1, impact: 1 },
+      { bars: 16, bl: "A", ar: "A", st: "H", l: "B", lk: "square", d: "breaks" },
+      { bars: 4, ar: "A", d: "roll", riser: 1 },
+      { bars: 16, bl: "A", ss: "S", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+      { bars: 8, pd: "P", st: "H", stk: "choir", d: "none" },
+      { bars: 8, bl: "A", ss: "S", l: "B", lk: "square", d: "edm", pump: 1 },
+      { bars: 4, st: "H", d: "none" },
+    ],
+  },
+  {
+    name: "Glass Garden", mood: "calm", style: "synthpop", fac: "yuri", bpm: 96, bassOct: -2, bassKind: "saw", lk: "square", padOct: 0,
+    parts: {
+      bass: { A: "B,4z4B,4z2B,2 | G,4z4G,4z2G,2 | D4z4D4z2D2 | A,4z4A,4z2A,2 |" },
+      arps: { A: "B d ^f b ^f d B d ^f b ^f d ^f b d' b | G B d g d B G B d g d B d g b g | D ^F A d A ^F D ^F A d A ^F A d ^f d | A, ^C E A E ^C A, ^C E A E ^C E A ^c A |" },
+      leads: { A: "^f4 e2 d2 | d4 B4 | A2 B2 d2 ^f2 | e8 |", B: "b4 a2 ^f2 | g4 d4 | ^f2 g2 a2 d'2 | ^c'8 |" },
+      pads: { P: "[B,D^F]4 | [G,B,D]4 | [D^FA]4 | [A,^CE]4 |" },
+    },
+    form: [
+      { bars: 8, ar: "A", pd: "P", d: "none", sweep: [500, 4000] },
+      { bars: 16, ar: "A", pd: "P", bl: "A", l: "A", d: "light" },
+      { bars: 16, ar: "A", pd: "P", bl: "A", l: "B", d: "pop" },
+      { bars: 8, pd: "P", l: "A", d: "none" },
+      { bars: 16, ar: "A", pd: "P", bl: "A", l: "B", d: "pop" },
+      { bars: 8, ar: "A", pd: "P", d: "none", sweep: [4000, 400] },
+    ],
+  },
+  {
+    name: "Velvet Signal", mood: "calm", style: "synthpop", fac: "yuri", bpm: 108, bassOct: -2, bassKind: "saw", lk: "square",
+    parts: {
+      bass: { A: "F2f2z2f2F2f2z2f2 | C2c2z2c2C2c2z2c2 | D2d2z2d2D2d2z2d2 | _B,2_B2z2_B2_B,2_B2z2_B2 |" },
+      arps: { A: "F A c f c A F A c f c A c f a f | C E G c G E C E G c G E G c e c | D F A d A F D F A d A F A d f d | _B, D F _B F D _B, D F _B F D F _B d _B |" },
+      chords: { S: "[FAc]16 | [EGc]16 | [DFA]16 | [DF_B]16 |" },
+      leads: { A: "a4 g2 f2 | g4 e4 | f2 e2 d2 f2 | d8 |", B: "c'4 _b2 a2 | g4 c'4 | a2 g2 f2 a2 | _b8 |" },
+      pads: { P: "[FAc]4 | [EGc]4 | [DFA]4 | [DF_B]4 |" },
+    },
+    form: [
+      { bars: 8, ar: "A", pd: "P", d: "none" },
+      { bars: 16, ar: "A", pd: "P", bl: "A", l: "A", d: "pop" },
+      { bars: 16, ss: "S", bl: "A", ar: "A", l: "B", d: "popdrive", pump: 1 },
+      { bars: 8, pd: "P", ar: "A", d: "none" },
+      { bars: 8, bl: "A", ar: "A", l: "A", d: "pop" },
+      { bars: 16, ss: "S", bl: "A", l: "B", d: "popdrive", pump: 1 },
+      { bars: 8, ar: "A", pd: "P", d: "none", sweep: [4000, 400] },
     ],
   },
 ];

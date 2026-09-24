@@ -1,5 +1,5 @@
 export {};
-let AC=null,masterGain=null,sfxBus=null,muted=(()=>{try{return"1"===localStorage.getItem("ifr_muted")}catch(e){return!1}})(),masterVol=(()=>{try{const e=localStorage.getItem("ifr_masterVol");return null===e?1:+e}catch(e){return 1}})(),sfxVol=(()=>{try{const e=localStorage.getItem("ifr_sfxVol");return null===e?1:+e}catch(e){return 1}})(),musicVol=(()=>{try{const e=localStorage.getItem("ifr_musicVol");return null===e?1:+e}catch(e){return 1}})(),trackSel=(()=>{try{const e=localStorage.getItem("ifr_track");return null===e?-1:+e}catch(e){return-1}})(),musicBus=null,playTrackRef=null;function setMasterVol(e){masterVol=e,masterGain&&!muted&&(masterGain.gain.value=e),customTrackEl&&(customTrackEl.volume=muted?0:e*musicVol);try{localStorage.setItem("ifr_masterVol",""+e)}catch(t){}}function setSfxVol(e){sfxVol=e,sfxBus&&(sfxBus.gain.value=e);try{localStorage.setItem("ifr_sfxVol",""+e)}catch(t){}}function setMusicVol(e){musicVol=e,musicBus&&(musicBus.gain.value=MUSIC_BASE*e),customTrackEl&&(customTrackEl.volume=muted?0:masterVol*e);try{localStorage.setItem("ifr_musicVol",""+e)}catch(t){}}function setTrackSel(e){trackSel=e;try{localStorage.setItem("ifr_track",""+e)}catch(t){}musicOn&&e>=0&&playAnyTrack(e)}
+let AC=null,masterGain=null,sfxBus=null,muted=(()=>{try{return"1"===localStorage.getItem("ifr_muted")}catch(e){return!1}})(),masterVol=(()=>{try{const e=localStorage.getItem("ifr_masterVol");return null===e?1:+e}catch(e){return 1}})(),sfxVol=(()=>{try{const e=localStorage.getItem("ifr_sfxVol");return null===e?1:+e}catch(e){return 1}})(),musicVol=(()=>{try{const e=localStorage.getItem("ifr_musicVol");return null===e?1:+e}catch(e){return 1}})(),trackSel=(()=>{try{const e=localStorage.getItem("ifr_track");return null===e?-1:+e}catch(e){return-1}})(),musicBus=null,playTrackRef=null;function setMasterVol(e){masterVol=e,masterGain&&!muted&&(masterGain.gain.value=e),customTrackEl&&(customTrackEl.volume=muted?0:e*musicVol);try{localStorage.setItem("ifr_masterVol",""+e)}catch(t){}}function setSfxVol(e){sfxVol=e,sfxBus&&(sfxBus.gain.value=e);try{localStorage.setItem("ifr_sfxVol",""+e)}catch(t){}}function setMusicVol(e){musicVol=e,musicBus&&(musicBus.gain.value=MUSIC_BASE*e),customTrackEl&&(customTrackEl.volume=muted?0:masterVol*e);try{localStorage.setItem("ifr_musicVol",""+e)}catch(t){}}function setTrackSel(e){trackSel=e;try{localStorage.setItem("ifr_track",""+e)}catch(t){}musicOn&&(e>=0?playAnyTrack(e):e<=-3&&musicStyleSwitch())}
 
 // ------------------------------------------------------------------ engine
 // Everything plays through: sources -> sfxBus/musicBus -> master -> limiter.
@@ -378,8 +378,17 @@ function musicDSP() {
     ride: { k: "x.......x.x.....", s: "....x.......x...", r: "x.x.x.x.x.x.x.x." },
     pulse: { k: "x...x...x...x...", h: "..x...x...x...x.", c: "....x.......x..." },
     build: { s: "x.x.x.x.xxxxxxxx", k: "x...x...x...x..." },
+    // electronic kits: K = electronic kick, p = clap, S = gated 80s snare
+    edm: { K: "x...x...x...x...", p: "....X.......X...", o: "..x...x...x...x.", h: "x.x.x.x.x.x.x.x." },
+    house: { K: "x...x...x...x...", p: "....x.......x...", o: "..x...x...x...x." },
+    hats: { h: "x...x...x...x...", o: "..x...x...x...x." },
+    breaks: { K: "x.....x...x.....", S: "....X.......X..f", h: "xxxxxxxxxxxxxxxx" },
+    roll: { K: "x...x...x...x...", p: "x.x.x.x.xxxxxxxx" },
+    pop: { K: "x.......x.x.....", S: "....X.......X...", h: "x.x.x.x.x.x.x.x." },
+    popdrive: { K: "x...x...x...x...", S: "....X.......X...", h: "xxxxxxxxxxxxxxxx" },
     none: {},
   };
+  const NOFILL = new Set(["edm", "house", "hats", "roll", "pop", "popdrive", "breaks"]);
 
   // ---- DSP: notes are synthesised in plain JS into sample buffers (polyBLEP
   // oscillators, RBJ biquads, per-note envelopes). A section then needs only a
@@ -439,10 +448,10 @@ function musicDSP() {
     voice(out, sr, t, { osc: [[0, mtof(m), 1], [2, mtof(m), .6]], a: .004, hold: Math.max(.01, dur - .04), rel: .08, peak: .5 * vel, lp: ["lowpass", 1.2, sweep(1100, 380, Math.min(.25, dur))] });
   }
   // Lead: guitar (drive applied per section) or synth, with glide + delayed vibrato.
-  function leadNote(out: Float32Array, sr: number, t: number, m: number, dur: number, prev: number | null, vel: number, synth: boolean) {
-    const g0 = prev ? mtof(prev) / mtof(m) : 1, depth = dur > .3 ? synth ? 12 : 22 : 0, vr = Math.min(dur, .45);
+  function leadNote(out: Float32Array, sr: number, t: number, m: number, dur: number, prev: number | null, vel: number, kind: string) {
+    const synth = "gtr" !== kind, g0 = prev ? mtof(prev) / mtof(m) : 1, depth = dur > .3 ? synth ? 12 : 22 : 0, vr = Math.min(dur, .45), f = mtof(m);
     voice(out, sr, t, {
-      osc: [[synth ? 1 : 0, mtof(m), 1]], a: .012, hold: Math.max(.02, dur - .05), rel: synth ? .12 : .25, peak: (synth ? .16 : .3) * vel,
+      osc: "saw" === kind ? [[0, f * cents(-9), .6], [0, f * cents(9), .6], [0, f * 2, .18]] : [[synth ? 1 : 0, f, 1]], a: .012, hold: Math.max(.02, dur - .05), rel: synth ? .14 : .25, peak: ("saw" === kind ? .3 : synth ? .2 : .3) * vel,
       fr: tt => (tt < .045 ? Math.pow(g0, 1 - tt / .045) : 1) * (depth ? cents(depth * Math.min(1, tt / vr) * Math.sin(35.19 * tt)) : 1),
     });
   }
@@ -454,7 +463,25 @@ function musicDSP() {
   }
   function padChord(out: Float32Array, sr: number, t: number, midis: number[], dur: number, vel: number) {
     const osc: number[][] = []; for (const m of midis) for (const d of [-7, 7]) osc.push([0, mtof(m) * cents(d), 1]);
-    voice(out, sr, t, { osc, a: .5, hold: Math.max(.05, dur - .5), rel: .9, peak: .07 * vel });
+    voice(out, sr, t, { osc, a: .5, hold: Math.max(.05, dur - .5), rel: .9, peak: .09 * vel });
+  }
+  // synth bass: "saw" = squelchy resonant pluck, "reese" = two detuned saws
+  function synthBass(out: Float32Array, sr: number, t: number, m: number, dur: number, vel: number, kind: string) {
+    const f = mtof(m);
+    if ("reese" === kind) voice(out, sr, t, { osc: [[0, f * cents(-14), .7], [0, f * cents(14), .7], [2, f / 2, .5]], a: .006, hold: Math.max(.01, dur - .05), rel: .1, peak: .42 * vel, lp: ["lowpass", 1.4, tt => 700 + 300 * Math.sin(tt * 3)] });
+    else voice(out, sr, t, { osc: [[0, f, 1], [1, f / 2, .5]], a: .003, hold: Math.max(.01, dur - .04), rel: .07, peak: .42 * vel, lp: ["lowpass", 4, sweep(2600, 260, Math.min(.2, dur + .05))] });
+  }
+  // arpeggiator pluck
+  function arpNote(out: Float32Array, sr: number, t: number, m: number, dur: number, vel: number) {
+    voice(out, sr, t, { osc: [[0, mtof(m) * cents(-6), .7], [1, mtof(m) * cents(6), .45]], a: .002, hold: Math.min(.03, dur * .3), rel: .2, peak: .26 * vel, lp: ["lowpass", 2, sweep(5200, 650, .14)] });
+  }
+  // supersaw chord, spread across two channels
+  function supersaw(L: Float32Array, R: Float32Array, sr: number, t: number, midis: number[], dur: number, vel: number) {
+    const k = 1 / Math.sqrt(midis.length), env = { a: .008, hold: Math.max(.02, dur - .03), rel: .28, peak: .17 * vel * k };
+    for (const [out, dets] of [[L, [-19, -7, 3, 13]], [R, [-13, -3, 7, 19]]] as any[]) {
+      const osc: number[][] = []; for (const m of midis) for (const d of dets) osc.push([0, mtof(m) * cents(d), 1]);
+      voice(out, sr, t, { osc, ...env });
+    }
   }
   const nzHit = (out: Float32Array, sr: number, t: number, type: string, f: number, q: number, d: number, g: number) => voice(out, sr, t, { osc: [[3, 0, 1]], a: .001, hold: 0, rel: d, peak: g, lp: [type, q, () => f] });
   const tnHit = (out: Float32Array, sr: number, t: number, w: number, f0: number, f1: number, sw: number, hold: number, rel: number, g: number) => voice(out, sr, t, { osc: [[w, 1, 1]], a: .001, hold, rel, peak: g, fr: sweep(f0, f1, sw) });
@@ -468,6 +495,9 @@ function musicDSP() {
     else if ("C" === lane) nzHit(out, sr, t, "highpass", 4500, .5, 1.9, .5);
     else if ("c" === lane) { for (const f of [850, 1330, 2150, 3400]) tnHit(out, sr, t, 2, f, f, 1, 0, .35, .09); nzHit(out, sr, t, "bandpass", 3000, 2, .08, .4); }
     else if ("t" === lane) tnHit(out, sr, t, 2, acc ? 140 : 190, acc ? 90 : 120, .2, 0, .35, .8);
+    else if ("K" === lane) tnHit(out, sr, t, 2, 150, 44, .11, .05, .38, .8), nzHit(out, sr, t, "highpass", 3500, .7, .008, .22);
+    else if ("p" === lane) { const gv = acc ? .9 : .7; for (const dt of [0, .011, .022]) nzHit(out, sr, t + dt, "bandpass", 1250, 1.3, dt < .02 ? .012 : .16, .75 * gv); }
+    else if ("S" === lane) { voice(out, sr, t, { osc: [[3, 0, 1]], a: .001, hold: .16, rel: .05, peak: .35 * v, lp: ["bandpass", .6, () => 2200] }), nzHit(out, sr, t, "bandpass", 1900, .7, .12, .65 * v), tnHit(out, sr, t, 4, 210, 160, .08, 0, .12, .4 * v); }
   }
 
   // Synthesise every stem of one section into sample arrays.
@@ -488,16 +518,21 @@ function musicDSP() {
       });
       if (clean && !1 !== sec.bass) loopEach(P, (e, b) => { b % 2 < 1e-6 && bassNote(B("bass"), sr, T(b), e.n[0] + oct - 12, 2 * spb * .9, .7); });
     }
-    if (sec.bl && parts.bass && parts.bass[sec.bl]) loopEach(abc(parts.bass[sec.bl], .25), (e, b) => bassNote(B("bass"), sr, T(b), e.n[0] + 12 * (song.bassOct ?? -3), e.d * spb * .95, 1));
+    if (sec.bl && parts.bass && parts.bass[sec.bl]) { const bk = sec.bk || song.bassKind; loopEach(abc(parts.bass[sec.bl], .25), (e, b) => { const m = e.n[0] + 12 * (song.bassOct ?? -3), d = e.d * spb * .95; bk ? synthBass(B("bass"), sr, T(b), m, d, e.m ? .75 : 1, bk) : bassNote(B("bass"), sr, T(b), m, d, 1); }); }
     if (sec.l && parts.leads && parts.leads[sec.l]) {
       let prev: number | null = null;
-      loopEach(abc(parts.leads[sec.l], .5), (e, b) => { const m = e.n[0] + 12 * (song.leadOct ?? 0); leadNote(B("lead"), sr, T(b), m, e.d * spb, e.d * spb < .5 ? prev : null, e.m ? .7 : 1, !!sec.synth); prev = m; });
+      loopEach(abc(parts.leads[sec.l], .5), (e, b) => { const m = e.n[0] + 12 * (song.leadOct ?? 0); leadNote(B("lead"), sr, T(b), m, e.d * spb, e.d * spb < .5 ? prev : null, e.m ? .7 : 1, leadKind(song, sec)); prev = m; });
     }
+    if (sec.ar && parts.arps && parts.arps[sec.ar]) loopEach(abc(parts.arps[sec.ar], .25), (e, b) => arpNote(B("arp"), sr, T(b), e.n[0] + 12 * (song.arpOct ?? 0), e.d * spb, e.m ? .6 : 1));
+    if (sec.ss && parts.chords && parts.chords[sec.ss]) loopEach(abc(parts.chords[sec.ss], .25), (e, b) => supersaw(B("ssL"), B("ssR"), sr, T(b), e.n.map((n: number) => n + 12 * (song.chordOct ?? 0)), e.d * spb * .95, 1));
+    const secLen = bars * barB * spb;
+    sec.riser && voice(B("fx"), sr, T(0), { osc: [[3, 0, 1]], a: secLen, hold: 0, rel: .25, peak: .22, lp: ["bandpass", 1.6, sweep(350, 7500, secLen)] });
+    sec.impact && (tnHit(B("fx"), sr, T(0), 2, 110, 28, 1.1, .1, 1.3, .9), nzHit(B("fx"), sr, T(0), "lowpass", 900, .7, 1.4, .5));
     const stk = sec.stk || song.stabKind || "brass";
     if (sec.st && parts.stabs && parts.stabs[sec.st]) loopEach(abc(parts.stabs[sec.st], .25), (e, b) => stabHit(B("stab"), sr, T(b), e.n.map((n: number) => n + 12 * (song.stabOct ?? -1)), e.d * spb, stk, 1));
     if (sec.pd && parts.pads && parts.pads[sec.pd]) loopEach(abc(parts.pads[sec.pd], 1), (e, b) => padChord(B("pad"), sr, T(b), e.n.map((n: number) => n + 12 * (song.padOct ?? -1)), e.d * spb, 1));
     // drums
-    const kit = DRUM_KITS[sec.d || "none"] || {}, fill = sec.fill !== !1 && "none" !== sec.d;
+    const kit = DRUM_KITS[sec.d || "none"] || {}, fill = sec.fill !== !1 && "none" !== sec.d && !NOFILL.has(sec.d);
     for (let bar = 0; bar < bars; bar++) {
       const lastBar = bar === bars - 1;
       for (const lane in kit) for (let st = 0; st < 16; st++) {
@@ -508,9 +543,16 @@ function musicDSP() {
       if (lastBar && fill) for (let st = 8; st < 16; st++) drumHit(B("drums"), sr, st < 12 ? "s" : "t", T(bar * 4 + st / 4), st >= 14);
       0 === bar && "none" !== sec.d && !sec.noCrash && drumHit(B("drums"), sr, "C", T(0), !0);
     }
+    // sidechain pump: synths duck on every beat under the kick
+    if (sec.pump) for (const k of ["ssL", "ssR", "pad", "arp", "bass"]) {
+      const b = bufs[k]; if (!b || ("bass" === k && 2 !== sec.pump)) continue;
+      const beat = spb * sr, off = .02 * sr, depth = .72, rel = .42 * beat;
+      for (let i = 0; i < b.length; i++) { const ph = (i - off) % beat; if (ph >= 0 && ph < rel) { const x = 1 - ph / rel; b[i] *= 1 - depth * x * x; } }
+    }
     return { N, bufs };
   }
-  return { synthSection, abcParse };
+  const leadKind = (song: any, sec: any) => sec.lk || (sec.synth ? "square" : song.lk || "gtr");
+  return { synthSection, abcParse, leadKind };
 }
 
 // ---- instruments (all built on an OfflineAudioContext for one section)
@@ -572,6 +614,7 @@ function musicSynth(song: any, si: number, sr: number): Promise<any> {
   const id = ++musicJobId, w = musicWorker, { name, mood, ...data } = song;
   return new Promise<any>(res => { musicJobs.set(id, res), w.postMessage({ id, song: data, si, sr }); }).then(r => r || inline());
 }
+const musicLeadKind = (song: any, sec: any) => sec.lk || (sec.synth ? "square" : song.lk || "gtr");
 async function renderSection(song: any, si: number, sr: number) {
   const { N, bufs } = await musicSynth(song, si, sr);
   const sec = song.form[si], clean = "clean" === (sec.g || null), stk = sec.stk || song.stabKind || "brass";
@@ -583,14 +626,24 @@ async function renderSection(song: any, si: number, sr: number) {
   bufs.gL && src([bufs.gL, bufs.gR], guitarAmp(ctx, ch.gtr, clean ? .9 : .55, clean));
   bufs.bass && src([bufs.bass], ch.bass);
   bufs.drums && src([bufs.drums], drumBus);
-  bufs.pad && (() => { const lp = ctx.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = 1400, lp.connect(ch.pad), src([bufs.pad], lp); })();
+
   if (bufs.stab) {
     if ("choir" === stk) { const pre = ctx.createGain(); for (const [f, q, l] of [[700, 6, 1], [1150, 8, .8], [2700, 10, .35]]) { const b = ctx.createBiquadFilter(); b.type = "bandpass", b.frequency.value = f, b.Q.value = q; const bg = ctx.createGain(); bg.gain.value = 2.2 * l, pre.connect(b), b.connect(bg), bg.connect(ch.stab); } src([bufs.stab], pre); }
     else src([bufs.stab], ch.stab);
   }
+  // optional filter sweep across the section (intros, builds, outros)
+  const secLen = sec.bars * 4 * 60 / song.bpm, swp = (dest: any, def?: number) => {
+    const sw = sec.sweep || (def ? [def, def] : null); if (!sw) return dest;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass", lp.Q.value = 1.2, lp.frequency.setValueAtTime(sw[0], 0), lp.frequency.exponentialRampToValueAtTime(sw[1], secLen), lp.connect(dest); return lp;
+  };
+  bufs.arp && src([bufs.arp], swp(chan(ctx, M, .5, .12, .3, .38)));
+  bufs.fx && src([bufs.fx], chan(ctx, M, .5, 0, .5));
+  bufs.pad && (() => { const lp = ctx.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = 1400, lp.connect(swp(ch.pad)), src([bufs.pad], lp); })();
+  bufs.ssL && src([bufs.ssL, bufs.ssR], swp(chan(ctx, M, .42, 0, .3, .12), 7000));
   if (bufs.lead) {
-    const lp = ctx.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = sec.synth ? 2600 : 4200, lp.Q.value = sec.synth ? 3 : .7, lp.connect(ch.lead);
-    if (sec.synth) src([bufs.lead], lp);
+    const lk = musicLeadKind(song, sec), synth = "gtr" !== lk;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = "saw" === lk ? 5200 : synth ? 2600 : 4200, lp.Q.value = "square" === lk ? 3 : .7, lp.connect(ch.lead);
+    if (synth) src([bufs.lead], lp);
     else { const pg = ctx.createGain(), sh = ctx.createWaveShaper(); pg.gain.value = 1.4, sh.curve = drive(6), sh.oversample = "2x", pg.connect(sh), sh.connect(lp), src([bufs.lead], pg); }
   }
   for (const [chans, dest] of pend) {
@@ -605,13 +658,53 @@ const musicState: any = { cur: -1, lastMood: "calm" };
 function musicMood() {
   try { const recent = S.fx.filter((f: any) => "boom" === f.kind).length + S.projs.length; return recent > 8 ? "battle" : "calm"; } catch (e) { return "calm"; }
 }
+// Styles and faction flavour: Auto weights each style by the player's faction
+// (Vanguard: synth rock + EDM, Legion: rock, Syndicate: synthpop + EDM) and by
+// the battle / calm mood; the player can also pick "shuffle all", one style,
+// or one track in Settings.
+const MUSIC_STYLE_NAMES: Record<string, string> = { rock: "Rock", synthrock: "Synth Rock", edm: "EDM", synthpop: "Synthpop" };
+const MUSIC_STYLE_KEYS = Object.keys(MUSIC_STYLE_NAMES);
+const FACTION_STYLE_W: Record<string, Record<string, number>> = {
+  allied: { synthrock: 3, edm: 2.2, rock: 1, synthpop: .5 },
+  soviet: { rock: 4, synthrock: .8, edm: .3, synthpop: .2 },
+  yuri: { synthpop: 3, edm: 3, synthrock: .6, rock: .4 },
+};
+const musicStyleOf = (i: number) => (MUSIC_TRACKS[i] && MUSIC_TRACKS[i].style) || "rock";
+function musicPlayerFac() { try { return S.players[0].fac; } catch (e) { return null; } }
+const musicRecent: number[] = [];
 function pickNextTrack(prev: number) {
-  const total = totalTrackCount();
   if (trackSel >= 0) return trackSel;
-  const mood = musicMood(), pool = MUSIC_TRACKS.map((t: any, i: number) => i).filter((i: number) => MUSIC_TRACKS[i].mood === mood && i !== prev);
-  if (CUSTOM_MUSIC.length && Math.random() < CUSTOM_MUSIC.length / total) return MUSIC_TRACKS.length + Math.floor(Math.random() * CUSTOM_MUSIC.length);
-  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : Math.floor(Math.random() * MUSIC_TRACKS.length);
+  const total = totalTrackCount(), style = trackSel <= -3 ? MUSIC_STYLE_KEYS[-3 - trackSel] : null;
+  if (!style && CUSTOM_MUSIC.length && Math.random() < CUSTOM_MUSIC.length / total) return MUSIC_TRACKS.length + Math.floor(Math.random() * CUSTOM_MUSIC.length);
+  const mood = musicMood(), fac = musicPlayerFac(), W = -1 === trackSel && fac ? FACTION_STYLE_W[fac] : null;
+  const w = MUSIC_TRACKS.map((t: any, i: number) => {
+    const st = musicStyleOf(i);
+    if (style && st !== style) return 0;
+    let x = W ? (W[st] ?? .5) * (t.fac === fac ? 2 : 1) : 1;
+    x *= t.mood === mood ? 3 : 1;
+    i === prev && (x *= .02), musicRecent.includes(i) && (x *= .2);
+    return x;
+  });
+  let sum = w.reduce((a: number, b: number) => a + b, 0), r = Math.random() * sum;
+  if (sum <= 0) return Math.floor(Math.random() * MUSIC_TRACKS.length);
+  for (let i = 0; i < w.length; i++) if ((r -= w[i]) <= 0) return musicRecent.unshift(i), musicRecent.length = Math.min(musicRecent.length, 4), i;
+  return w.length - 1;
 }
+// switching to a style in Settings changes track straight away if needed
+function musicStyleSwitch() {
+  const style = MUSIC_STYLE_KEYS[-3 - trackSel], cur = musicNowIdx();
+  (cur < 0 || musicStyleOf(cur) !== style) && playAnyTrack(pickNextTrack(cur));
+}
+function musicNowIdx() {
+  if (customTrackEl) return MUSIC_TRACKS.length + customTrackIdx;
+  const t = AC ? AC.currentTime : 0, s = (musicState.srcs || []).find((x: any) => x.start <= t && x.end - 2.4 > t);
+  return s ? s.idx : musicState.cur;
+}
+function musicNowPlaying() { const i = musicNowIdx(); return i >= 0 && musicOn ? trackName(i) : ""; }
+function musicModeOptions() {
+  return ['<option value="-1">Auto (faction mix)</option>', '<option value="-2">Shuffle all</option>'].concat(MUSIC_STYLE_KEYS.map((k, i) => '<option value="' + (-3 - i) + '">Style: ' + MUSIC_STYLE_NAMES[k] + "</option>"));
+}
+function musicTrackLabel(i: number) { return MUSIC_TRACKS[i].name + " · " + MUSIC_STYLE_NAMES[musicStyleOf(i)]; }
 function startMusic() {
   const ac = audio();
   if (!ac || musicOn || !MUSIC_TRACKS.length) return;
@@ -642,7 +735,7 @@ function startMusic() {
         const sp = ac.createChannelSplitter(3), dry = ac.createChannelMerger(2);
         src.connect(g), g.connect(sp), sp.connect(dry, 0, 0), sp.connect(dry, 1, 1), sp.connect(verb, 2), dry.connect(mg), src.start(when);
         src.onended = () => { try { g.disconnect(), sp.disconnect(), dry.disconnect(); } catch (e) { } };
-        musicState.srcs = (musicState.srcs || []).filter((s: any) => s.end > ac.currentTime), musicState.srcs.push({ src, g, end: when + buf.duration });
+        musicState.srcs = (musicState.srcs || []).filter((s: any) => s.end > ac.currentTime), musicState.srcs.push({ src, g, idx, start: when, end: when + buf.duration });
         when += l;
       }
       await sleep((when - ac.currentTime - MUSIC_AHEAD) * 1e3);
@@ -659,7 +752,8 @@ function startMusic() {
     for (const s of musicState.srcs || []) { try { s.g.gain.cancelScheduledValues(now), s.g.gain.setValueAtTime(s.g.gain.value, now), s.g.gain.linearRampToValueAtTime(0, now + .6), s.src.stop(now + .7); } catch (e) { } }
     musicState.srcs = [], run(i, ++musicGen, ac.currentTime + .15, !0);
   };
-  playAnyTrack(trackSel >= 0 ? trackSel : pickNextTrack(-1));
+  // pick on the next tick: startGame calls this before the players exist
+  setTimeout(() => playAnyTrack(trackSel >= 0 ? trackSel : pickNextTrack(-1)), 0);
 }
 function musicSongABC(idx: number) { const s = MUSIC_TRACKS[idx]; return s ? s.parts : null; }
 
@@ -670,7 +764,8 @@ Object.assign(window, {
   audio, sfx, sfxHit, setMuted, setMasterVol, setSfxVol, setMusicVol,
   setTrackSel, setRainAmbience, startFpsAmbience, stopFpsAmbience, startMusic, MUSIC_TRACKS,
   loadAdminMusic, saveAdminMusic, refreshCustomMusic, totalTrackCount, trackName,
-  playVoiceLine, setVoicesEnabled, announce, announceHint, audioTap, musicRenderSection: renderSection, musicSongABC,
+  playVoiceLine, setVoicesEnabled, announce, announceHint, audioTap, musicRenderSection: renderSection, musicStems: musicSynth, musicSongABC,
+  musicModeOptions, musicTrackLabel, musicNowPlaying, pickNextTrack,
 });
 
 Object.defineProperties(window, {

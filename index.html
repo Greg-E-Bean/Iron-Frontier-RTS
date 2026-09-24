@@ -13641,6 +13641,289 @@ varying vec3 vFgWN;
         { bars: 8, r: "B", d: "half", l: "A" },
         { bars: 4, r: "A", g: "clean", d: "none", pd: "P" }
       ]
+    },
+    // ======================================================= Vanguard: synth rock / EDM
+    {
+      name: "Blue Protocol",
+      mood: "battle",
+      style: "edm",
+      fac: "allied",
+      bpm: 128,
+      riffOct: -2,
+      bassKind: "saw",
+      lk: "saw",
+      parts: {
+        riffs: { R: ".A.A.A.A.A.A.A.A | .F.F.F.F.F.F.F.F | .C.C.C.C.C.C.C.C | .G.G.G.G.G.G.G.G |" },
+        bass: { A: "z2A2z2A2z2A2z2A2 | z2F2z2F2z2F2z2F2 | z2c2z2c2z2c2z2c2 | z2G2z2G2z2G2z2G2 |" },
+        arps: { A: "A c e a e c A c e a e c e a c' a | F A c f c A F A c f c A c f a f | C E G c G E C E G c G E G c e c | G, B, D G D B, G, B, D G D B, D G B G |" },
+        chords: { S: "[Ace]3[Ace]3[Ace]2 z2[Ace]2 [Ace]2z2 | [FAc]3[FAc]3[FAc]2 z2[FAc]2 [FAc]2z2 | [EGc]3[EGc]3[EGc]2 z2[EGc]2 [EGc]2z2 | [DGB]3[DGB]3[DGB]2 z2[DGB]2 [DGB]2z2 |" },
+        leads: { A: "a2 g a e2 c2 | f2 e f c4 | e2 d e g2 c'2 | b2 a g d4 |", B: "c'2 b c' e'2 a2 | a2 g a f4 | g2 f g c'2 e'2 | d'4 b4 |" },
+        pads: { P: "[Ace]4 | [FAc]4 | [EGc]4 | [DGB]4 |" }
+      },
+      form: [
+        { bars: 8, ar: "A", d: "hats", sweep: [300, 3e3] },
+        { bars: 16, ar: "A", bl: "A", ss: "S", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, ar: "A", pd: "P", l: "B", lk: "square", d: "none" },
+        { bars: 4, ar: "A", bl: "A", d: "roll", riser: 1, sweep: [500, 6e3] },
+        { bars: 16, r: "R", ar: "A", bl: "A", ss: "S", l: "B", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, ar: "A", pd: "P", d: "house" },
+        { bars: 8, r: "R", ar: "A", bl: "A", ss: "S", l: "A", d: "edm", pump: 1 },
+        { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [4e3, 300] }
+      ]
+    },
+    {
+      name: "Chrono Shift",
+      mood: "battle",
+      style: "synthrock",
+      fac: "allied",
+      bpm: 140,
+      riffOct: -2,
+      parts: {
+        riffs: {
+          A: ".E.EE2.E.EE2.E.EG2.E.E^F2 | .C.CC2.C.CC2.C.CE2.C.CD2 | .D.DD2.D.DD2.D.D^F2.D.DE2 | .B,.B,B,2.B,.B,B,2.B,.B,^D2.B,.B,^F2 |",
+          B: "E8 E4 G4 | C8 C4 E4 | D8 D4 ^F4 | B,8 B,8 |",
+          D: "E16 | C16 | D16 | B,16 |"
+        },
+        arps: { A: "E G B e B G E G B e B G B e g e | C E G c G E C E G c G E G c e c | D ^F A d A ^F D ^F A d A ^F A d ^f d | B, ^D ^F B ^F ^D B, ^D ^F B ^F ^D ^F B ^d B |" },
+        leads: { A: "e2 ^f g b2 g2 | c'2 b a g4 | a2 g ^f d2 ^f2 | ^d4 B4 |", B: "b2 e'2 d'2 b2 | c'2 b2 g4 | a2 b2 c'2 d'2 | ^d'4 b4 |" },
+        pads: { P: "[EGB]4 | [CEG]4 | [D^FA]4 | [B,^D^F]4 |" }
+      },
+      form: [
+        { bars: 4, ar: "A", d: "none", sweep: [400, 5e3] },
+        { bars: 8, r: "A", ar: "A", d: "rock" },
+        { bars: 8, r: "A", l: "A", synth: true, d: "drive" },
+        { bars: 8, r: "B", l: "B", ar: "A", d: "rock" },
+        { bars: 8, r: "A", l: "A", synth: true, d: "drive" },
+        { bars: 8, r: "B", l: "B", ar: "A", d: "rock" },
+        { bars: 8, ar: "A", pd: "P", l: "A", synth: true, d: "half" },
+        { bars: 4, r: "A", d: "build", riser: 1 },
+        { bars: 16, r: "B", l: "B", ar: "A", d: "drive" },
+        { bars: 4, r: "D", pd: "P", d: "rock", fill: false }
+      ]
+    },
+    {
+      name: "Skyline Intercept",
+      mood: "battle",
+      style: "synthrock",
+      fac: "allied",
+      bpm: 156,
+      riffOct: -2,
+      parts: {
+        riffs: {
+          A: ".D.D.D.D.D.D.D.D | ._B,._B,._B,._B,._B,._B,._B,._B, | .F.F.F.F.F.F.F.F | .C.C.C.C.C.C.C.C |",
+          B: "D4 D4 D2 F2 D4 | _B,4 _B,4 _B,2 D2 _B,4 | F4 F4 F2 A2 F4 | C4 C4 C2 E2 C4 |",
+          D: "D16 | _B,16 | F16 | C16 |"
+        },
+        arps: { A: "D F A d A F D F A d A F A d f d | _B, D F _B F D _B, D F _B F D F _B d _B | F A c f c A F A c f c A c f a f | C E G c G E C E G c G E G c e c |" },
+        chords: { S: "[DFA]16 | [_B,DF]16 | [CFA]16 | [CEG]16 |" },
+        leads: { A: "a2 a g f2 d2 | f2 f e d4 | c2 c d f2 a2 | g4 e4 |", B: "d'2 c' _b a2 f2 | _b2 a g f4 | a2 g f c'2 a2 | g8 |" },
+        pads: { P: "[DFA]4 | [_B,DF]4 | [CFA]4 | [CEG]4 |" }
+      },
+      form: [
+        { bars: 8, ar: "A", d: "none", sweep: [300, 4e3] },
+        { bars: 16, r: "A", l: "A", synth: true, d: "punk" },
+        { bars: 8, r: "B", ar: "A", d: "rock" },
+        { bars: 16, r: "B", ss: "S", l: "B", lk: "saw", ar: "A", d: "drive" },
+        { bars: 8, ar: "A", pd: "P", d: "half" },
+        { bars: 4, r: "A", d: "build", riser: 1 },
+        { bars: 16, r: "B", ss: "S", l: "B", lk: "saw", ar: "A", d: "drive" },
+        { bars: 4, r: "D", pd: "P", d: "rock", fill: false }
+      ]
+    },
+    {
+      name: "Overclock",
+      mood: "battle",
+      style: "edm",
+      fac: "allied",
+      bpm: 132,
+      bassOct: -2,
+      bassKind: "saw",
+      lk: "saw",
+      parts: {
+        bass: {
+          A: "z2C2z2C2z2C2z2C2 | z2_A,2z2_A,2z2_A,2z2_A,2 | z2_E2z2_E2z2_E2z2_E2 | z2_B,2z2_B,2z2_B,2z2_B,2 |",
+          B: "CCcC CCcC CCcC CCcC | _A,_A,_A_A, _A,_A,_A_A, _A,_A,_A_A, _A,_A,_A_A, | _E_E_e_E _E_E_e_E _E_E_e_E _E_E_e_E | _B,_B,_B_B, _B,_B,_B_B, _B,_B,_B_B, _B,_B,_B_B, |"
+        },
+        arps: { A: "C _E G c G _E C _E G c G _E G c _e c | _A, C _E _A _E C _A, C _E _A _E C _E _A c _A | _E G _B _e _B G _E G _B _e _B G _B _e g _e | _B, D F _B F D _B, D F _B F D F _B d _B |" },
+        chords: { S: "[C_EG]3[C_EG]3[C_EG]2 z2[C_EG]2 [C_EG]2z2 | [C_E_A]3[C_E_A]3[C_E_A]2 z2[C_E_A]2 [C_E_A]2z2 | [_B,_EG]3[_B,_EG]3[_B,_EG]2 z2[_B,_EG]2 [_B,_EG]2z2 | [_B,DF]3[_B,DF]3[_B,DF]2 z2[_B,DF]2 [_B,DF]2z2 |" },
+        leads: { A: "g2 _e c g2 _a2 | _a2 g _e c4 | _e2 f g _b2 g2 | f4 d4 |", B: "c'4 _b2 g2 | _a4 _e4 | g2 _a2 _b2 _e'2 | d'8 |" },
+        pads: { P: "[C_EG]4 | [C_E_A]4 | [_B,_EG]4 | [_B,DF]4 |" }
+      },
+      form: [
+        { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [300, 3e3] },
+        { bars: 8, ar: "A", bl: "A", d: "house", riser: 1 },
+        { bars: 16, ss: "S", bl: "B", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, pd: "P", ar: "A", l: "B", lk: "square", d: "none" },
+        { bars: 4, bl: "A", ar: "A", d: "roll", riser: 1, sweep: [400, 6e3] },
+        { bars: 16, ss: "S", bl: "B", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, pd: "P", ar: "A", l: "B", lk: "square", d: "house" },
+        { bars: 8, ar: "A", pd: "P", d: "hats", sweep: [3e3, 300] }
+      ]
+    },
+    {
+      name: "Clear Skies",
+      mood: "calm",
+      style: "synthrock",
+      fac: "allied",
+      bpm: 100,
+      riffOct: -2,
+      bassOct: -2,
+      bassKind: "saw",
+      parts: {
+        riffs: { A: "G2B2d2g2d2B2G2D2 | D2^F2A2d2A2^F2D2A,2 | E2G2B2e2B2G2E2B,2 | C2E2G2c2G2E2C2G,2 |" },
+        bass: { A: "G4z2G2G4D4 | D4z2D2D4A,4 | E4z2E2E4B,4 | C4z2C2C4G,4 |" },
+        arps: { A: "G B d g d B G B d g d B d g b g | D ^F A d A ^F D ^F A d A ^F A d ^f d | E G B e B G E G B e B G B e g e | C E G c G E C E G c G E G c e c |" },
+        leads: { A: "d4 B2 G2 | A4 ^F4 | G2 A2 B2 e2 | d8 |", B: "g4 ^f2 e2 | ^f4 d4 | e2 ^f2 g2 b2 | a8 |" },
+        pads: { P: "[GBd]4 | [D^FA]4 | [EGB]4 | [CEG]4 |" }
+      },
+      form: [
+        { bars: 8, r: "A", g: "clean", pd: "P", d: "none" },
+        { bars: 16, r: "A", g: "clean", bass: false, bl: "A", l: "A", synth: true, d: "light" },
+        { bars: 8, ar: "A", pd: "P", bl: "A", l: "B", d: "ride" },
+        { bars: 8, r: "A", g: "clean", pd: "P", d: "none" },
+        { bars: 16, r: "A", g: "clean", bass: false, ar: "A", bl: "A", l: "A", synth: true, d: "light" },
+        { bars: 8, ar: "A", pd: "P", bl: "A", l: "B", d: "ride" },
+        { bars: 8, r: "A", g: "clean", pd: "P", d: "none" }
+      ]
+    },
+    // ======================================================= Syndicate: synthpop / EDM
+    {
+      name: "Hive Mind",
+      mood: "battle",
+      style: "edm",
+      fac: "yuri",
+      bpm: 126,
+      bassOct: -2,
+      bassKind: "reese",
+      stabKind: "choir",
+      parts: {
+        bass: {
+          A: "F6 F2 F4 F4 | _D6 _D2 _D4 _D4 | _E6 _E2 _E4 _E4 | C6 C2 C4 C4 |",
+          B: "z2F2z2F2z2F2z2F2 | z2_D2z2_D2z2_D2z2_D2 | z2_E2z2_E2z2_E2z2_E2 | z2C2z2C2z2C2z2C2 |"
+        },
+        arps: { A: "F _A c f c _A F _A c f c _A c f _a f | _D F _A _d _A F _D F _A _d _A F _A _d f _d | _E G _B _e _B G _E G _B _e _B G _B _e g _e | C E G c G E C E G c G E G c e c |" },
+        chords: { S: "[F_Ac]2z2[F_Ac]2z2[F_Ac]2z2[F_Ac]2[F_Ac]2 | [F_A_d]2z2[F_A_d]2z2[F_A_d]2z2[F_A_d]2[F_A_d]2 | [G_B_e]2z2[G_B_e]2z2[G_B_e]2z2[G_B_e]2[G_B_e]2 | [EGc]2z2[EGc]2z2[EGc]2z2[EGc]2[EGc]2 |" },
+        stabs: { H: "[F_Ac]8 z8 | [F_A_d]8 z8 | [G_B_e]8 z8 | [EGc]8 z8 |" },
+        leads: { A: "c'2 _a f c'2 _d'2 | c'4 _a4 | _b2 g _e _b2 c'2 | e4 c4 |", B: "f'4 _e'2 c'2 | _d'4 _a4 | _b2 c'2 _d'2 _e'2 | e'8 |" },
+        pads: { P: "[F_Ac]4 | [F_A_d]4 | [G_B_e]4 | [EGc]4 |" }
+      },
+      form: [
+        { bars: 8, pd: "P", st: "H", d: "none", sweep: [300, 2500] },
+        { bars: 16, bl: "A", ar: "A", d: "breaks" },
+        { bars: 4, ar: "A", d: "roll", riser: 1 },
+        { bars: 16, ss: "S", bl: "B", bk: "saw", l: "A", lk: "square", ar: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, st: "H", pd: "P", l: "B", lk: "saw", d: "none" },
+        { bars: 4, bl: "A", d: "roll", riser: 1 },
+        { bars: 16, ss: "S", bl: "B", bk: "saw", l: "B", lk: "saw", ar: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, bl: "A", pd: "P", d: "hats", sweep: [3e3, 300] }
+      ]
+    },
+    {
+      name: "Neon Cult",
+      mood: "battle",
+      style: "synthpop",
+      fac: "yuri",
+      bpm: 118,
+      bassOct: -2,
+      bassKind: "saw",
+      lk: "square",
+      parts: {
+        bass: { A: "A,2A2A,2A2A,2A2A,2A2 | F,2F2F,2F2F,2F2F,2F2 | G,2G2G,2G2G,2G2G,2G2 | E,2E2E,2E2E,2E2E,2E2 |" },
+        arps: { A: "a e c e a e c e a e c e a e c e | a f c f a f c f a f c f a f c f | b g d g b g d g b g d g b g d g | b g e g b g e g b g e g b g e g |" },
+        chords: { S: "[Ace]16 | [FAc]16 | [GBd]16 | [EGB]16 |" },
+        leads: { A: "e2 e2 d c B2 | c4 A4 | B2 B2 c d e2 | B8 |", B: "a4 g2 e2 | f2 e2 c4 | d2 e2 g2 b2 | e'8 |" },
+        pads: { P: "[Ace]4 | [FAc]4 | [GBd]4 | [EGB]4 |" }
+      },
+      form: [
+        { bars: 8, ar: "A", pd: "P", d: "none" },
+        { bars: 16, bl: "A", ar: "A", l: "A", d: "pop" },
+        { bars: 16, bl: "A", ss: "S", l: "B", d: "popdrive" },
+        { bars: 8, pd: "P", ar: "A", d: "half" },
+        { bars: 8, bl: "A", ar: "A", l: "A", d: "pop" },
+        { bars: 16, bl: "A", ss: "S", l: "B", ar: "A", d: "popdrive" },
+        { bars: 8, ar: "A", pd: "P", d: "none" }
+      ]
+    },
+    {
+      name: "Psychic Dominion",
+      mood: "battle",
+      style: "edm",
+      fac: "yuri",
+      bpm: 140,
+      bassOct: -2,
+      bassKind: "saw",
+      stabKind: "hit",
+      lk: "saw",
+      parts: {
+        bass: { A: "EEeE EEeE EEeE EEeE | FFfF FFfF FFfF FFfF | EEeE EEeE EEeE EEeE | DDdD DDdD DDdD DDdD |" },
+        arps: { A: "e b g e b g e b g e b g e b g e | f c' a f c' a f c' a f c' a f c' a f | e b g e b g e b g e b g e b g e | d a ^f d a ^f d a ^f d a ^f d a ^f d |" },
+        chords: { S: "[EGB]4 z4 [EGB]2 z2 [EGB]4 | [FAc]4 z4 [FAc]2 z2 [FAc]4 | [EGB]4 z4 [EGB]2 z2 [EGB]4 | [D^FA]4 z4 [D^FA]2 z2 [D^FA]4 |" },
+        stabs: { H: "[EB]2 z14 | [FA]2 z14 | [EB]2 z14 | [DA]2 z14 |" },
+        leads: { A: "b2 c' b g2 e2 | f2 g a c'4 | b2 a g e2 g2 | ^f8 |", B: "e'4 f'4 | e'2 c'2 a4 | b4 g4 | a2 ^f2 d4 |" },
+        pads: { P: "[EGB]4 | [FAc]4 | [EGB]4 | [D^FA]4 |" }
+      },
+      form: [
+        { bars: 4, st: "H", pd: "P", d: "none" },
+        { bars: 4, bl: "A", ar: "A", d: "roll", riser: 1 },
+        { bars: 16, bl: "A", ss: "S", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 16, bl: "A", ar: "A", st: "H", l: "B", lk: "square", d: "breaks" },
+        { bars: 4, ar: "A", d: "roll", riser: 1 },
+        { bars: 16, bl: "A", ss: "S", ar: "A", l: "A", d: "edm", pump: 1, impact: 1 },
+        { bars: 8, pd: "P", st: "H", stk: "choir", d: "none" },
+        { bars: 8, bl: "A", ss: "S", l: "B", lk: "square", d: "edm", pump: 1 },
+        { bars: 4, st: "H", d: "none" }
+      ]
+    },
+    {
+      name: "Glass Garden",
+      mood: "calm",
+      style: "synthpop",
+      fac: "yuri",
+      bpm: 96,
+      bassOct: -2,
+      bassKind: "saw",
+      lk: "square",
+      padOct: 0,
+      parts: {
+        bass: { A: "B,4z4B,4z2B,2 | G,4z4G,4z2G,2 | D4z4D4z2D2 | A,4z4A,4z2A,2 |" },
+        arps: { A: "B d ^f b ^f d B d ^f b ^f d ^f b d' b | G B d g d B G B d g d B d g b g | D ^F A d A ^F D ^F A d A ^F A d ^f d | A, ^C E A E ^C A, ^C E A E ^C E A ^c A |" },
+        leads: { A: "^f4 e2 d2 | d4 B4 | A2 B2 d2 ^f2 | e8 |", B: "b4 a2 ^f2 | g4 d4 | ^f2 g2 a2 d'2 | ^c'8 |" },
+        pads: { P: "[B,D^F]4 | [G,B,D]4 | [D^FA]4 | [A,^CE]4 |" }
+      },
+      form: [
+        { bars: 8, ar: "A", pd: "P", d: "none", sweep: [500, 4e3] },
+        { bars: 16, ar: "A", pd: "P", bl: "A", l: "A", d: "light" },
+        { bars: 16, ar: "A", pd: "P", bl: "A", l: "B", d: "pop" },
+        { bars: 8, pd: "P", l: "A", d: "none" },
+        { bars: 16, ar: "A", pd: "P", bl: "A", l: "B", d: "pop" },
+        { bars: 8, ar: "A", pd: "P", d: "none", sweep: [4e3, 400] }
+      ]
+    },
+    {
+      name: "Velvet Signal",
+      mood: "calm",
+      style: "synthpop",
+      fac: "yuri",
+      bpm: 108,
+      bassOct: -2,
+      bassKind: "saw",
+      lk: "square",
+      parts: {
+        bass: { A: "F2f2z2f2F2f2z2f2 | C2c2z2c2C2c2z2c2 | D2d2z2d2D2d2z2d2 | _B,2_B2z2_B2_B,2_B2z2_B2 |" },
+        arps: { A: "F A c f c A F A c f c A c f a f | C E G c G E C E G c G E G c e c | D F A d A F D F A d A F A d f d | _B, D F _B F D _B, D F _B F D F _B d _B |" },
+        chords: { S: "[FAc]16 | [EGc]16 | [DFA]16 | [DF_B]16 |" },
+        leads: { A: "a4 g2 f2 | g4 e4 | f2 e2 d2 f2 | d8 |", B: "c'4 _b2 a2 | g4 c'4 | a2 g2 f2 a2 | _b8 |" },
+        pads: { P: "[FAc]4 | [EGc]4 | [DFA]4 | [DF_B]4 |" }
+      },
+      form: [
+        { bars: 8, ar: "A", pd: "P", d: "none" },
+        { bars: 16, ar: "A", pd: "P", bl: "A", l: "A", d: "pop" },
+        { bars: 16, ss: "S", bl: "A", ar: "A", l: "B", d: "popdrive", pump: 1 },
+        { bars: 8, pd: "P", ar: "A", d: "none" },
+        { bars: 8, bl: "A", ar: "A", l: "A", d: "pop" },
+        { bars: 16, ss: "S", bl: "A", l: "B", d: "popdrive", pump: 1 },
+        { bars: 8, ar: "A", pd: "P", d: "none", sweep: [4e3, 400] }
+      ]
     }
   ];
   Object.assign(window, { MUSIC_SONGS });
@@ -13721,7 +14004,7 @@ varying vec3 vFgWN;
       localStorage.setItem("ifr_track", "" + e);
     } catch (t) {
     }
-    musicOn && e >= 0 && playAnyTrack(e);
+    musicOn && (e >= 0 ? playAnyTrack(e) : e <= -3 && musicStyleSwitch());
   }
   var MUSIC_BASE = 0.7;
   var limiter = null;
@@ -14242,8 +14525,17 @@ varying vec3 vFgWN;
       ride: { k: "x.......x.x.....", s: "....x.......x...", r: "x.x.x.x.x.x.x.x." },
       pulse: { k: "x...x...x...x...", h: "..x...x...x...x.", c: "....x.......x..." },
       build: { s: "x.x.x.x.xxxxxxxx", k: "x...x...x...x..." },
+      // electronic kits: K = electronic kick, p = clap, S = gated 80s snare
+      edm: { K: "x...x...x...x...", p: "....X.......X...", o: "..x...x...x...x.", h: "x.x.x.x.x.x.x.x." },
+      house: { K: "x...x...x...x...", p: "....x.......x...", o: "..x...x...x...x." },
+      hats: { h: "x...x...x...x...", o: "..x...x...x...x." },
+      breaks: { K: "x.....x...x.....", S: "....X.......X..f", h: "xxxxxxxxxxxxxxxx" },
+      roll: { K: "x...x...x...x...", p: "x.x.x.x.xxxxxxxx" },
+      pop: { K: "x.......x.x.....", S: "....X.......X...", h: "x.x.x.x.x.x.x.x." },
+      popdrive: { K: "x...x...x...x...", S: "....X.......X...", h: "xxxxxxxxxxxxxxxx" },
       none: {}
     };
+    const NOFILL = /* @__PURE__ */ new Set(["edm", "house", "hats", "roll", "pop", "popdrive", "breaks"]);
     let _nz = null;
     const NZ = () => {
       if (!_nz) {
@@ -14308,14 +14600,14 @@ varying vec3 vFgWN;
     function bassNote(out, sr, t, m, dur, vel) {
       voice(out, sr, t, { osc: [[0, mtof(m), 1], [2, mtof(m), 0.6]], a: 4e-3, hold: Math.max(0.01, dur - 0.04), rel: 0.08, peak: 0.5 * vel, lp: ["lowpass", 1.2, sweep(1100, 380, Math.min(0.25, dur))] });
     }
-    function leadNote(out, sr, t, m, dur, prev, vel, synth) {
-      const g0 = prev ? mtof(prev) / mtof(m) : 1, depth = dur > 0.3 ? synth ? 12 : 22 : 0, vr2 = Math.min(dur, 0.45);
+    function leadNote(out, sr, t, m, dur, prev, vel, kind) {
+      const synth = "gtr" !== kind, g0 = prev ? mtof(prev) / mtof(m) : 1, depth = dur > 0.3 ? synth ? 12 : 22 : 0, vr2 = Math.min(dur, 0.45), f = mtof(m);
       voice(out, sr, t, {
-        osc: [[synth ? 1 : 0, mtof(m), 1]],
+        osc: "saw" === kind ? [[0, f * cents(-9), 0.6], [0, f * cents(9), 0.6], [0, f * 2, 0.18]] : [[synth ? 1 : 0, f, 1]],
         a: 0.012,
         hold: Math.max(0.02, dur - 0.05),
-        rel: synth ? 0.12 : 0.25,
-        peak: (synth ? 0.16 : 0.3) * vel,
+        rel: synth ? 0.14 : 0.25,
+        peak: ("saw" === kind ? 0.3 : synth ? 0.2 : 0.3) * vel,
         fr: (tt) => (tt < 0.045 ? Math.pow(g0, 1 - tt / 0.045) : 1) * (depth ? cents(depth * Math.min(1, tt / vr2) * Math.sin(35.19 * tt)) : 1)
       });
     }
@@ -14328,7 +14620,23 @@ varying vec3 vFgWN;
     function padChord(out, sr, t, midis, dur, vel) {
       const osc = [];
       for (const m of midis) for (const d of [-7, 7]) osc.push([0, mtof(m) * cents(d), 1]);
-      voice(out, sr, t, { osc, a: 0.5, hold: Math.max(0.05, dur - 0.5), rel: 0.9, peak: 0.07 * vel });
+      voice(out, sr, t, { osc, a: 0.5, hold: Math.max(0.05, dur - 0.5), rel: 0.9, peak: 0.09 * vel });
+    }
+    function synthBass(out, sr, t, m, dur, vel, kind) {
+      const f = mtof(m);
+      if ("reese" === kind) voice(out, sr, t, { osc: [[0, f * cents(-14), 0.7], [0, f * cents(14), 0.7], [2, f / 2, 0.5]], a: 6e-3, hold: Math.max(0.01, dur - 0.05), rel: 0.1, peak: 0.42 * vel, lp: ["lowpass", 1.4, (tt) => 700 + 300 * Math.sin(tt * 3)] });
+      else voice(out, sr, t, { osc: [[0, f, 1], [1, f / 2, 0.5]], a: 3e-3, hold: Math.max(0.01, dur - 0.04), rel: 0.07, peak: 0.42 * vel, lp: ["lowpass", 4, sweep(2600, 260, Math.min(0.2, dur + 0.05))] });
+    }
+    function arpNote(out, sr, t, m, dur, vel) {
+      voice(out, sr, t, { osc: [[0, mtof(m) * cents(-6), 0.7], [1, mtof(m) * cents(6), 0.45]], a: 2e-3, hold: Math.min(0.03, dur * 0.3), rel: 0.2, peak: 0.26 * vel, lp: ["lowpass", 2, sweep(5200, 650, 0.14)] });
+    }
+    function supersaw(L, R, sr, t, midis, dur, vel) {
+      const k = 1 / Math.sqrt(midis.length), env = { a: 8e-3, hold: Math.max(0.02, dur - 0.03), rel: 0.28, peak: 0.17 * vel * k };
+      for (const [out, dets] of [[L, [-19, -7, 3, 13]], [R, [-13, -3, 7, 19]]]) {
+        const osc = [];
+        for (const m of midis) for (const d of dets) osc.push([0, mtof(m) * cents(d), 1]);
+        voice(out, sr, t, { osc, ...env });
+      }
     }
     const nzHit = (out, sr, t, type, f, q, d, g) => voice(out, sr, t, { osc: [[3, 0, 1]], a: 1e-3, hold: 0, rel: d, peak: g, lp: [type, q, () => f] });
     const tnHit = (out, sr, t, w, f0, f1, sw, hold, rel, g) => voice(out, sr, t, { osc: [[w, 1, 1]], a: 1e-3, hold, rel, peak: g, fr: sweep(f0, f1, sw) });
@@ -14346,6 +14654,13 @@ varying vec3 vFgWN;
         for (const f of [850, 1330, 2150, 3400]) tnHit(out, sr, t, 2, f, f, 1, 0, 0.35, 0.09);
         nzHit(out, sr, t, "bandpass", 3e3, 2, 0.08, 0.4);
       } else if ("t" === lane) tnHit(out, sr, t, 2, acc ? 140 : 190, acc ? 90 : 120, 0.2, 0, 0.35, 0.8);
+      else if ("K" === lane) tnHit(out, sr, t, 2, 150, 44, 0.11, 0.05, 0.38, 0.8), nzHit(out, sr, t, "highpass", 3500, 0.7, 8e-3, 0.22);
+      else if ("p" === lane) {
+        const gv = acc ? 0.9 : 0.7;
+        for (const dt of [0, 0.011, 0.022]) nzHit(out, sr, t + dt, "bandpass", 1250, 1.3, dt < 0.02 ? 0.012 : 0.16, 0.75 * gv);
+      } else if ("S" === lane) {
+        voice(out, sr, t, { osc: [[3, 0, 1]], a: 1e-3, hold: 0.16, rel: 0.05, peak: 0.35 * v, lp: ["bandpass", 0.6, () => 2200] }), nzHit(out, sr, t, "bandpass", 1900, 0.7, 0.12, 0.65 * v), tnHit(out, sr, t, 4, 210, 160, 0.08, 0, 0.12, 0.4 * v);
+      }
     }
     function synthSection(song, si, sr) {
       const sec = song.form[si], spb = 60 / song.bpm, barB = 4, bars = sec.bars, N = Math.ceil((bars * barB * spb + 2.4) * sr);
@@ -14371,19 +14686,30 @@ varying vec3 vFgWN;
           b % 2 < 1e-6 && bassNote(B("bass"), sr, T(b), e.n[0] + oct - 12, 2 * spb * 0.9, 0.7);
         });
       }
-      if (sec.bl && parts.bass && parts.bass[sec.bl]) loopEach(abc(parts.bass[sec.bl], 0.25), (e, b) => bassNote(B("bass"), sr, T(b), e.n[0] + 12 * (song.bassOct ?? -3), e.d * spb * 0.95, 1));
+      if (sec.bl && parts.bass && parts.bass[sec.bl]) {
+        const bk = sec.bk || song.bassKind;
+        loopEach(abc(parts.bass[sec.bl], 0.25), (e, b) => {
+          const m = e.n[0] + 12 * (song.bassOct ?? -3), d = e.d * spb * 0.95;
+          bk ? synthBass(B("bass"), sr, T(b), m, d, e.m ? 0.75 : 1, bk) : bassNote(B("bass"), sr, T(b), m, d, 1);
+        });
+      }
       if (sec.l && parts.leads && parts.leads[sec.l]) {
         let prev = null;
         loopEach(abc(parts.leads[sec.l], 0.5), (e, b) => {
           const m = e.n[0] + 12 * (song.leadOct ?? 0);
-          leadNote(B("lead"), sr, T(b), m, e.d * spb, e.d * spb < 0.5 ? prev : null, e.m ? 0.7 : 1, !!sec.synth);
+          leadNote(B("lead"), sr, T(b), m, e.d * spb, e.d * spb < 0.5 ? prev : null, e.m ? 0.7 : 1, leadKind(song, sec));
           prev = m;
         });
       }
+      if (sec.ar && parts.arps && parts.arps[sec.ar]) loopEach(abc(parts.arps[sec.ar], 0.25), (e, b) => arpNote(B("arp"), sr, T(b), e.n[0] + 12 * (song.arpOct ?? 0), e.d * spb, e.m ? 0.6 : 1));
+      if (sec.ss && parts.chords && parts.chords[sec.ss]) loopEach(abc(parts.chords[sec.ss], 0.25), (e, b) => supersaw(B("ssL"), B("ssR"), sr, T(b), e.n.map((n) => n + 12 * (song.chordOct ?? 0)), e.d * spb * 0.95, 1));
+      const secLen = bars * barB * spb;
+      sec.riser && voice(B("fx"), sr, T(0), { osc: [[3, 0, 1]], a: secLen, hold: 0, rel: 0.25, peak: 0.22, lp: ["bandpass", 1.6, sweep(350, 7500, secLen)] });
+      sec.impact && (tnHit(B("fx"), sr, T(0), 2, 110, 28, 1.1, 0.1, 1.3, 0.9), nzHit(B("fx"), sr, T(0), "lowpass", 900, 0.7, 1.4, 0.5));
       const stk = sec.stk || song.stabKind || "brass";
       if (sec.st && parts.stabs && parts.stabs[sec.st]) loopEach(abc(parts.stabs[sec.st], 0.25), (e, b) => stabHit(B("stab"), sr, T(b), e.n.map((n) => n + 12 * (song.stabOct ?? -1)), e.d * spb, stk, 1));
       if (sec.pd && parts.pads && parts.pads[sec.pd]) loopEach(abc(parts.pads[sec.pd], 1), (e, b) => padChord(B("pad"), sr, T(b), e.n.map((n) => n + 12 * (song.padOct ?? -1)), e.d * spb, 1));
-      const kit = DRUM_KITS[sec.d || "none"] || {}, fill = sec.fill !== false && "none" !== sec.d;
+      const kit = DRUM_KITS[sec.d || "none"] || {}, fill = sec.fill !== false && "none" !== sec.d && !NOFILL.has(sec.d);
       for (let bar = 0; bar < bars; bar++) {
         const lastBar = bar === bars - 1;
         for (const lane in kit) for (let st = 0; st < 16; st++) {
@@ -14395,9 +14721,22 @@ varying vec3 vFgWN;
         if (lastBar && fill) for (let st = 8; st < 16; st++) drumHit(B("drums"), sr, st < 12 ? "s" : "t", T(bar * 4 + st / 4), st >= 14);
         0 === bar && "none" !== sec.d && !sec.noCrash && drumHit(B("drums"), sr, "C", T(0), true);
       }
+      if (sec.pump) for (const k of ["ssL", "ssR", "pad", "arp", "bass"]) {
+        const b = bufs[k];
+        if (!b || "bass" === k && 2 !== sec.pump) continue;
+        const beat = spb * sr, off = 0.02 * sr, depth = 0.72, rel = 0.42 * beat;
+        for (let i = 0; i < b.length; i++) {
+          const ph = (i - off) % beat;
+          if (ph >= 0 && ph < rel) {
+            const x = 1 - ph / rel;
+            b[i] *= 1 - depth * x * x;
+          }
+        }
+      }
       return { N, bufs };
     }
-    return { synthSection, abcParse };
+    const leadKind = (song, sec) => sec.lk || (sec.synth ? "square" : song.lk || "gtr");
+    return { synthSection, abcParse, leadKind };
   }
   function mkMix(ctx, spb) {
     const out = ctx.createGain();
@@ -14494,6 +14833,7 @@ varying vec3 vFgWN;
       musicJobs.set(id, res), w.postMessage({ id, song: data, si, sr });
     }).then((r) => r || inline());
   }
+  var musicLeadKind = (song, sec) => sec.lk || (sec.synth ? "square" : song.lk || "gtr");
   async function renderSection(song, si, sr) {
     const { N, bufs } = await musicSynth(song, si, sr);
     const sec = song.form[si], clean = "clean" === (sec.g || null), stk = sec.stk || song.stabKind || "brass";
@@ -14506,10 +14846,6 @@ varying vec3 vFgWN;
     bufs.gL && src([bufs.gL, bufs.gR], guitarAmp(ctx, ch.gtr, clean ? 0.9 : 0.55, clean));
     bufs.bass && src([bufs.bass], ch.bass);
     bufs.drums && src([bufs.drums], drumBus);
-    bufs.pad && (() => {
-      const lp = ctx.createBiquadFilter();
-      lp.type = "lowpass", lp.frequency.value = 1400, lp.connect(ch.pad), src([bufs.pad], lp);
-    })();
     if (bufs.stab) {
       if ("choir" === stk) {
         const pre = ctx.createGain();
@@ -14522,10 +14858,25 @@ varying vec3 vFgWN;
         src([bufs.stab], pre);
       } else src([bufs.stab], ch.stab);
     }
-    if (bufs.lead) {
+    const secLen = sec.bars * 4 * 60 / song.bpm, swp = (dest, def) => {
+      const sw = sec.sweep || (def ? [def, def] : null);
+      if (!sw) return dest;
       const lp = ctx.createBiquadFilter();
-      lp.type = "lowpass", lp.frequency.value = sec.synth ? 2600 : 4200, lp.Q.value = sec.synth ? 3 : 0.7, lp.connect(ch.lead);
-      if (sec.synth) src([bufs.lead], lp);
+      lp.type = "lowpass", lp.Q.value = 1.2, lp.frequency.setValueAtTime(sw[0], 0), lp.frequency.exponentialRampToValueAtTime(sw[1], secLen), lp.connect(dest);
+      return lp;
+    };
+    bufs.arp && src([bufs.arp], swp(chan(ctx, M, 0.5, 0.12, 0.3, 0.38)));
+    bufs.fx && src([bufs.fx], chan(ctx, M, 0.5, 0, 0.5));
+    bufs.pad && (() => {
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass", lp.frequency.value = 1400, lp.connect(swp(ch.pad)), src([bufs.pad], lp);
+    })();
+    bufs.ssL && src([bufs.ssL, bufs.ssR], swp(chan(ctx, M, 0.42, 0, 0.3, 0.12), 7e3));
+    if (bufs.lead) {
+      const lk = musicLeadKind(song, sec), synth = "gtr" !== lk;
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass", lp.frequency.value = "saw" === lk ? 5200 : synth ? 2600 : 4200, lp.Q.value = "square" === lk ? 3 : 0.7, lp.connect(ch.lead);
+      if (synth) src([bufs.lead], lp);
       else {
         const pg = ctx.createGain(), sh = ctx.createWaveShaper();
         pg.gain.value = 1.4, sh.curve = drive(6), sh.oversample = "2x", pg.connect(sh), sh.connect(lp), src([bufs.lead], pg);
@@ -14548,12 +14899,58 @@ varying vec3 vFgWN;
       return "calm";
     }
   }
+  var MUSIC_STYLE_NAMES = { rock: "Rock", synthrock: "Synth Rock", edm: "EDM", synthpop: "Synthpop" };
+  var MUSIC_STYLE_KEYS = Object.keys(MUSIC_STYLE_NAMES);
+  var FACTION_STYLE_W = {
+    allied: { synthrock: 3, edm: 2.2, rock: 1, synthpop: 0.5 },
+    soviet: { rock: 4, synthrock: 0.8, edm: 0.3, synthpop: 0.2 },
+    yuri: { synthpop: 3, edm: 3, synthrock: 0.6, rock: 0.4 }
+  };
+  var musicStyleOf = (i) => MUSIC_TRACKS[i] && MUSIC_TRACKS[i].style || "rock";
+  function musicPlayerFac() {
+    try {
+      return S.players[0].fac;
+    } catch (e) {
+      return null;
+    }
+  }
+  var musicRecent = [];
   function pickNextTrack(prev) {
-    const total = totalTrackCount();
     if (trackSel >= 0) return trackSel;
-    const mood = musicMood(), pool = MUSIC_TRACKS.map((t, i) => i).filter((i) => MUSIC_TRACKS[i].mood === mood && i !== prev);
-    if (CUSTOM_MUSIC.length && Math.random() < CUSTOM_MUSIC.length / total) return MUSIC_TRACKS.length + Math.floor(Math.random() * CUSTOM_MUSIC.length);
-    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : Math.floor(Math.random() * MUSIC_TRACKS.length);
+    const total = totalTrackCount(), style = trackSel <= -3 ? MUSIC_STYLE_KEYS[-3 - trackSel] : null;
+    if (!style && CUSTOM_MUSIC.length && Math.random() < CUSTOM_MUSIC.length / total) return MUSIC_TRACKS.length + Math.floor(Math.random() * CUSTOM_MUSIC.length);
+    const mood = musicMood(), fac = musicPlayerFac(), W = -1 === trackSel && fac ? FACTION_STYLE_W[fac] : null;
+    const w = MUSIC_TRACKS.map((t, i) => {
+      const st = musicStyleOf(i);
+      if (style && st !== style) return 0;
+      let x = W ? (W[st] ?? 0.5) * (t.fac === fac ? 2 : 1) : 1;
+      x *= t.mood === mood ? 3 : 1;
+      i === prev && (x *= 0.02), musicRecent.includes(i) && (x *= 0.2);
+      return x;
+    });
+    let sum = w.reduce((a, b) => a + b, 0), r = Math.random() * sum;
+    if (sum <= 0) return Math.floor(Math.random() * MUSIC_TRACKS.length);
+    for (let i = 0; i < w.length; i++) if ((r -= w[i]) <= 0) return musicRecent.unshift(i), musicRecent.length = Math.min(musicRecent.length, 4), i;
+    return w.length - 1;
+  }
+  function musicStyleSwitch() {
+    const style = MUSIC_STYLE_KEYS[-3 - trackSel], cur = musicNowIdx();
+    (cur < 0 || musicStyleOf(cur) !== style) && playAnyTrack(pickNextTrack(cur));
+  }
+  function musicNowIdx() {
+    if (customTrackEl) return MUSIC_TRACKS.length + customTrackIdx;
+    const t = AC ? AC.currentTime : 0, s = (musicState.srcs || []).find((x) => x.start <= t && x.end - 2.4 > t);
+    return s ? s.idx : musicState.cur;
+  }
+  function musicNowPlaying() {
+    const i = musicNowIdx();
+    return i >= 0 && musicOn ? trackName(i) : "";
+  }
+  function musicModeOptions() {
+    return ['<option value="-1">Auto (faction mix)</option>', '<option value="-2">Shuffle all</option>'].concat(MUSIC_STYLE_KEYS.map((k, i) => '<option value="' + (-3 - i) + '">Style: ' + MUSIC_STYLE_NAMES[k] + "</option>"));
+  }
+  function musicTrackLabel(i) {
+    return MUSIC_TRACKS[i].name + " \xB7 " + MUSIC_STYLE_NAMES[musicStyleOf(i)];
   }
   function startMusic() {
     const ac = audio();
@@ -14594,7 +14991,7 @@ varying vec3 vFgWN;
             } catch (e) {
             }
           };
-          musicState.srcs = (musicState.srcs || []).filter((s) => s.end > ac.currentTime), musicState.srcs.push({ src, g, end: when + buf.duration });
+          musicState.srcs = (musicState.srcs || []).filter((s) => s.end > ac.currentTime), musicState.srcs.push({ src, g, idx, start: when, end: when + buf.duration });
           when += l;
         }
         await sleep((when - ac.currentTime - MUSIC_AHEAD) * 1e3);
@@ -14615,7 +15012,7 @@ varying vec3 vFgWN;
       }
       musicState.srcs = [], run(i, ++musicGen, ac.currentTime + 0.15, true);
     };
-    playAnyTrack(trackSel >= 0 ? trackSel : pickNextTrack(-1));
+    setTimeout(() => playAnyTrack(trackSel >= 0 ? trackSel : pickNextTrack(-1)), 0);
   }
   function musicSongABC(idx) {
     const s = MUSIC_TRACKS[idx];
@@ -14711,7 +15108,12 @@ varying vec3 vFgWN;
     announceHint,
     audioTap,
     musicRenderSection: renderSection,
-    musicSongABC
+    musicStems: musicSynth,
+    musicSongABC,
+    musicModeOptions,
+    musicTrackLabel,
+    musicNowPlaying,
+    pickNextTrack
   });
   Object.defineProperties(window, {
     lightningT: { get: () => lightningT, set: (v) => {
@@ -15529,12 +15931,12 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           S.running = true, openMenu(null);
         }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => S.mission ? S.mission.tutorial ? launchTutorial() : launchMission(S.mission.fac, S.mission.idx) : location.reload());
       } else if ("settings" === e) {
-        const trackOpts = ['<option value="-1">Auto (Shuffle)</option>'].concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + e2.name + "</option>")).concat(CUSTOM_MUSIC.map((e2, t2) => '<option value="' + (MUSIC_TRACKS.length + t2) + '">' + e2.name + " (custom)</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
+        const trackOpts = musicModeOptions().concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + musicTrackLabel(t2) + "</option>")).concat(CUSTOM_MUSIC.map((e2, t2) => '<option value="' + (MUSIC_TRACKS.length + t2) + '">' + e2.name + " (custom)</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
         const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
         const kbRow = (action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>";
         const kbRows = Object.keys(KEYBINDS).filter((a) => !BUILD_HOTKEY_ACTIONS.includes(a)).map(kbRow).join(""), buildKbRows = BUILD_HOTKEY_ACTIONS.map(kbRow).join("");
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music Track</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music' + (musicNowPlaying() ? ' <span style="color:#9db4cc">\xB7 now playing: ' + musicNowPlaying() + "</span>" : "") + '</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
