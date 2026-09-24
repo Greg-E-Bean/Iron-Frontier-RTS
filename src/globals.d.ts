@@ -638,7 +638,15 @@ declare global {
   function setRainAmbience(on: boolean): void;
   function startFpsAmbience(): void;
   function stopFpsAmbience(): void;
-  function startMusic(): void;
+  function startMusic(first?: number): void;
+  function musicPlay(i: number): void;
+  function musicStop(): void;
+  function musicIsOn(): boolean;
+  function musicNowIdx(): number;
+  function musicTrackInfo(i: number): { name: string; style: string; mood: string; fac: string; secs: number } | null;
+  function mapTileRGB(i: number): number[];
+  function showMusicMenu(): void;
+  function showMainSettings(): void;
   const MUSIC_TRACKS: { name: string; [k: string]: any }[];
   function musicModeOptions(): string[];
   function musicTrackLabel(i: number): string;

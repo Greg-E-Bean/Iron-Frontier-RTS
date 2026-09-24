@@ -776,7 +776,7 @@ function musicModeOptions() {
   return ['<option value="-1">Auto (faction mix)</option>', '<option value="-2">Shuffle all</option>'].concat(MUSIC_STYLE_KEYS.map((k, i) => '<option value="' + (-3 - i) + '">Style: ' + MUSIC_STYLE_NAMES[k] + "</option>"));
 }
 function musicTrackLabel(i: number) { return MUSIC_TRACKS[i].name + " · " + MUSIC_STYLE_NAMES[musicStyleOf(i)]; }
-function startMusic() {
+function startMusic(first?: number) {
   const ac = audio();
   if (!ac || musicOn || !MUSIC_TRACKS.length) return;
   musicOn = true;
@@ -824,8 +824,21 @@ function startMusic() {
     musicState.srcs = [], run(i, ++musicGen, ac.currentTime + .15, !0);
   };
   // pick on the next tick: startGame calls this before the players exist
-  setTimeout(() => playAnyTrack(trackSel >= 0 ? trackSel : pickNextTrack(-1)), 0);
+  setTimeout(() => playAnyTrack(first != null ? first : trackSel >= 0 ? trackSel : pickNextTrack(-1)), 0);
 }
+// Jukebox controls (launch menu): play a chosen track now, or stop the music.
+function musicPlay(i: number) { if (!audio()) return; musicOn ? playAnyTrack(i) : startMusic(i); }
+function musicStop() {
+  if (!musicOn) return;
+  musicGen++, stopCustomTrack();
+  const now = AC ? AC.currentTime : 0;
+  for (const s of musicState.srcs || []) { try { s.g.gain.cancelScheduledValues(now), s.g.gain.setValueAtTime(s.g.gain.value, now), s.g.gain.linearRampToValueAtTime(0, now + .5), s.src.stop(now + .6); } catch (e) { } }
+  musicState.srcs = [], musicState.cur = -1, musicOn = !1;
+  const mg = musicBus; musicBus = null, playTrackRef = null;
+  setTimeout(() => { try { mg && mg.disconnect(); } catch (e) { } }, 900);
+}
+const musicIsOn = () => musicOn;
+function musicTrackInfo(i: number) { const s = MUSIC_TRACKS[i]; return s ? { name: s.name, style: MUSIC_STYLE_NAMES[musicStyleOf(i)], mood: s.mood, fac: s.fac || "", secs: Math.round(s.form.reduce((a: number, f: any) => a + f.bars * 240 / s.bpm, 0)) } : null; }
 function musicSongABC(idx: number) { const s = MUSIC_TRACKS[idx]; return s ? s.parts : null; }
 
 const ADMIN_MUSIC_KEY="ifr_admin_music";function loadAdminMusic(){try{return JSON.parse(localStorage.getItem(ADMIN_MUSIC_KEY)||"[]")}catch(e){return[]}}function saveAdminMusic(list){try{localStorage.setItem(ADMIN_MUSIC_KEY,JSON.stringify(list));return!0}catch(e){return!1}}let CUSTOM_MUSIC=loadAdminMusic();function refreshCustomMusic(){CUSTOM_MUSIC=loadAdminMusic()}function totalTrackCount(){return MUSIC_TRACKS.length+CUSTOM_MUSIC.length}function trackName(i){return i<MUSIC_TRACKS.length?MUSIC_TRACKS[i].name:(CUSTOM_MUSIC[i-MUSIC_TRACKS.length]?CUSTOM_MUSIC[i-MUSIC_TRACKS.length].name:"?")}let customTrackEl=null,customTrackIdx=-1;function stopCustomTrack(){if(customTrackEl){try{customTrackEl.pause()}catch(e){}customTrackEl=null,customTrackIdx=-1}}function playCustomTrack(i){const t=CUSTOM_MUSIC[i];if(!t){trackSel=-1;try{localStorage.setItem("ifr_track","-1")}catch(e){}const total=totalTrackCount();return void(total>0&&playAnyTrack(Math.floor(Math.random()*total)))}stopCustomTrack(),musicOn=!0;const el=new Audio(t.dataUrl);el.volume=muted?0:masterVol*musicVol,customTrackEl=el,customTrackIdx=i,el.onended=()=>{if(customTrackIdx!==i)return;if(trackSel>=0)el.currentTime=0,el.play().catch(()=>{});else{const total=totalTrackCount();total>0&&playAnyTrack(Math.floor(Math.random()*total))}},el.play().catch(()=>{})}function playAnyTrack(idx){idx<MUSIC_TRACKS.length?(stopCustomTrack(),playTrackRef&&playTrackRef(idx)):(musicGen++,playCustomTrack(idx-MUSIC_TRACKS.length))}
@@ -836,7 +849,7 @@ Object.assign(window, {
   setTrackSel, setRainAmbience, startFpsAmbience, stopFpsAmbience, startMusic, MUSIC_TRACKS,
   loadAdminMusic, saveAdminMusic, refreshCustomMusic, totalTrackCount, trackName,
   playVoiceLine, setVoicesEnabled, announce, announceHint, audioTap, musicRenderSection: renderSection, musicStems: musicSynth, musicSongABC,
-  musicModeOptions, musicTrackLabel, musicNowPlaying, pickNextTrack,
+  musicModeOptions, musicTrackLabel, musicNowPlaying, pickNextTrack, musicPlay, musicStop, musicIsOn, musicNowIdx, musicTrackInfo,
 });
 
 Object.defineProperties(window, {
