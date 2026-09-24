@@ -402,6 +402,7 @@ function fgFx(on: boolean) {
     if (p.dead || 2 !== visAt(p.x, p.y) || !near(p.x, p.y)) continue;
     const z = gz(p.x, p.y) + (p.z || 0), c = Math.cos(p.ang), s = Math.sin(p.ang);
     if ("bullet" === p.kind) beam(p.x - 11 * c, p.y - 11 * s, z, p.x, p.y, z, .3, "#ffd27a", .95), beam(p.x - 5 * c, p.y - 5 * s, z, p.x, p.y, z, .9, "#ff9a40", .35);
+    else if ("shell" === p.kind && p.fire) beam(p.x - 26 * c, p.y - 26 * s, z, p.x, p.y, z, 3, "#ff7a20", .8), spr(p.x, p.y, z, 7 + Math.sin(60 * S.time) * 1.5, T.glow, "#ffb040", 1, !0), spr(p.x, p.y, z, 3.5, T.glow, "#fff6d0", 1, !0);
     else if ("shell" === p.kind) beam(p.x - 22 * c, p.y - 22 * s, z, p.x, p.y, z, 1, "#ffd890", .85), spr(p.x, p.y, z, 3.4, T.glow, "#fff0c0", .9, !0);
     else if ("flak" === p.kind) spr(p.x, p.y, z, 3, T.glow, "#ffcf6a", .95, !0);
     else if ("flame" === p.kind) spr(p.x, p.y, z, 7 + 3 * Math.sin(p.x), T.smoke, "#ff9a3c", .85, !0, p.x), spr(p.x, p.y, z, 4, T.glow, "#fff0a0", .8, !0);
@@ -1073,7 +1074,7 @@ function fgPruneGroups() {
 
 // ============================================================ COCKPITS
 function fpsBuildCockpit(e: any) {
-  const V = fgVM(), root = new THREE.Group(), fac = hdFac(e), pal = palette(e.owner), fly = !!e.d.fly, naval = !!e.d.naval, walker = /titan|bastion/.test(e.key);
+  const V = fgVM(), root = new THREE.Group(), fac = hdFac(e), pal = palette(e.owner), fly = !!e.d.fly, naval = !!e.d.naval, walker = /titan_allied|titan_yuri|bastion/.test(e.key);
   const key = "ck|" + e.key + "|" + e.owner;
   const G = (n: string, f: (a: any[]) => void) => hdObj(hdGeo(key + n, pal, f), V.mats, !1);
   const s = .05, frame = new THREE.Group();
