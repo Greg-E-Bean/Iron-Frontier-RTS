@@ -400,6 +400,13 @@ function musicDSP() {
     popdrive: { K: "x...x...x...x...", S: "....X.......X...", h: "xxxxxxxxxxxxxxxx" },
     // march / anthem kits (H = gang "HEY!" shout)
     stomp: { k: "x.x.....x.x.....", p: "....X.......X..." },
+    onedrop: { k: "........x.......", s: "........X.......", h: "..x...x...x...x.", c: "....x.......x..." },
+    disco: { k: "x...x...x...x...", s: "....X.......X...", o: "..x...x...x...x.", h: "x...x...x...x..." },
+    blast: { k: "x.x.x.x.x.x.x.x.", s: ".x.x.x.x.x.x.x.x", r: "x...x...x...x..." },
+    tribal: { t: "X..x..x.X..x.xx.", k: "x.......x.......", s: "....x.......x..." },
+    funk: { k: "x..x..x...x.x...", s: "....X..f.f..X..f", h: "xxxxxxxxxxxxxxxx" },
+    shuffle: { k: "x.......x.x.....", s: "....X.......X...", h: "x.x.x.x.x.x.x.x." },
+    doom: { k: "x.......x..x....", s: "........X.......", r: "x...x...x...x..." },
     marchrock: { k: "x...x...x...x...", s: "..x...x.X.x.x.xx", h: "x.x.x.x.x.x.x.x." },
     shout: { k: "x...x...x...x...", s: "....X.......X...", h: "x.x.x.x.x.x.x.x.", H: "....x.......x..." },
     anthem: { k: "x.......x.......", s: "........X.......", H: "............x...", h: "x...x...x...x..." },
@@ -561,7 +568,9 @@ function musicDSP() {
   // Synthesise every stem of one section into sample arrays.
   function synthSection(song: any, si: number, sr: number) {
     const sec = song.form[si], spb = 60 / song.bpm, barB = 4, bars = sec.bars, N = Math.ceil((bars * barB * spb + 2.4) * sr);
-    const T = (beat: number) => beat * spb + .02, tr = sec.tr || 0;
+    // swing: pushes off-beat 8ths/16ths late for shuffle / triplet feels
+    const sw = sec.swing ?? song.swing ?? 0, SW = (b: number) => { if (!sw) return b; const bi = Math.floor(b + 1e-9), f = b - bi; return bi + (f < .5 ? f * (1 + sw / 3) : .5 + sw / 6 + (f - .5) * (1 - sw / 3)); };
+    const T = (beat: number) => SW(beat) * spb + .02, tr = sec.tr || 0, gv = sec.gv || song.gv || "power";
     // key lift for reprises: transpose every pitched part
     const A = (src: string, u: number) => { const r = abc(src, u); return tr ? { len: r.len, ev: r.ev.map((e: any) => ({ t: e.t, d: e.d, m: e.m, n: e.n.map((x: number) => x + tr) })) } : r; };
     const loopEach = (P: any, cb: (e: any, t: number) => void) => { if (!P.len) return; for (let off = 0; off < bars * barB - 1e-6; off += P.len) for (const e of P.ev) { const b = off + e.t; b < bars * barB - 1e-6 && cb(e, b); } };
@@ -571,7 +580,7 @@ function musicDSP() {
     if (sec.r && parts.riffs && parts.riffs[sec.r]) {
       const P = A(parts.riffs[sec.r], .25), oct = 12 * (song.riffOct ?? -2), L = B("gL"), R = B("gR");
       loopEach(P, (e, b) => {
-        const root = e.n[0] + oct, voic = clean ? e.n.map((n: number) => n + oct + 12) : e.n.length > 1 ? e.n.map((n: number) => n + oct) : [root, root + 7, root + 12];
+        const root = e.n[0] + oct, voic = clean ? e.n.map((n: number) => n + oct + 12) : e.n.length > 1 ? e.n.map((n: number) => n + oct) : "single" === gv ? [root, root + 12] : [root, root + 7, root + 12];
         const d = e.d * spb, mute = !!e.m || "mute" === gm;
         gtrNote(L, sr, T(b), voic, d, mute, 1, clean, 5), gtrNote(R, sr, T(b) + .006, voic, d, mute, .95, clean, -6);
         !1 !== sec.bass && !clean && bassNote(B("bass"), sr, T(b), root - 12, Math.min(d, e.m ? .18 : d), e.m ? .8 : 1);
@@ -654,16 +663,17 @@ function chan(ctx: any, M: any, g: number, pan: number, verb: number, delay?: nu
   return n;
 }
 // Distorted rhythm guitar bus: notes -> drive -> cabinet voicing.
-function guitarAmp(ctx: any, dest: any, gain: number, clean?: boolean) {
-  const pre = ctx.createGain(); pre.gain.value = clean ? .6 : 1.25;
+function guitarAmp(ctx: any, dest: any, gain: number, clean?: boolean, tone?: string) {
+  const cr = "crunch" === tone, fz = "fuzz" === tone;
+  const pre = ctx.createGain(); pre.gain.value = clean ? .6 : cr ? .8 : fz ? 1.5 : 1.25;
   let n: any = pre;
-  if (!clean) { const sh = ctx.createWaveShaper(); sh.curve = drive(6.5), sh.oversample = "2x", pre.connect(sh), n = sh; }
+  if (!clean) { const sh = ctx.createWaveShaper(); sh.curve = drive(cr ? 3.5 : fz ? 8 : 6.5), sh.oversample = "2x", pre.connect(sh), n = sh; }
   const hp = ctx.createBiquadFilter(); hp.type = "highpass", hp.frequency.value = clean ? 120 : 85, hp.Q.value = .7;
   const scoop = ctx.createBiquadFilter(); scoop.type = "peaking", scoop.frequency.value = 700, scoop.Q.value = .9, scoop.gain.value = clean ? 0 : -5;
   const pres = ctx.createBiquadFilter(); pres.type = "peaking", pres.frequency.value = 2600, pres.Q.value = 1, pres.gain.value = clean ? 1.5 : 2.5;
-  const lp1 = ctx.createBiquadFilter(); lp1.type = "lowpass", lp1.frequency.value = clean ? 5200 : 4300, lp1.Q.value = .6;
+  const lp1 = ctx.createBiquadFilter(); lp1.type = "lowpass", lp1.frequency.value = clean ? 5200 : fz ? 3400 : cr ? 4800 : 4300, lp1.Q.value = .6;
   const lp2 = ctx.createBiquadFilter(); lp2.type = "lowpass", lp2.frequency.value = 7800, lp2.Q.value = .5;
-  const og = ctx.createGain(); og.gain.value = gain;
+  const og = ctx.createGain(); og.gain.value = gain * (cr ? 1.35 : 1);
   n.connect(hp), hp.connect(scoop), scoop.connect(pres), pres.connect(lp1), lp1.connect(lp2), lp2.connect(og), og.connect(dest);
   return pre;
 }
@@ -693,7 +703,7 @@ async function renderSection(song: any, si: number, sr: number) {
   const ch = { gtr: chan(ctx, M, .5, 0, .06), bass: chan(ctx, M, .55, 0, 0), drums: chan(ctx, M, .85, 0, .12), lead: chan(ctx, M, .42, .08, .28, .32), stab: chan(ctx, M, .4, -.1, .35), pad: chan(ctx, M, .45, 0, .55) };
   const drumBus = ctx.createDynamicsCompressor(); drumBus.threshold.value = -12, drumBus.ratio.value = 4, drumBus.attack.value = .004, drumBus.release.value = .12, drumBus.connect(ch.drums);
   const pend: [Float32Array[], any][] = [], src = (chans: Float32Array[], dest: any) => pend.push([chans, dest]);
-  bufs.gL && src([bufs.gL, bufs.gR], guitarAmp(ctx, ch.gtr, clean ? .9 : .55, clean));
+  bufs.gL && src([bufs.gL, bufs.gR], guitarAmp(ctx, ch.gtr, clean ? .9 : .55, clean, song.gtone));
   bufs.bass && src([bufs.bass], ch.bass);
   bufs.drums && src([bufs.drums], drumBus);
 
