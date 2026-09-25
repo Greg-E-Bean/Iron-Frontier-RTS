@@ -792,6 +792,9 @@ declare global {
   function beginFpsEntry(u: Unit): void;
   function step(dt: number): void;
   const SECBTN: string;
+  function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number): void;
+  function missionDebrief(win: boolean): string;
+  function radioStop(): void;
   const RDT: number;
 
   // === abilities.js ===

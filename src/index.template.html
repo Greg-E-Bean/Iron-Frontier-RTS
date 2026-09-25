@@ -189,6 +189,62 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #tutorialPanel .tSkip{pointer-events:auto;cursor:pointer;font-size:10px;letter-spacing:.4px;padding:2px 8px;
   border-radius:4px;border:1px solid var(--amber);background:#1a140a;color:var(--amber2)}
 #tutorialPanel .tSkip:active{background:var(--amber);color:#1a140a}
+#tutorialPanel.obj{max-width:min(300px,62vw);border-color:rgb(var(--accrgb) / 55%);background:linear-gradient(160deg,rgba(18,28,34,.86),rgba(6,10,13,.9));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#tutorialPanel.obj .ts{opacity:.95;font-size:11.5px;line-height:1.35}
+#tutorialPanel.obj .ts.cur{color:#e8f0f4}
+#tutorialPanel.obj .ts.sec{color:#bcd0de;opacity:.8}
+#tutorialPanel.obj .ts.sec b{color:var(--amber2)}
+#tutorialPanel.obj .ts.done{text-decoration:none;color:#7dff8a;opacity:.7}
+#tutorialPanel.obj .ts.fail{color:#e0473a;opacity:.7;text-decoration:line-through}
+#tutorialPanel .tMin{pointer-events:auto;cursor:pointer;font-size:12px;line-height:1;padding:1px 7px;margin-left:8px;border-radius:4px;border:1px solid rgb(var(--accrgb) / 50%);background:transparent;color:var(--amber2)}
+#radioBox{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 150px);z-index:14;width:min(460px,calc(100vw - 32px));
+  display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;cursor:pointer;
+  background:linear-gradient(160deg,rgba(18,28,34,.92),rgba(6,10,13,.94));border:1px solid rgba(170,200,220,.2);
+  box-shadow:0 8px 30px #000a;animation:rbIn .3s var(--ease,ease-out)}
+@keyframes rbIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+#radioBox .rbPort{flex:0 0 40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;letter-spacing:1px;
+  color:#0a0f13;background:var(--rc);box-shadow:0 0 14px var(--rc),inset 0 0 0 2px rgba(255,255,255,.3);background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.12) 0 2px,transparent 2px 4px)}
+#radioBox .rbName{font-size:10px;font-weight:700;letter-spacing:1.5px;margin-bottom:2px}
+#radioBox .rbText{font-size:12.5px;line-height:1.4;color:#dfe8ee}
+body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 190px)}
+.campCard{display:block;width:100%;text-align:left;margin-top:10px;padding:12px 14px;border-radius:12px;cursor:pointer;color:#cfe0f5;
+  border:1px solid rgba(170,200,220,.16);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));transition:border-color .2s,transform .2s}
+.campCard:hover{border-color:rgba(240,167,44,.6);transform:translateY(-1px)}
+.campCard .ccTop{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:2px;font-weight:700}
+.campCard .ccIcon{font-size:16px}.campCard .ccProg{margin-left:auto;color:var(--dim)}
+.campCard .ccTitle{font-size:16px;margin:4px 0 2px;color:#e8f0f4;letter-spacing:1px}
+.campCard .ccTag{font-size:11px;color:var(--dim);line-height:1.45}
+.campCard .ccBar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);margin-top:9px;overflow:hidden}
+.campCard .ccBar i{display:block;height:100%;background:var(--fc,var(--amber))}
+.campCard .ccStars{font-size:10px;color:var(--amber2);margin-top:5px;letter-spacing:1px}
+.f-allied{--fc:#6fb8e0}.f-soviet{--fc:#e0674a}.f-yuri{--fc:#b27ae0}
+.campCard .ccIcon,.campCard .ccFac,h1.f-allied,h1.f-soviet,h1.f-yuri{color:var(--fc)!important}
+.mRow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin-top:6px;padding:9px 12px;border-radius:10px;cursor:pointer;
+  border:1px solid rgba(170,200,220,.14);background:rgba(255,255,255,.03);color:#cfe0f5}
+.mRow:hover:not([disabled]){border-color:rgba(240,167,44,.6)}
+.mRow.locked{opacity:.4;cursor:default}.mRow.next{border-color:rgba(240,167,44,.55);background:rgba(240,167,44,.07)}
+.mRow .mNum{flex:0 0 26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;background:rgba(255,255,255,.07)}
+.mRow.done .mNum{background:rgba(125,255,138,.15);color:#7dff8a}
+.mRow .mMain{flex:1;display:flex;flex-direction:column;min-width:0}
+.mRow .mMain b{font-size:13px;color:#e8f0f4}.mRow .mMain small{font-size:10px;color:var(--dim);letter-spacing:1px}
+.mRow .mGo{font-size:11px;color:var(--amber2);font-weight:700;letter-spacing:1px}
+.stars i{font-style:normal;color:rgba(255,255,255,.18);font-size:14px}.stars i.on{color:#ffcb62;text-shadow:0 0 8px rgba(255,203,98,.6)}
+.bHead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.bHead h1{text-align:left!important}.bHead .sub{text-align:left!important;margin-bottom:8px!important}
+.bOp{font-size:9px;letter-spacing:2px;color:var(--amber2)}
+.bMap{display:flex;justify-content:center;margin:4px 0 8px}.bMap svg{max-width:100%;height:auto;border-radius:8px}
+.bLine{display:flex;flex-direction:column;gap:1px;padding:6px 9px;margin-top:5px;border-left:2px solid rgba(170,200,220,.18);font-size:12px;line-height:1.45;color:#dfe8ee;transition:background .2s,border-color .2s}
+.bLine.on{background:rgba(240,167,44,.08);border-left-color:var(--amber)}
+.bWho{font-size:10px;font-weight:700;letter-spacing:1.4px}
+.bPlay{width:100%;margin-top:8px;padding:7px;border-radius:8px;border:1px dashed rgba(240,167,44,.55);background:transparent;color:var(--amber2);font-size:11px;letter-spacing:2px;cursor:pointer}
+.bSec{font-size:10px;letter-spacing:2px;color:var(--dim);margin:12px 0 4px}
+.bObj{display:flex;gap:7px;font-size:12px;line-height:1.4;padding:2px 0;color:#e8f0f4}
+.bObj b{color:var(--amber2);flex:0 0 12px}.bObj.sec{color:#bcd0de}
+.bObj.ok b{color:#7dff8a}.bObj.bad{opacity:.6}.bObj.bad b{color:#e0473a}
+.bFoe{display:inline-block;font-size:10px;letter-spacing:1px;padding:3px 8px;border-radius:10px;margin:2px 4px 2px 0;background:rgba(224,71,58,.14);color:#f3a397;border:1px solid rgba(224,71,58,.35)}
+.bFoe.ally{background:rgba(111,184,224,.14);color:#a8d8f0;border-color:rgba(111,184,224,.35)}
+.dBrief{margin:10px 0 4px;text-align:left}.dStars{text-align:center;margin-bottom:6px}.dStars .stars i{font-size:26px}
+
 #menu{position:fixed;inset:0;z-index:30;background:
   radial-gradient(120% 80% at 50% 0%,#14201c 0%,#070a0b 60%),#070a0b;display:flex;align-items:center;
   align-items:safe center;
@@ -732,6 +788,7 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
 </div>
 <div id="superPanel" class="hidden"></div>
 <div id="tutorialPanel" class="hidden"></div>
+<div id="radioBox" class="hidden"></div>
 
 <div id="mmWrap" class="hidden"><canvas id="minimap"></canvas></div>
 
