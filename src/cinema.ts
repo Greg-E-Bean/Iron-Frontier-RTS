@@ -142,7 +142,8 @@ portrait(g,W,H,t,T,p){const c=castOf(p.who),col=c.c||"#8fd0ff",m=Math.min(W,H);s
 // war-room bokeh
 const R=mulb(p.who.length*31+3);for(let i=0;i<22;i++)glow(g,W*R(),H*R()*.9,m*(.03+.07*R()),R()<.5?col:"#3c5a6a",.18+.1*Math.sin(T+i));
 g.strokeStyle=rgba(col,.08);for(let i=0;i<12;i++){const y=H*i/12;g.beginPath(),g.moveTo(0,y),g.lineTo(W,y),g.stroke()}
-drawBust(g,W,H,t,T,p.who,p.side);
+{const talk=F&&F.talk?Math.max(0,.55*Math.sin(T*12.7)+.35*Math.sin(T*7.9+1)+.25*Math.sin(T*19.3)):0;F&&(F.jaw=lerp(F.jaw||0,talk,.35));const med=fmvMedia(p.who);if(med){const vw=med.videoWidth||med.naturalWidth||0,vh=med.videoHeight||med.naturalHeight||0;if(vw){const k=Math.max(W/vw,H/vh);g.drawImage(med,(W-vw*k)/2,(H-vh*k)/2,vw*k,vh*k)}}else{const acv="function"==typeof renderActor?renderActor(p.who,T,F?F.jaw:0,p.side==="r"?-1:1,parseInt((c.c||"#8fd0ff").slice(1),16)):null;
+if(acv){const dh=H*1.02,dw=dh*acv.width/acv.height;g.drawImage(acv,W*(p.side==="r"?.64:.36)-dw/2,H*.04,dw,dh)}else drawBust(g,W,H,t,T,p.who,p.side)}}
 // lower third
 const lx=W*(p.side==="r"?.06:.56),ly=H*.62;g.fillStyle="rgba(0,0,0,.45)",g.fillRect(lx,ly,W*.36,m*.13);g.fillStyle=col,g.fillRect(lx,ly,m*.008,m*.13);g.font="700 "+Math.round(m*.04)+"px sans-serif",g.fillStyle="#eef4f8",g.fillText(c.n.toUpperCase(),lx+m*.03,ly+m*.055);g.font="600 "+Math.round(m*.024)+"px monospace",g.fillStyle=rgba(col,.9),g.fillText((c.role||FAC_NAME[c.fac]||"").toUpperCase(),lx+m*.03,ly+m*.1);
 for(let i=0;i<24;i++){const a=Math.abs(Math.sin(T*9+i*1.7)*Math.sin(T*3.3+i))*m*.04*(p.quiet?.2:1);g.fillStyle=rgba(col,.7),g.fillRect(lx+m*.03+i*m*.012,ly+m*.17-a,m*.007,a+2)}},
@@ -241,6 +242,10 @@ else if("helmet"===L.hat){const hg2=g.createRadialGradient(-.1*s,-.6*s,.05*s,0,-
 else if("hood"===L.hat){const hd=g.createLinearGradient(0,-.8*s,0,.6*s);hd.addColorStop(0,"#241630"),hd.addColorStop(1,"#0a060e"),g.fillStyle=hd,g.beginPath(),g.moveTo(-.62*s,.8*s),g.bezierCurveTo(-.7*s,-.6*s,-.35*s,-.88*s,0,-.86*s),g.bezierCurveTo(.35*s,-.88*s,.7*s,-.6*s,.62*s,.8*s),g.lineTo(.4*s,.6*s),g.bezierCurveTo(.5*s,-.1*s,.38*s,-.55*s,0,-.58*s),g.bezierCurveTo(-.38*s,-.55*s,-.5*s,-.1*s,-.4*s,.6*s),g.closePath(),g.fill();g.strokeStyle=rgba(col,.4),g.lineWidth=s*.01,g.beginPath(),g.moveTo(-.4*s,.6*s),g.bezierCurveTo(-.5*s,-.1*s,-.38*s,-.55*s,0,-.58*s),g.bezierCurveTo(.38*s,-.55*s,.5*s,-.1*s,.4*s,.6*s),g.stroke()}
 g.restore()}
 
+// Real footage can replace any character: map a cast id to a video or image
+// file (e.g. reyes:"fmv/reyes.mp4") and its portrait shots play that instead.
+const FMV_MEDIA={},_fmvEl={};
+function fmvMedia(who){const src=FMV_MEDIA[who];if(!src)return null;let el=_fmvEl[who];if(!el){el=_fmvEl[who]=/\.(mp4|webm|mov)$/i.test(src)?Object.assign(document.createElement("video"),{src,muted:!0,loop:!0,playsInline:!0,autoplay:!0}):Object.assign(new Image(),{src});el.play&&el.play().catch(()=>{})}return el}
 // ---- the films ----
 const N="narr";
 const FILMS={
@@ -344,7 +349,7 @@ post(g,W,H,t,sh,D);requestAnimationFrame(filmFrame)}
 function post(g,W,H,t,sh,D){const m=Math.min(W,H);
 // soft bloom: a blurred, downscaled copy screened back over the frame
 F.bl||(F.bl=document.createElement("canvas"));const bw=Math.max(8,W>>3),bh=Math.max(8,H>>3);F.bl.width!==bw&&(F.bl.width=bw,F.bl.height=bh);const bc=F.bl.getContext("2d");bc.globalCompositeOperation="copy",bc.drawImage(g.canvas,0,0,bw,bh),g.save(),g.globalCompositeOperation="screen",g.globalAlpha=.32,g.imageSmoothingEnabled=!0,g.drawImage(F.bl,0,0,W,H),g.restore();
-if(sh.rec){g.save(),g.globalCompositeOperation="saturation",g.fillStyle="rgba(128,128,128,.7)",g.fillRect(0,0,W,H),g.restore();g.fillStyle="rgba(255,255,255,.04)";for(let y=(F.T*60)%4;y<H;y+=4)g.fillRect(0,y,W,1);const by=(F.T*.3%1)*H;g.fillStyle="rgba(255,255,255,.06)",g.fillRect(0,by,W,m*.02);g.font="700 "+Math.round(m*.03)+"px monospace",g.fillStyle="#ff4040",Math.sin(F.T*5)>0&&g.fillText("● REC",W*.06,H*.2),g.fillStyle="rgba(240,240,240,.85)",g.fillText(sh.rec,W*.06,H*.2+m*.045)}
+"portrait"===sh.s&&(g.fillStyle="rgba(0,0,0,.09)",(()=>{for(let y=0;y<H;y+=3)g.fillRect(0,y,W,1)})(),g.fillStyle=rgba((castOf(sh.p.who).c||"#8fd0ff"),.05),g.fillRect(0,0,W,H));if(sh.rec){g.save(),g.globalCompositeOperation="saturation",g.fillStyle="rgba(128,128,128,.7)",g.fillRect(0,0,W,H),g.restore();g.fillStyle="rgba(255,255,255,.04)";for(let y=(F.T*60)%4;y<H;y+=4)g.fillRect(0,y,W,1);const by=(F.T*.3%1)*H;g.fillStyle="rgba(255,255,255,.06)",g.fillRect(0,by,W,m*.02);g.font="700 "+Math.round(m*.03)+"px monospace",g.fillStyle="#ff4040",Math.sin(F.T*5)>0&&g.fillText("● REC",W*.06,H*.2),g.fillStyle="rgba(240,240,240,.85)",g.fillText(sh.rec,W*.06,H*.2+m*.045)}
 if(Math.random()<.02){const y=Math.random()*H,h=m*.03;g.drawImage(g.canvas,0,y,W,h,(Math.random()-.5)*m*.03,y,W,h)}
 if(!F.grain){const c=document.createElement("canvas");c.width=c.height=128;const cg=c.getContext("2d"),im=cg.createImageData(128,128);for(let i=0;i<im.data.length;i+=4){const v=Math.random()*255;im.data[i]=im.data[i+1]=im.data[i+2]=v,im.data[i+3]=22}cg.putImageData(im,0,0),F.grain=g.createPattern(c,"repeat")}
 g.save(),g.translate(Math.random()*128,Math.random()*128),g.fillStyle=F.grain,g.fillRect(-128,-128,W+256,H+256),g.restore();
@@ -352,4 +357,4 @@ const vg=g.createRadialGradient(W/2,H/2,m*.35,W/2,H/2,Math.hypot(W,H)*.55);vg.ad
 const fi=sat(F.st/.45),fo=sat((D-F.st)/.35),a=1-Math.min(fi,fo);a>0&&(g.fillStyle="rgba(0,0,0,"+a+")",g.fillRect(0,0,W,H))}
 addEventListener("keydown",e=>{F&&("Escape"===e.key?endFilm():" "===e.key&&(F.st=1e3))});
 
-Object.assign(window,{playFilm,endFilm,FILMS,filmSeen});
+Object.assign(window,{playFilm,endFilm,FILMS,filmSeen,FMV_MEDIA});
