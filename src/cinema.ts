@@ -142,7 +142,7 @@ portrait(g,W,H,t,T,p){const c=castOf(p.who),col=c.c||"#8fd0ff",m=Math.min(W,H);s
 // war-room bokeh
 const R=mulb(p.who.length*31+3);for(let i=0;i<22;i++)glow(g,W*R(),H*R()*.9,m*(.03+.07*R()),R()<.5?col:"#3c5a6a",.18+.1*Math.sin(T+i));
 g.strokeStyle=rgba(col,.08);for(let i=0;i<12;i++){const y=H*i/12;g.beginPath(),g.moveTo(0,y),g.lineTo(W,y),g.stroke()}
-{const talk=F&&F.talk?Math.max(0,.55*Math.sin(T*12.7)+.35*Math.sin(T*7.9+1)+.25*Math.sin(T*19.3)):0;F&&(F.jaw=lerp(F.jaw||0,talk,.35));const med=fmvMedia(p.who);if(med){const vw=med.videoWidth||med.naturalWidth||0,vh=med.videoHeight||med.naturalHeight||0;if(vw){const k=Math.max(W/vw,H/vh);g.drawImage(med,(W-vw*k)/2,(H-vh*k)/2,vw*k,vh*k)}}else{const acv="function"==typeof renderActor?renderActor(p.who,T,F?F.jaw:0,p.side==="r"?-1:1,parseInt((c.c||"#8fd0ff").slice(1),16)):null;
+{const talk=F&&F.talk?Math.max(0,.55*Math.sin(T*12.7)+.35*Math.sin(T*7.9+1)+.25*Math.sin(T*19.3)):0;F&&(F.jaw=lerp(F.jaw||0,talk,.35));const med=fmvMedia(p.who);if(med)drawMedia(g,W,H,med,t,p.side);else{const acv="function"==typeof renderActor?renderActor(p.who,T,F?F.jaw:0,p.side==="r"?-1:1,parseInt((c.c||"#8fd0ff").slice(1),16)):null;
 if(acv){const dh=H*1.02,dw=dh*acv.width/acv.height;g.drawImage(acv,W*(p.side==="r"?.64:.36)-dw/2,H*.04,dw,dh)}else drawBust(g,W,H,t,T,p.who,p.side)}}
 // lower third
 const lx=W*(p.side==="r"?.06:.56),ly=H*.62;g.fillStyle="rgba(0,0,0,.45)",g.fillRect(lx,ly,W*.36,m*.13);g.fillStyle=col,g.fillRect(lx,ly,m*.008,m*.13);g.font="700 "+Math.round(m*.04)+"px sans-serif",g.fillStyle="#eef4f8",g.fillText(c.n.toUpperCase(),lx+m*.03,ly+m*.055);g.font="600 "+Math.round(m*.024)+"px monospace",g.fillStyle=rgba(col,.9),g.fillText((c.role||FAC_NAME[c.fac]||"").toUpperCase(),lx+m*.03,ly+m*.1);
@@ -242,10 +242,19 @@ else if("helmet"===L.hat){const hg2=g.createRadialGradient(-.1*s,-.6*s,.05*s,0,-
 else if("hood"===L.hat){const hd=g.createLinearGradient(0,-.8*s,0,.6*s);hd.addColorStop(0,"#241630"),hd.addColorStop(1,"#0a060e"),g.fillStyle=hd,g.beginPath(),g.moveTo(-.62*s,.8*s),g.bezierCurveTo(-.7*s,-.6*s,-.35*s,-.88*s,0,-.86*s),g.bezierCurveTo(.35*s,-.88*s,.7*s,-.6*s,.62*s,.8*s),g.lineTo(.4*s,.6*s),g.bezierCurveTo(.5*s,-.1*s,.38*s,-.55*s,0,-.58*s),g.bezierCurveTo(-.38*s,-.55*s,-.5*s,-.1*s,-.4*s,.6*s),g.closePath(),g.fill();g.strokeStyle=rgba(col,.4),g.lineWidth=s*.01,g.beginPath(),g.moveTo(-.4*s,.6*s),g.bezierCurveTo(-.5*s,-.1*s,-.38*s,-.55*s,0,-.58*s),g.bezierCurveTo(.38*s,-.55*s,.5*s,-.1*s,.4*s,.6*s),g.stroke()}
 g.restore()}
 
-// Real footage can replace any character: map a cast id to a video or image
-// file (e.g. reyes:"fmv/reyes.mp4") and its portrait shots play that instead.
-const FMV_MEDIA={},_fmvEl={};
-function fmvMedia(who){const src=FMV_MEDIA[who];if(!src)return null;let el=_fmvEl[who];if(!el){el=_fmvEl[who]=/\.(mp4|webm|mov)$/i.test(src)?Object.assign(document.createElement("video"),{src,muted:!0,loop:!0,playsInline:!0,autoplay:!0}):Object.assign(new Image(),{src});el.play&&el.play().catch(()=>{})}return el}
+// ---- real footage -----------------------------------------------------------
+// Drop photos or video clips into an fmv/ folder next to index.html and they
+// replace the drawn artwork automatically:
+//   fmv/<character>.jpg|png|webp|mp4|webm   e.g. fmv/reyes.jpg — every close-up of her
+//   fmv/<film>_<shot>.jpg|...               e.g. fmv/prologue_05.mp4 — that whole shot
+// Stills get a slow push-in; clips loop muted under the voiced line.
+// FMV_MEDIA can also map a key to any URL explicitly.
+const FMV_MEDIA={},_media={},FMV_EXT=["mp4","webm","jpg","png","webp"];
+function probeMedia(key){if(_media[key])return _media[key];const rec=_media[key]={el:null};const list=FMV_MEDIA[key]?[FMV_MEDIA[key]]:FMV_EXT.map(e=>"fmv/"+key+"."+e);let i=0;
+const next=()=>{if(i>=list.length)return;const src=list[i++];if(/\.(mp4|webm|mov)$/i.test(src)){const v=document.createElement("video");v.muted=!0,v.loop=!0,v.playsInline=!0,v.preload="auto",v.oncanplay=()=>{rec.el||(rec.el=v,v.play().catch(()=>{}))},v.onerror=next,v.src=src}else{const im=new Image;im.onload=()=>{rec.el=im},im.onerror=next,im.src=src}};next();return rec}
+function fmvMedia(key){const r=_media[key];return r&&r.el||null}
+function drawMedia(g,W,H,el,t,side){const vw=el.videoWidth||el.naturalWidth||0,vh=el.videoHeight||el.naturalHeight||0;if(!vw)return!1;el.paused&&el.play&&el.play().catch(()=>{});const k=Math.max(W/vw,H/vh)*(1.03+.05*t),dx=(side==="r"?-1:1)*W*.012*t;g.fillStyle="#000",g.fillRect(0,0,W,H),g.drawImage(el,(W-vw*k)/2+dx,(H-vh*k)/2-H*.01*t,vw*k,vh*k);return!0}
+const shotKey=(k,i)=>k+"_"+String(i).padStart(2,"0");
 // ---- the films ----
 const N="narr";
 const FILMS={
@@ -336,7 +345,7 @@ function shotDur(sh){return Math.max(sh.d||0,sh.say?lineDur(sh.say[1])+.8:4)}
 function ensureCine(){let el=$("#cine");if(el)return el;el=document.createElement("div"),el.id="cine",el.className="hidden",el.innerHTML='<canvas></canvas><div class="cBar t"></div><div class="cBar b"></div><div class="cSub"><b></b><span></span></div><div class="cTitle"></div><button class="cSkip">SKIP ›</button>',document.body.appendChild(el);
 el.querySelector(".cSkip").addEventListener("click",e=>{e.stopPropagation(),endFilm()});el.addEventListener("click",()=>{F&&(F.st=shotDur(F.film.shots[F.i]))});return el}
 function playFilm(key,done){const film=FILMS[key];if(!film)return void(done&&done());endFilm(!0);const el=ensureCine();el.classList.remove("hidden");markFilm(key);try{audio()}catch(e){}
-F={key,film,i:-1,st:0,T:0,last:performance.now(),done,el,cv:el.querySelector("canvas"),grain:null};el.querySelector(".cTitle").textContent=film.title.toUpperCase();try{cineMood(film.mood||"tense")}catch(e){}nextShot(),requestAnimationFrame(filmFrame)}
+film.shots.forEach((sh,i)=>{probeMedia(shotKey(key,i)),"portrait"===sh.s&&sh.p&&probeMedia(sh.p.who)});F={key,film,i:-1,st:0,T:0,last:performance.now(),done,el,cv:el.querySelector("canvas"),grain:null};el.querySelector(".cTitle").textContent=film.title.toUpperCase();try{cineMood(film.mood||"tense")}catch(e){}nextShot(),requestAnimationFrame(filmFrame)}
 function endFilm(silent){if(!F)return;const f=F;F=null;f.el.classList.add("hidden");try{speakStop(),cineStop()}catch(e){}silent||f.done&&f.done()}
 function nextShot(){F.i++;if(F.i>=F.film.shots.length)return endFilm();const sh=F.film.shots[F.i];F.st=0,F.fxDone={};const sub=F.el.querySelector(".cSub");
 if(sh.say){const c=castOf(sh.say[0]);sub.querySelector("b").textContent="narr"===sh.say[0]||"portrait"===sh.s?"":c.n.toUpperCase(),sub.querySelector("b").style.color=c.c,sub.querySelector("span").textContent=sh.say[1],sub.classList.add("on");try{speakAs(c.fac,sh.say[1],c.acc,c.g,c.p,c.r,"narr"===sh.say[0])}catch(e){}}else sub.classList.remove("on");
@@ -344,7 +353,7 @@ try{sh.fx&&cineHit(sh.fx),sh.mood&&cineMood(sh.mood)}catch(e){}}
 function filmFrame(now){if(!F)return;const dt=Math.min(.1,(now-F.last)/1e3);F.last=now,F.T+=dt,F.st+=dt;const sh=F.film.shots[F.i],D=shotDur(sh);if(F.st>=D){nextShot();if(!F)return;return void requestAnimationFrame(filmFrame)}
 for(const[at,k]of sh.fxAt||[])F.st>=at&&!F.fxDone[at]&&(F.fxDone[at]=1,cineHit(k));
 F.talk=!!(sh.say&&sh.p&&sh.say[0]===sh.p.who&&F.st>.35&&F.st<lineDur(sh.say[1])-.3);const cv=F.cv,dpr=Math.min(1.5,window.devicePixelRatio||1),W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);(cv.width!==W||cv.height!==H)&&(cv.width=W,cv.height=H);const g=cv.getContext("2d"),t=F.st/D;
-g.save();const cam=sh.cam||[1,1.07],z=lerp(cam[0],cam[1],t);g.translate(W/2,H/2),g.scale(z,z),g.translate(-W/2,-H/2);try{SCENES[sh.s](g,W,H,t,F.T,sh.p||{})}catch(e){console.error(e)}g.restore();
+g.save();const cam=sh.cam||[1,1.07],z=lerp(cam[0],cam[1],t);g.translate(W/2,H/2),g.scale(z,z),g.translate(-W/2,-H/2);const shm=fmvMedia(shotKey(F.key,F.i));try{shm&&drawMedia(g,W,H,shm,t,"")||SCENES[sh.s](g,W,H,t,F.T,sh.p||{})}catch(e){console.error(e)}g.restore();
 post(g,W,H,t,sh,D);requestAnimationFrame(filmFrame)}
 function post(g,W,H,t,sh,D){const m=Math.min(W,H);
 // soft bloom: a blurred, downscaled copy screened back over the frame

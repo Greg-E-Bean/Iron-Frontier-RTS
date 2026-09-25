@@ -22276,13 +22276,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const talk = F && F.talk ? Math.max(0, 0.55 * Math.sin(T * 12.7) + 0.35 * Math.sin(T * 7.9 + 1) + 0.25 * Math.sin(T * 19.3)) : 0;
         F && (F.jaw = lerp(F.jaw || 0, talk, 0.35));
         const med = fmvMedia(p.who);
-        if (med) {
-          const vw = med.videoWidth || med.naturalWidth || 0, vh = med.videoHeight || med.naturalHeight || 0;
-          if (vw) {
-            const k = Math.max(W / vw, H / vh);
-            g.drawImage(med, (W - vw * k) / 2, (H - vh * k) / 2, vw * k, vh * k);
-          }
-        } else {
+        if (med) drawMedia(g, W, H, med, t, p.side);
+        else {
           const acv = "function" == typeof renderActor ? renderActor(p.who, T, F ? F.jaw : 0, p.side === "r" ? -1 : 1, parseInt((c.c || "#8fd0ff").slice(1), 16)) : null;
           if (acv) {
             const dh = H * 1.02, dw = dh * acv.width / acv.height;
@@ -22527,18 +22522,46 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     g.restore();
   }
   var FMV_MEDIA = {};
-  var _fmvEl = {};
-  function fmvMedia(who) {
-    const src = FMV_MEDIA[who];
-    if (!src) return null;
-    let el = _fmvEl[who];
-    if (!el) {
-      el = _fmvEl[who] = /\.(mp4|webm|mov)$/i.test(src) ? Object.assign(document.createElement("video"), { src, muted: true, loop: true, playsInline: true, autoplay: true }) : Object.assign(new Image(), { src });
-      el.play && el.play().catch(() => {
-      });
-    }
-    return el;
+  var _media = {};
+  var FMV_EXT = ["mp4", "webm", "jpg", "png", "webp"];
+  function probeMedia(key) {
+    if (_media[key]) return _media[key];
+    const rec = _media[key] = { el: null };
+    const list = FMV_MEDIA[key] ? [FMV_MEDIA[key]] : FMV_EXT.map((e) => "fmv/" + key + "." + e);
+    let i = 0;
+    const next = () => {
+      if (i >= list.length) return;
+      const src = list[i++];
+      if (/\.(mp4|webm|mov)$/i.test(src)) {
+        const v = document.createElement("video");
+        v.muted = true, v.loop = true, v.playsInline = true, v.preload = "auto", v.oncanplay = () => {
+          rec.el || (rec.el = v, v.play().catch(() => {
+          }));
+        }, v.onerror = next, v.src = src;
+      } else {
+        const im = new Image();
+        im.onload = () => {
+          rec.el = im;
+        }, im.onerror = next, im.src = src;
+      }
+    };
+    next();
+    return rec;
   }
+  function fmvMedia(key) {
+    const r = _media[key];
+    return r && r.el || null;
+  }
+  function drawMedia(g, W, H, el, t, side) {
+    const vw = el.videoWidth || el.naturalWidth || 0, vh = el.videoHeight || el.naturalHeight || 0;
+    if (!vw) return false;
+    el.paused && el.play && el.play().catch(() => {
+    });
+    const k = Math.max(W / vw, H / vh) * (1.03 + 0.05 * t), dx = (side === "r" ? -1 : 1) * W * 0.012 * t;
+    g.fillStyle = "#000", g.fillRect(0, 0, W, H), g.drawImage(el, (W - vw * k) / 2 + dx, (H - vh * k) / 2 - H * 0.01 * t, vw * k, vh * k);
+    return true;
+  }
+  var shotKey = (k, i) => k + "_" + String(i).padStart(2, "0");
   var N = "narr";
   var FILMS = {
     prologue: { title: "The Iron Frontier", mood: "tense", shots: [
@@ -22668,6 +22691,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       audio();
     } catch (e) {
     }
+    film.shots.forEach((sh, i) => {
+      probeMedia(shotKey(key, i)), "portrait" === sh.s && sh.p && probeMedia(sh.p.who);
+    });
     F = { key, film, i: -1, st: 0, T: 0, last: performance.now(), done, el, cv: el.querySelector("canvas"), grain: null };
     el.querySelector(".cTitle").textContent = film.title.toUpperCase();
     try {
@@ -22724,8 +22750,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     g.save();
     const cam = sh.cam || [1, 1.07], z = lerp(cam[0], cam[1], t);
     g.translate(W / 2, H / 2), g.scale(z, z), g.translate(-W / 2, -H / 2);
+    const shm = fmvMedia(shotKey(F.key, F.i));
     try {
-      SCENES[sh.s](g, W, H, t, F.T, sh.p || {});
+      shm && drawMedia(g, W, H, shm, t, "") || SCENES[sh.s](g, W, H, t, F.T, sh.p || {});
     } catch (e) {
       console.error(e);
     }
