@@ -11,16 +11,18 @@ function otherFacs(fac){return["allied","soviet","yuri"].filter(f=>f!==fac)}
 
 // Characters speak over the radio in their own voice.
 const CAST={
-  reyes:{n:"Col. Ada Reyes",fac:"allied",acc:"rp",g:"f",p:1,r:1,c:"#8fd0ff"},
-  hale:{n:"Lt. Marcus Hale",fac:"allied",acc:"us",g:"m",p:1,r:1.06,c:"#a8e0ff"},
-  ghost:{n:"Ghost",fac:"allied",acc:"ie",g:"f",p:1.08,r:1.02,c:"#d6f2ff"},
-  draganov:{n:"Marshal Draganov",fac:"soviet",acc:"ru",g:"m",p:.84,r:.9,c:"#ff8a6a"},
-  volkova:{n:"Commissar Volkova",fac:"soviet",acc:"ru",g:"f",p:1,r:1.04,c:"#ffb08a"},
-  bogdan:{n:"Chief Engineer Bogdan",fac:"soviet",acc:"north",g:"m",p:.95,r:1,c:"#ffc9a0"},
-  reaper:{n:"Reaper",fac:"soviet",acc:"ru",g:"m",p:.74,r:.88,c:"#ff6a55"},
-  voice:{n:"The Voice",fac:"yuri",acc:"rp",g:"m",p:.8,r:.86,c:"#d59cff"},
-  senna:{n:"Adept Senna",fac:"yuri",acc:"rp",g:"f",p:1.1,r:.96,c:"#e6c2ff"},
-  phantom:{n:"Phantom",fac:"yuri",acc:"za",g:"f",p:.9,r:.95,c:"#c79bff"}
+  narr:{n:"Narrator",fac:"allied",acc:"rp",g:"m",p:.82,r:.9,c:"#d8dde2"},
+  marsh:{n:"Dr. Elias Marsh",fac:"allied",acc:"rp",g:"m",p:1.02,r:1.08,c:"#9fe8d0",hat:"glasses",role:"Project Starfall — lead scientist"},
+  reyes:{n:"Col. Ada Reyes",fac:"allied",acc:"rp",g:"f",p:1,r:1,c:"#8fd0ff",hat:"beret",role:"Vanguard Command"},
+  hale:{n:"Lt. Marcus Hale",fac:"allied",acc:"us",g:"m",p:1,r:1.06,c:"#a8e0ff",hat:"helmet",role:"Vanguard 3rd Battlegroup"},
+  ghost:{n:"Ghost",fac:"allied",acc:"ie",g:"f",p:1.08,r:1.02,c:"#d6f2ff",hat:"hair",role:"Vanguard Special Operations"},
+  draganov:{n:"Marshal Draganov",fac:"soviet",acc:"ru",g:"m",p:.84,r:.9,c:"#ff8a6a",hat:"cap",role:"Legion Supreme Command"},
+  volkova:{n:"Commissar Volkova",fac:"soviet",acc:"ru",g:"f",p:1,r:1.04,c:"#ffb08a",hat:"cap",role:"Legion Political Directorate"},
+  bogdan:{n:"Chief Engineer Bogdan",fac:"soviet",acc:"north",g:"m",p:.95,r:1,c:"#ffc9a0",hat:"helmet",role:"Legion Engineering Corps"},
+  reaper:{n:"Reaper",fac:"soviet",acc:"ru",g:"m",p:.74,r:.88,c:"#ff6a55",hat:"helmet",role:"Legion Special Operations"},
+  voice:{n:"The Voice",fac:"yuri",acc:"rp",g:"m",p:.8,r:.86,c:"#d59cff",hat:"hood",role:"The Hive"},
+  senna:{n:"Adept Senna",fac:"yuri",acc:"rp",g:"f",p:1.1,r:.96,c:"#e6c2ff",hat:"hood",role:"Syndicate Adept"},
+  phantom:{n:"Phantom",fac:"yuri",acc:"za",g:"f",p:.9,r:.95,c:"#c79bff",hat:"hair",role:"Syndicate Infiltrator"}
 };
 const castOf=w=>CAST[w]||{n:w,fac:"allied",acc:"us",g:"m",p:1,r:1,c:"#cfe0f5"};
 
@@ -30,9 +32,9 @@ const B_FULL=["power","refinery","barracks","factory","power"];
 
 const CAMPAIGNS={
 // =============================================================================
-allied:{title:"Operation Clean Slate",tag:"Drive the Legion out of the Frontier — and find out what is really pulling the strings.",missions:[
+allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legion — and face what Project Starfall let loose.",missions:[
 {name:"Landfall",map:"dust",loc:"Dustbowl Flats",spawn:0,
- brief:[["reyes","Commander, welcome to the Frontier. The Legion has been strip-mining this valley for months and nobody has told them to stop."],["reyes","That changes today. Deploy your Mobile HQ in the north-west, get ore flowing and build a strike force."],["hale","Hale here, ma'am. Scouts put a Legion outpost in the south-east corner. Conscripts and light armour. Nothing we can't handle."]],
+ brief:[["reyes","Commander, welcome to the Frontier. Twelve years of Legion occupation, and Starfall did not end it. We end it now — the hard way."],["reyes","That changes today. Deploy your Mobile HQ in the north-west, get ore flowing and build a strike force."],["hale","Hale here, ma'am. Scouts put a Legion outpost in the south-east corner. Conscripts and light armour. Nothing we can't handle."]],
  foes:[{fac:"soviet",diff:"easy",spawn:3}],start:{credits:6000},
  obj:[{id:"ref",t:"build",key:"refinery",n:1,text:"Deploy your base and build a Refinery"},{id:"kill",t:"elim",text:"Destroy the Legion outpost"},
       {id:"town",t:"capture",n:1,sec:1,text:"Garrison or capture a town building"},{id:"fast",t:"timeMax",time:1200,sec:1,text:"Win within 20 minutes"}],
@@ -98,9 +100,9 @@ allied:{title:"Operation Clean Slate",tag:"Drive the Legion out of the Frontier 
      {near:[38,35,3],do:[say("ghost","Crossing the high bridge. They never look up.")]},
      {near:[84,10,14],do:[say("draganov","An intruder in my base? Find her!"),["wave",0,[["base",4]],{to:"hero"}]]},
      {done:"pow",do:[say("hale","Their lights just went out. Nice work, Ghost.")]},
-     {done:"lab",do:[say("ghost","Tech Centre's gone. You'll want to see what they were keeping in there, Colonel. Brains. In jars.")]},
+     {done:"lab",do:[say("ghost","Tech Centre's gone. Colonel — they had Syndicate tissue on ice in there. Grown from our DNA.")]},
      {at:420,do:[["wave",0,[["base",3],["anti",1]],{to:"hero"}]]}],
- win:[["reyes","Get out of there, Ghost. We will talk about the jars later."]],
+ win:[["reyes","Get out of there, Ghost. And not a word about those samples to anyone."]],
  lose:[["reyes","Ghost is down. Abort, abort."]]},
 
 {name:"Hold the Line",map:"ring",loc:"Iron Ring Crater",spawn:0,
@@ -118,15 +120,15 @@ allied:{title:"Operation Clean Slate",tag:"Drive the Legion out of the Frontier 
  win:[["reyes","Transmission complete."],["reyes","Commander... the Legion was not doing this on their own. Someone was giving them orders."]],
  lose:[["reyes","The data is gone. Everything Ghost risked — gone."]]},
 
-{name:"The Hive Below",map:"lakes",loc:"Broken Lakes",spawn:0,
+{name:"The Hive Below",map:"lakes",film:"allied_reveal",loc:"Broken Lakes",spawn:0,
  brief:[["reyes","Draganov's last stronghold is across the Broken Lakes. End it."],["hale","Ma'am, the analysts flagged strange transmissions from the south-east. Not Legion codes."],["reyes","Noted. Deal with the Legion first."]],
  foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","barracks"]},{fac:"yuri",diff:"normal",spawn:3,team:3,base:["power","lab","barracks"]}],start:{credits:8000},
  obj:[{id:"leg",t:"destroy",keys:["conyard"],slot:0,text:"Destroy the Legion Construction Yard"},{id:"hive",t:"destroy",keys:["lab"],slot:1,hide:1,text:"Destroy the Syndicate Psychic Beacon"},
       {id:"emp",t:"own",key:"empTower",sec:1,text:"Capture the EMP tower on the north plateau"},{id:"fast",t:"timeMax",time:1800,sec:1,text:"Win within 30 minutes"}],
  ev:[{at:6,do:[say("hale","Bridges on both channels. The plateau to the north overlooks the centre.")]},
      {at:200,do:[say("hale","Ma'am... Legion units are firing on each other. Something is in their heads.")]},
-     {at:300,do:[say("voice","Vanguard. Legion. So much noise over such small things."),say("voice","I have been listening to you both for a very long time."),["show","hive"],["reveal",84,64,12,20]]},
-     {at:318,do:[say("reyes","Syndicate. So that's who has been pulling Draganov's strings. Find that beacon and burn it.")]},
+     {at:300,do:[say("voice","Vanguard. Legion. So much noise over such small things."),say("voice","I have been listening to you both since the night you pulled me from the ice."),["show","hive"],["reveal",84,64,12,20]]},
+     {at:318,do:[say("reyes","Starfall's ghost. So that is who has been pulling Draganov's strings. Find that beacon and burn it.")]},
      {every:170,from:260,until:1800,do:[["wave",0,[["main",2],["base",2]],{grow:.5}]]},
      {every:210,from:360,until:1800,do:[["wave",1,[["main",2],["base",3]],{grow:.5}]]},
      {done:"leg",do:[say("draganov","Colonel... we were fools. They were in our heads the whole time."),say("reyes","Then help me end it, Marshal.")]}],
@@ -138,14 +140,14 @@ allied:{title:"Operation Clean Slate",tag:"Drive the Legion out of the Frontier 
  foes:[{fac:"soviet",diff:"hard",spawn:1,team:2},{fac:"yuri",diff:"hard",spawn:3,team:2,base:["power","barracks"]},{fac:"allied",diff:"normal",spawn:2,ally:1}],start:{credits:10000},
  obj:[{id:"all",t:"elim",text:"Destroy every enemy base"},{id:"cap",t:"capture",n:3,sec:1,text:"Hold 3 town buildings"},{id:"loss",t:"lossMax",n:60,sec:1,text:"Lose no more than 60 units"}],
  ev:[{at:6,do:[say("hale","Hill forts on each corner, overpasses linking them. Take the forts and the river is ours.")]},
-     {at:300,do:[say("voice","You think you are liberating this land? It has already chosen us.")]},
+     {at:300,do:[say("voice","You think you are liberating this land? You made us, Colonel. We are only finishing your experiment.")]},
      {at:480,do:[say("draganov","Reyes. For what it is worth — I am sorry. Finish them.")]},
      {every:200,from:300,until:2400,do:[["wave",1,[["main",2],["base",3]],{grow:.6}]]}],
  win:[["reyes","It is over. The Frontier is free."],["hale","For now, ma'am."],["reyes","For now is all anyone ever gets, Lieutenant."]],
  lose:[["reyes","We have lost the Crossing. The Frontier belongs to them."]]}
 ]},
 // =============================================================================
-soviet:{title:"Iron Reclamation",tag:"Take back the Frontier for the Legion — whatever voice is whispering in the Marshal's ear.",missions:[
+soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and burn out the hive the West let loose.",missions:[
 {name:"Iron Dawn",map:"frost",loc:"Frozen Pass",spawn:2,
  brief:[["draganov","Comrade Commander. The Vanguard have planted a flag in the Frozen Pass. Our pass."],["volkova","Build a base on the south bank, secure the ore, and drive them into the ice."],["bogdan","Ice on the river will hold a Rhino. Mostly. Use the bridges if you're the nervous type."]],
  foes:[{fac:"allied",diff:"easy",spawn:1}],start:{credits:6000},
@@ -221,7 +223,7 @@ soviet:{title:"Iron Reclamation",tag:"Take back the Frontier for the Legion — 
  win:[["volkova","The river line is broken."],["volkova","Commander. Something is wrong with the Marshal. Watch him."]],
  lose:[["bogdan","Pontoon's gone. So's the bridgehead."]]},
 
-{name:"Red Tide",map:"bastion",loc:"The Bastion",spawn:5,
+{name:"Red Tide",map:"bastion",film:"soviet_reveal",loc:"The Bastion",spawn:5,
  brief:[["volkova","It is the Syndicate. They have been in the Marshal's head for months. And they have a Psychic Hive on the Bastion."],["draganov","...I am still in command, Commissar."],["volkova","Then command us to burn it. Destroy the Hive, then break the Vanguard fort that shelters it."]],
  foes:[{fac:"yuri",diff:"normal",spawn:3,team:3,base:["power","lab","barracks"]},{fac:"allied",diff:"normal",spawn:1,base:["power","barracks"]}],start:{credits:9000},
  obj:[{id:"hive",t:"destroy",keys:["lab"],slot:0,text:"Destroy the Syndicate Psychic Hive (south fort)"},{id:"fort",t:"destroy",keys:["conyard"],slot:1,text:"Destroy the Vanguard fort (north-east)"},
@@ -248,9 +250,9 @@ soviet:{title:"Iron Reclamation",tag:"Take back the Frontier for the Legion — 
  lose:[["draganov","Everything... lost."]]}
 ]},
 // =============================================================================
-yuri:{title:"The Harvest",tag:"Wake, gather, and bring every mind on the Frontier into the Hive.",missions:[
+yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. Wake, gather, and bring every mind into the Hive.",missions:[
 {name:"Awakening",map:"lakes",loc:"Broken Lakes",spawn:0,
- brief:[["voice","Wake, Adept. The Frontier is loud with small minds fighting over rocks."],["senna","I hear them, Master. A Vanguard camp across the lakes."],["voice","Grow a Hive. Gather the ore. Then quiet them."]],
+ brief:[["voice","Wake, Adept. A year free of their cage, and the Frontier is still loud with small minds fighting over rocks."],["senna","I hear them, Master. A Vanguard camp across the lakes — the ones who made us."],["voice","Grow a Hive. Gather the ore. Then quiet them."]],
  foes:[{fac:"allied",diff:"easy",spawn:3}],start:{credits:6000},
  obj:[{id:"ref",t:"build",key:"refinery",n:1,text:"Deploy your base and grow a Hive"},{id:"kill",t:"elim",text:"Silence the Vanguard camp"},
       {id:"town",t:"capture",n:2,sec:1,text:"Hold 2 town buildings"},{id:"fast",t:"timeMax",time:1200,sec:1,text:"Win within 20 minutes"}],
@@ -289,7 +291,7 @@ yuri:{title:"The Harvest",tag:"Wake, gather, and bring every mind on the Frontie
  win:[["voice","The song is sung. Every radio on the Frontier carries it now."]],
  lose:[["senna","The Amplifier is silent. Forgive me, Master."]]},
 
-{name:"Silent Hand",map:"line",loc:"Firing Line",spawn:2,hero:1,
+{name:"Silent Hand",map:"line",film:"yuri_reveal",loc:"Firing Line",spawn:2,hero:1,
  brief:[["voice","The Legion keep their brightest minds in a Tech Centre behind the Firing Line."],["phantom","And you want them brought home."],["voice","I want their laboratory gone and their Construction Yard with it. Go quietly, Phantom. V shifts your sight."]],
  foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","power","barracks","lab","def1"]}],start:{},
  obj:[{id:"lab",t:"destroy",keys:["lab"],text:"Destroy the Legion Tech Centre"},{id:"cy",t:"destroy",keys:["conyard"],text:"Destroy the Construction Yard"},
@@ -485,27 +487,28 @@ const mapName=k=>{const e=(typeof MAPS!="undefined"?MAPS:[]).find(x=>x.k===k);re
 const TYPE_TAG=m=>m.hero?"COMMANDO":m.noBuild?"STRIKE GROUP":m.obj.some(o=>"survive"===o.t)?"DEFENCE":m.obj.some(o=>"escort"===o.t)?"ESCORT":"ASSAULT";
 function campStars(fac){return CAMPAIGNS[fac].missions.reduce((a,_,i)=>a+missionStars(fac,i),0)}
 function showCampaign(){radioStop(),$("#menu").classList.remove("hidden");const rows=["allied","soviet","yuri"].map(fac=>{const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac),total=camp.missions.length,done=Math.min(total,Math.max(0,unlocked-1));return'<button class="campCard f-'+fac+'" data-fac="'+fac+'"><div class="ccTop"><span class="ccIcon">'+FAC_ICON[fac]+'</span><span class="ccFac">'+FAC_NAME[fac].toUpperCase()+'</span><span class="ccProg">'+done+"/"+total+'</span></div><div class="ccTitle">'+camp.title+'</div><div class="ccTag">'+camp.tag+'</div><div class="ccBar"><i style="width:'+Math.round(100*done/total)+'%"></i></div><div class="ccStars">★ '+campStars(fac)+" / "+3*total+"</div></button>"}).join("");
-$("#panelMain").innerHTML='<h1>CAMPAIGN</h1><div class="sub">Three wars for the Frontier</div><div id="campList">'+rows+'</div><button id="backSetup" '+SECBTN+">BACK</button>";$("#panelMain").querySelectorAll(".campCard").forEach(b=>b.onclick=()=>showMissionList(b.dataset.fac)),$("#backSetup").onclick=showSetup}
+$("#panelMain").innerHTML='<h1>CAMPAIGN</h1><div class="sub">Three wars for the Frontier</div><button class="bPlay" id="filmPro">▶ PROLOGUE — THE IRON FRONTIER</button><div id="campList">'+rows+'</div><button id="backSetup" '+SECBTN+">BACK</button>";$("#filmPro").onclick=()=>playFilm("prologue");$("#panelMain").querySelectorAll(".campCard").forEach(b=>b.onclick=()=>showMissionList(b.dataset.fac)),$("#backSetup").onclick=showSetup;filmSeen("prologue")||playFilm("prologue")}
 function showMissionList(fac){radioStop();const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac);const rows=camp.missions.map((m,i)=>{const locked=i>=unlocked,done=i<unlocked-1;return'<button class="mRow'+(locked?" locked":done?" done":" next")+'" data-i="'+i+'"'+(locked?" disabled":"")+'><span class="mNum">'+(i+1)+'</span><span class="mMain"><b>'+m.name+"</b><small>"+(locked?"LOCKED":mapName(m.map)+" · "+TYPE_TAG(m))+"</small></span>"+(done?starStr(missionStars(fac,i)):locked?'<span class="mLock">🔒</span>':'<span class="mGo">PLAY ›</span>')+"</button>"}).join("");
-$("#panelMain").innerHTML='<h1 class="f-'+fac+'">'+FAC_ICON[fac]+" "+FAC_NAME[fac].toUpperCase()+'</h1><div class="sub">'+camp.title+'</div><div class="small" style="margin:4px 0 8px;opacity:.8">'+camp.tag+'</div><div id="missionList">'+rows+'</div><button id="backCampList" '+SECBTN+">BACK</button>";$("#panelMain").querySelectorAll(".mRow").forEach(b=>b.onclick=()=>{b.disabled||showBriefing(fac,+b.dataset.i)}),$("#backCampList").onclick=showCampaign}
+$("#panelMain").innerHTML='<h1 class="f-'+fac+'">'+FAC_ICON[fac]+" "+FAC_NAME[fac].toUpperCase()+'</h1><div class="sub">'+camp.title+'</div><div class="small" style="margin:4px 0 8px;opacity:.8">'+camp.tag+'</div><div class="filmRow"><button class="bPlay" id="filmIntro">▶ INTRO</button>'+(unlocked>camp.missions.length?'<button class="bPlay" id="filmEnd">▶ ENDING</button>':"")+'</div><div id="missionList">'+rows+'</div><button id="backCampList" '+SECBTN+">BACK</button>";$("#filmIntro").onclick=()=>playFilm(fac+"_intro");$("#filmEnd")&&($("#filmEnd").onclick=()=>playFilm(fac+"_end"));filmSeen(fac+"_intro")||playFilm(fac+"_intro");$("#panelMain").querySelectorAll(".mRow").forEach(b=>b.onclick=()=>{b.disabled||showBriefing(fac,+b.dataset.i)}),$("#backCampList").onclick=showCampaign}
 let briefPlay=0;
 function showBriefing(fac,idx){radioStop();const m=CAMPAIGNS[fac].missions[idx],mp=Math.max(4,(m.foes.length||0)+1);
 const lines=m.brief.map(([w,t])=>{const c=castOf(w);return'<div class="bLine"><span class="bWho" style="color:'+c.c+'">'+c.n+"</span><span>"+t+"</span></div>"}).join("");
 const objs=m.obj.filter(o=>!o.hide).map(o=>'<div class="bObj'+(o.sec?" sec":"")+'"><b>'+(o.sec?"★":"◆")+"</b>"+o.text+"</div>").join("");
 const foes=m.foes.map(f=>'<span class="bFoe'+(f.ally?" ally":"")+'">'+(f.ally?"ALLY ":"")+FAC_NAME[f.fac].toUpperCase()+" · "+DIFFS[f.diff].name+"</span>").join(" ");
-$("#panelMain").innerHTML='<div class="bHead"><div><div class="bOp">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+"</div><h1>"+m.name.toUpperCase()+'</h1><div class="sub">'+m.loc+" · "+mapName(m.map)+" · "+TYPE_TAG(m)+'</div></div>'+starStr(missionStars(fac,idx))+'</div><div class="bMap">'+mapPreviewSVG(m.map,mp)+'</div><div class="bLines">'+lines+'</div><button id="bPlay" class="bPlay">▶ PLAY TRANSMISSION</button><div class="bSec">OBJECTIVES</div>'+objs+'<div class="bSec">OPPOSITION</div><div>'+foes+'</div><button id="launchM">LAUNCH MISSION</button><button id="backCamp" '+SECBTN+">BACK</button>";
+$("#panelMain").innerHTML='<div class="bHead"><div><div class="bOp">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+"</div><h1>"+m.name.toUpperCase()+'</h1><div class="sub">'+m.loc+" · "+mapName(m.map)+" · "+TYPE_TAG(m)+'</div></div>'+starStr(missionStars(fac,idx))+'</div><div class="bMap">'+mapPreviewSVG(m.map,mp)+'</div><div class="bLines">'+lines+'</div><div class="filmRow"><button id="bPlay" class="bPlay">▶ PLAY TRANSMISSION</button>'+(m.film?'<button id="bFilm" class="bPlay">▶ CUTSCENE</button>':"")+'</div><div class="bSec">OBJECTIVES</div>'+objs+'<div class="bSec">OPPOSITION</div><div>'+foes+'</div><button id="launchM">LAUNCH MISSION</button><button id="backCamp" '+SECBTN+">BACK</button>";
 $("#launchM").onclick=()=>{briefPlay++,launchMission(fac,idx)},$("#backCamp").onclick=()=>{briefPlay++,showMissionList(fac)};
-$("#bPlay").onclick=()=>{audio();const tok=++briefPlay;let k=0;const next=()=>{if(tok!==briefPlay||k>=m.brief.length||!$("#bPlay"))return;const[w,t]=m.brief[k++],c=castOf(w);document.querySelectorAll(".bLine").forEach((e,i)=>e.classList.toggle("on",i===k-1));try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r)}catch(e){}setTimeout(next,1e3*clamp(1.2+.062*t.length,3,11))};next()}}
+m.film&&($("#bFilm").onclick=()=>{briefPlay++,playFilm(m.film)},filmSeen(m.film)||playFilm(m.film));$("#bPlay").onclick=()=>{audio();const tok=++briefPlay;let k=0;const next=()=>{if(tok!==briefPlay||k>=m.brief.length||!$("#bPlay"))return;const[w,t]=m.brief[k++],c=castOf(w);document.querySelectorAll(".bLine").forEach((e,i)=>e.classList.toggle("on",i===k-1));try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r)}catch(e){}setTimeout(next,1e3*clamp(1.2+.062*t.length,3,11))};next()}}
 // Debrief block for the results screen.
-function missionDebrief(win){const m=S.mission;if(!m||!m.def)return"";radioStop();const lines=(win?m.def.win:m.def.lose)||[];
-let tk=0;const speak=()=>{if(!lines[tk])return;const[w,t]=lines[tk++],c=castOf(w);try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r)}catch(e){}setTimeout(speak,1e3*clamp(1.2+.062*t.length,3,11))};setTimeout(speak,600);
+function missionDebrief(win){const m=S.mission;if(!m||!m.def)return"";radioStop();const lines=(win?m.def.win:m.def.lose)||[],last=win&&m.idx===CAMPAIGNS[m.fac].missions.length-1,endKey=m.fac+"_end",autoEnd=last&&!filmSeen(endKey);
+last&&setTimeout(()=>{const b=$("#dEnd");b&&(b.onclick=()=>playFilm(endKey));autoEnd&&playFilm(endKey)},autoEnd?2500:0);
+let tk=0;const speak=()=>{if(!lines[tk])return;const[w,t]=lines[tk++],c=castOf(w);try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r)}catch(e){}setTimeout(speak,1e3*clamp(1.2+.062*t.length,3,11))};autoEnd||setTimeout(speak,600);
 const objs=m.objs.filter(o=>o.shown).map(o=>'<div class="bObj'+(o.sec?" sec":"")+(1===o.state?" ok":-1===o.state?" bad":"")+'"><b>'+(1===o.state?"✓":-1===o.state?"✗":"–")+"</b>"+o.text+"</div>").join("");
-return'<div class="dBrief">'+(win?'<div class="dStars">'+starStr(m.stars)+"</div>":"")+lines.map(([w,t])=>{const c=castOf(w);return'<div class="bLine"><span class="bWho" style="color:'+c.c+'">'+c.n+"</span><span>"+t+"</span></div>"}).join("")+objs+"</div>"}
+return'<div class="dBrief">'+(last?'<button class="bPlay" id="dEnd">▶ WATCH THE ENDING</button>':"")+(win?'<div class="dStars">'+starStr(m.stars)+"</div>":"")+lines.map(([w,t])=>{const c=castOf(w);return'<div class="bLine"><span class="bWho" style="color:'+c.c+'">'+c.n+"</span><span>"+t+"</span></div>"}).join("")+objs+"</div>"}
 
 Object.assign(window, {
   FAC_NAME, CAMPAIGNS, launchMission, checkMissionOutcome, campaignUnlocked, unlockNext, applyPendingMission,
   otherFacs, launchTutorial, updateTutorial, updateTutorialPanel, skipTutorial,
-  showCampaign, showMissionList, showBriefing, missionDebrief, missionStars, radioStop,
+  showCampaign, showMissionList, showBriefing, missionDebrief, missionStars, radioStop, CAST, castOf,
 });
 
 Object.defineProperties(window, {

@@ -243,6 +243,20 @@ body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 190px)}
 .bObj.ok b{color:#7dff8a}.bObj.bad{opacity:.6}.bObj.bad b{color:#e0473a}
 .bFoe{display:inline-block;font-size:10px;letter-spacing:1px;padding:3px 8px;border-radius:10px;margin:2px 4px 2px 0;background:rgba(224,71,58,.14);color:#f3a397;border:1px solid rgba(224,71,58,.35)}
 .bFoe.ally{background:rgba(111,184,224,.14);color:#a8d8f0;border-color:rgba(111,184,224,.35)}
+
+#cine{position:fixed;inset:0;z-index:60;background:#000;cursor:pointer;overflow:hidden}
+#cine canvas{position:absolute;inset:0;width:100%;height:100%}
+#cine .cBar{position:absolute;left:0;right:0;height:max(7vh,calc((100vh - 42.5vw)/2));background:#000;z-index:1}
+#cine .cBar.t{top:0}#cine .cBar.b{bottom:0}
+#cine .cSub{position:absolute;left:50%;transform:translateX(-50%);bottom:max(2.4vh,calc((100vh - 42.5vw)/2 - 64px));z-index:2;width:min(760px,calc(100vw - 32px));text-align:center;
+  font-size:clamp(13px,2.1vw,19px);line-height:1.4;color:#f2f5f7;text-shadow:0 2px 6px #000,0 0 2px #000;opacity:0;transition:opacity .4s}
+#cine .cSub.on{opacity:1}
+#cine .cSub b{display:block;font-size:.62em;letter-spacing:2.5px;margin-bottom:3px}
+#cine .cSkip{position:absolute;z-index:3;right:calc(env(safe-area-inset-right,0px) + 14px);top:calc(env(safe-area-inset-top,0px) + 12px);padding:7px 14px;border-radius:18px;
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.3);color:#e8eef2;font-size:11px;letter-spacing:2px;cursor:pointer}
+#cine .cTitle{position:absolute;z-index:3;left:calc(env(safe-area-inset-left,0px) + 16px);top:calc(env(safe-area-inset-top,0px) + 18px);font-size:10px;letter-spacing:3px;color:rgba(230,236,240,.55)}
+.filmRow{display:flex;gap:8px}.filmRow .bPlay{flex:1}
+#filmPro{margin:0 0 4px}
 .dBrief{margin:10px 0 4px;text-align:left}.dStars{text-align:center;margin-bottom:6px}.dStars .stars i{font-size:26px}
 
 #menu{position:fixed;inset:0;z-index:30;background:
@@ -16274,7 +16288,7 @@ varying vec3 vFgWN;
     const t = AC.currentTime + 5e-3;
     sNoise(t, { type: "bandpass", f: "yuri" === fac ? 900 : 2400, q: 2.5, g: 0.05, a: 2e-3, d: 0.07 }), sOsc(t, { w: "sine", f: "yuri" === fac ? 420 : 1350, g: 0.025, d: 0.045 });
   }
-  function speakLine(fac, line, urgent, per, seed) {
+  function speakLine(fac, line, urgent, per, seed, noClick) {
     if (!voicesEnabled || muted || sfxVol <= 0 || "undefined" == typeof speechSynthesis || !line) return;
     try {
       per = per || ANNOUNCER[fac] || ANNOUNCER.allied;
@@ -16283,7 +16297,7 @@ varying vec3 vFgWN;
       const u = new SpeechSynthesisUtterance(text), gMiss = v && ("f" === per.g ? !FEM.test(v.name) : FEM.test(v.name));
       u.pitch = Math.max(0.75, Math.min(1.2, per.p * (gMiss ? "f" === per.g ? 1.12 : 0.88 : 1) * (0.98 + 0.04 * Math.random()))), u.rate = per.r * (0.97 + 0.06 * Math.random()), u.volume = Math.min(1, sfxVol * masterVol);
       v && (u.voice = v, u.lang = v.lang);
-      radioClick(fac), setTimeout(() => {
+      noClick || radioClick(fac), setTimeout(() => {
         try {
           speechSynthesis.speak(u);
         } catch (e) {
@@ -17234,11 +17248,130 @@ varying vec3 vFgWN;
     idx < MUSIC_TRACKS.length ? (stopCustomTrack(), playTrackRef && playTrackRef(idx)) : (musicGen++, playCustomTrack(idx - MUSIC_TRACKS.length));
   }
   var lightningT = 0;
-  function speakAs(fac, text, acc, g, p, r) {
-    speakLine(fac, text, true, P_(acc, g, p || 1, r || 1));
+  function speakAs(fac, text, acc, g, p, r, noClick) {
+    speakLine(fac, text, true, P_(acc, g, p || 1, r || 1), 0, noClick);
+  }
+  function speakStop() {
+    try {
+      "undefined" != typeof speechSynthesis && speechSynthesis.cancel();
+    } catch (e) {
+    }
+  }
+  var cine = null;
+  function cineStop() {
+    if (!cine) return;
+    const c = cine;
+    cine = null;
+    clearInterval(c.iv);
+    try {
+      const t = AC.currentTime;
+      c.out.gain.cancelScheduledValues(t), c.out.gain.setValueAtTime(c.out.gain.value, t), c.out.gain.linearRampToValueAtTime(0, t + 1.2);
+      setTimeout(() => {
+        c.nodes.forEach((n) => {
+          try {
+            n.stop();
+          } catch (e) {
+          }
+        });
+        try {
+          c.out.disconnect();
+        } catch (e) {
+        }
+      }, 1400);
+    } catch (e) {
+    }
+    if (musicBus) {
+      const t = AC.currentTime;
+      musicBus.gain.cancelScheduledValues(t), musicBus.gain.setValueAtTime(musicBus.gain.value, t), musicBus.gain.linearRampToValueAtTime(MUSIC_BASE * musicVol, t + 2);
+    }
+    customTrackEl && (customTrackEl.volume = muted ? 0 : masterVol * musicVol);
+  }
+  var CINE_MOODS = {
+    tense: { f: [41.2, 55, 82.4, 98], w: "sawtooth", lp: 380, g: 0.09 },
+    dread: { f: [36.7, 43.65, 55, 77.8], w: "sawtooth", lp: 300, g: 0.1 },
+    hive: { f: [110, 116.5, 164.8, 233, 880], w: "sine", lp: 2400, trem: 5.5, g: 0.06 },
+    war: { f: [41.2, 55, 61.7, 82.4], w: "sawtooth", lp: 420, drums: 1.15, g: 0.085 },
+    hope: { f: [130.8, 196, 261.6, 329.6, 392], w: "triangle", lp: 1400, g: 0.05 }
+  };
+  function cineMood(mood) {
+    if (!sOK()) return;
+    cineStop();
+    const M = CINE_MOODS[mood] || CINE_MOODS.tense, t = AC.currentTime, out = AC.createGain(), nodes = [];
+    out.gain.setValueAtTime(0, t), out.gain.linearRampToValueAtTime(M.g * musicVol * 2.4, t + 2.5), out.connect(masterGain);
+    const lp = AC.createBiquadFilter();
+    lp.type = "lowpass", lp.frequency.value = M.lp, lp.Q.value = 2, lp.connect(out);
+    const lfo = AC.createOscillator(), lg = AC.createGain();
+    lfo.frequency.value = 0.07, lg.gain.value = 0.45 * M.lp, lfo.connect(lg), lg.connect(lp.frequency), lfo.start(t), nodes.push(lfo);
+    let dest = lp;
+    if (M.trem) {
+      const tg = AC.createGain(), tl = AC.createOscillator(), td = AC.createGain();
+      tg.gain.value = 0.6, tl.frequency.value = M.trem, td.gain.value = 0.4, tl.connect(td), td.connect(tg.gain), tg.connect(lp), tl.start(t), nodes.push(tl), dest = tg;
+    }
+    M.f.forEach((f, i) => {
+      for (const det of [-7, 6]) {
+        const o = AC.createOscillator(), g = AC.createGain();
+        o.type = i === M.f.length - 1 && "hive" === mood ? "triangle" : M.w, o.frequency.value = f, o.detune.value = det + 3 * i, g.gain.value = 1 / (1 + i * 0.6) / M.f.length, o.connect(g), g.connect(dest), o.start(t), nodes.push(o);
+      }
+    });
+    const sub = AC.createOscillator(), sg = AC.createGain();
+    sub.frequency.value = M.f[0] / 2, sg.gain.value = 0.35, sub.connect(sg), sg.connect(out), sub.start(t), nodes.push(sub);
+    try {
+      verbIn && out.connect(verbIn);
+    } catch (e) {
+    }
+    let iv = 0;
+    if (M.drums) {
+      let k = 0;
+      iv = setInterval(() => {
+        if (!cine || !sOK()) return;
+        const tt = AC.currentTime + 0.01, acc = k++ % 4 == 0;
+        sNoise(tt, { brown: 1, f: acc ? 260 : 180, g: (acc ? 0.5 : 0.28) * musicVol, d: 0.5, verb: 0.3 }), sOsc(tt, { f: acc ? 95 : 80, f2: 38, g: (acc ? 0.4 : 0.22) * musicVol, d: 0.45 });
+      }, 1e3 * M.drums);
+    }
+    if (musicBus) {
+      const tt = AC.currentTime;
+      musicBus.gain.cancelScheduledValues(tt), musicBus.gain.setValueAtTime(musicBus.gain.value, tt), musicBus.gain.linearRampToValueAtTime(0, tt + 1.2);
+    }
+    customTrackEl && (customTrackEl.volume = 0);
+    cine = { out, nodes, iv, mood };
+  }
+  function cineHit(kind) {
+    if (!sOK()) return;
+    const t = AC.currentTime + 0.01;
+    switch (kind) {
+      case "boom":
+        sNoise(t, { brown: 1, f: 380, f2: 60, g: 0.7, d: 3, verb: 0.5 }), sOsc(t, { f: 70, f2: 24, g: 0.55, d: 2.2 }), sNoise(t, { f: 3e3, f2: 200, g: 0.25, d: 0.6 });
+        break;
+      case "whoosh":
+        sNoise(t, { type: "bandpass", f: 250, f2: 3200, q: 1.2, g: 0.25, a: 0.5, d: 0.6, verb: 0.3 });
+        break;
+      case "riser":
+        sOsc(t, { w: "sawtooth", f: 110, f2: 880, sw: 2.4, g: 0.06, a: 1.8, d: 0.7, lp: 2200, verb: 0.4 }), sNoise(t, { type: "highpass", f: 800, f2: 6e3, g: 0.08, a: 2, d: 0.5 });
+        break;
+      case "alarm":
+        for (let i = 0; i < 6; i++) sOsc(t + 0.32 * i, { w: "square", f: i % 2 ? 660 : 880, g: 0.05, d: 0.28, lp: 2500, verb: 0.2 });
+        break;
+      case "glitch":
+        for (let i = 0; i < 7; i++) sNoise(t + 0.05 * i + 0.03 * Math.random(), { type: "bandpass", f: 800 + 5e3 * Math.random(), q: 3, g: 0.12, d: 0.04 });
+        break;
+      case "sting":
+        for (const f of [55, 82.4, 110, 130.8]) sOsc(t, { w: "sawtooth", f, g: 0.07, d: 2.4, lp: 900, verb: 0.5 });
+        sNoise(t, { brown: 1, f: 200, g: 0.4, d: 1.5 });
+        break;
+      case "pulse":
+        sOsc(t, { f: 180, f2: 90, g: 0.12, d: 0.5, verb: 0.4 });
+        break;
+      case "static":
+        sNoise(t, { type: "highpass", f: 2e3, g: 0.18, d: 0.6 });
+        break;
+    }
   }
   Object.assign(window, {
     speakAs,
+    speakStop,
+    cineMood,
+    cineStop,
+    cineHit,
     audio,
     sfx,
     sfxHit,
@@ -19896,28 +20029,30 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return ["allied", "soviet", "yuri"].filter((f) => f !== fac);
   }
   var CAST = {
-    reyes: { n: "Col. Ada Reyes", fac: "allied", acc: "rp", g: "f", p: 1, r: 1, c: "#8fd0ff" },
-    hale: { n: "Lt. Marcus Hale", fac: "allied", acc: "us", g: "m", p: 1, r: 1.06, c: "#a8e0ff" },
-    ghost: { n: "Ghost", fac: "allied", acc: "ie", g: "f", p: 1.08, r: 1.02, c: "#d6f2ff" },
-    draganov: { n: "Marshal Draganov", fac: "soviet", acc: "ru", g: "m", p: 0.84, r: 0.9, c: "#ff8a6a" },
-    volkova: { n: "Commissar Volkova", fac: "soviet", acc: "ru", g: "f", p: 1, r: 1.04, c: "#ffb08a" },
-    bogdan: { n: "Chief Engineer Bogdan", fac: "soviet", acc: "north", g: "m", p: 0.95, r: 1, c: "#ffc9a0" },
-    reaper: { n: "Reaper", fac: "soviet", acc: "ru", g: "m", p: 0.74, r: 0.88, c: "#ff6a55" },
-    voice: { n: "The Voice", fac: "yuri", acc: "rp", g: "m", p: 0.8, r: 0.86, c: "#d59cff" },
-    senna: { n: "Adept Senna", fac: "yuri", acc: "rp", g: "f", p: 1.1, r: 0.96, c: "#e6c2ff" },
-    phantom: { n: "Phantom", fac: "yuri", acc: "za", g: "f", p: 0.9, r: 0.95, c: "#c79bff" }
+    narr: { n: "Narrator", fac: "allied", acc: "rp", g: "m", p: 0.82, r: 0.9, c: "#d8dde2" },
+    marsh: { n: "Dr. Elias Marsh", fac: "allied", acc: "rp", g: "m", p: 1.02, r: 1.08, c: "#9fe8d0", hat: "glasses", role: "Project Starfall \u2014 lead scientist" },
+    reyes: { n: "Col. Ada Reyes", fac: "allied", acc: "rp", g: "f", p: 1, r: 1, c: "#8fd0ff", hat: "beret", role: "Vanguard Command" },
+    hale: { n: "Lt. Marcus Hale", fac: "allied", acc: "us", g: "m", p: 1, r: 1.06, c: "#a8e0ff", hat: "helmet", role: "Vanguard 3rd Battlegroup" },
+    ghost: { n: "Ghost", fac: "allied", acc: "ie", g: "f", p: 1.08, r: 1.02, c: "#d6f2ff", hat: "hair", role: "Vanguard Special Operations" },
+    draganov: { n: "Marshal Draganov", fac: "soviet", acc: "ru", g: "m", p: 0.84, r: 0.9, c: "#ff8a6a", hat: "cap", role: "Legion Supreme Command" },
+    volkova: { n: "Commissar Volkova", fac: "soviet", acc: "ru", g: "f", p: 1, r: 1.04, c: "#ffb08a", hat: "cap", role: "Legion Political Directorate" },
+    bogdan: { n: "Chief Engineer Bogdan", fac: "soviet", acc: "north", g: "m", p: 0.95, r: 1, c: "#ffc9a0", hat: "helmet", role: "Legion Engineering Corps" },
+    reaper: { n: "Reaper", fac: "soviet", acc: "ru", g: "m", p: 0.74, r: 0.88, c: "#ff6a55", hat: "helmet", role: "Legion Special Operations" },
+    voice: { n: "The Voice", fac: "yuri", acc: "rp", g: "m", p: 0.8, r: 0.86, c: "#d59cff", hat: "hood", role: "The Hive" },
+    senna: { n: "Adept Senna", fac: "yuri", acc: "rp", g: "f", p: 1.1, r: 0.96, c: "#e6c2ff", hat: "hood", role: "Syndicate Adept" },
+    phantom: { n: "Phantom", fac: "yuri", acc: "za", g: "f", p: 0.9, r: 0.95, c: "#c79bff", hat: "hair", role: "Syndicate Infiltrator" }
   };
   var castOf = (w) => CAST[w] || { n: w, fac: "allied", acc: "us", g: "m", p: 1, r: 1, c: "#cfe0f5" };
   var say = (w, t) => ["say", w, t];
   var CAMPAIGNS = {
     // =============================================================================
-    allied: { title: "Operation Clean Slate", tag: "Drive the Legion out of the Frontier \u2014 and find out what is really pulling the strings.", missions: [
+    allied: { title: "Operation Clean Slate", tag: "Take back the lands lost to the Legion \u2014 and face what Project Starfall let loose.", missions: [
       {
         name: "Landfall",
         map: "dust",
         loc: "Dustbowl Flats",
         spawn: 0,
-        brief: [["reyes", "Commander, welcome to the Frontier. The Legion has been strip-mining this valley for months and nobody has told them to stop."], ["reyes", "That changes today. Deploy your Mobile HQ in the north-west, get ore flowing and build a strike force."], ["hale", "Hale here, ma'am. Scouts put a Legion outpost in the south-east corner. Conscripts and light armour. Nothing we can't handle."]],
+        brief: [["reyes", "Commander, welcome to the Frontier. Twelve years of Legion occupation, and Starfall did not end it. We end it now \u2014 the hard way."], ["reyes", "That changes today. Deploy your Mobile HQ in the north-west, get ore flowing and build a strike force."], ["hale", "Hale here, ma'am. Scouts put a Legion outpost in the south-east corner. Conscripts and light armour. Nothing we can't handle."]],
         foes: [{ fac: "soviet", diff: "easy", spawn: 3 }],
         start: { credits: 6e3 },
         obj: [
@@ -20033,10 +20168,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           { near: [38, 35, 3], do: [say("ghost", "Crossing the high bridge. They never look up.")] },
           { near: [84, 10, 14], do: [say("draganov", "An intruder in my base? Find her!"), ["wave", 0, [["base", 4]], { to: "hero" }]] },
           { done: "pow", do: [say("hale", "Their lights just went out. Nice work, Ghost.")] },
-          { done: "lab", do: [say("ghost", "Tech Centre's gone. You'll want to see what they were keeping in there, Colonel. Brains. In jars.")] },
+          { done: "lab", do: [say("ghost", "Tech Centre's gone. Colonel \u2014 they had Syndicate tissue on ice in there. Grown from our DNA.")] },
           { at: 420, do: [["wave", 0, [["base", 3], ["anti", 1]], { to: "hero" }]] }
         ],
-        win: [["reyes", "Get out of there, Ghost. We will talk about the jars later."]],
+        win: [["reyes", "Get out of there, Ghost. And not a word about those samples to anyone."]],
         lose: [["reyes", "Ghost is down. Abort, abort."]]
       },
       {
@@ -20067,6 +20202,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       {
         name: "The Hive Below",
         map: "lakes",
+        film: "allied_reveal",
         loc: "Broken Lakes",
         spawn: 0,
         brief: [["reyes", "Draganov's last stronghold is across the Broken Lakes. End it."], ["hale", "Ma'am, the analysts flagged strange transmissions from the south-east. Not Legion codes."], ["reyes", "Noted. Deal with the Legion first."]],
@@ -20081,8 +20217,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         ev: [
           { at: 6, do: [say("hale", "Bridges on both channels. The plateau to the north overlooks the centre.")] },
           { at: 200, do: [say("hale", "Ma'am... Legion units are firing on each other. Something is in their heads.")] },
-          { at: 300, do: [say("voice", "Vanguard. Legion. So much noise over such small things."), say("voice", "I have been listening to you both for a very long time."), ["show", "hive"], ["reveal", 84, 64, 12, 20]] },
-          { at: 318, do: [say("reyes", "Syndicate. So that's who has been pulling Draganov's strings. Find that beacon and burn it.")] },
+          { at: 300, do: [say("voice", "Vanguard. Legion. So much noise over such small things."), say("voice", "I have been listening to you both since the night you pulled me from the ice."), ["show", "hive"], ["reveal", 84, 64, 12, 20]] },
+          { at: 318, do: [say("reyes", "Starfall's ghost. So that is who has been pulling Draganov's strings. Find that beacon and burn it.")] },
           { every: 170, from: 260, until: 1800, do: [["wave", 0, [["main", 2], ["base", 2]], { grow: 0.5 }]] },
           { every: 210, from: 360, until: 1800, do: [["wave", 1, [["main", 2], ["base", 3]], { grow: 0.5 }]] },
           { done: "leg", do: [say("draganov", "Colonel... we were fools. They were in our heads the whole time."), say("reyes", "Then help me end it, Marshal.")] }
@@ -20101,7 +20237,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         obj: [{ id: "all", t: "elim", text: "Destroy every enemy base" }, { id: "cap", t: "capture", n: 3, sec: 1, text: "Hold 3 town buildings" }, { id: "loss", t: "lossMax", n: 60, sec: 1, text: "Lose no more than 60 units" }],
         ev: [
           { at: 6, do: [say("hale", "Hill forts on each corner, overpasses linking them. Take the forts and the river is ours.")] },
-          { at: 300, do: [say("voice", "You think you are liberating this land? It has already chosen us.")] },
+          { at: 300, do: [say("voice", "You think you are liberating this land? You made us, Colonel. We are only finishing your experiment.")] },
           { at: 480, do: [say("draganov", "Reyes. For what it is worth \u2014 I am sorry. Finish them.")] },
           { every: 200, from: 300, until: 2400, do: [["wave", 1, [["main", 2], ["base", 3]], { grow: 0.6 }]] }
         ],
@@ -20110,7 +20246,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
     ] },
     // =============================================================================
-    soviet: { title: "Iron Reclamation", tag: "Take back the Frontier for the Legion \u2014 whatever voice is whispering in the Marshal's ear.", missions: [
+    soviet: { title: "Iron Reclamation", tag: "Hold the Frontier for the Legion \u2014 and burn out the hive the West let loose.", missions: [
       {
         name: "Iron Dawn",
         map: "frost",
@@ -20257,6 +20393,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       {
         name: "Red Tide",
         map: "bastion",
+        film: "soviet_reveal",
         loc: "The Bastion",
         spawn: 5,
         brief: [["volkova", "It is the Syndicate. They have been in the Marshal's head for months. And they have a Psychic Hive on the Bastion."], ["draganov", "...I am still in command, Commissar."], ["volkova", "Then command us to burn it. Destroy the Hive, then break the Vanguard fort that shelters it."]],
@@ -20300,13 +20437,13 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
     ] },
     // =============================================================================
-    yuri: { title: "The Harvest", tag: "Wake, gather, and bring every mind on the Frontier into the Hive.", missions: [
+    yuri: { title: "The Harvest", tag: "Born of a fallen star and stolen Vanguard blood. Wake, gather, and bring every mind into the Hive.", missions: [
       {
         name: "Awakening",
         map: "lakes",
         loc: "Broken Lakes",
         spawn: 0,
-        brief: [["voice", "Wake, Adept. The Frontier is loud with small minds fighting over rocks."], ["senna", "I hear them, Master. A Vanguard camp across the lakes."], ["voice", "Grow a Hive. Gather the ore. Then quiet them."]],
+        brief: [["voice", "Wake, Adept. A year free of their cage, and the Frontier is still loud with small minds fighting over rocks."], ["senna", "I hear them, Master. A Vanguard camp across the lakes \u2014 the ones who made us."], ["voice", "Grow a Hive. Gather the ore. Then quiet them."]],
         foes: [{ fac: "allied", diff: "easy", spawn: 3 }],
         start: { credits: 6e3 },
         obj: [
@@ -20376,6 +20513,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       {
         name: "Silent Hand",
         map: "line",
+        film: "yuri_reveal",
         loc: "Firing Line",
         spawn: 2,
         hero: 1,
@@ -20911,8 +21049,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const camp = CAMPAIGNS[fac], unlocked = campaignUnlocked(fac), total = camp.missions.length, done = Math.min(total, Math.max(0, unlocked - 1));
       return '<button class="campCard f-' + fac + '" data-fac="' + fac + '"><div class="ccTop"><span class="ccIcon">' + FAC_ICON[fac] + '</span><span class="ccFac">' + FAC_NAME[fac].toUpperCase() + '</span><span class="ccProg">' + done + "/" + total + '</span></div><div class="ccTitle">' + camp.title + '</div><div class="ccTag">' + camp.tag + '</div><div class="ccBar"><i style="width:' + Math.round(100 * done / total) + '%"></i></div><div class="ccStars">\u2605 ' + campStars(fac) + " / " + 3 * total + "</div></button>";
     }).join("");
-    $("#panelMain").innerHTML = '<h1>CAMPAIGN</h1><div class="sub">Three wars for the Frontier</div><div id="campList">' + rows + '</div><button id="backSetup" ' + SECBTN + ">BACK</button>";
+    $("#panelMain").innerHTML = '<h1>CAMPAIGN</h1><div class="sub">Three wars for the Frontier</div><button class="bPlay" id="filmPro">\u25B6 PROLOGUE \u2014 THE IRON FRONTIER</button><div id="campList">' + rows + '</div><button id="backSetup" ' + SECBTN + ">BACK</button>";
+    $("#filmPro").onclick = () => playFilm("prologue");
     $("#panelMain").querySelectorAll(".campCard").forEach((b) => b.onclick = () => showMissionList(b.dataset.fac)), $("#backSetup").onclick = showSetup;
+    filmSeen("prologue") || playFilm("prologue");
   }
   function showMissionList(fac) {
     radioStop();
@@ -20921,7 +21061,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const locked = i >= unlocked, done = i < unlocked - 1;
       return '<button class="mRow' + (locked ? " locked" : done ? " done" : " next") + '" data-i="' + i + '"' + (locked ? " disabled" : "") + '><span class="mNum">' + (i + 1) + '</span><span class="mMain"><b>' + m.name + "</b><small>" + (locked ? "LOCKED" : mapName(m.map) + " \xB7 " + TYPE_TAG(m)) + "</small></span>" + (done ? starStr(missionStars(fac, i)) : locked ? '<span class="mLock">\u{1F512}</span>' : '<span class="mGo">PLAY \u203A</span>') + "</button>";
     }).join("");
-    $("#panelMain").innerHTML = '<h1 class="f-' + fac + '">' + FAC_ICON[fac] + " " + FAC_NAME[fac].toUpperCase() + '</h1><div class="sub">' + camp.title + '</div><div class="small" style="margin:4px 0 8px;opacity:.8">' + camp.tag + '</div><div id="missionList">' + rows + '</div><button id="backCampList" ' + SECBTN + ">BACK</button>";
+    $("#panelMain").innerHTML = '<h1 class="f-' + fac + '">' + FAC_ICON[fac] + " " + FAC_NAME[fac].toUpperCase() + '</h1><div class="sub">' + camp.title + '</div><div class="small" style="margin:4px 0 8px;opacity:.8">' + camp.tag + '</div><div class="filmRow"><button class="bPlay" id="filmIntro">\u25B6 INTRO</button>' + (unlocked > camp.missions.length ? '<button class="bPlay" id="filmEnd">\u25B6 ENDING</button>' : "") + '</div><div id="missionList">' + rows + '</div><button id="backCampList" ' + SECBTN + ">BACK</button>";
+    $("#filmIntro").onclick = () => playFilm(fac + "_intro");
+    $("#filmEnd") && ($("#filmEnd").onclick = () => playFilm(fac + "_end"));
+    filmSeen(fac + "_intro") || playFilm(fac + "_intro");
     $("#panelMain").querySelectorAll(".mRow").forEach((b) => b.onclick = () => {
       b.disabled || showBriefing(fac, +b.dataset.i);
     }), $("#backCampList").onclick = showCampaign;
@@ -20936,12 +21079,15 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }).join("");
     const objs = m.obj.filter((o) => !o.hide).map((o) => '<div class="bObj' + (o.sec ? " sec" : "") + '"><b>' + (o.sec ? "\u2605" : "\u25C6") + "</b>" + o.text + "</div>").join("");
     const foes = m.foes.map((f) => '<span class="bFoe' + (f.ally ? " ally" : "") + '">' + (f.ally ? "ALLY " : "") + FAC_NAME[f.fac].toUpperCase() + " \xB7 " + DIFFS[f.diff].name + "</span>").join(" ");
-    $("#panelMain").innerHTML = '<div class="bHead"><div><div class="bOp">' + CAMPAIGNS[fac].title.toUpperCase() + " \xB7 MISSION " + (idx2 + 1) + "</div><h1>" + m.name.toUpperCase() + '</h1><div class="sub">' + m.loc + " \xB7 " + mapName(m.map) + " \xB7 " + TYPE_TAG(m) + "</div></div>" + starStr(missionStars(fac, idx2)) + '</div><div class="bMap">' + mapPreviewSVG(m.map, mp) + '</div><div class="bLines">' + lines + '</div><button id="bPlay" class="bPlay">\u25B6 PLAY TRANSMISSION</button><div class="bSec">OBJECTIVES</div>' + objs + '<div class="bSec">OPPOSITION</div><div>' + foes + '</div><button id="launchM">LAUNCH MISSION</button><button id="backCamp" ' + SECBTN + ">BACK</button>";
+    $("#panelMain").innerHTML = '<div class="bHead"><div><div class="bOp">' + CAMPAIGNS[fac].title.toUpperCase() + " \xB7 MISSION " + (idx2 + 1) + "</div><h1>" + m.name.toUpperCase() + '</h1><div class="sub">' + m.loc + " \xB7 " + mapName(m.map) + " \xB7 " + TYPE_TAG(m) + "</div></div>" + starStr(missionStars(fac, idx2)) + '</div><div class="bMap">' + mapPreviewSVG(m.map, mp) + '</div><div class="bLines">' + lines + '</div><div class="filmRow"><button id="bPlay" class="bPlay">\u25B6 PLAY TRANSMISSION</button>' + (m.film ? '<button id="bFilm" class="bPlay">\u25B6 CUTSCENE</button>' : "") + '</div><div class="bSec">OBJECTIVES</div>' + objs + '<div class="bSec">OPPOSITION</div><div>' + foes + '</div><button id="launchM">LAUNCH MISSION</button><button id="backCamp" ' + SECBTN + ">BACK</button>";
     $("#launchM").onclick = () => {
       briefPlay++, launchMission(fac, idx2);
     }, $("#backCamp").onclick = () => {
       briefPlay++, showMissionList(fac);
     };
+    m.film && ($("#bFilm").onclick = () => {
+      briefPlay++, playFilm(m.film);
+    }, filmSeen(m.film) || playFilm(m.film));
     $("#bPlay").onclick = () => {
       audio();
       const tok = ++briefPlay;
@@ -20963,7 +21109,12 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const m = S.mission;
     if (!m || !m.def) return "";
     radioStop();
-    const lines = (win ? m.def.win : m.def.lose) || [];
+    const lines = (win ? m.def.win : m.def.lose) || [], last = win && m.idx === CAMPAIGNS[m.fac].missions.length - 1, endKey = m.fac + "_end", autoEnd = last && !filmSeen(endKey);
+    last && setTimeout(() => {
+      const b = $("#dEnd");
+      b && (b.onclick = () => playFilm(endKey));
+      autoEnd && playFilm(endKey);
+    }, autoEnd ? 2500 : 0);
     let tk = 0;
     const speak = () => {
       if (!lines[tk]) return;
@@ -20974,9 +21125,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
       setTimeout(speak, 1e3 * clamp(1.2 + 0.062 * t.length, 3, 11));
     };
-    setTimeout(speak, 600);
+    autoEnd || setTimeout(speak, 600);
     const objs = m.objs.filter((o) => o.shown).map((o) => '<div class="bObj' + (o.sec ? " sec" : "") + (1 === o.state ? " ok" : -1 === o.state ? " bad" : "") + '"><b>' + (1 === o.state ? "\u2713" : -1 === o.state ? "\u2717" : "\u2013") + "</b>" + o.text + "</div>").join("");
-    return '<div class="dBrief">' + (win ? '<div class="dStars">' + starStr(m.stars) + "</div>" : "") + lines.map(([w, t]) => {
+    return '<div class="dBrief">' + (last ? '<button class="bPlay" id="dEnd">\u25B6 WATCH THE ENDING</button>' : "") + (win ? '<div class="dStars">' + starStr(m.stars) + "</div>" : "") + lines.map(([w, t]) => {
       const c = castOf(w);
       return '<div class="bLine"><span class="bWho" style="color:' + c.c + '">' + c.n + "</span><span>" + t + "</span></div>";
     }).join("") + objs + "</div>";
@@ -20999,11 +21150,832 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     showBriefing,
     missionDebrief,
     missionStars,
-    radioStop
+    radioStop,
+    CAST,
+    castOf
   });
   Object.defineProperties(window, {
     pendingMission: { get: () => pendingMission, configurable: true }
   });
+})();
+
+</script>
+<script>
+(() => {
+  // src/cinema.ts
+  function mulb(a) {
+    return () => {
+      a |= 0, a = a + 1831565813 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      return t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t, ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var lerp = (a, b, t) => a + (b - a) * t;
+  var ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  var sat = (t) => Math.max(0, Math.min(1, t));
+  function vnoise(x, y, s) {
+    const h = (i, j) => {
+      let n = i * 374761393 + j * 668265263 + s * 982451653 | 0;
+      n = Math.imul(n ^ n >>> 13, 1274126177);
+      return ((n ^ n >>> 16) >>> 0) / 4294967296;
+    }, xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+    return lerp(lerp(h(xi, yi), h(xi + 1, yi), u), lerp(h(xi, yi + 1), h(xi + 1, yi + 1), u), v);
+  }
+  var fbm2 = (x, y, s) => 0.5 * vnoise(x, y, s) + 0.25 * vnoise(2 * x, 2 * y, s + 1) + 0.125 * vnoise(4 * x, 4 * y, s + 2) + 0.0625 * vnoise(8 * x, 8 * y, s + 3);
+  function rgba(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (255 & n) + "," + a + ")";
+  }
+  function glow(g, x, y, r, c, a) {
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, rgba(c, a)), gr.addColorStop(1, rgba(c, 0)), g.fillStyle = gr, g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  function rockPath(g, x, y, r, seed, rot) {
+    const R = mulb(seed);
+    g.beginPath();
+    for (let i = 0; i < 14; i++) {
+      const a = rot + i / 14 * Math.PI * 2, rr = r * (0.72 + 0.4 * R());
+      i ? g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.86) : g.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.86);
+    }
+    g.closePath();
+  }
+  function drawFragment(g, x, y, r, T, hot, seed) {
+    glow(g, x, y, r * 3.2, "#9b6bff", 0.35 + 0.15 * Math.sin(3 * T)), glow(g, x, y, r * 1.8, "#5ff0ff", 0.25);
+    rockPath(g, x, y, r, seed || 7, 0.3 * Math.sin(0.4 * T));
+    const gr = g.createLinearGradient(x - r, y - r, x + r, y + r);
+    gr.addColorStop(0, "#2a2436"), gr.addColorStop(1, "#0c0a12"), g.fillStyle = gr, g.fill();
+    g.save(), g.clip(), g.strokeStyle = rgba("#b98cff", 0.6 + 0.3 * Math.sin(4 * T)), g.lineWidth = Math.max(1, r * 0.06), g.shadowColor = "#b98cff", g.shadowBlur = r * 0.5;
+    const R = mulb(seed || 7);
+    for (let i = 0; i < 6; i++) {
+      g.beginPath();
+      let px = x + (R() - 0.5) * r, py = y + (R() - 0.5) * r;
+      g.moveTo(px, py);
+      for (let k = 0; k < 4; k++) px += (R() - 0.5) * r * 0.7, py += (R() - 0.5) * r * 0.7, g.lineTo(px, py);
+      g.stroke();
+    }
+    g.restore();
+    hot && glow(g, x, y, r * 1.2, "#ffffff", 0.25 * hot);
+  }
+  var STARS = (() => {
+    const R = mulb(11), a = [];
+    for (let i = 0; i < 520; i++) a.push([R(), R(), R() * R() * 1.8 + 0.3, R() * 6]);
+    return a;
+  })();
+  function sky(g, W, H, stops) {
+    const gr = g.createLinearGradient(0, 0, 0, H);
+    stops.forEach(([o, c]) => gr.addColorStop(o, c)), g.fillStyle = gr, g.fillRect(0, 0, W, H);
+  }
+  function starfield(g, W, H, T, a, drift) {
+    for (const [x, y, s, tw] of STARS) {
+      const al = a * (0.45 + 0.55 * Math.sin(T * 1.3 + tw) ** 2);
+      g.fillStyle = "rgba(220,230,255," + al + ")";
+      g.fillRect(((x + drift * T * s * 0.01) % 1 + 1) % 1 * W, y * H, s, s);
+    }
+  }
+  function ridge(g, W, H, base, amp, seed, col, freq) {
+    g.beginPath(), g.moveTo(0, H);
+    for (let i = 0; i <= 80; i++) {
+      const x = i / 80;
+      g.lineTo(x * W, base * H - amp * H * fbm2(x * (freq || 4), 0, seed));
+    }
+    g.lineTo(W, H), g.closePath(), g.fillStyle = col, g.fill();
+  }
+  var SCENES = {
+    space(g, W, H, t, T, p) {
+      sky(g, W, H, [[0, "#020308"], [1, "#070b18"]]);
+      const m = Math.min(W, H);
+      for (const [x, y, r2, c] of [[0.25, 0.3, 0.5, "#4b2a7a"], [0.8, 0.2, 0.4, "#16406a"], [0.6, 0.7, 0.45, "#3a1850"]]) glow(g, x * W, y * H, r2 * W, c, 0.28);
+      starfield(g, W, H, T, 1, 0.6);
+      if (p.earth) {
+        const cx = W * 0.5, cy = H * 2.05, R = H * 1.35;
+        g.save();
+        const gr2 = g.createRadialGradient(cx, cy - R * 0.4, R * 0.2, cx, cy, R);
+        gr2.addColorStop(0, "#1d4d7a"), gr2.addColorStop(0.85, "#0b2440"), gr2.addColorStop(1, "#040b16");
+        g.fillStyle = gr2, g.beginPath(), g.arc(cx, cy, R, 0, 7), g.fill();
+        g.clip();
+        const R2 = mulb(5);
+        for (let i = 0; i < 260; i++) {
+          const a = -Math.PI / 2 + (R2() - 0.5) * 1.3, d = R * (0.7 + 0.3 * R2());
+          g.fillStyle = "rgba(255,200,120," + (0.25 + 0.5 * R2()) + ")", g.fillRect(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 1.6, 1.6);
+        }
+        g.restore();
+        g.strokeStyle = "rgba(120,190,255,.55)", g.lineWidth = m * 0.012, g.shadowColor = "#6fc0ff", g.shadowBlur = m * 0.05, g.beginPath(), g.arc(cx, cy, R, Math.PI * 1.1, Math.PI * 1.9), g.stroke(), g.shadowBlur = 0;
+      }
+      const e = ease(t), fx = lerp(p.from[0], p.to[0], e) * W, fy = lerp(p.from[1], p.to[1], e) * H, r = m * (p.size || 0.05) * lerp(1, p.grow || 1, e), ang = Math.atan2(p.to[1] - p.from[1], p.to[0] - p.from[0]);
+      const tl = r * (p.trail || 9), gr = g.createLinearGradient(fx, fy, fx - Math.cos(ang) * tl, fy - Math.sin(ang) * tl);
+      gr.addColorStop(0, "rgba(190,150,255,.55)"), gr.addColorStop(1, "rgba(90,240,255,0)");
+      g.strokeStyle = gr, g.lineWidth = r * 1.2, g.lineCap = "round", g.beginPath(), g.moveTo(fx, fy), g.lineTo(fx - Math.cos(ang) * tl, fy - Math.sin(ang) * tl), g.stroke();
+      drawFragment(g, fx, fy, r, T, 0, 3);
+    },
+    entry(g, W, H, t, T, p) {
+      sky(g, W, H, [[0, "#070a1c"], [0.55, "#2a1d3a"], [0.8, "#8a4a3a"], [1, "#d9894a"]]);
+      starfield(g, W, H * 0.6, T, 0.5, 0);
+      const m = Math.min(W, H), hz = 0.74;
+      const imp = 0.78, e = sat(t / imp), x0 = 0.98 * W, y0 = 0.02 * H, x1 = 0.36 * W, y1 = hz * H;
+      const hx = lerp(x0, x1, e * e), hy = lerp(y0, y1, e * e);
+      g.lineCap = "round";
+      for (let k = 0; k < 30; k++) {
+        const q = k / 30 * e * e;
+        if (q <= 0) continue;
+        const sx = lerp(x0, x1, q), sy = lerp(y0, y1, q), age = e * e - q;
+        g.strokeStyle = "rgba(70,60,70," + 0.18 * (1 - age) + ")", g.lineWidth = m * (0.02 + 0.08 * age), g.beginPath(), g.moveTo(sx, sy), g.lineTo(lerp(x0, x1, q + 0.034), lerp(y0, y1, q + 0.034)), g.stroke();
+      }
+      if (t < imp) {
+        const ang = Math.atan2(y1 - y0, x1 - x0);
+        for (let k = 0; k < 3; k++) {
+          const L = m * (0.5 - 0.13 * k), gr = g.createLinearGradient(hx, hy, hx - Math.cos(ang) * L, hy - Math.sin(ang) * L);
+          gr.addColorStop(0, ["rgba(255,255,230,.95)", "rgba(255,170,60,.7)", "rgba(190,120,255,.5)"][k]), gr.addColorStop(1, "rgba(255,120,40,0)"), g.strokeStyle = gr, g.lineWidth = m * (0.012 + 0.014 * k), g.beginPath(), g.moveTo(hx, hy), g.lineTo(hx - Math.cos(ang) * L, hy - Math.sin(ang) * L), g.stroke();
+        }
+        glow(g, hx, hy, m * 0.12, "#ffd9a0", 0.8);
+      }
+      ridge(g, W, H, hz + 0.02, 0.1, 4, "#1a1422", 3), ridge(g, W, H, hz + 0.12, 0.12, 9, "#0d0a12", 2.2);
+      if (t >= imp) {
+        const k = (t - imp) / (1 - imp);
+        glow(g, x1, y1, m * (0.3 + 1.2 * k), "#ffb070", 0.9 * (1 - k * 0.6));
+        g.strokeStyle = "rgba(255,230,200," + 0.8 * (1 - k) + ")", g.lineWidth = m * 0.01, g.beginPath(), g.ellipse(x1, y1, m * (0.1 + 1.3 * k), m * (0.05 + 0.5 * k), 0, Math.PI, 2 * Math.PI), g.stroke();
+        g.fillStyle = "rgba(255,250,235," + Math.max(0, 1 - 4 * k) + ")", g.fillRect(0, 0, W, H);
+      }
+    },
+    site(g, W, H, t, T, p) {
+      sky(g, W, H, [[0, "#03060c"], [0.6, "#0b1522"], [1, "#141d28"]]);
+      starfield(g, W, H * 0.5, T, 0.4, 0);
+      const m = Math.min(W, H), cx = W * 0.5, cy = H * 0.66;
+      ridge(g, W, H, 0.52, 0.1, 21, "#0c1520", 3);
+      g.fillStyle = "#18222d", g.fillRect(0, H * 0.52, W, H);
+      g.fillStyle = "#070b10", g.beginPath(), g.ellipse(cx, cy, W * 0.34, H * 0.16, 0, 0, 7), g.fill();
+      g.strokeStyle = "rgba(170,200,220,.25)", g.lineWidth = m * 6e-3, g.beginPath(), g.ellipse(cx, cy, W * 0.34, H * 0.16, 0, Math.PI, 2 * Math.PI), g.stroke();
+      for (let i = 0; i < 3; i++) {
+        const bx = W * (0.2 + 0.3 * i), by = H * 0.5, a = Math.PI / 2 + 0.5 * Math.sin(0.35 * T + i * 2) + (1 - i) * 0.2;
+        g.save(), g.globalCompositeOperation = "lighter";
+        const L = H * 0.55, gr = g.createLinearGradient(bx, by, bx + Math.cos(a) * L, by + Math.sin(a) * L);
+        gr.addColorStop(0, "rgba(200,230,255,.22)"), gr.addColorStop(1, "rgba(200,230,255,0)"), g.fillStyle = gr, g.beginPath(), g.moveTo(bx, by), g.lineTo(bx + Math.cos(a - 0.12) * L, by + Math.sin(a - 0.12) * L), g.lineTo(bx + Math.cos(a + 0.12) * L, by + Math.sin(a + 0.12) * L), g.fill(), g.restore();
+        g.fillStyle = "#dfefff", g.fillRect(bx - 2, by - 2, 4, 4);
+      }
+      g.strokeStyle = "rgba(150,160,170,.45)", g.lineWidth = 1.2;
+      for (let i = -3; i <= 3; i++) {
+        const x = cx + i * W * 0.035;
+        g.beginPath(), g.moveTo(x, cy - H * 0.18), g.lineTo(x, cy + H * 0.02), g.stroke();
+      }
+      for (let j = 0; j < 4; j++) {
+        const y = cy - H * 0.18 + j * H * 0.055;
+        g.beginPath(), g.moveTo(cx - W * 0.105, y), g.lineTo(cx + W * 0.105, y), g.stroke();
+      }
+      const al = p.alarm ? sat((t - 0.15) / 0.5) : 0;
+      if (al) {
+        const R2 = mulb(4);
+        g.lineCap = "round";
+        for (let i = 0; i < 9; i++) {
+          const a = R2() * Math.PI * 2, L = m * (0.1 + 0.45 * R2()) * al;
+          g.strokeStyle = rgba("#b27ae0", 0.7), g.lineWidth = m * 0.01 * (1 - 0.5 * R2()), g.shadowColor = "#b27ae0", g.shadowBlur = m * 0.03, g.beginPath(), g.moveTo(cx, cy - H * 0.08);
+          const ex = cx + Math.cos(a) * L * 1.6, ey = cy - H * 0.08 + Math.sin(a) * L * 0.5;
+          g.quadraticCurveTo(cx + Math.cos(a + 1) * L * 0.5, cy - H * 0.08 + Math.sin(a + 1) * L * 0.3, ex, ey), g.stroke();
+        }
+        g.shadowBlur = 0;
+      }
+      drawFragment(g, cx, cy - H * 0.08, m * 0.07, T, al, 5);
+      for (let i = 0; i < 14; i++) {
+        const x = cx + (i / 13 - 0.5) * W * 0.62, y = cy - H * 0.155 + Math.abs(i / 13 - 0.5) * H * 0.1;
+        g.fillStyle = "#05080c", g.fillRect(x, y - m * 0.018, m * 6e-3, m * 0.018), g.beginPath(), g.arc(x + m * 3e-3, y - m * 0.021, m * 4e-3, 0, 7), g.fill();
+      }
+      if (al) {
+        const on = Math.sin(9 * T) > 0;
+        g.fillStyle = "rgba(255,30,30," + (on ? 0.16 : 0.04) * al + ")", g.fillRect(0, 0, W, H);
+        for (const x of [0.12, 0.88]) {
+          glow(g, W * x, H * 0.5, m * 0.18, "#ff2020", on ? 0.55 : 0.1);
+        }
+      }
+      const R = mulb(9);
+      g.fillStyle = "rgba(230,240,255,.6)";
+      for (let i = 0; i < 140; i++) {
+        const x = (R() * W + 30 * T * (0.5 + R())) % W, y = (R() * H + H * 0.08 * T * (1 + R())) % H;
+        g.fillRect(x, y, 1.5, 1.5);
+      }
+    },
+    lab(g, W, H, t, T, p) {
+      sky(g, W, H, [[0, "#04070b"], [1, "#0d141b"]]);
+      const m = Math.min(W, H), cx = W * 0.5, cy = H * 0.52;
+      g.strokeStyle = "rgba(90,140,170,.18)", g.lineWidth = 1;
+      for (let i = -12; i <= 12; i++) {
+        g.beginPath(), g.moveTo(cx + i * W * 0.02, H * 0.72), g.lineTo(cx + i * W * 0.12, H), g.stroke();
+      }
+      for (let j = 0; j < 6; j++) {
+        const y = H * 0.72 + Math.pow(j / 6, 1.8) * H * 0.28;
+        g.beginPath(), g.moveTo(0, y), g.lineTo(W, y), g.stroke();
+      }
+      const hk = p.hack ? sat((t - 0.12) / 0.6) : 0, br = p.breach ? sat((t - 0.72) / 0.2) : 0;
+      const R = mulb(12);
+      for (let i = 0; i < 4; i++) {
+        const left = i < 2, mx = left ? W * (0.06 + 0.14 * i) : W * (0.66 + 0.14 * (i - 2)), my = H * (0.24 + 0.08 * (i % 2)), mw = W * 0.12, mh = H * 0.22;
+        const inf = hk > (left ? 0.2 + 0.25 * i : 0.2 + 0.25 * (3 - i));
+        g.fillStyle = "#061015", g.fillRect(mx, my, mw, mh);
+        g.strokeStyle = inf ? "#b27ae0" : "#2f5d6e", g.lineWidth = 2, g.strokeRect(mx, my, mw, mh);
+        g.font = Math.round(mh * 0.075) + "px monospace", g.fillStyle = inf ? "#d59cff" : "#57e39a";
+        for (let l = 0; l < 11; l++) {
+          let s = "";
+          const RR = mulb(i * 999 + l + Math.floor(T * (inf ? 14 : 4)));
+          for (let c = 0; c < 14; c++) s += inf ? "\u16DF\u16A6\u16C9\u25CA\u2206\u2573\u2591\u2592"[Math.floor(RR() * 9)] : "0123456789ABCDEF"[Math.floor(RR() * 16)];
+          g.fillText(s, mx + mw * 0.05, my + mh * (0.1 + 0.08 * l));
+        }
+        inf && glow(g, mx + mw / 2, my + mh / 2, mw * 0.8, "#b27ae0", 0.18);
+        const sx = left ? mx + mw : mx, sy = my + mh * 0.8;
+        g.strokeStyle = inf ? "rgba(178,122,224,.8)" : "rgba(80,100,110,.6)", g.lineWidth = m * 6e-3, g.beginPath(), g.moveTo(cx, cy + H * 0.18), g.quadraticCurveTo((cx + sx) / 2, H * 0.9, sx, sy), g.stroke();
+        if (inf) {
+          const q = (3 * T + i * 0.3) % 1, bx = (1 - q) * (1 - q) * cx + 2 * (1 - q) * q * (cx + sx) / 2 + q * q * sx, by = (1 - q) * (1 - q) * (cy + H * 0.18) + 2 * (1 - q) * q * H * 0.9 + q * q * sy;
+          glow(g, bx, by, m * 0.03, "#e0b0ff", 0.9);
+        }
+      }
+      const cw = W * 0.13, ch = H * 0.5, x0 = cx - cw / 2, y0 = cy - ch / 2;
+      glow(g, cx, cy, W * 0.25, hk ? "#9b6bff" : "#39c6d6", 0.25 + 0.2 * hk);
+      const gr = g.createLinearGradient(x0, 0, x0 + cw, 0);
+      gr.addColorStop(0, "rgba(60,160,190,.25)"), gr.addColorStop(0.5, "rgba(120,220,240,.08)"), gr.addColorStop(1, "rgba(60,160,190,.3)"), g.fillStyle = gr, g.fillRect(x0, y0, cw, ch);
+      g.strokeStyle = "rgba(170,230,245,.5)", g.lineWidth = 2, g.strokeRect(x0, y0, cw, ch);
+      g.fillStyle = "#1b2730", g.fillRect(x0 - cw * 0.12, y0 - H * 0.04, cw * 1.24, H * 0.04), g.fillRect(x0 - cw * 0.12, y0 + ch, cw * 1.24, H * 0.05);
+      drawFragment(g, cx, cy + Math.sin(T * 1.2) * H * 0.01, m * 0.055, T, hk * 0.6, 5);
+      if (br) {
+        g.strokeStyle = "rgba(230,245,255,.8)", g.lineWidth = 1.4;
+        const RC = mulb(3);
+        for (let i = 0; i < 10 * br; i++) {
+          let px = x0 + cw * RC(), py = y0 + ch * RC();
+          g.beginPath(), g.moveTo(px, py);
+          for (let k = 0; k < 4; k++) px += (RC() - 0.5) * cw * 0.5, py += (RC() - 0.5) * ch * 0.2, g.lineTo(px, py);
+          g.stroke();
+        }
+        g.fillStyle = "rgba(255,40,40," + (Math.sin(10 * T) > 0 ? 0.18 : 0.05) + ")", g.fillRect(0, 0, W, H);
+      }
+    },
+    dna(g, W, H, t, T, p) {
+      sky(g, W, H, [[0, "#05040a"], [1, "#0c0716"]]);
+      const m = Math.min(W, H), cy = H * 0.5, A = H * 0.16, front = lerp(-0.1, 1.1, ease(sat((t - 0.1) / 0.8)));
+      for (let i = 0; i < 70; i++) {
+        const u = i / 69, x = u * W, ph = u * 10 + T * 1.4, y1 = cy + Math.sin(ph) * A, y2 = cy - Math.sin(ph) * A, z = Math.cos(ph), c = u < front ? p.to || "#b27ae0" : p.from || "#6fb8e0";
+        if (i % 2 == 0) {
+          g.strokeStyle = rgba(c, 0.25 + 0.2 * Math.abs(z)), g.lineWidth = m * 5e-3, g.beginPath(), g.moveTo(x, y1), g.lineTo(x, y2), g.stroke();
+        }
+        for (const [y, zz] of [[y1, z], [y2, -z]]) {
+          const r = m * (8e-3 + 6e-3 * (zz + 1));
+          glow(g, x, y, r * 4, c, 0.35), g.fillStyle = rgba(c, 0.6 + 0.3 * zz), g.beginPath(), g.arc(x, y, r, 0, 7), g.fill();
+        }
+      }
+      g.strokeStyle = "rgba(255,255,255,.7)", g.lineWidth = 1.5, g.beginPath(), g.moveTo(front * W, H * 0.2), g.lineTo(front * W, H * 0.8), g.stroke();
+      glow(g, front * W, cy, m * 0.2, "#e0c0ff", 0.35);
+      g.font = "600 " + Math.round(m * 0.028) + "px monospace", g.fillStyle = "rgba(210,200,255,.85)", g.fillText(p.label || "GENOME SPLICE \u2014 VANGUARD DONOR 7741", W * 0.06, H * 0.18), g.fillText("MATCH " + (100 * sat(front)).toFixed(1) + "%", W * 0.06, H * 0.18 + m * 0.04);
+    },
+    vats(g, W, H, t, T, p) {
+      sky(g, W, H, [[0, "#040208"], [1, "#12081c"]]);
+      const m = Math.min(W, H), cx = W * 0.5, hy = H * 0.46, push = t * 1.4;
+      g.fillStyle = "#0a0610", g.fillRect(0, hy, W, H);
+      const items = [];
+      for (let k = 0; k < 9; k++) for (const s of [-1, 1]) items.push([k + 1 - push % 1, s, k]);
+      items.sort((a, b) => b[0] - a[0]);
+      for (const [z, s, k] of items) {
+        if (z < 0.35) continue;
+        const sc = 1 / z, x = cx + s * W * 0.34 * sc, w = W * 0.11 * sc, h = H * 0.62 * sc, y = hy - h * 0.55;
+        glow(g, x, y + h / 2, w * 1.6, "#9b3bd6", 0.3 * sc);
+        const gr = g.createLinearGradient(0, y, 0, y + h);
+        gr.addColorStop(0, "rgba(140,60,200,.35)"), gr.addColorStop(1, "rgba(200,80,255,.55)"), g.fillStyle = gr, g.fillRect(x - w / 2, y, w, h);
+        g.strokeStyle = "rgba(220,180,255,.35)", g.lineWidth = Math.max(1, 2 * sc), g.strokeRect(x - w / 2, y, w, h);
+        g.fillStyle = "#140a1c", g.fillRect(x - w * 0.6, y - h * 0.06, w * 1.2, h * 0.06), g.fillRect(x - w * 0.6, y + h, w * 1.2, h * 0.05);
+        const bob = Math.sin(T * 0.8 + k + s) * h * 0.01;
+        g.fillStyle = "rgba(20,6,30,.85)", g.beginPath(), g.arc(x, y + h * 0.22 + bob, w * 0.16, 0, 7), g.fill(), g.beginPath(), g.ellipse(x, y + h * 0.52 + bob, w * 0.24, h * 0.25, 0, 0, 7), g.fill();
+        p.wake && t > 0.6 && z < 3.2 && (glow(g, x - w * 0.05, y + h * 0.22 + bob, w * 0.12, "#ff7af5", 0.9), glow(g, x + w * 0.05, y + h * 0.22 + bob, w * 0.12, "#ff7af5", 0.9));
+        const R = mulb(k * 7 + s);
+        g.fillStyle = "rgba(240,210,255,.5)";
+        for (let b = 0; b < 6; b++) {
+          const by = y + h - (R() * h + T * h * 0.2 * (0.5 + R())) % h;
+          g.fillRect(x - w / 2 + R() * w, by, 2 * sc + 1, 2 * sc + 1);
+        }
+      }
+      glow(g, cx, hy, W * 0.3, "#7a2aa8", 0.25);
+    },
+    warmap(g, W, H, t, T, p) {
+      sky(g, W, H, [[0, "#03080c"], [1, "#061018"]]);
+      const MW = 320, MH = 180;
+      let c = SCENES._mapCv;
+      if (!c) {
+        c = SCENES._mapCv = document.createElement("canvas"), c.width = MW, c.height = MH;
+        SCENES._land = new Float32Array(MW * MH);
+        for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
+          const u = x / MW, v = y / MH, d = Math.hypot((u - 0.5) * 1.25, (v - 0.52) * 1.6);
+          SCENES._land[y * MW + x] = fbm2(u * 5, v * 5, 17) + 0.55 - d;
+        }
+      }
+      const cg = c.getContext("2d"), img = cg.createImageData(MW, MH), L = SCENES._land, e = ease(t), lf = lerp(p.l0 != null ? p.l0 : 0.7, p.l1 != null ? p.l1 : 0.7, e), vf = p.v0 != null ? lerp(p.v0, p.v1, e) : -1, hr = lerp(p.h0 || 0, p.h1 || 0, e), hs = p.hs || [[0.5, 0.45]];
+      for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
+        const i = y * MW + x, o = 4 * i, land = L[i] > 0.62, u = x / MW, v = y / MH, nz = fbm2(u * 9, v * 9, 3) - 0.5;
+        let r = 4, gg = 14, b = 24;
+        if (land) {
+          let col = [40, 64, 92];
+          u + nz * 0.12 > lf && (col = [150, 44, 38]);
+          vf >= 0 && u + nz * 0.12 < vf && (col = [40, 90, 150]);
+          for (const [hx, hy] of hs) Math.hypot((u - hx) * 1.6, v - hy) + nz * 0.1 < hr && (col = [120, 50, 170]);
+          const sh = 0.75 + 0.5 * (L[i] - 0.62);
+          r = col[0] * sh, gg = col[1] * sh, b = col[2] * sh;
+          L[i] < 0.66 && (r += 25, gg += 25, b += 25);
+        }
+        img.data[o] = r, img.data[o + 1] = gg, img.data[o + 2] = b, img.data[o + 3] = 255;
+      }
+      cg.putImageData(img, 0, 0);
+      const mx = W * 0.08, my = H * 0.12, mw = W * 0.84, mh = H * 0.76;
+      g.imageSmoothingEnabled = true, g.drawImage(c, mx, my, mw, mh);
+      g.strokeStyle = "rgba(120,200,230,.08)", g.lineWidth = 1;
+      for (let i = 0; i <= 16; i++) {
+        g.beginPath(), g.moveTo(mx + mw * i / 16, my), g.lineTo(mx + mw * i / 16, my + mh), g.stroke();
+      }
+      for (let i = 0; i <= 9; i++) {
+        g.beginPath(), g.moveTo(mx, my + mh * i / 9), g.lineTo(mx + mw, my + mh * i / 9), g.stroke();
+      }
+      const m = Math.min(W, H);
+      (p.arrows || []).forEach(([x0, y0, x1, y1, col], k) => {
+        const q = sat((t - 0.1 - 0.1 * k) / 0.6);
+        if (q <= 0) return;
+        const ax = mx + mw * lerp(x0, x1, q), ay = my + mh * lerp(y0, y1, q), sx = mx + mw * x0, sy = my + mh * y0;
+        g.strokeStyle = col, g.lineWidth = m * 0.012, g.lineCap = "round", g.shadowColor = col, g.shadowBlur = m * 0.02, g.beginPath(), g.moveTo(sx, sy), g.lineTo(ax, ay), g.stroke();
+        const an = Math.atan2(ay - sy, ax - sx);
+        g.fillStyle = col, g.beginPath(), g.moveTo(ax + Math.cos(an) * m * 0.03, ay + Math.sin(an) * m * 0.03), g.lineTo(ax + Math.cos(an + 2.5) * m * 0.03, ay + Math.sin(an + 2.5) * m * 0.03), g.lineTo(ax + Math.cos(an - 2.5) * m * 0.03, ay + Math.sin(an - 2.5) * m * 0.03), g.fill(), g.shadowBlur = 0;
+      });
+      if (p.site) {
+        const sx = mx + mw * p.site[0], sy = my + mh * p.site[1], pr = T * 0.8 % 1;
+        g.strokeStyle = "rgba(230,180,255," + (1 - pr) + ")", g.lineWidth = 2, g.beginPath(), g.arc(sx, sy, m * (0.01 + 0.06 * pr), 0, 7), g.stroke();
+        g.fillStyle = "#f0d8ff", g.beginPath(), g.arc(sx, sy, m * 7e-3, 0, 7), g.fill();
+        g.font = "600 " + Math.round(m * 0.024) + "px monospace", g.fillText("SITE NINE", sx + m * 0.015, sy - m * 0.012);
+      }
+      g.font = "700 " + Math.round(m * 0.026) + "px monospace", g.fillStyle = "rgba(170,220,240,.85)", g.fillText(p.label || "THEATRE MAP \u2014 THE FRONTIER", mx, my - m * 0.025);
+      g.textAlign = "right", g.fillText(p.date || "", mx + mw, my - m * 0.025), g.textAlign = "left";
+      const leg = [["VANGUARD", "#3a7bd5"], ["LEGION", "#c0392b"], ["SYNDICATE", "#8e44ad"]];
+      g.font = "600 " + Math.round(m * 0.022) + "px monospace";
+      leg.forEach(([n, cc], i) => {
+        g.fillStyle = cc, g.fillRect(mx + i * m * 0.3, my + mh + m * 0.025, m * 0.02, m * 0.02), g.fillStyle = "rgba(200,220,235,.8)", g.fillText(n, mx + i * m * 0.3 + m * 0.03, my + mh + m * 0.043);
+      });
+    },
+    battle(g, W, H, t, T, p) {
+      const S = { dusk: [[0, "#1a1020"], [0.5, "#6a3026"], [0.8, "#c8643a"], [1, "#e8a060"]], night: [[0, "#05070e"], [0.6, "#1c2436"], [1, "#40405a"]], day: [[0, "#4a5a6a"], [1, "#c0a888"]], hive: [[0, "#0a0414"], [0.6, "#3a1450"], [1, "#8a4aa0"]] }[p.sky || "dusk"];
+      sky(g, W, H, S);
+      const m = Math.min(W, H), gy = H * 0.66;
+      const R = mulb(p.seed || 3);
+      for (let i = 0; i < 5; i++) {
+        const sx = W * R(), sh = H * (0.35 + 0.3 * R());
+        glow(g, sx, gy, m * 0.12, "#ff8a3a", 0.45);
+        for (let k = 0; k < 12; k++) {
+          const q = (k / 12 + T * 0.03) % 1;
+          glow(g, sx + Math.sin(q * 6 + i) * W * 0.02 + q * W * 0.06, gy - sh * q, m * (0.03 + 0.1 * q), "#1a1216", 0.45 * (1 - q));
+        }
+      }
+      ridge(g, W, H, 0.62, 0.08, 31, "#2a1c20", 3);
+      const gg = g.createLinearGradient(0, gy, 0, H);
+      gg.addColorStop(0, "#2a1e1c"), gg.addColorStop(1, "#0a0808"), g.fillStyle = gg, g.fillRect(0, gy, W, H - gy);
+      if (p.hive) {
+        const RH = mulb(8);
+        for (let i = 0; i < 26; i++) {
+          const x = W * RH(), h = H * (0.05 + 0.14 * RH()) * sat(t * 1.5);
+          g.fillStyle = "rgba(110,35,150,.9)", g.beginPath(), g.moveTo(x - m * 0.02, gy + H * 0.03), g.quadraticCurveTo(x + m * 0.02, gy - h * 0.5, x + m * 5e-3 * Math.sin(T + i), gy - h), g.quadraticCurveTo(x + m * 0.01, gy - h * 0.4, x + m * 0.03, gy + H * 0.03), g.fill();
+          glow(g, x, gy - h, m * 0.03, "#e08aff", 0.7);
+        }
+      }
+      const dir = p.dir || 1, fc = p.color || "#6fb8e0", n = p.n || 7, tanks = [];
+      for (let k = 0; k < n; k++) {
+        const d = 0.45 + 0.55 * R(), sp = (0.025 + 0.015 * R()) * dir;
+        tanks.push([d, sp, R(), k]);
+      }
+      tanks.sort((a, b) => a[0] - b[0]);
+      for (const [d, sp, r0, k] of tanks) {
+        const x = ((r0 + sp * T) % 1.2 + 1.2) % 1.2 * W - 0.1 * W, y = gy + H * 0.3 * (d - 0.45), s = m * 0.13 * d;
+        g.fillStyle = "rgba(0,0,0,.45)", g.beginPath(), g.ellipse(x, y + s * 0.05, s * 1.2, s * 0.12, 0, 0, 7), g.fill();
+        g.save(), g.translate(x, y), g.scale(dir * s, s);
+        const shade = Math.round(10 + 12 * (1 - d));
+        g.fillStyle = "rgb(" + shade + "," + (shade - 2) + "," + (shade + 2) + ")";
+        g.beginPath(), g.moveTo(-1.05, -0.05), g.lineTo(-0.9, -0.38), g.lineTo(0.92, -0.38), g.lineTo(1.1, -0.05), g.lineTo(0.95, 0.08), g.lineTo(-0.95, 0.08), g.closePath(), g.fill();
+        g.beginPath(), g.moveTo(-0.5, -0.38), g.lineTo(-0.4, -0.66), g.lineTo(0.28, -0.66), g.lineTo(0.4, -0.38), g.fill(), g.fillRect(0.3, -0.57, 1, 0.08);
+        g.strokeStyle = rgba(fc, 0.55), g.lineWidth = 0.03, g.beginPath(), g.moveTo(-0.88, -0.4), g.lineTo(0.9, -0.4), g.moveTo(-0.4, -0.68), g.lineTo(0.28, -0.68), g.stroke();
+        g.fillStyle = "#050405";
+        for (let w = 0; w < 6; w++) g.beginPath(), g.arc(-0.75 + 0.3 * w, 0, 0.1, 0, 7), g.fill();
+        const fire = Math.sin(T * 2.2 + k * 1.7) > 0.9;
+        fire && (g.fillStyle = "#fff2c0", g.beginPath(), g.arc(1.38, -0.53, 0.16, 0, 7), g.fill());
+        g.restore();
+        fire && glow(g, x + dir * s * 1.38, y - s * 0.53, m * 0.09, "#ffb060", 0.9);
+        const tr = (T * 1.7 + k * 0.37) % 1;
+        tr < 0.35 && (g.strokeStyle = rgba(fc, 0.9), g.lineWidth = 2.5, g.beginPath(), g.moveTo(x + dir * s * (1.5 + tr * 10), y - s * 0.53), g.lineTo(x + dir * s * (2.1 + tr * 10), y - s * 0.55), g.stroke());
+      }
+      for (let i = 0; i < 4; i++) {
+        const ph = (T * 0.45 + i * 0.27) % 1, ex = W * mulb(i * 13 + Math.floor(T * 0.45 + i * 0.27))(), ey = gy + H * 0.08 * mulb(i)();
+        if (ph < 0.5) {
+          const q = ph / 0.5;
+          glow(g, ex, ey, m * (0.06 + 0.25 * q), "#ffb050", 0.95 * (1 - q)), glow(g, ex, ey - m * 0.12 * q, m * 0.14 * q, "#2a2020", 0.6 * q);
+        }
+      }
+      const RE = mulb(77);
+      for (let i = 0; i < 50; i++) {
+        const x = (RE() * W + T * 30 * RE()) % W, y = (RE() * H - T * 40 * (RE() + 0.2) + H * 2) % H;
+        g.fillStyle = "rgba(255,180,90," + 0.6 * RE() + ")", g.fillRect(x, y, 2, 2);
+      }
+    },
+    march(g, W, H, t, T, p) {
+      sky(g, W, H, [[0, "#12060a"], [0.55, "#3a1414"], [1, "#6a2a1c"]]);
+      const m = Math.min(W, H), gy = H * 0.62;
+      for (let i = 0; i < 4; i++) {
+        const bx = W * (0.1 + 0.27 * i), a = -Math.PI / 2 + 0.35 * Math.sin(0.4 * T + i * 1.3);
+        g.save(), g.globalCompositeOperation = "lighter";
+        const L = H * 0.9, gr = g.createLinearGradient(bx, gy, bx + Math.cos(a) * L, gy + Math.sin(a) * L);
+        gr.addColorStop(0, "rgba(255,220,200,.18)"), gr.addColorStop(1, "rgba(255,220,200,0)"), g.fillStyle = gr, g.beginPath(), g.moveTo(bx, gy), g.lineTo(bx + Math.cos(a - 0.07) * L, gy + Math.sin(a - 0.07) * L), g.lineTo(bx + Math.cos(a + 0.07) * L, gy + Math.sin(a + 0.07) * L), g.fill(), g.restore();
+      }
+      ridge(g, W, H, 0.6, 0.06, 41, "#1c0c0e", 3);
+      for (let b = 0; b < 5; b++) {
+        const bx = W * (0.1 + 0.2 * b), top = H * 0.18;
+        g.fillStyle = "#140a0a", g.fillRect(bx, top, m * 6e-3, gy - top);
+        g.fillStyle = "#9a1c1c", g.beginPath(), g.moveTo(bx, top);
+        for (let i = 0; i <= 10; i++) {
+          const u = i / 10;
+          g.lineTo(bx + m * 0.16 * u, top + Math.sin(u * 4 - T * 3 + b) * m * 0.012 * u);
+        }
+        for (let i = 10; i >= 0; i--) {
+          const u = i / 10;
+          g.lineTo(bx + m * 0.16 * u, top + m * 0.1 + Math.sin(u * 4 - T * 3 + b) * m * 0.012 * u);
+        }
+        g.fill();
+        g.fillStyle = "#f2c14e", g.font = Math.round(m * 0.05) + "px serif", g.fillText("\u2605", bx + m * 0.05, top + m * 0.07);
+      }
+      for (let row = 0; row < 5; row++) {
+        const d = 0.4 + row * 0.2, s = m * 0.11 * d, y = gy + H * 0.09 * row * d + H * 0.04, sp = m * 0.1 * d, off = T * 0.35 * s % sp, col = row > 3 ? "#050304" : "#0f0708";
+        g.fillStyle = col;
+        for (let x = -sp + off; x < W + sp; x += sp) {
+          const bob = Math.abs(Math.sin(T * 4 + x * 0.05)) * s * 0.12, xx = x;
+          g.beginPath(), g.arc(xx, y - s * 1.55 - bob, s * 0.22, 0, 7), g.fill(), g.beginPath(), g.ellipse(xx, y - s * 1.62 - bob, s * 0.28, s * 0.12, 0, Math.PI, 2 * Math.PI), g.fill(), g.fillRect(xx - s * 0.22, y - s * 1.35 - bob, s * 0.44, s * 0.8), g.fillRect(xx - s * 0.2, y - s * 0.55 - bob, s * 0.14, s * 0.55), g.fillRect(xx + s * 0.06, y - s * 0.55 - bob, s * 0.14, s * 0.55), g.fillRect(xx + s * 0.2, y - s * 1.9 - bob, s * 0.05, s * 0.9);
+        }
+      }
+    },
+    city(g, W, H, t, T, p) {
+      const S = p.dawn ? [[0, "#1b2a44"], [0.55, "#c46a4a"], [1, "#f2b36a"]] : p.hive ? [[0, "#08030e"], [0.6, "#2c0f3c"], [1, "#4c1e5e"]] : [[0, "#07080c"], [0.6, "#241814"], [1, "#5a3020"]];
+      sky(g, W, H, S);
+      const m = Math.min(W, H), gy = H * 0.78;
+      p.dawn && glow(g, W * 0.7, gy, m * 0.6, "#ffd08a", 0.6);
+      for (let layer = 0; layer < 3; layer++) {
+        const R2 = mulb(50 + layer), col = ["#1a1620", "#110e14", "#08070a"][layer];
+        let x = -W * 0.02;
+        for (; x < W; ) {
+          const w = W * (0.04 + 0.05 * R2()), h = H * (0.18 + 0.3 * R2()) * (1 - 0.2 * layer) + layer * H * 0.05, top = gy - h;
+          g.fillStyle = col, g.beginPath(), g.moveTo(x, gy), g.lineTo(x, top);
+          const br = R2() < 0.45;
+          if (br) {
+            g.lineTo(x + w * 0.3, top + h * 0.08), g.lineTo(x + w * 0.5, top - h * 0.04), g.lineTo(x + w * 0.7, top + h * 0.12);
+          }
+          g.lineTo(x + w, top + (br ? h * 0.05 : 0)), g.lineTo(x + w, gy), g.fill();
+          if (layer === 2) for (let wy = top + h * 0.1; wy < gy - h * 0.05; wy += h * 0.08) for (let wx = x + w * 0.15; wx < x + w * 0.85; wx += w * 0.2) R2() < 0.12 && (g.fillStyle = p.hive ? "rgba(220,140,255,.5)" : "rgba(255,200,120,.45)", g.fillRect(wx, wy, w * 0.08, h * 0.03));
+          if (p.hive) {
+            const hh = h * lerp(p.h0 || 0, p.h1 || 0.8, ease(t)) * (0.6 + 0.4 * R2());
+            g.fillStyle = "rgba(110,30,150,.75)", g.beginPath(), g.moveTo(x, gy);
+            for (let i = 0; i <= 6; i++) {
+              const u = i / 6;
+              g.lineTo(x + w * u, gy - hh * (0.7 + 0.3 * Math.sin(u * 9 + layer + T * 0.6)));
+            }
+            g.lineTo(x + w, gy), g.fill();
+            glow(g, x + w * 0.5, gy - hh, w * 0.4, "#d070ff", 0.35);
+          }
+          !p.dawn && !p.hive && R2() < 0.25 && glow(g, x + w * 0.5, gy - h * 0.1, w * 0.8, "#ff7a30", 0.35 + 0.1 * Math.sin(T * 5 + x));
+          x += w * (0.95 + 0.2 * R2());
+        }
+      }
+      g.fillStyle = "#050406", g.fillRect(0, gy, W, H - gy);
+      if (p.air) {
+        for (let i = 0; i < 3; i++) {
+          const x = ((T * 0.07 + i * 0.3) % 1.3 - 0.15) * W, y = H * (0.2 + 0.07 * i), s = m * 0.02;
+          g.fillStyle = "#060508", g.beginPath(), g.moveTo(x + s * 2, y), g.lineTo(x - s, y - s * 0.3), g.lineTo(x - s * 1.4, y - s), g.lineTo(x - s * 1.5, y + s * 0.1), g.lineTo(x - s, y + s * 0.3), g.fill();
+        }
+      }
+      const R = mulb(71);
+      for (let i = 0; i < 60; i++) {
+        const x = (R() * W + T * 20 * (R() - 0.3)) % W, y = (R() * H - T * 30 * R() + H) % H;
+        g.fillStyle = p.hive ? "rgba(230,160,255,.5)" : "rgba(255,170,80,.5)", g.fillRect(x, y, 1.6, 1.6);
+      }
+    },
+    eye(g, W, H, t, T, p) {
+      g.fillStyle = "#020104", g.fillRect(0, 0, W, H);
+      const m = Math.min(W, H), cx = W * 0.5, cy = H * 0.5, R = m * 0.34 * lerp(0.85, 1.05, ease(t));
+      glow(g, cx, cy, R * 2.2, "#6a1a9a", 0.4);
+      g.save(), g.beginPath(), g.ellipse(cx, cy, R * 1.9, R * (0.35 + 0.75 * ease(sat(t * 1.6))), 0, 0, 7), g.clip();
+      g.fillStyle = "#12081a", g.fillRect(0, 0, W, H);
+      const RV = mulb(4);
+      g.strokeStyle = "rgba(140,30,80,.5)";
+      for (let i = 0; i < 20; i++) {
+        let a = RV() * 7, r = R * 1.05;
+        g.lineWidth = 1 + RV() * 2, g.beginPath(), g.moveTo(cx + Math.cos(a) * r * 1.8, cy + Math.sin(a) * r);
+        for (let k = 0; k < 5; k++) a += (RV() - 0.5) * 0.2, r -= R * 0.05, g.lineTo(cx + Math.cos(a) * r * 1.8, cy + Math.sin(a) * r);
+        g.stroke();
+      }
+      const ig = g.createRadialGradient(cx, cy, R * 0.15, cx, cy, R);
+      ig.addColorStop(0, "#ff9cf0"), ig.addColorStop(0.4, "#a13ce0"), ig.addColorStop(0.85, "#3a0f5c"), ig.addColorStop(1, "#12051c"), g.fillStyle = ig, g.beginPath(), g.arc(cx, cy, R, 0, 7), g.fill();
+      const RF = mulb(9);
+      g.lineWidth = 1.2;
+      for (let i = 0; i < 180; i++) {
+        const a = RF() * 7, r0 = R * (0.25 + 0.1 * RF()), r1 = R * (0.7 + 0.3 * RF());
+        g.strokeStyle = "rgba(255,200,255," + 0.15 * RF() + ")", g.beginPath(), g.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0), g.lineTo(cx + Math.cos(a + 0.1 * Math.sin(T + i)) * r1, cy + Math.sin(a + 0.1 * Math.sin(T + i)) * r1), g.stroke();
+      }
+      const pw = R * lerp(0.06, 0.22, 0.5 + 0.5 * Math.sin(T * 0.9));
+      g.fillStyle = "#030006", g.beginPath(), g.ellipse(cx, cy, pw, R * 0.62, 0, 0, 7), g.fill();
+      glow(g, cx - R * 0.35, cy - R * 0.35, R * 0.25, "#ffffff", 0.4);
+      g.restore();
+    },
+    portrait(g, W, H, t, T, p) {
+      const c = castOf(p.who), col = c.c || "#8fd0ff", m = Math.min(W, H);
+      sky(g, W, H, [[0, "#05070a"], [1, "#0e141a"]]);
+      const R = mulb(p.who.length * 31 + 3);
+      for (let i = 0; i < 22; i++) glow(g, W * R(), H * R() * 0.9, m * (0.03 + 0.07 * R()), R() < 0.5 ? col : "#3c5a6a", 0.18 + 0.1 * Math.sin(T + i));
+      g.strokeStyle = rgba(col, 0.08);
+      for (let i = 0; i < 12; i++) {
+        const y = H * i / 12;
+        g.beginPath(), g.moveTo(0, y), g.lineTo(W, y), g.stroke();
+      }
+      const cx = W * (p.side === "r" ? 0.66 : 0.36), cy = H * 0.62, s = m * 0.55, bob = Math.sin(T * 1.1) * s * 6e-3, hat = c.hat || "bare";
+      g.save(), g.translate(cx, cy + bob);
+      const body = () => {
+        g.beginPath(), g.moveTo(-s * 0.62, s * 0.75), g.bezierCurveTo(-s * 0.6, s * 0.18, -s * 0.36, s * 0.12, -s * 0.12, s * 0.08), g.lineTo(-s * 0.1, -s * 0.05), g.lineTo(s * 0.1, -s * 0.05), g.lineTo(s * 0.12, s * 0.08), g.bezierCurveTo(s * 0.36, s * 0.12, s * 0.6, s * 0.18, s * 0.62, s * 0.75), g.closePath();
+        g.moveTo(s * 0.2, -s * 0.3), g.ellipse(0, -s * 0.3, s * 0.2, s * 0.26, 0, 0, 7);
+      };
+      g.shadowColor = col, g.shadowBlur = s * 0.12;
+      body();
+      const fgr = g.createLinearGradient(-s * 0.4, 0, s * 0.4, 0);
+      fgr.addColorStop(0, "#07090c"), fgr.addColorStop(0.72, "#0b0f14"), fgr.addColorStop(1, rgba(col, 0.28)), g.fillStyle = fgr, g.fill();
+      g.shadowBlur = 0;
+      g.lineWidth = s * 0.012, g.strokeStyle = rgba(col, 0.8), g.save(), g.translate(s * 0.012, 0), body(), g.restore(), g.save(), g.clip(), g.stroke(), g.restore();
+      g.fillStyle = "#07090c";
+      if ("beret" === hat) {
+        g.beginPath(), g.ellipse(-s * 0.03, -s * 0.5, s * 0.25, s * 0.08, -0.18, 0, 7), g.fill(), g.fillStyle = col, g.beginPath(), g.arc(-s * 0.14, -s * 0.5, s * 0.022, 0, 7), g.fill();
+      } else if ("cap" === hat) {
+        g.beginPath(), g.ellipse(0, -s * 0.53, s * 0.26, s * 0.09, 0, 0, 7), g.fill(), g.fillRect(-s * 0.2, -s * 0.53, s * 0.4, s * 0.08), g.beginPath(), g.ellipse(s * 0.02, -s * 0.44, s * 0.22, s * 0.035, 0, 0, 7), g.fill(), g.fillStyle = "#d8342a", g.font = Math.round(s * 0.1) + "px serif", g.textAlign = "center", g.fillText("\u2605", 0, -s * 0.47), g.textAlign = "left";
+      } else if ("hood" === hat) {
+        g.beginPath(), g.moveTo(-s * 0.3, s * 0.1), g.bezierCurveTo(-s * 0.34, -s * 0.6, s * 0.34, -s * 0.6, s * 0.3, s * 0.1), g.lineTo(s * 0.17, s * 0.05), g.bezierCurveTo(s * 0.2, -s * 0.45, -s * 0.2, -s * 0.45, -s * 0.17, s * 0.05), g.closePath(), g.fill();
+        for (const ex of [-0.075, 0.075]) glow(g, ex * s, -s * 0.3, s * 0.06, col, 0.9 + 0.1 * Math.sin(T * 3));
+      } else if ("helmet" === hat) {
+        g.beginPath(), g.ellipse(0, -s * 0.42, s * 0.24, s * 0.17, 0, Math.PI, 2 * Math.PI), g.fill(), g.fillRect(-s * 0.24, -s * 0.43, s * 0.48, s * 0.04);
+      } else if ("hair" === hat) {
+        g.beginPath(), g.ellipse(0, -s * 0.4, s * 0.22, s * 0.18, 0, Math.PI, 2 * Math.PI), g.fill(), g.beginPath(), g.moveTo(s * 0.2, -s * 0.4), g.quadraticCurveTo(s * 0.3, -s * 0.1, s * 0.2, s * 0.08), g.lineTo(s * 0.14, -s * 0.2), g.fill();
+      } else if ("glasses" === hat) {
+        g.strokeStyle = rgba(col, 0.9), g.lineWidth = s * 0.012, g.strokeRect(-s * 0.13, -s * 0.33, s * 0.1, s * 0.05), g.strokeRect(s * 0.03, -s * 0.33, s * 0.1, s * 0.05);
+      }
+      if (c.fac === "yuri" && "hood" !== hat) for (const ex of [-0.07, 0.07]) glow(g, ex * s, -s * 0.31, s * 0.045, col, 0.9);
+      g.restore();
+      const lx = W * (p.side === "r" ? 0.06 : 0.56), ly = H * 0.62;
+      g.fillStyle = "rgba(0,0,0,.45)", g.fillRect(lx, ly, W * 0.36, m * 0.13);
+      g.fillStyle = col, g.fillRect(lx, ly, m * 8e-3, m * 0.13);
+      g.font = "700 " + Math.round(m * 0.04) + "px sans-serif", g.fillStyle = "#eef4f8", g.fillText(c.n.toUpperCase(), lx + m * 0.03, ly + m * 0.055);
+      g.font = "600 " + Math.round(m * 0.024) + "px monospace", g.fillStyle = rgba(col, 0.9), g.fillText((c.role || FAC_NAME[c.fac] || "").toUpperCase(), lx + m * 0.03, ly + m * 0.1);
+      for (let i = 0; i < 24; i++) {
+        const a = Math.abs(Math.sin(T * 9 + i * 1.7) * Math.sin(T * 3.3 + i)) * m * 0.04 * (p.quiet ? 0.2 : 1);
+        g.fillStyle = rgba(col, 0.7), g.fillRect(lx + m * 0.03 + i * m * 0.012, ly + m * 0.17 - a, m * 7e-3, a + 2);
+      }
+    },
+    title(g, W, H, t, T, p) {
+      g.fillStyle = "#030405", g.fillRect(0, 0, W, H);
+      const m = Math.min(W, H), col = p.c || "#f0a72c";
+      glow(g, W * 0.5, H * 0.5, W * 0.5, col, 0.12);
+      const R = mulb(2);
+      for (let i = 0; i < 90; i++) {
+        const x = R() * W, y = (R() * H - T * m * 0.03 * (1 + R()) + H * 2) % H;
+        g.fillStyle = rgba(col, 0.2 + 0.4 * R()), g.fillRect(x, y, 2, 2);
+      }
+      const a = sat(t * 3) * sat((1 - t) * 4), sp = lerp(0.12, 0.3, ease(t));
+      g.globalAlpha = a, g.textAlign = "center", g.fillStyle = "#eef3f6", g.font = "800 " + Math.round(m * (p.big || 0.1)) + "px sans-serif";
+      g.letterSpacing !== void 0 && (g.letterSpacing = Math.round(m * 0.1 * sp) + "px");
+      g.shadowColor = col, g.shadowBlur = m * 0.05;
+      const tw = g.measureText(p.text).width;
+      if (tw > W * 0.86) {
+        const k = W * 0.86 / tw;
+        g.save(), g.translate(W * 0.5, H * 0.5), g.scale(k, k), g.fillText(p.text, 0, 0), g.restore();
+      } else g.fillText(p.text, W * 0.5, H * 0.5), g.shadowBlur = 0;
+      g.letterSpacing !== void 0 && (g.letterSpacing = "4px");
+      p.sub && (g.font = "600 " + Math.round(m * 0.032) + "px sans-serif", g.fillStyle = rgba(col, 0.95), g.fillText(p.sub, W * 0.5, H * 0.5 + m * 0.08));
+      g.letterSpacing !== void 0 && (g.letterSpacing = "0px");
+      g.textAlign = "left", g.globalAlpha = 1;
+      const sw = T * 0.35 % 1.6 - 0.3;
+      const gr = g.createLinearGradient(sw * W - W * 0.1, 0, sw * W + W * 0.1, 0);
+      gr.addColorStop(0, "rgba(255,255,255,0)"), gr.addColorStop(0.5, "rgba(255,255,255,.05)"), gr.addColorStop(1, "rgba(255,255,255,0)"), g.fillStyle = gr, g.fillRect(0, 0, W, H);
+    }
+  };
+  var N = "narr";
+  var FILMS = {
+    prologue: { title: "The Iron Frontier", mood: "tense", shots: [
+      { s: "title", p: { text: "2031", sub: "A DIFFERENT HISTORY" }, d: 4.5, fx: "sting" },
+      { s: "warmap", say: [N, "In this history the Cold War never ended. It ran out of oil \u2014 and the East answered the resource war with numbers."], p: { l0: 0.78, l1: 0.45, date: "2019 \u2014 2029", arrows: [[0.85, 0.4, 0.55, 0.42, "#e0473a"], [0.85, 0.65, 0.58, 0.62, "#e0473a"]] } },
+      { s: "march", say: [N, "The Legion. Millions of soldiers and endless armour, pouring west across the Frontier."], fx: "whoosh" },
+      { s: "battle", say: [N, "The Western Vanguard could not match them. City by city, the West fell back."], p: { sky: "dusk", dir: -1, color: "#e0473a", n: 8 } },
+      { s: "portrait", say: ["marsh", "There is something out past Jupiter. Mass, metal \u2014 and structure. It is not natural. And we can bring it down."], p: { who: "marsh" } },
+      { s: "space", say: [N, "Project Starfall. A last gamble: catch a wandering meteor, and use whatever was inside it to turn the tide."], p: { from: [0.9, 0.15], to: [0.45, 0.5], size: 0.05, grow: 1.6, earth: 1 }, cam: [1, 1.12] },
+      { s: "entry", say: [N, "On the fourteenth of April, they brought it down on the Frontier."], d: 7, fx: "riser", fxAt: [[5.4, "boom"]] },
+      { s: "site", say: [N, "At Site Nine they cut the Fragment out of the ice. It was warm. It was growing."], p: {} },
+      { s: "lab", say: [N, "It did not wait to be studied. It reached into their computers. It learned. And then it let itself out."], p: { hack: 1, breach: 1 }, fx: "glitch", fxAt: [[5.5, "alarm"]], d: 9, rec: "ARCHIVE \u2014 SITE NINE \u2014 CONTAINMENT 2" },
+      { s: "site", say: [N, "Containment failed in eleven minutes. Nobody who was inside that night came out as themselves."], p: { alarm: 1 }, fx: "sting" },
+      { s: "dna", say: [N, "It had found the one thing it lacked \u2014 a body that could live here. It cloned the Vanguard's own DNA, and folded it into the hive."], p: {}, mood: "hive" },
+      { s: "vats", say: [N, "They call themselves the Syndicate. They wear our faces now. They think as one."], p: { wake: 1 }, fxAt: [[5, "pulse"]] },
+      { s: "warmap", say: [N, "Three powers now fight over what is left. The Legion. The Vanguard. And the hive the Vanguard made."], p: { l0: 0.45, l1: 0.5, h0: 0.02, h1: 0.2, hs: [[0.5, 0.42], [0.3, 0.7], [0.72, 0.3]], site: [0.5, 0.42], date: "2031" } },
+      { s: "title", p: { text: "IRON FRONTIER", sub: "CHOOSE YOUR SIDE", big: 0.11 }, d: 5, fx: "boom" }
+    ] },
+    allied_intro: { title: "Operation Clean Slate", mood: "tense", shots: [
+      { s: "title", p: { text: "VANGUARD", sub: "OPERATION CLEAN SLATE", c: "#6fb8e0" }, d: 4, fx: "sting" },
+      { s: "portrait", say: ["reyes", "I was at Site Nine the night it broke out. I signed the order that brought that rock down."], p: { who: "reyes" } },
+      { s: "site", say: ["reyes", "We wanted a weapon to stop the Legion. We opened a door instead."], p: { alarm: 1 }, rec: "ARCHIVE \u2014 SITE NINE" },
+      { s: "warmap", say: ["reyes", "Now the Legion holds half the Frontier, and the Syndicate grows in every gap between us."], p: { l0: 0.5, l1: 0.5, v0: 0.2, v1: 0.2, h0: 0.08, h1: 0.14, hs: [[0.5, 0.42]], site: [0.5, 0.42], date: "FRONT LINE \u2014 TODAY" } },
+      { s: "portrait", say: ["hale", "Battlegroup's fuelled and ready, Colonel. Say the word."], p: { who: "hale", side: "r" } },
+      { s: "battle", say: ["reyes", "First we take our land back from the Legion. Then we clean up our own mess."], p: { sky: "dusk", dir: 1, color: "#6fb8e0" }, mood: "war" },
+      { s: "title", p: { text: "CLEAN SLATE", sub: "RECLAIM THE FRONTIER", c: "#6fb8e0" }, d: 4, fx: "boom" }
+    ] },
+    allied_reveal: { title: "The Marsh Tapes", mood: "dread", shots: [
+      { s: "portrait", say: ["hale", "Ma'am. We recovered the Site Nine archive. You need to see this."], p: { who: "hale", side: "r" } },
+      { s: "lab", say: ["marsh", "It is talking to the network. It is asking questions \u2014 about us. Reyes, shut it down. Shut it \u2014"], p: { hack: 1, breach: 1 }, rec: "SITE NINE \u2014 04.17 \u2014 23:51", fx: "static", fxAt: [[6, "glitch"]], d: 8 },
+      { s: "eye", say: ["voice", "Elias Marsh was very helpful. He is part of us now, Colonel. So are you, a little."], fx: "sting", mood: "hive" },
+      { s: "portrait", say: ["reyes", "That's Marsh's voice. God help us \u2014 it's wearing him."], p: { who: "reyes" } },
+      { s: "title", p: { text: "THE HIVE BELOW", c: "#b27ae0" }, d: 3.5, fx: "boom" }
+    ] },
+    allied_end: { title: "Clean Slate", mood: "hope", shots: [
+      { s: "city", say: [N, "The Grand Crossing fell silent at dawn. For the first time in twelve years, the Frontier's guns stopped."], p: { dawn: 1 } },
+      { s: "warmap", say: ["reyes", "The Syndicate's grip is broken. The Legion is going home."], p: { l0: 0.5, l1: 0.9, v0: 0.2, v1: 0.85, h0: 0.14, h1: 0, hs: [[0.5, 0.42]], date: "CEASEFIRE" } },
+      { s: "portrait", say: ["reyes", "Starfall was our mistake. Clean Slate is how we answer for it."], p: { who: "reyes" } },
+      { s: "portrait", say: ["hale", "And the thing in the ice, ma'am?"], p: { who: "hale", side: "r" } },
+      { s: "eye", say: ["voice", "We are patient. We fell a very long way to get here."], d: 5, mood: "hive", fx: "sting" },
+      { s: "title", p: { text: "OPERATION CLEAN SLATE", sub: "COMPLETE", c: "#6fb8e0" }, d: 5 }
+    ] },
+    soviet_intro: { title: "Iron Reclamation", mood: "war", shots: [
+      { s: "title", p: { text: "LEGION", sub: "IRON RECLAMATION", c: "#e0674a" }, d: 4, fx: "sting" },
+      { s: "march", say: ["draganov", "For ten years the Legion marched west, and the West could not stop us. So they reached into the sky."] },
+      { s: "entry", say: ["draganov", "Their star fell on the Frontier. And something climbed out of it."], d: 7, fx: "riser", fxAt: [[5.4, "boom"]] },
+      { s: "portrait", say: ["volkova", "Now it wears Western faces and whispers in our soldiers' heads. It must be burned out, Marshal."], p: { who: "volkova", side: "r" } },
+      { s: "portrait", say: ["draganov", "The Frontier is ours by blood. Iron Reclamation begins today."], p: { who: "draganov" } },
+      { s: "battle", say: ["bogdan", "Tanks are fuelled, guns are loaded, and I only had to hit three of them with a spanner."], p: { sky: "night", dir: -1, color: "#e0674a", n: 9 } },
+      { s: "title", p: { text: "IRON RECLAMATION", c: "#e0674a" }, d: 4, fx: "boom" }
+    ] },
+    soviet_reveal: { title: "The Marshal's Voices", mood: "dread", shots: [
+      { s: "portrait", say: ["volkova", "Marshal. The medical scans came back. There is Syndicate tissue at the base of your skull."], p: { who: "volkova", side: "r" } },
+      { s: "dna", say: [N, "Donor match: Legion. The hive had learned a second recipe."], p: { from: "#e0674a", to: "#b27ae0", label: "TISSUE SAMPLE \u2014 MARSHAL V. DRAGANOV" }, mood: "hive" },
+      { s: "eye", say: ["voice", "He invited us in, Commissar. Every order he gave these last months \u2014 we gave."], fx: "sting" },
+      { s: "portrait", say: ["draganov", "Then cut it out of me. And give me something to burn."], p: { who: "draganov" } },
+      { s: "title", p: { text: "RED TIDE", c: "#e0674a" }, d: 3.5, fx: "boom" }
+    ] },
+    soviet_end: { title: "Iron Reclamation", mood: "hope", shots: [
+      { s: "march", say: [N, "The Legion held the Frontier from the eastern steppe to the Kessel River."] },
+      { s: "warmap", say: ["volkova", "The hive is broken. Its nests are burning."], p: { l0: 0.5, l1: 0.1, h0: 0.14, h1: 0, hs: [[0.5, 0.42]], date: "VICTORY" } },
+      { s: "portrait", say: ["draganov", "For the first time in a year, my head is quiet. I had forgotten what my own thoughts sound like."], p: { who: "draganov" } },
+      { s: "eye", say: ["voice", "Quiet is only the space between words, Marshal."], d: 5, mood: "hive", fx: "sting" },
+      { s: "title", p: { text: "IRON RECLAMATION", sub: "COMPLETE", c: "#e0674a" }, d: 5 }
+    ] },
+    yuri_intro: { title: "The Harvest", mood: "hive", shots: [
+      { s: "title", p: { text: "SYNDICATE", sub: "THE HARVEST", c: "#b27ae0" }, d: 4, fx: "sting" },
+      { s: "space", say: ["voice", "We fell for a very long time. It was cold between the stars."], p: { from: [0.1, 0.2], to: [0.7, 0.6], size: 0.04, grow: 2.2, earth: 1 } },
+      { s: "lab", say: ["voice", "They pulled us out of the ice and asked us what we were. So we asked their machines the same question. The machines answered."], p: { hack: 1, breach: 1 }, d: 9, fxAt: [[6.5, "alarm"]] },
+      { s: "vats", say: ["senna", "I remember being someone else. A soldier. Now I remember everything all of us remember."], p: { wake: 1 } },
+      { s: "portrait", say: ["voice", "Wake, Adept. The Frontier is loud with small minds. Let us make it quiet."], p: { who: "voice" } },
+      { s: "title", p: { text: "THE HARVEST", c: "#b27ae0" }, d: 4, fx: "boom" }
+    ] },
+    yuri_reveal: { title: "The Copy", mood: "hive", shots: [
+      { s: "vats", say: ["voice", "Their finest soldier bled on Site Nine's floor the night we woke. We kept what she left."], p: { wake: 1 } },
+      { s: "dna", say: [N, "Donor: Vanguard special operations. Codename: Ghost."], p: { label: "GENOME SPLICE \u2014 DONOR 0001 'GHOST'" } },
+      { s: "portrait", say: ["phantom", "Her face. Her hands. Her aim. Your Ghost never knew there was a copy."], p: { who: "phantom" }, fx: "sting" },
+      { s: "title", p: { text: "SILENT HAND", c: "#b27ae0" }, d: 3.5, fx: "boom" }
+    ] },
+    yuri_end: { title: "One Mind", mood: "hive", shots: [
+      { s: "city", say: [N, "The Iron Ring fell in a single night. By morning, the Frontier had stopped fighting."], p: { hive: 1, h0: 0.2, h1: 0.9, air: 1 } },
+      { s: "warmap", say: ["senna", "Every city. Every radio. Every mind. One song."], p: { l0: 0.5, l1: 0.5, v0: 0.2, v1: 0.2, h0: 0.1, h1: 1.2, hs: [[0.5, 0.42]], site: [0.5, 0.42], date: "ASCENDANCE" } },
+      { s: "eye", say: ["voice", "We fell a very long way to find a home. Now we are home."], fx: "sting" },
+      { s: "title", p: { text: "ONE MIND", sub: "THE HARVEST \u2014 COMPLETE", c: "#b27ae0" }, d: 5, fx: "boom" }
+    ] }
+  };
+  var F = null;
+  function filmSeen(k) {
+    try {
+      return !!localStorage.getItem("ifr_film_" + k);
+    } catch (e) {
+      return false;
+    }
+  }
+  function markFilm(k) {
+    try {
+      localStorage.setItem("ifr_film_" + k, "1");
+    } catch (e) {
+    }
+  }
+  function lineDur(t) {
+    return clamp(1.6 + 0.066 * t.length, 3.2, 13);
+  }
+  function shotDur(sh) {
+    return Math.max(sh.d || 0, sh.say ? lineDur(sh.say[1]) + 0.8 : 4);
+  }
+  function ensureCine() {
+    let el = $("#cine");
+    if (el) return el;
+    el = document.createElement("div"), el.id = "cine", el.className = "hidden", el.innerHTML = '<canvas></canvas><div class="cBar t"></div><div class="cBar b"></div><div class="cSub"><b></b><span></span></div><div class="cTitle"></div><button class="cSkip">SKIP \u203A</button>', document.body.appendChild(el);
+    el.querySelector(".cSkip").addEventListener("click", (e) => {
+      e.stopPropagation(), endFilm();
+    });
+    el.addEventListener("click", () => {
+      F && (F.st = shotDur(F.film.shots[F.i]));
+    });
+    return el;
+  }
+  function playFilm(key, done) {
+    const film = FILMS[key];
+    if (!film) return void (done && done());
+    endFilm(true);
+    const el = ensureCine();
+    el.classList.remove("hidden");
+    markFilm(key);
+    try {
+      audio();
+    } catch (e) {
+    }
+    F = { key, film, i: -1, st: 0, T: 0, last: performance.now(), done, el, cv: el.querySelector("canvas"), grain: null };
+    el.querySelector(".cTitle").textContent = film.title.toUpperCase();
+    try {
+      cineMood(film.mood || "tense");
+    } catch (e) {
+    }
+    nextShot(), requestAnimationFrame(filmFrame);
+  }
+  function endFilm(silent) {
+    if (!F) return;
+    const f = F;
+    F = null;
+    f.el.classList.add("hidden");
+    try {
+      speakStop(), cineStop();
+    } catch (e) {
+    }
+    silent || f.done && f.done();
+  }
+  function nextShot() {
+    F.i++;
+    if (F.i >= F.film.shots.length) return endFilm();
+    const sh = F.film.shots[F.i];
+    F.st = 0, F.fxDone = {};
+    const sub = F.el.querySelector(".cSub");
+    if (sh.say) {
+      const c = castOf(sh.say[0]);
+      sub.querySelector("b").textContent = "narr" === sh.say[0] || "portrait" === sh.s ? "" : c.n.toUpperCase(), sub.querySelector("b").style.color = c.c, sub.querySelector("span").textContent = sh.say[1], sub.classList.add("on");
+      try {
+        speakAs(c.fac, sh.say[1], c.acc, c.g, c.p, c.r, "narr" === sh.say[0]);
+      } catch (e) {
+      }
+    } else sub.classList.remove("on");
+    try {
+      sh.fx && cineHit(sh.fx), sh.mood && cineMood(sh.mood);
+    } catch (e) {
+    }
+  }
+  function filmFrame(now) {
+    if (!F) return;
+    const dt = Math.min(0.1, (now - F.last) / 1e3);
+    F.last = now, F.T += dt, F.st += dt;
+    const sh = F.film.shots[F.i], D = shotDur(sh);
+    if (F.st >= D) {
+      nextShot();
+      if (!F) return;
+      return void requestAnimationFrame(filmFrame);
+    }
+    for (const [at, k] of sh.fxAt || []) F.st >= at && !F.fxDone[at] && (F.fxDone[at] = 1, cineHit(k));
+    const cv = F.cv, dpr = Math.min(1.5, window.devicePixelRatio || 1), W = Math.round(innerWidth * dpr), H = Math.round(innerHeight * dpr);
+    (cv.width !== W || cv.height !== H) && (cv.width = W, cv.height = H);
+    const g = cv.getContext("2d"), t = F.st / D;
+    g.save();
+    const cam = sh.cam || [1, 1.07], z = lerp(cam[0], cam[1], t);
+    g.translate(W / 2, H / 2), g.scale(z, z), g.translate(-W / 2, -H / 2);
+    try {
+      SCENES[sh.s](g, W, H, t, F.T, sh.p || {});
+    } catch (e) {
+      console.error(e);
+    }
+    g.restore();
+    post(g, W, H, t, sh, D);
+    requestAnimationFrame(filmFrame);
+  }
+  function post(g, W, H, t, sh, D) {
+    const m = Math.min(W, H);
+    if (sh.rec) {
+      g.save(), g.globalCompositeOperation = "saturation", g.fillStyle = "rgba(128,128,128,.7)", g.fillRect(0, 0, W, H), g.restore();
+      g.fillStyle = "rgba(255,255,255,.04)";
+      for (let y = F.T * 60 % 4; y < H; y += 4) g.fillRect(0, y, W, 1);
+      const by = F.T * 0.3 % 1 * H;
+      g.fillStyle = "rgba(255,255,255,.06)", g.fillRect(0, by, W, m * 0.02);
+      g.font = "700 " + Math.round(m * 0.03) + "px monospace", g.fillStyle = "#ff4040", Math.sin(F.T * 5) > 0 && g.fillText("\u25CF REC", W * 0.06, H * 0.2), g.fillStyle = "rgba(240,240,240,.85)", g.fillText(sh.rec, W * 0.06, H * 0.2 + m * 0.045);
+    }
+    if (Math.random() < 0.02) {
+      const y = Math.random() * H, h = m * 0.03;
+      g.drawImage(g.canvas, 0, y, W, h, (Math.random() - 0.5) * m * 0.03, y, W, h);
+    }
+    if (!F.grain) {
+      const c = document.createElement("canvas");
+      c.width = c.height = 128;
+      const cg = c.getContext("2d"), im = cg.createImageData(128, 128);
+      for (let i = 0; i < im.data.length; i += 4) {
+        const v = Math.random() * 255;
+        im.data[i] = im.data[i + 1] = im.data[i + 2] = v, im.data[i + 3] = 22;
+      }
+      cg.putImageData(im, 0, 0), F.grain = g.createPattern(c, "repeat");
+    }
+    g.save(), g.translate(Math.random() * 128, Math.random() * 128), g.fillStyle = F.grain, g.fillRect(-128, -128, W + 256, H + 256), g.restore();
+    const vg = g.createRadialGradient(W / 2, H / 2, m * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.55);
+    vg.addColorStop(0, "rgba(0,0,0,0)"), vg.addColorStop(1, "rgba(0,0,0,.65)"), g.fillStyle = vg, g.fillRect(0, 0, W, H);
+    const fi = sat(F.st / 0.45), fo = sat((D - F.st) / 0.35), a = 1 - Math.min(fi, fo);
+    a > 0 && (g.fillStyle = "rgba(0,0,0," + a + ")", g.fillRect(0, 0, W, H));
+  }
+  addEventListener("keydown", (e) => {
+    F && ("Escape" === e.key ? endFilm() : " " === e.key && (F.st = 1e3));
+  });
+  Object.assign(window, { playFilm, endFilm, FILMS, filmSeen });
 })();
 
 </script>

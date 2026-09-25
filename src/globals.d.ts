@@ -792,7 +792,12 @@ declare global {
   function beginFpsEntry(u: Unit): void;
   function step(dt: number): void;
   const SECBTN: string;
-  function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number): void;
+  function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number, noClick?: boolean): void;
+  function speakStop(): void;
+  function cineMood(m: string): void;
+  function cineStop(): void;
+  function cineHit(k: string): void;
+  function playFilm(key: string, done?: () => void): void;
   function missionDebrief(win: boolean): string;
   function radioStop(): void;
   const RDT: number;

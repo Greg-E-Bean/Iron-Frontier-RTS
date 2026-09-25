@@ -202,7 +202,7 @@ function radioClick(fac: string) {
   const t = AC.currentTime + .005;
   sNoise(t, { type: "bandpass", f: "yuri" === fac ? 900 : 2400, q: 2.5, g: .05, a: .002, d: .07 }), sOsc(t, { w: "sine", f: "yuri" === fac ? 420 : 1350, g: .025, d: .045 });
 }
-function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, seed?: number) {
+function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, seed?: number, noClick?: boolean) {
   if (!voicesEnabled || muted || sfxVol <= 0 || "undefined" == typeof speechSynthesis || !line) return;
   try {
     per = per || ANNOUNCER[fac] || ANNOUNCER.allied;
@@ -212,7 +212,7 @@ function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, see
     // natural range only, with a touch of per-line variation
     u.pitch = Math.max(.75, Math.min(1.2, per.p * (gMiss ? ("f" === per.g ? 1.12 : .88) : 1) * (.98 + .04 * Math.random()))), u.rate = per.r * (.97 + .06 * Math.random()), u.volume = Math.min(1, sfxVol * masterVol);
     v && (u.voice = v, u.lang = v.lang);
-    radioClick(fac), setTimeout(() => { try { speechSynthesis.speak(u); } catch (e) { } }, 70);
+    noClick || radioClick(fac), setTimeout(() => { try { speechSynthesis.speak(u); } catch (e) { } }, 70);
   } catch (e) { }
 }
 function unitLines(fac: string, category: string, role: string, key?: string | null, per?: Persona) {
@@ -920,9 +920,58 @@ const ADMIN_MUSIC_KEY="ifr_admin_music";function loadAdminMusic(){try{return JSO
 let lightningT = 0;
 
 // Campaign characters speak over the radio in their own voice persona.
-function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number) { speakLine(fac, text, !0, P_(acc, g, p || 1, r || 1)); }
+function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number, noClick?: boolean) { speakLine(fac, text, !0, P_(acc, g, p || 1, r || 1), 0, noClick); }
+function speakStop() { try { "undefined" != typeof speechSynthesis && speechSynthesis.cancel(); } catch (e) { } }
+// ---- cutscene score: a sustained pad per mood, plus hits on cuts ----------
+let cine: any = null;
+function cineStop() {
+  if (!cine) return;
+  const c = cine; cine = null; clearInterval(c.iv);
+  try { const t = AC.currentTime; c.out.gain.cancelScheduledValues(t), c.out.gain.setValueAtTime(c.out.gain.value, t), c.out.gain.linearRampToValueAtTime(0, t + 1.2); setTimeout(() => { c.nodes.forEach((n: any) => { try { n.stop(); } catch (e) { } }); try { c.out.disconnect(); } catch (e) { } }, 1400); } catch (e) { }
+  if (musicBus) { const t = AC.currentTime; musicBus.gain.cancelScheduledValues(t), musicBus.gain.setValueAtTime(musicBus.gain.value, t), musicBus.gain.linearRampToValueAtTime(MUSIC_BASE * musicVol, t + 2); }
+  customTrackEl && (customTrackEl.volume = muted ? 0 : masterVol * musicVol);
+}
+const CINE_MOODS: Record<string, { f: number[]; w: OscillatorType; lp: number; trem?: number; drums?: number; g: number }> = {
+  tense: { f: [41.2, 55, 82.4, 98], w: "sawtooth", lp: 380, g: .09 },
+  dread: { f: [36.7, 43.65, 55, 77.8], w: "sawtooth", lp: 300, g: .1 },
+  hive: { f: [110, 116.5, 164.8, 233, 880], w: "sine", lp: 2400, trem: 5.5, g: .06 },
+  war: { f: [41.2, 55, 61.7, 82.4], w: "sawtooth", lp: 420, drums: 1.15, g: .085 },
+  hope: { f: [130.8, 196, 261.6, 329.6, 392], w: "triangle", lp: 1400, g: .05 },
+};
+function cineMood(mood: string) {
+  if (!sOK()) return;
+  cineStop();
+  const M = CINE_MOODS[mood] || CINE_MOODS.tense, t = AC.currentTime, out = AC.createGain(), nodes: any[] = [];
+  out.gain.setValueAtTime(0, t), out.gain.linearRampToValueAtTime(M.g * musicVol * 2.4, t + 2.5), out.connect(masterGain);
+  const lp = AC.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = M.lp, lp.Q.value = 2, lp.connect(out);
+  const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = .07, lg.gain.value = .45 * M.lp, lfo.connect(lg), lg.connect(lp.frequency), lfo.start(t), nodes.push(lfo);
+  let dest: any = lp;
+  if (M.trem) { const tg = AC.createGain(), tl = AC.createOscillator(), td = AC.createGain(); tg.gain.value = .6, tl.frequency.value = M.trem, td.gain.value = .4, tl.connect(td), td.connect(tg.gain), tg.connect(lp), tl.start(t), nodes.push(tl), dest = tg; }
+  M.f.forEach((f, i) => { for (const det of [-7, 6]) { const o = AC.createOscillator(), g = AC.createGain(); o.type = i === M.f.length - 1 && "hive" === mood ? "triangle" : M.w, o.frequency.value = f, o.detune.value = det + 3 * i, g.gain.value = 1 / (1 + i * .6) / M.f.length, o.connect(g), g.connect(dest), o.start(t), nodes.push(o); } });
+  const sub = AC.createOscillator(), sg = AC.createGain(); sub.frequency.value = M.f[0] / 2, sg.gain.value = .35, sub.connect(sg), sg.connect(out), sub.start(t), nodes.push(sub);
+  try { verbIn && out.connect(verbIn); } catch (e) { }
+  let iv: any = 0;
+  if (M.drums) { let k = 0; iv = setInterval(() => { if (!cine || !sOK()) return; const tt = AC.currentTime + .01, acc = k++ % 4 == 0; sNoise(tt, { brown: 1, f: acc ? 260 : 180, g: (acc ? .5 : .28) * musicVol, d: .5, verb: .3 }), sOsc(tt, { f: acc ? 95 : 80, f2: 38, g: (acc ? .4 : .22) * musicVol, d: .45 }); }, 1e3 * M.drums); }
+  if (musicBus) { const tt = AC.currentTime; musicBus.gain.cancelScheduledValues(tt), musicBus.gain.setValueAtTime(musicBus.gain.value, tt), musicBus.gain.linearRampToValueAtTime(0, tt + 1.2); }
+  customTrackEl && (customTrackEl.volume = 0);
+  cine = { out, nodes, iv, mood };
+}
+function cineHit(kind: string) {
+  if (!sOK()) return;
+  const t = AC.currentTime + .01;
+  switch (kind) {
+    case "boom": sNoise(t, { brown: 1, f: 380, f2: 60, g: .7, d: 3, verb: .5 }), sOsc(t, { f: 70, f2: 24, g: .55, d: 2.2 }), sNoise(t, { f: 3000, f2: 200, g: .25, d: .6 }); break;
+    case "whoosh": sNoise(t, { type: "bandpass", f: 250, f2: 3200, q: 1.2, g: .25, a: .5, d: .6, verb: .3 }); break;
+    case "riser": sOsc(t, { w: "sawtooth", f: 110, f2: 880, sw: 2.4, g: .06, a: 1.8, d: .7, lp: 2200, verb: .4 }), sNoise(t, { type: "highpass", f: 800, f2: 6000, g: .08, a: 2, d: .5 }); break;
+    case "alarm": for (let i = 0; i < 6; i++) sOsc(t + .32 * i, { w: "square", f: i % 2 ? 660 : 880, g: .05, d: .28, lp: 2500, verb: .2 }); break;
+    case "glitch": for (let i = 0; i < 7; i++) sNoise(t + .05 * i + .03 * Math.random(), { type: "bandpass", f: 800 + 5e3 * Math.random(), q: 3, g: .12, d: .04 }); break;
+    case "sting": for (const f of [55, 82.4, 110, 130.8]) sOsc(t, { w: "sawtooth", f, g: .07, d: 2.4, lp: 900, verb: .5 }); sNoise(t, { brown: 1, f: 200, g: .4, d: 1.5 }); break;
+    case "pulse": sOsc(t, { f: 180, f2: 90, g: .12, d: .5, verb: .4 }); break;
+    case "static": sNoise(t, { type: "highpass", f: 2000, g: .18, d: .6 }); break;
+  }
+}
 Object.assign(window, {
-  speakAs, audio, sfx, sfxHit, setMuted, setMasterVol, setSfxVol, setMusicVol,
+  speakAs, speakStop, cineMood, cineStop, cineHit, audio, sfx, sfxHit, setMuted, setMasterVol, setSfxVol, setMusicVol,
   setTrackSel, setRainAmbience, startFpsAmbience, stopFpsAmbience, startMusic, MUSIC_TRACKS,
   loadAdminMusic, saveAdminMusic, refreshCustomMusic, totalTrackCount, trackName,
   playVoiceLine, setVoicesEnabled, announce, announceHint, audioTap, musicRenderSection: renderSection, musicStems: musicSynth, musicSongABC,
