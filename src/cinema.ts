@@ -142,8 +142,7 @@ portrait(g,W,H,t,T,p){const c=castOf(p.who),col=c.c||"#8fd0ff",m=Math.min(W,H);s
 // war-room bokeh
 const R=mulb(p.who.length*31+3);for(let i=0;i<22;i++)glow(g,W*R(),H*R()*.9,m*(.03+.07*R()),R()<.5?col:"#3c5a6a",.18+.1*Math.sin(T+i));
 g.strokeStyle=rgba(col,.08);for(let i=0;i<12;i++){const y=H*i/12;g.beginPath(),g.moveTo(0,y),g.lineTo(W,y),g.stroke()}
-{const talk=F&&F.talk?Math.max(0,.55*Math.sin(T*12.7)+.35*Math.sin(T*7.9+1)+.25*Math.sin(T*19.3)):0;F&&(F.jaw=lerp(F.jaw||0,talk,.35));const med=fmvMedia(p.who);if(med)drawMedia(g,W,H,med,t,p.side);else{const acv="function"==typeof renderActor?renderActor(p.who,T,F?F.jaw:0,p.side==="r"?-1:1,parseInt((c.c||"#8fd0ff").slice(1),16)):null;
-if(acv){const dh=H*1.02,dw=dh*acv.width/acv.height;g.drawImage(acv,W*(p.side==="r"?.64:.36)-dw/2,H*.04,dw,dh)}else drawBust(g,W,H,t,T,p.who,p.side)}}
+{const talk=F&&F.talk?Math.max(0,.55*Math.sin(T*12.7)+.35*Math.sin(T*7.9+1)+.25*Math.sin(T*19.3)):0;F&&(F.jaw=lerp(F.jaw||0,talk,.35));const med=fmvMedia(p.who);if(med)drawMedia(g,W,H,med,t,p.side);else drawBust(g,W,H,t,T,p.who,p.side)}
 // lower third
 const lx=W*(p.side==="r"?.06:.56),ly=H*.62;g.fillStyle="rgba(0,0,0,.45)",g.fillRect(lx,ly,W*.36,m*.13);g.fillStyle=col,g.fillRect(lx,ly,m*.008,m*.13);g.font="700 "+Math.round(m*.04)+"px sans-serif",g.fillStyle="#eef4f8",g.fillText(c.n.toUpperCase(),lx+m*.03,ly+m*.055);g.font="600 "+Math.round(m*.024)+"px monospace",g.fillStyle=rgba(col,.9),g.fillText((c.role||FAC_NAME[c.fac]||"").toUpperCase(),lx+m*.03,ly+m*.1);
 for(let i=0;i<24;i++){const a=Math.abs(Math.sin(T*9+i*1.7)*Math.sin(T*3.3+i))*m*.04*(p.quiet?.2:1);g.fillStyle=rgba(col,.7),g.fillRect(lx+m*.03+i*m*.012,ly+m*.17-a,m*.007,a+2)}},
