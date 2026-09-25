@@ -1010,7 +1010,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/sim.ts
-  var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), bridge: new Uint8Array(6624), bridgeHp: new Float32Array(6624), bridgeSite: new Uint8Array(6624), bridgeHoriz: new Uint8Array(6624), elevOverride: new Float32Array(6624), flatCorner: new Float32Array(93 * 73), flatCornerSet: new Uint8Array(93 * 73), fall: [] };
+  var G = { terr: new Uint8Array(6624), ore: new Float32Array(6624), tib: new Uint8Array(6624), occ: new Int32Array(6624), tint: new Uint8Array(6624), blk: new Uint8Array(6624), pave: new Uint8Array(6624), vis: new Uint8Array(6624), elev: new Float32Array(6624), mtn: new Float32Array(6624), bridge: new Uint8Array(6624), bridgeHp: new Float32Array(6624), bridgeSite: new Uint8Array(6624), bridgeHoriz: new Uint8Array(6624), over: new Uint8Array(6624), overZ: new Float32Array(6624), elevOverride: new Float32Array(6624), flatCorner: new Float32Array(93 * 73), flatCornerSet: new Uint8Array(93 * 73), fall: [] };
   var FOG_ON = true;
   var idx = (e, t) => 92 * t + e;
   var inMap = (e, t) => e >= 0 && t >= 0 && e < 92 && t < 72;
@@ -1088,12 +1088,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function fbm(e, t, r) {
     return 0.6 * vnoise(e, t, r) + 0.3 * vnoise(2.3 * e, 2.3 * t, r + 9) + 0.1 * vnoise(5.1 * e, 5.1 * t, r + 17);
   }
-  var MAPS = [{ k: "basin", n: "IRON BASIN", s: "Twin lakes, corner bases", mp: 4 }, { k: "divide", n: "THE DIVIDE", s: "River, two crossings", mp: 4 }, { k: "high", n: "HIGHLANDS", s: "Rock chokepoints", mp: 4 }, { k: "dust", n: "DUSTBOWL", s: "Open ground, rich centre", mp: 4 }, { k: "lakes", n: "BROKEN LAKES", s: "Winding water", mp: 4 }, { k: "line", n: "FIRING LINE", s: "One pass, mirrored flanks", mp: 4 }, { k: "ring", n: "IRON RING", s: "Crater wall, rich core", mp: 4 }, { k: "city", n: "METRO SPRAWL", s: "8-way river metropolis \u2014 plazas, alleys, hill districts, tight ore", mp: 8 }, { k: "islands", n: "ARCHIPELAGO", s: "Scattered islands, no land bridges \u2014 naval & air only", mp: 4 }, { k: "atoll", n: "URBAN ATOLL", s: "Island townships linked by sea", mp: 4 }, { k: "harbor", n: "HARBOR SPRAWL", s: "River city, two bridge crossings", mp: 4 }, { k: "grand", n: "GRAND CROSSING", s: "Cross-river metropolis, four bridges, hill forts, capturable cannons", mp: 4 }, { k: "octagon", n: "OCTAGON FRONT", s: "Eight-way scramble, open lanes, contested high ground", mp: 8 }, { k: "bastion", n: "THE BASTION", s: "Highland forts, ramps to the peaks, one gate per base", mp: 6 }, { k: "boomtown", n: "BOOMTOWN", s: "Ore-choked plains, abundant deposits, fast economy", mp: 6 }, { k: "frost", n: "FROZEN PASS", s: "Snowbound valley, iced river \u2014 every step leaves a trail", mp: 4 }, { k: "random", n: "RANDOM", s: "Surprise me", mp: 4 }];
+  var MAPS = [{ k: "basin", n: "IRON BASIN", s: "Corner plateaus overlooking a lake basin", mp: 4 }, { k: "divide", n: "THE DIVIDE", s: "River divide, two bridges watched by bluffs", mp: 4 }, { k: "high", n: "HIGHLANDS", s: "Twin mesas joined by an overpass above the valley road", mp: 4 }, { k: "dust", n: "DUSTBOWL", s: "Open desert, rich centre ringed by lookout mesas", mp: 4 }, { k: "lakes", n: "BROKEN LAKES", s: "Linked lakes, bridged channels, split highway", mp: 4 }, { k: "line", n: "FIRING LINE", s: "Mountain wall, three passes, guarded bluffs", mp: 4 }, { k: "ring", n: "IRON RING", s: "Crater rim high ground around a rich floor", mp: 4 }, { k: "city", n: "METRO SPRAWL", s: "8-way river metropolis \u2014 plazas, alleys, hill districts, tight ore", mp: 8 }, { k: "islands", n: "ARCHIPELAGO", s: "Scattered islands, no land bridges \u2014 naval & air only", mp: 4 }, { k: "atoll", n: "URBAN ATOLL", s: "Island townships linked by sea", mp: 4 }, { k: "harbor", n: "HARBOR SPRAWL", s: "Broad river port, two long bridges, bluffs", mp: 4 }, { k: "grand", n: "GRAND CROSSING", s: "Crossing rivers, hill forts linked by overpasses", mp: 4 }, { k: "octagon", n: "OCTAGON FRONT", s: "Eight-way front around a central mesa", mp: 8 }, { k: "bastion", n: "THE BASTION", s: "Six hill forts, one gate each, open ore plain", mp: 6 }, { k: "boomtown", n: "BOOMTOWN", s: "Mining town crossroads on a rich plain", mp: 6 }, { k: "frost", n: "FROZEN PASS", s: "Iced river, bank roads under a high overpass \u2014 every step leaves a trail", mp: 4 }, { k: "random", n: "RANDOM", s: "Surprise me", mp: 4 }];
   function baseTerrain(e, t) {
     G.flatCorner.fill(0), G.flatCornerSet.fill(0);
     for (let r = 0; r < 72; r++) for (let n = 0; n < 92; n++) {
       const a = idx(n, r), o = fbm(0.048 * n + e, 0.048 * r - e, e);
-      G.terr[a] = o > (void 0 === t ? 0.5 : t) ? 1 : 0, G.tint[a] = Math.floor(7.999 * fbm(0.16 * n + 3 * e, 0.16 * r, e + 5)), G.ore[a] = 0, G.occ[a] = 0, G.tib[a] = 0, G.blk[a] = 0, G.pave[a] = 0, G.vis[a] = 0, G.bridge[a] = 0, G.bridgeHp[a] = 0, G.bridgeSite[a] = 0, G.bridgeHoriz[a] = 0, G.elevOverride[a] = 0;
+      G.terr[a] = o > (void 0 === t ? 0.5 : t) ? 1 : 0, G.tint[a] = Math.floor(7.999 * fbm(0.16 * n + 3 * e, 0.16 * r, e + 5)), G.ore[a] = 0, G.occ[a] = 0, G.tib[a] = 0, G.blk[a] = 0, G.pave[a] = 0, G.vis[a] = 0, G.bridge[a] = 0, G.bridgeHp[a] = 0, G.bridgeSite[a] = 0, G.bridgeHoriz[a] = 0, G.over[a] = 0, G.overZ[a] = 0, G.elevOverride[a] = 0;
     }
     for (let e2 = 0; e2 < 3; e2++) {
       const e3 = Uint8Array.from(G.terr);
@@ -1113,7 +1113,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function computeMtnShore() {
     let mB = new Float32Array(6624);
-    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) mB[idx(x, y)] = 3 === G.terr[idx(x, y)] ? 1 : 0;
+    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) mB[idx(x, y)] = 3 === G.terr[idx(x, y)] && !(G.elevOverride[idx(x, y)] > 0) ? 1 : 0;
     for (let pass = 0; pass < 2; pass++) {
       const mN = new Float32Array(6624);
       for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) {
@@ -1388,7 +1388,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     G.terr = unpackArr(data.terr, Uint8Array, 6624), G.ore = unpackArr(data.ore, Float32Array, 6624), G.tib = data.tib ? unpackArr(data.tib, Uint8Array, 6624) : new Uint8Array(6624), G.blk = data.blk ? unpackArr(data.blk, Uint8Array, 6624) : new Uint8Array(6624), G.pave = data.pave ? unpackArr(data.pave, Uint8Array, 6624) : new Uint8Array(6624), G.elevOverride = data.elevOverride ? unpackArr(data.elevOverride, Float32Array, 6624) : new Float32Array(6624);
     G.occ = new Int32Array(6624), G.vis = new Uint8Array(6624), G.tint = new Uint8Array(6624);
     for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) G.tint[idx(x, y)] = Math.floor(7.999 * fbm(0.16 * x + 3 * G.seed, 0.16 * y, G.seed + 5));
-    G.bridge = data.bridge ? unpackArr(data.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = data.bridgeHp ? unpackArr(data.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = data.bridgeSite ? unpackArr(data.bridgeSite, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHoriz = data.bridgeHoriz ? unpackArr(data.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624);
+    G.bridge = data.bridge ? unpackArr(data.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = data.bridgeHp ? unpackArr(data.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = data.bridgeSite ? unpackArr(data.bridgeSite, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHoriz = data.bridgeHoriz ? unpackArr(data.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624), G.over = data.over ? unpackArr(data.over, Uint8Array, 6624) : new Uint8Array(6624), G.overZ = data.overZ ? unpackArr(data.overZ, Float32Array, 6624) : new Float32Array(6624), G.hasOver = G.over.some((v) => v > 0), G.calm = data.calm || 0;
     G.roadLines = data.roadLines || [], G.snow = data.snow || 0, G.civ = (data.civ || []).map((c) => c.slice()), G.special = (data.special || []).map((c) => c.slice()), G.props = (data.props || []).map((p) => Object.assign({}, p)), G.oreSpots = (data.oreSpots || []).map((o) => Object.assign({}, o)), G.fall = [];
     G.spots = (data.spots && data.spots.length ? data.spots : [[13, 13], [76, 56]]).map((s) => s.slice());
     computeMtnShore();
@@ -1448,7 +1448,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     G.pendingBridges = G.pendingBridges || [];
     let run = [];
     const flush = () => {
-      run.length && run.length <= 6 && G.pendingBridges.push(run.slice()), run = [];
+      run.length && run.length <= 10 && G.pendingBridges.push(run.slice()), run = [];
     };
     for (let k = 0; k < path.length; k++) {
       const i = path[k], x = i % 92, y = i / 92 | 0;
@@ -1815,6 +1815,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     let r = t || "basin";
     "random" === r && (r = MAPS[Math.floor(Math.random() * (MAPS.length - 1))].k);
     if (CUSTOM_MAPS[r]) return void loadStaticMap(CUSTOM_MAPS[r], r);
+    if (typeof MAPDEFS != "undefined" && MAPDEFS[r]) return void buildAuthoredMap(r, e);
+    G.calm = 0, G.hasOver = false;
     G.map = r, G.snow = "frost" === r ? 1 : 0, G.trees = [], G.civ = [], G.oreSpots = [], S.traffic = [];
     let n = [[13, 13], [76, 56]], a = [], o = [];
     if ("divide" === r) baseTerrain(e, 0.46), ridge(46, -4, 46, 76, 4.4, 2, 16, e), bridge(46, 18.72, 16, 9), bridge(46, 53.28, 16, 9), blob(46, 36, 5, 3), blob(92 * 0.2, 72 * 0.18, 4, 3), blob(92 * 0.8, 59.04, 4, 3), n = [[10, Math.round(36) - 6], [78, Math.round(36) - 6]], a = [[12, 14], [12, 56], [78, 14], [78, 56], [92 * 0.3, 36], [92 * 0.7, 36]], o = [[46, 18.72], [46, 53.28]];
@@ -2183,7 +2185,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let o = t - R; o <= t + R; o++) for (let s = e - R; s <= e + R; s++) {
       if (!inMap(s, o)) continue;
       const i = idx(s, o);
-      if (G.terr[i] >= 2) continue;
+      if (G.terr[i] >= 2 || G.pave[i] || G.over[i]) continue;
       let w = 0;
       for (const [lx, ly, lr] of lobes) {
         const d = dist(s, o, lx, ly) + 1.6 * noise2(5 * s, 5 * o, 6) - 0.8;
@@ -2247,11 +2249,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (!inMap(e, t) || !inMap(r, n)) return null;
     if (e === r && t === n) return [];
     const o = w ? (e2, t2) => a ? walkableWIgnore(e2, t2, a) : walkableW(e2, t2) : (e2, t2) => walkableTeam(e2, t2, team, a);
-    if (!o(r, n)) {
+    if (!o(r, n) && !(G.hasOver && G.over[idx(r, n)])) {
       const a2 = nearestFree(r, n, o);
       if (!a2) return null;
       if (r = a2[0], n = a2[1], e === r && t === n) return [];
     }
+    if (G.hasOver && !w) return findPathL(e, t, r, n, o);
     _stamp++;
     const s = (e2, t2) => {
       const a2 = Math.abs(e2 - r), o2 = Math.abs(t2 - n);
@@ -2346,8 +2349,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function unstick(e) {
     const t = Math.floor(e.x / 32), r = Math.floor(e.y / 32), wfn = e.d.naval ? walkableW : walkable;
     if (wfn(t, r)) return;
+    if (e.lvl && G.over && inMap(t, r) && G.over[idx(t, r)]) return;
     const n = nearestFree(t, r, wfn);
-    n && (e.x = 32 * n[0] + 16, e.y = 32 * n[1] + 16, e.path = null);
+    n && (e.x = 32 * n[0] + 16, e.y = 32 * n[1] + 16, e.path = null, e.lvl = 0);
   }
   function nearWater(t, r, a, m) {
     for (let yy = r - m; yy < r + a + m; yy++) for (let xx = t - m; xx < t + a + m; xx++) if (inMap(xx, yy) && 2 === G.terr[idx(xx, yy)]) return true;
@@ -2379,7 +2383,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let e2 = r; e2 < r + a; e2++) for (let r2 = t; r2 < t + a; r2++) {
       if (!inMap(r2, e2)) return false;
       const t2 = idx(r2, e2);
-      if (G.terr[t2] >= 2 || 0 !== G.occ[t2] || G.ore[t2] > 0 || G.bridge[t2]) return false;
+      if (G.terr[t2] >= 2 || 0 !== G.occ[t2] || G.ore[t2] > 0 || G.bridge[t2] || G.over[t2]) return false;
     }
     if (isNaval && !nearWater(t, r, a, 2)) return false;
     if (!isFlatFooting(t, r, a)) return false;
@@ -2650,6 +2654,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const n of e) "miner" === n.d.role && (n.order = "harvest", n.ore = { tx: t, ty: r }, n.path = null);
   }
   function repath(e) {
+    _pathLvl = e.lvl || 0;
     const t = findPath(clamp(Math.floor(e.x / 32), 0, 91), clamp(Math.floor(e.y / 32), 0, 71), clamp(Math.floor(e.tx / 32), 0, 91), clamp(Math.floor(e.ty / 32), 0, 71), null, e.d.naval, teamOf(e.owner));
     e.path = t && t.length ? t : null, e.pi = 0, e.repath = 0, e.stuck = 0;
   }
@@ -2922,7 +2927,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var NO_TREAD = /hover|lasher|gattling|mastermind|shard|spore|cultivator|titan_allied|titan_yuri|terror|rift|drone/;
   function trackPair(e) {
-    if (!G.snow && NO_TREAD.test(e.key)) return;
+    if (!G.snow && NO_TREAD.test(e.key) || e.lvl) return;
     const L = e.lastTrk;
     if (L && Math.hypot(e.x - L.x, e.y - L.y) < 7) return;
     e.lastTrk = { x: e.x, y: e.y };
@@ -2947,6 +2952,118 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (u.dead || u.inside || u.d.fly || u.d.naval || (u.alt || 0) > 2 || !u.moving) continue;
       "inf" === u.d.kind && footStep(u);
     }
+  }
+  var PLAT_MIN = 1.5;
+  function isHighTile(i) {
+    return G.elevOverride[i] >= PLAT_MIN && 3 !== G.terr[i];
+  }
+  function levelStep(fi, lv, ti) {
+    if (fi === ti) return lv;
+    const O = G.over, oT = O ? O[ti] : 0, oF = O ? O[fi] : 0;
+    if (!oT && !oF) return 0;
+    const dx = ti % 92 - fi % 92, dy = (ti / 92 | 0) - (fi / 92 | 0), along = (o) => 1 === o ? 0 === dy && 1 === Math.abs(dx) : 2 === o && 0 === dx && 1 === Math.abs(dy);
+    if (oF && 1 === lv) return oT ? oT === oF && along(oF) ? 1 : -1 : along(oF) && isHighTile(ti) ? 0 : -1;
+    if (oT) return !oF && isHighTile(fi) ? along(oT) ? 1 : -1 : G.terr[ti] < 2 || G.bridge[ti] ? 0 : -1;
+    return isHighTile(ti) ? -1 : 0;
+  }
+  function tileOfU(u) {
+    return idx(clamp(Math.floor(u.x / 32), 0, 91), clamp(Math.floor(u.y / 32), 0, 71));
+  }
+  function syncLevel(u, fi) {
+    if (!G.over || u.d.fly || u.d.naval) return void (u.lvl = 0);
+    const ti = tileOfU(u);
+    if (ti !== fi) {
+      const l = levelStep(fi, u.lvl || 0, ti);
+      u.lvl = l < 0 ? u.lvl || 0 : l;
+    }
+    G.over[ti] || (u.lvl = 0);
+  }
+  function unitGroundH(u) {
+    if (u.lvl && G.over) {
+      const i = tileOfU(u);
+      if (G.over[i]) return G.overZ[i];
+    }
+    return heightAt(u.x, u.y);
+  }
+  function lvlOff(u) {
+    return u.lvl && G.over && G.over[tileOfU(u)] ? G.overZ[tileOfU(u)] - heightAt(u.x, u.y) : 0;
+  }
+  var _LV = 13248;
+  var _lG = new Float32Array(_LV);
+  var _lFrom = new Int32Array(_LV);
+  var _lVis = new Int32Array(_LV);
+  var _lCl = new Uint8Array(_LV);
+  var _lStamp = 0;
+  var _pathLvl = 0;
+  function findPathL(sx, sy, gx, gy, o) {
+    const H = [], push = (s, f) => {
+      H.push([f, s]);
+      let k = H.length - 1;
+      for (; k > 0; ) {
+        const p = k - 1 >> 1;
+        if (H[p][0] <= H[k][0]) break;
+        [H[p], H[k]] = [H[k], H[p]], k = p;
+      }
+    }, pop = () => {
+      const top = H[0], last = H.pop();
+      if (H.length) {
+        H[0] = last;
+        let k = 0;
+        for (; ; ) {
+          const l = 2 * k + 1, r = l + 1;
+          let m = k;
+          l < H.length && H[l][0] < H[m][0] && (m = l), r < H.length && H[r][0] < H[m][0] && (m = r);
+          if (m === k) break;
+          [H[m], H[k]] = [H[k], H[m]], k = m;
+        }
+      }
+      return top;
+    }, h = (x, y) => {
+      const a = Math.abs(x - gx), b = Math.abs(y - gy);
+      return a + b + (1.414 - 2) * Math.min(a, b);
+    };
+    _lStamp++;
+    const g = idx(gx, gy), s0 = 2 * idx(sx, sy) + (G.over[idx(sx, sy)] ? _pathLvl : 0);
+    _lVis[s0] = _lStamp, _lG[s0] = 0, _lFrom[s0] = -1, _lCl[s0] = 0, push(s0, h(sx, sy));
+    let best = s0, bh = h(sx, sy), it = 0, end = -1;
+    for (; H.length; ) {
+      const [, st] = pop();
+      if (_lCl[st] && _lVis[st] === _lStamp) continue;
+      _lCl[st] = 1;
+      const ti = st >> 1, lv = st & 1;
+      if (ti === g) {
+        end = st;
+        break;
+      }
+      if (++it > 9e3) break;
+      const x = ti % 92, y = ti / 92 | 0, hh = h(x, y);
+      hh < bh && (bh = hh, best = st);
+      for (let n = 0; n < 8; n++) {
+        const nx = x + NB[n][0], ny = y + NB[n][1];
+        if (!inMap(nx, ny)) continue;
+        const ni = idx(nx, ny);
+        if (n > 3) {
+          if (G.over[ti] || G.over[ni] || G.over[idx(nx, y)] || G.over[idx(x, ny)]) continue;
+          if (!o(nx, y) || !o(x, ny)) continue;
+        }
+        const nl = levelStep(ti, lv, ni);
+        if (nl < 0) continue;
+        if (!(G.over[ni] && 1 === nl) && !o(nx, ny)) continue;
+        if (G.over[ni] && 1 === nl && G.occ[ni]) continue;
+        const ns = 2 * ni + nl;
+        if (_lVis[ns] === _lStamp && _lCl[ns]) continue;
+        const c = _lG[st] + NB[n][2];
+        (_lVis[ns] !== _lStamp || c < _lG[ns]) && (_lVis[ns] = _lStamp, _lG[ns] = c, _lFrom[ns] = st, _lCl[ns] = 0, push(ns, c + 1.08 * h(nx, ny)));
+      }
+    }
+    let cur = end >= 0 ? end : best;
+    const out = [];
+    let guard = 0;
+    for (; cur !== -1 && cur !== s0 && guard++ < 5e3; ) {
+      const t = cur >> 1;
+      out.push({ x: t % 92 * 32 + 16, y: 32 * (t / 92 | 0) + 16 }), cur = _lFrom[cur];
+    }
+    return out.reverse(), simplify(out);
   }
   function tickUnit(e, t) {
     if (e.dead) return;
@@ -3028,6 +3145,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var angDiff = (e, t) => (t - e + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
   function moveAlong(e, t) {
+    const _fi = tileOfU(e);
     if (!e.path || !e.path.length) return void (e.moving = false);
     if (e.pi >= e.path.length) return e.moving = false, void (e.path = null);
     let r = e.path[e.pi], n = e.pi === e.path.length - 1, a = Math.hypot(r.x - e.x, r.y - e.y);
@@ -3038,7 +3156,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     let o = (r.x - e.x) / (a || 1), s = (r.y - e.y) / (a || 1), i = 0, l = 0, c = 0;
     gridNear(e.x, e.y, 64, (t2) => {
       if (t2 === e || t2.dead || t2.inside || t2.attached) return;
-      if ((t2.alt || 0) > 2 != (e.alt || 0) > 2) return;
+      if ((t2.alt || 0) > 2 != (e.alt || 0) > 2 || (t2.lvl || 0) !== (e.lvl || 0)) return;
       const r2 = e.x - t2.x, n2 = e.y - t2.y, a2 = 1.15 * (e.d.radius + t2.d.radius), o2 = r2 * r2 + n2 * n2;
       if (o2 < a2 * a2 && o2 > 0.01) {
         const e2 = Math.sqrt(o2), s2 = (a2 - e2) / a2, d2 = t2.moving ? 0.65 : 1.35;
@@ -3060,7 +3178,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     passableAt(g, y, e) || (passableAt(g, e.y, e) ? y = e.y : passableAt(e.x, y, e) ? g = e.x : (g = e.x, y = e.y, e.stuck += t));
     const x = Math.hypot(g - e.x, y - e.y);
-    x < 0.03 ? e.stuck += t : e.stuck = 0, e.stuck > 0.8 && (e.stuck = 0, repath(e), e.path || (e.order = "miner" === e.d.role ? "harvest" : "idle")), e.x = clamp(g, 6, 2938), e.y = clamp(y, 6, 2298), e.animT = (e.animT || 0) + x, e.moving = x > 0.12, e.key.startsWith("titan_") && !e.d.crush && titanStep(e), e.d.crush && e.moving && crushInfantry(e), e.d.turret ? idleTurret(e, t) : e.tang = e.ang, e.moving && "inf" !== e.d.kind && (e.d.naval ? (Math.random() < 0.15 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }), !e.d.sub && (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.22, S.fx.push({ kind: "wake", x: e.x - Math.cos(e.ang) * 0.8 * e.d.radius, y: e.y - Math.sin(e.ang) * 0.8 * e.d.radius, s: e.d.radius, t: 0, life: 1.4 }))) : (Math.random() < 0.025 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 2, s: 0.22, c: "#8a7f6a", t: 0, life: 0.45 }), trackPair(e)));
+    x < 0.03 ? e.stuck += t : e.stuck = 0, e.stuck > 0.8 && (e.stuck = 0, repath(e), e.path || (e.order = "miner" === e.d.role ? "harvest" : "idle")), e.x = clamp(g, 6, 2938), e.y = clamp(y, 6, 2298), G.hasOver && syncLevel(e, _fi), e.animT = (e.animT || 0) + x, e.moving = x > 0.12, e.key.startsWith("titan_") && !e.d.crush && titanStep(e), e.d.crush && e.moving && crushInfantry(e), e.d.turret ? idleTurret(e, t) : e.tang = e.ang, e.moving && "inf" !== e.d.kind && (e.d.naval ? (Math.random() < 0.15 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 1, s: 0.4, c: "#e4f2f5", t: 0, life: 0.5 }), !e.d.sub && (e.trackT = (e.trackT || 0) - t) <= 0 && (e.trackT = 0.22, S.fx.push({ kind: "wake", x: e.x - Math.cos(e.ang) * 0.8 * e.d.radius, y: e.y - Math.sin(e.ang) * 0.8 * e.d.radius, s: e.d.radius, t: 0, life: 1.4 }))) : (Math.random() < 0.025 && S.fx.push({ kind: "smoke", x: e.x - Math.cos(e.ang) * e.d.radius, y: e.y - Math.sin(e.ang) * e.d.radius, z: 2, s: 0.22, c: "#8a7f6a", t: 0, life: 0.45 }), trackPair(e)));
   }
   function sepOk(u) {
     return !u.dead && !u.inside && !u.attached && !((u.alt || 0) > 2) && !u.rollout;
@@ -3076,7 +3194,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (!sepOk(a)) continue;
       const ra = ("inf" === a.d.kind ? 0.8 : 0.85) * a.d.radius;
       gridNear(a.x, a.y, ra + 42, (b) => {
-        if (b === a || b.id < a.id || !sepOk(b) || !!a.d.naval !== !!b.d.naval) return;
+        if (b === a || b.id < a.id || !sepOk(b) || !!a.d.naval !== !!b.d.naval || (a.lvl || 0) !== (b.lvl || 0)) return;
         if ((a.d.crush && "inf" === b.d.kind || b.d.crush && "inf" === a.d.kind) && teamOf(a.owner) !== teamOf(b.owner)) return;
         const rb = ("inf" === b.d.kind ? 0.8 : 0.85) * b.d.radius;
         let dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
@@ -3086,8 +3204,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const ov = (mn - d) * k, ma = sepMass(a), mb = sepMass(b), nx = dx / d, ny = dy / d;
         let pa = ov * mb / (ma + mb), pb = ov * ma / (ma + mb);
         const mv = (u, px, py) => {
-          const x = u.x + px, y = u.y + py;
-          return !!passableAt(x, y, u) && (u.x = clamp(x, 6, 2938), u.y = clamp(y, 6, 2298), u.animT = (u.animT || 0) + Math.hypot(px, py), true);
+          const x = u.x + px, y = u.y + py, fi = tileOfU(u);
+          return !!passableAt(x, y, u) && (u.x = clamp(x, 6, 2938), u.y = clamp(y, 6, 2298), u.animT = (u.animT || 0) + Math.hypot(px, py), G.hasOver && syncLevel(u, fi), true);
         };
         mv(a, -nx * pa, -ny * pa) || (pb += pa), mv(b, nx * pb, ny * pb) || mv(a, -nx * pb, -ny * pb);
       });
@@ -3097,6 +3215,14 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const n = Math.floor(e / 32), a = Math.floor(t / 32);
     if (!inMap(n, a)) return false;
     const o = idx(n, a);
+    if (G.hasOver && r && !r.d.fly && !r.d.naval) {
+      const fi = tileOfU(r);
+      if (fi !== o) {
+        const l = levelStep(fi, r.lvl || 0, o);
+        if (l < 0) return false;
+        if (1 === l) return !G.occ[o];
+      } else if (r.lvl && G.over[o]) return true;
+    }
     if (r && r.d.naval ? 2 !== G.terr[o] : G.terr[o] >= 2 && !G.bridge[o]) return false;
     const s = G.occ[o];
     if (0 !== s) {
@@ -3348,7 +3474,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var fogT = 0;
   var FOG_HZ = 1 / 7;
   function sightOf(e) {
-    return "b" === e.e ? 150 + 34 * e.size : (e.d.sight || 260) * (e.d.fly ? 1.25 : 1);
+    return "b" === e.e ? 150 + 34 * e.size : (e.d.sight || 260) * (e.d.fly ? 1.25 : 1) * (!e.d.fly && (e.lvl || G.elevOverride[tileOfU(e)] >= PLAT_MIN) ? 1.3 : 1);
   }
   function updateFog(e, t) {
     if (!FOG_ON) return;
@@ -3528,6 +3654,19 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    dressRoad,
+    buildPendingBridges,
+    buildTowns,
+    civSiteOk,
+    clearTileProps,
+    paveNear,
+    levelStep,
+    syncLevel,
+    unitGroundH,
+    lvlOff,
+    tileOfU,
+    isHighTile,
+    PLAT_MIN,
     snowTrails,
     footStep,
     NO_TREAD,
@@ -3936,6 +4075,671 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     aiThreatScore,
     inferPlayerProfile
   });
+})();
+
+</script>
+<script>
+(() => {
+  // src/mapdefs.ts
+  var MW = 91;
+  var MH = 71;
+  var TOP_Z = 22;
+  var MD = { plats: [], overs: [], ramps: [], spots: [], ore: [], forests: [], towns: [], specials: [], cannons: [], snow: 0 };
+  function symRun(kind, fn) {
+    const V = kind === "m4" ? [[0, 0], [1, 0], [0, 1], [1, 1]] : kind === "mx" ? [[0, 0], [1, 0]] : kind === "my" ? [[0, 0], [0, 1]] : kind === "r2" ? [[0, 0], [1, 1]] : [[0, 0]];
+    for (const [fx, fy] of V) {
+      const X = (x) => fx ? MW - x : x, Y = (y) => fy ? MH - y : y;
+      const D = (d) => fx && (d === "e" || d === "w") ? d === "e" ? "w" : "e" : fy && (d === "n" || d === "s") ? d === "n" ? "s" : "n" : d;
+      fn({ X, Y, D, P: (p) => [X(p[0]), Y(p[1])], PL: (ps) => ps.map((p) => [X(p[0]), Y(p[1])]), fx, fy });
+    }
+  }
+  function mdBegin(seed, key, snow) {
+    baseTerrain(seed, 0.5);
+    G.map = key, G.snow = snow ? 1 : 0, G.calm = 1, G.hasOver = false;
+    G.over.fill(0), G.overZ.fill(0);
+    G.props = [], G.trees = [], G.civ = [], G.oreSpots = [], G.special = [], G.pendingBridges = [], G.roadLines = [], G.townHints = [], G.towns = [], G.expansions = [], G.plateaus = [], G.strategic = [], G.stratSpecial = [], G.fall = [];
+    S.traffic = [];
+    MD.plats = [], MD.overs = [], MD.ramps = [], MD.spots = [], MD.ore = [], MD.forests = [], MD.towns = [], MD.specials = [], MD.cannons = [], MD.roads = [];
+  }
+  var T_ = (x, y) => inMap(x, y) ? idx(x, y) : -1;
+  function setLand(i) {
+    G.terr[i] === 2 && (G.terr[i] = 1);
+    G.terr[i] === 3 && (G.terr[i] = 1);
+    G.blk[i] = 0, G.ore[i] = 0, G.tib[i] = 0;
+  }
+  function mdRiver(pts, w) {
+    for (let k = 0; k < pts.length - 1; k++) ridge(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1], w / 2, 2, 1.2, 7 + k);
+  }
+  function mdLake(cx, cy, rx, ry) {
+    for (let y = Math.floor(cy - ry - 2); y <= cy + ry + 2; y++) for (let x = Math.floor(cx - rx - 2); x <= cx + rx + 2; x++) {
+      const i = T_(x, y);
+      if (i < 0) continue;
+      const d = Math.hypot((x - cx) / rx, (y - cy) / ry) + 0.18 * (noise2(3 * x, 3 * y, 11) - 0.5);
+      d < 1 && (G.terr[i] = 2);
+    }
+  }
+  function mdRidge(pts, w) {
+    for (let k = 0; k < pts.length - 1; k++) ridge(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1], w / 2, 3, 2, 21 + k);
+  }
+  function mdPlateau(x0, y0, x1, y1, h) {
+    h = h || 2.6;
+    const ax = Math.min(x0, x1), bx = Math.max(x0, x1), ay = Math.min(y0, y1), by = Math.max(y0, y1);
+    const corner = (x, y) => false;
+    for (let y = ay - 1; y <= by + 1; y++) for (let x = ax - 1; x <= bx + 1; x++) {
+      const i = T_(x, y);
+      if (i < 0) continue;
+      const inside = x >= ax && x <= bx && y >= ay && y <= by && !corner(x, y);
+      if (inside) setLand(i), G.elevOverride[i] = h;
+      else if (!(G.elevOverride[i] >= h)) G.terr[i] = 3, G.elevOverride[i] = h, G.blk[i] = 0, G.ore[i] = 0;
+    }
+    MD.plats.push({ ax, ay, bx, by, h });
+    G.plateaus.push([(ax + bx) / 2, (ay + by) / 2]);
+  }
+  function mdRamp(x, y, dir, len, w) {
+    len = len || 5, w = w || 3;
+    const dx = dir === "e" ? 1 : dir === "w" ? -1 : 0, dy = dir === "s" ? 1 : dir === "n" ? -1 : 0, px = dy ? 1 : 0, py = dx ? 1 : 0;
+    const top = T_(x - dx, y - dy), h = top >= 0 ? G.elevOverride[top] || 2.6 : 2.6;
+    const half = w >> 1, SH = 3;
+    for (let k = 0; k < len; k++) for (let o = -half - SH; o <= half + SH; o++) {
+      const i = T_(x + dx * k + px * o, y + dy * k + py * o);
+      if (i < 0) continue;
+      const e = h * (1 - (k + 0.5) / len), side = Math.abs(o) - half;
+      if (side <= 0) {
+        setLand(i), G.elevOverride[i] = Math.max(0, e);
+        continue;
+      }
+      const se = e * (1 - side / (SH + 1));
+      if (G.terr[i] === 3 && G.elevOverride[i] > 0 && k === 0) continue;
+      se > (G.elevOverride[i] || 0) && G.terr[i] !== 2 && (G.terr[i] === 3 && (G.terr[i] = 1), G.elevOverride[i] = se, G.blk[i] = 0);
+    }
+    MD.ramps.push({ x, y, dir, len, w });
+  }
+  function mdOverpass(x0, y0, x1, y1) {
+    const vert = x0 === x1, ax = Math.min(x0, x1), bx = Math.max(x0, x1), ay = Math.min(y0, y1), by = Math.max(y0, y1);
+    MD.overs.push({ vert, ax, ay, bx: vert ? ax + 1 : bx, by: vert ? by : ay + 1 });
+  }
+  function mdRoad(pts) {
+    MD.roads.push(pts.map((p) => [Math.round(p[0]), Math.round(p[1])]));
+  }
+  function mdSpot(x, y) {
+    MD.spots.push([x, y]);
+  }
+  function mdOre(x, y, r, type, exp) {
+    MD.ore.push([x, y, r, type || 1, !!exp]);
+  }
+  function mdForest(x, y, rx, ry, d) {
+    MD.forests.push([x, y, rx, ry, d || 0.72]);
+  }
+  function mdTown(x, y) {
+    MD.towns.push([x, y]);
+  }
+  function mdSpecial(x, y, key) {
+    MD.specials.push([x, y, key]);
+  }
+  function mdCannon(x, y) {
+    MD.cannons.push([x, y]);
+  }
+  function lineTiles(a, b) {
+    const out = [];
+    let x0 = a[0], y0 = a[1];
+    const x1 = b[0], y1 = b[1], dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+    for (; ; ) {
+      out.push(idx(clamp(x0, 0, 91), clamp(y0, 0, 71)));
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      e2 >= dy && (err += dy, x0 += sx), e2 <= dx && (err += dx, y0 += sy);
+    }
+    return out;
+  }
+  function mdLayRoads() {
+    for (const pts of MD.roads) {
+      const path = [];
+      for (let k = 0; k < pts.length - 1; k++) {
+        const seg = lineTiles(pts[k], pts[k + 1]);
+        path.length && seg.shift();
+        path.push(...seg);
+      }
+      const keep = path.filter((i) => !G.over[i]);
+      dressRoad(keep.length === path.length ? path : keep);
+      G.roadLines.push(pts.map((p) => [p[0], p[1]]));
+    }
+  }
+  function mdSharpenCliffs() {
+    const rim = (i) => G.terr[i] === 3 && G.elevOverride[i] > 0;
+    const onTop = (x, y) => MD.plats.some((p) => x >= p.ax && x <= p.bx && y >= p.ay && y <= p.by);
+    const ramp = new Uint8Array(6624);
+    for (const r of MD.ramps) {
+      const dx = r.dir === "e" ? 1 : r.dir === "w" ? -1 : 0, dy = r.dir === "s" ? 1 : r.dir === "n" ? -1 : 0, px = dy ? 1 : 0, py = dx ? 1 : 0;
+      for (let k = -1; k <= r.len; k++) for (let o = -(r.w >> 1) - 1; o <= (r.w >> 1) + 1; o++) {
+        const i = T_(r.x + dx * k + px * o, r.y + dy * k + py * o);
+        i >= 0 && (ramp[i] = 1);
+      }
+    }
+    for (let cy = 0; cy <= 72; cy++) for (let cx = 0; cx <= 92; cx++) {
+      let hasRim = 0, top = 0, nearRamp = 0, outN = 0, outS = 0;
+      for (let dy = -1; dy <= 0; dy++) for (let dx = -1; dx <= 0; dx++) {
+        const x = cx + dx, y = cy + dy, i = T_(x, y);
+        if (i < 0) continue;
+        ramp[i] && (nearRamp = 1);
+        if (rim(i)) {
+          hasRim = 1;
+          continue;
+        }
+        if (onTop(x, y)) {
+          top = 1;
+          continue;
+        }
+        outN++, outS += G.elevOverride[i] || 0;
+      }
+      if (!hasRim || top || nearRamp) continue;
+      const ci = 93 * cy + cx;
+      G.flatCorner[ci] = cornerBumpBase(cx, cy) + TOP_Z * (outN ? outS / outN : 0), G.flatCornerSet[ci] = 1;
+    }
+  }
+  function mdDecks() {
+    for (const o of MD.overs) {
+      const endA = o.vert ? T_(o.ax, o.ay - 1) : T_(o.ax - 1, o.ay), endB = o.vert ? T_(o.ax, o.by + 1) : T_(o.bx + 1, o.ay);
+      const hA = endA >= 0 ? heightAt(32 * (endA % 92) + 16, 32 * (endA / 92 | 0) + 16) : 60, hB = endB >= 0 ? heightAt(32 * (endB % 92) + 16, 32 * (endB / 92 | 0) + 16) : hA;
+      const n = o.vert ? o.by - o.ay : o.bx - o.ax;
+      for (let y = o.ay; y <= o.by; y++) for (let x = o.ax; x <= o.bx; x++) {
+        const i = T_(x, y);
+        if (i < 0) continue;
+        const k = o.vert ? y - o.ay : x - o.ax, z = hA + (hB - hA) * (n ? k / n : 0);
+        G.over[i] = o.vert ? 2 : 1, G.overZ[i] = z, G.blk[i] = 0;
+      }
+    }
+    G.hasOver = MD.overs.length > 0;
+    for (const o of MD.overs) for (let y = o.ay; y <= o.by; y++) for (let x = o.ax; x <= o.bx; x++) {
+      const i = T_(x, y);
+      if (i < 0) continue;
+      const side = o.vert ? x === o.ax ? 1 : 2 : y === o.ay ? 1 : 2, k = o.vert ? y - o.ay : x - o.ax;
+      const ground = heightAt(32 * x + 16, 32 * y + 16), clear = G.overZ[i] - ground, pier = k % 4 === 2 && clear > 12 && G.terr[i] !== 2 ? Math.round(clear - 2) : 0;
+      G.props.push({ tx: x, ty: y, kind: "overpass", x: 32 * x + 16, y: 32 * y + 16, z: G.overZ[i], r: o.vert ? -Math.PI / 2 : 0, v: side + 10 * pier, s: 1 });
+    }
+  }
+  function mdScenery() {
+    for (const [cx, cy, rx, ry, d] of MD.forests) for (let y = Math.floor(cy - ry); y <= cy + ry; y++) for (let x = Math.floor(cx - rx); x <= cx + rx; x++) {
+      if (!freeTile(x, y) || G.elevOverride[idx(x, y)] > 0 && G.terr[idx(x, y)] === 3) continue;
+      const q = Math.hypot((x - cx) / rx, (y - cy) / ry);
+      if (q > 1) continue;
+      Math.random() < d * (1.15 - q) && addProp("tree", x, y, true);
+    }
+    for (let i = 0; i < 2600; i++) {
+      const x = irnd(2, 89), y = irnd(2, 69), t = idx(x, y);
+      if (!freeTile(x, y) || MD.spots.some((s) => Math.abs(x - s[0] - 3) < 7 && Math.abs(y - s[1] - 3) < 7)) continue;
+      const road = paveNear(x, y, 2) && !paveNear(x, y, 1), cliff = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => {
+        const j = T_(x + dx, y + dy);
+        return j >= 0 && G.terr[j] === 3;
+      });
+      if (road && Math.random() < 0.05) addProp("tree", x, y, true);
+      else if (cliff && Math.random() < 0.12) addProp("rock", x, y, true);
+      else if (!G.snow && G.terr[t] === 0 && Math.random() < 0.09) G.props.push({ tx: x, ty: y, kind: Math.random() < 0.2 ? "flower" : "grass", x: 32 * x + 4 + 24 * Math.random(), y: 32 * y + 4 + 24 * Math.random(), r: 6.283 * Math.random(), s: 1, v: irnd(0, 3) });
+    }
+  }
+  function siteNear(x, y, spots, r) {
+    for (let d = 0; d <= (r || 5); d++) for (let dy = -d; dy <= d; dy++) for (let dx = -d; dx <= d; dx++) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) !== d) continue;
+      const X = Math.round(x) + dx, Y = Math.round(y) + dy;
+      if (civSiteOk(X, Y, spots) && !G.over[idx(X, Y)]) return [X, Y];
+    }
+    return null;
+  }
+  function mdFinish() {
+    const spots = MD.spots;
+    G.spots = spots.map((s) => s.slice());
+    for (const [sx, sy] of spots) for (let y = sy - 1; y <= sy + 6; y++) for (let x = sx - 1; x <= sx + 6; x++) {
+      const i = T_(x, y);
+      i >= 0 && G.terr[i] !== 3 && setLand(i);
+    }
+    mdLayRoads();
+    buildPendingBridges();
+    computeMtnShore();
+    mdSharpenCliffs();
+    mdDecks();
+    for (const [x, y, r, type, exp] of MD.ore) {
+      oreField(x, y, r, type === 2 ? 1600 : 2200, type);
+      exp && G.expansions.push([x, y]);
+    }
+    mdScenery();
+    G.townHints = MD.towns.slice(), buildTowns(MD.towns.length > 3 ? "grand" : "basin", spots);
+    for (const [x, y, key] of MD.specials) {
+      const p = siteNear(x, y, spots);
+      p && (clearTileProps(p[0], p[1]), G.special.push([p[0], p[1], key]));
+    }
+    for (const [x, y] of MD.cannons) {
+      const p = siteNear(x, y, spots, 3);
+      p && G.civ.push([p[0], p[1], "cannon"]);
+    }
+    computeMtnShore();
+    for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) G.elev[idx(x, y)] = heightAt(32 * x + 16, 32 * y + 16);
+  }
+  var MAPDEFS = {
+    // HIGHLANDS: two mesas north and south of a valley highway, joined by an
+    // overpass the valley traffic drives under. Mesa tops hold rich ground.
+    high(seed) {
+      mdBegin(seed, "high");
+      mdPlateau(30, 7, 61, 25);
+      mdPlateau(30, 46, 61, 64);
+      mdOverpass(45, 26, 45, 45);
+      symRun("m4", (T) => {
+        mdSpot(T.X(5) - (T.fx ? 5 : 0), T.Y(5) - (T.fy ? 5 : 0));
+        mdRamp(T.X(29), T.Y(16), T.D("w"), 5);
+        mdOre(T.X(12), T.Y(20), 3.8);
+        mdOre(T.X(38), T.Y(12), 3.2, 1, true);
+        mdForest(T.X(3), T.Y(28), 2.5, 4);
+        mdForest(T.X(22), T.Y(3), 5, 2);
+        mdCannon(T.X(41), T.Y(22));
+      });
+      mdRoad([[4, 35], [87, 35]]);
+      symRun("m4", (T) => {
+        mdRoad(T.PL([[8, 12], [8, 35]]));
+        mdRoad(T.PL([[11, 16], [24, 16]]));
+      });
+      mdRoad([[24, 16], [67, 16]]);
+      mdRoad([[24, 55], [67, 55]]);
+      mdRoad([[45, 16], [45, 25]]);
+      mdRoad([[45, 46], [45, 55]]);
+      mdOre(38, 38, 2.6, 2);
+      mdOre(53, 33, 2.6, 2);
+      mdTown(18, 35);
+      mdTown(73, 35);
+      mdSpecial(52, 11, "empTower");
+      mdSpecial(38, 60, "oilDerek");
+      mdSpecial(18, 30, "paradropHangar");
+      mdSpecial(84, 45, "rogueDen");
+      mdForest(86, 45, 3, 5);
+      mdFinish();
+    },
+    // IRON BASIN: each base holds a corner plateau looking down into a lake
+    // basin; a ring road circles the lake and links the east and west towns.
+    basin(seed) {
+      mdBegin(seed, "basin");
+      mdLake(45.5, 35.5, 8, 5.5);
+      symRun("m4", (T) => {
+        mdPlateau(T.X(3), T.Y(3), T.X(20), T.Y(17));
+        mdSpot(T.X(6) - (T.fx ? 5 : 0), T.Y(6) - (T.fy ? 5 : 0));
+        mdRamp(T.X(21), T.Y(11), T.D("e"), 5);
+        mdRamp(T.X(11), T.Y(18), T.D("s"), 5);
+        mdOre(T.X(16), T.Y(7), 3.2);
+        mdRoad(T.PL([[12, 11], [26, 11], [31, 25]]));
+        mdRoad(T.PL([[11, 12], [11, 35]]));
+        mdOre(T.X(36), T.Y(20), 3.4, 1, true);
+        mdForest(T.X(33), T.Y(4), 5, 2.5);
+        mdForest(T.X(3), T.Y(27), 2.5, 4);
+        mdCannon(T.X(34), T.Y(28));
+      });
+      mdRoad([[31, 25], [60, 25], [60, 46], [31, 46], [31, 25]]);
+      mdRoad([[11, 35], [31, 35]]);
+      mdRoad([[60, 35], [80, 35]]);
+      mdOre(45.5, 25.5, 2.4, 2);
+      mdOre(45.5, 45.5, 2.4, 2);
+      mdTown(15, 35);
+      mdTown(76, 35);
+      mdSpecial(46, 14, "empTower");
+      mdSpecial(20, 31, "paradropHangar");
+      mdSpecial(40, 20, "oilDerek");
+      mdSpecial(46, 58, "rogueDen");
+      mdForest(46, 60, 4, 3);
+      mdFinish();
+    },
+    // THE DIVIDE: a river splits east from west; two road bridges, each
+    // watched by a bluff you can build on.
+    divide(seed) {
+      mdBegin(seed, "divide");
+      mdRiver([[46, -2], [44, 12], [47, 26], [45, 36], [44, 45], [47, 59], [45, 73]], 5);
+      symRun("r2", (T) => {
+        mdSpot(T.X(5) - (T.fx ? 5 : 0), T.Y(6) - (T.fy ? 5 : 0));
+        mdSpot(T.X(5) - (T.fx ? 5 : 0), T.Y(60) - (T.fy ? 5 : 0));
+        mdPlateau(T.X(31), T.Y(24), T.X(39), T.Y(31));
+        mdRamp(T.X(30), T.Y(28), T.D("w"), 5);
+        mdRoad(T.PL([[11, 9], [30, 9], [30, 18], [60, 18]]));
+        mdRoad(T.PL([[11, 63], [24, 63], [24, 28], [30, 28]]));
+        mdRoad(T.PL([[30, 18], [24, 28]]));
+        mdOre(T.X(14), T.Y(18), 3.6);
+        mdOre(T.X(14), T.Y(52), 3.6);
+        mdOre(T.X(35), T.Y(27), 2.8, 1, true);
+        mdOre(T.X(20), T.Y(36), 2.6, 2);
+        mdTown(T.X(36), T.Y(15));
+        mdForest(T.X(3), T.Y(36), 3, 6);
+        mdForest(T.X(30), T.Y(3), 6, 2);
+        mdCannon(T.X(37), T.Y(22));
+      });
+      mdSpecial(35, 26, "empTower");
+      mdSpecial(60, 50, "paradropHangar");
+      mdSpecial(20, 40, "oilDerek");
+      mdSpecial(70, 34, "rogueDen");
+      mdFinish();
+    },
+    // DUSTBOWL: open desert, a rich centre ringed by four low mesas that
+    // overlook it; two oases.
+    dust(seed) {
+      mdBegin(seed, "dust");
+      for (let i = 0; i < G.terr.length; i++) G.terr[i] = fbm(i % 92 * 0.05 + seed, (i / 92 | 0) * 0.05, seed + 3) > 0.62 ? 0 : 1;
+      mdLake(20, 35.5, 3.5, 3);
+      mdLake(71, 35.5, 3.5, 3);
+      mdOre(45.5, 35.5, 5, 1);
+      mdOre(45.5, 35.5, 2, 2);
+      symRun("m4", (T) => {
+        mdSpot(T.X(6) - (T.fx ? 5 : 0), T.Y(6) - (T.fy ? 5 : 0));
+        mdPlateau(T.X(33), T.Y(20), T.X(40), T.Y(26), 2.2);
+        mdRamp(T.X(36), T.Y(27), T.D("s"), 4);
+        mdRoad(T.PL([[11, 11], [30, 26]]));
+        mdOre(T.X(16), T.Y(15), 3.6);
+        mdOre(T.X(27), T.Y(8), 3, 1, true);
+        mdCannon(T.X(37), T.Y(23));
+      });
+      mdRoad([[30, 26], [61, 26], [61, 45], [30, 45], [30, 26]]);
+      mdTown(45, 12);
+      mdTown(45, 59);
+      mdRoad([[30, 26], [45, 12], [61, 26]]);
+      mdRoad([[30, 45], [45, 59], [61, 45]]);
+      mdSpecial(52, 22, "empTower");
+      mdSpecial(56, 12, "paradropHangar");
+      mdSpecial(24, 31, "oilDerek");
+      mdSpecial(66, 40, "oilDerek");
+      mdForest(20, 35.5, 5, 4.5, 0.35);
+      mdForest(71, 35.5, 5, 4.5, 0.35);
+      mdFinish();
+    },
+    // BROKEN LAKES: four lakes linked by channels frame a central lake; the
+    // highway crosses both channels on bridges and splits around the middle.
+    lakes(seed) {
+      mdBegin(seed, "lakes");
+      mdLake(45.5, 35.5, 6, 4.5);
+      symRun("m4", (T) => {
+        mdLake(T.X(24), T.Y(20), 7, 5);
+        mdSpot(T.X(5) - (T.fx ? 5 : 0), T.Y(5) - (T.fy ? 5 : 0));
+        mdOre(T.X(13), T.Y(16), 3.6);
+        mdOre(T.X(38), T.Y(8), 3, 1, true);
+        mdForest(T.X(3), T.Y(30), 2.5, 4);
+        mdForest(T.X(22), T.Y(5), 4, 2);
+        mdRoad(T.PL([[10, 11], [10, 30], [14, 35]]));
+      });
+      mdRiver([[24, 24], [24, 47]], 3);
+      mdRiver([[67, 24], [67, 47]], 3);
+      mdRoad([[4, 35], [30, 35], [36, 28], [55, 28], [61, 35], [87, 35]]);
+      mdRoad([[30, 35], [36, 43], [55, 43], [61, 35]]);
+      mdRoad([[45, 28], [45, 10]]);
+      mdRoad([[45, 43], [45, 61]]);
+      mdPlateau(40, 5, 51, 11, 2.2);
+      mdRamp(45, 12, "s", 4);
+      mdPlateau(40, 60, 51, 66, 2.2);
+      mdRamp(45, 59, "n", 4);
+      mdOre(45, 7.5, 2.6, 2);
+      mdOre(45, 63.5, 2.6, 2);
+      mdTown(14, 35);
+      mdTown(77, 35);
+      mdSpecial(49, 8, "empTower");
+      mdSpecial(18, 40, "paradropHangar");
+      mdSpecial(35, 50, "oilDerek");
+      mdSpecial(56, 22, "oilDerek");
+      mdFinish();
+    },
+    // FIRING LINE: a mountain wall splits north from south with three passes;
+    // the centre pass is overlooked by bluffs on both sides.
+    line(seed) {
+      mdBegin(seed, "line");
+      mdRidge([[-2, 35.5], [11, 35.5]], 5);
+      mdRidge([[21, 35.5], [41, 35.5]], 5);
+      mdRidge([[50, 35.5], [70, 35.5]], 5);
+      mdRidge([[80, 35.5], [93, 35.5]], 5);
+      symRun("m4", (T) => {
+        mdSpot(T.X(6) - (T.fx ? 5 : 0), T.Y(6) - (T.fy ? 5 : 0));
+        mdPlateau(T.X(35), T.Y(24), T.X(41), T.Y(29), 2.2);
+        mdRamp(T.X(34), T.Y(26), T.D("w"), 4);
+        mdRoad(T.PL([[11, 11], [16, 20], [16, 35]]));
+        mdRoad(T.PL([[11, 9], [30, 9], [45, 20], [45, 35]]));
+        mdOre(T.X(16), T.Y(6), 3.6);
+        mdOre(T.X(28), T.Y(20), 3, 1, true);
+        mdOre(T.X(38), T.Y(26.5), 2, 2);
+        mdForest(T.X(3), T.Y(24), 2.5, 5);
+        mdForest(T.X(60), T.Y(4), 6, 2);
+        mdTown(T.X(22), T.Y(28));
+        mdCannon(T.X(40), T.Y(28));
+      });
+      mdRoad([[16, 35], [75, 35]]);
+      mdSpecial(54, 22, "empTower");
+      mdSpecial(36, 50, "paradropHangar");
+      mdSpecial(70, 22, "oilDerek");
+      mdSpecial(20, 50, "rogueDen");
+      mdFinish();
+    },
+    // IRON RING: a square crater rim of high ground surrounds a rich crater
+    // floor; ramps climb the rim from outside and drop into the crater.
+    ring(seed) {
+      mdBegin(seed, "ring");
+      mdPlateau(26, 14, 65, 19);
+      mdPlateau(26, 52, 65, 57);
+      mdPlateau(20, 20, 25, 51);
+      mdPlateau(66, 20, 71, 51);
+      mdRamp(45, 13, "n", 5);
+      mdRamp(45, 20, "s", 5);
+      mdRamp(45, 58, "s", 5);
+      mdRamp(45, 51, "n", 5);
+      mdRamp(19, 35, "w", 5);
+      mdRamp(26, 35, "e", 5);
+      mdRamp(72, 35, "e", 5);
+      mdRamp(65, 35, "w", 5);
+      mdOre(45.5, 35.5, 4.5);
+      mdOre(45.5, 35.5, 1.8, 2);
+      symRun("m4", (T) => {
+        mdSpot(T.X(4) - (T.fx ? 5 : 0), T.Y(4) - (T.fy ? 5 : 0));
+        mdOre(T.X(14), T.Y(14), 3.4);
+        mdRoad(T.PL([[9, 10], [9, 35], [14, 35]]));
+        mdRoad(T.PL([[10, 9], [45, 9]]));
+        mdForest(T.X(22), T.Y(4), 3, 2);
+        mdForest(T.X(4), T.Y(24), 2, 3);
+        mdCannon(T.X(30), T.Y(16));
+      });
+      mdRoad([[14, 35], [77, 35]]);
+      mdRoad([[45, 9], [45, 62]]);
+      mdTown(10, 50);
+      mdTown(81, 21);
+      mdSpecial(30, 16, "empTower");
+      mdSpecial(60, 55, "paradropHangar");
+      mdSpecial(22, 45, "oilDerek");
+      mdSpecial(69, 26, "oilDerek");
+      mdFinish();
+    },
+    // HARBOR SPRAWL: a broad river through a port city; two long bridges and
+    // bluffs on each bank overlooking the water.
+    harbor(seed) {
+      mdBegin(seed, "harbor");
+      mdRiver([[45.5, -2], [45.5, 73]], 7);
+      symRun("r2", (T) => {
+        mdSpot(T.X(5) - (T.fx ? 5 : 0), T.Y(6) - (T.fy ? 5 : 0));
+        mdSpot(T.X(5) - (T.fx ? 5 : 0), T.Y(60) - (T.fy ? 5 : 0));
+        mdPlateau(T.X(28), T.Y(29), T.X(35), T.Y(42));
+        mdRamp(T.X(27), T.Y(35), T.D("w"), 5);
+        mdRoad(T.PL([[11, 9], [22, 9], [22, 16], [60, 16]]));
+        mdRoad(T.PL([[11, 63], [22, 63], [22, 16]]));
+        mdRoad(T.PL([[22, 35], [27, 35]]));
+        mdOre(T.X(14), T.Y(18), 3.6);
+        mdOre(T.X(14), T.Y(52), 3.6);
+        mdOre(T.X(31), T.Y(35), 2.8, 1, true);
+        mdOre(T.X(35), T.Y(58), 2.6, 2);
+        mdTown(T.X(35), T.Y(13));
+        mdTown(T.X(33), T.Y(22));
+        mdForest(T.X(3), T.Y(36), 2.5, 7);
+      });
+      mdSpecial(33, 40, "empTower");
+      mdSpecial(58, 26, "paradropHangar");
+      mdSpecial(26, 50, "oilDerek");
+      mdSpecial(65, 20, "oilDerek");
+      mdFinish();
+    },
+    // GRAND CROSSING: two rivers cross at a central lake, with a ground
+    // bridge on each arm. Hill forts guard the centre, and the northern pair
+    // is joined by an overpass high above the river.
+    grand(seed) {
+      mdBegin(seed, "grand");
+      mdLake(45.5, 35.5, 5, 4);
+      mdRiver([[45.5, -2], [45.5, 32]], 5);
+      mdRiver([[45.5, 39], [45.5, 73]], 5);
+      mdRiver([[-2, 35.5], [41, 35.5]], 5);
+      mdRiver([[50, 35.5], [93, 35.5]], 5);
+      symRun("m4", (T) => {
+        mdSpot(T.X(5) - (T.fx ? 5 : 0), T.Y(5) - (T.fy ? 5 : 0));
+        mdPlateau(T.X(30), T.Y(20), T.X(38), T.Y(27));
+        mdRamp(T.X(29), T.Y(24), T.D("w"), 5);
+        mdRoad(T.PL([[11, 9], [22, 9], [22, 24], [29, 24]]));
+        mdRoad(T.PL([[9, 11], [9, 30]]));
+        mdOre(T.X(15), T.Y(17), 3.6);
+        mdOre(T.X(33), T.Y(10), 3, 1, true);
+        mdOre(T.X(34), T.Y(24), 2, 2);
+        mdTown(T.X(16), T.Y(28));
+        mdForest(T.X(40), T.Y(4), 3, 2);
+        mdCannon(T.X(36), T.Y(25));
+      });
+      mdOverpass(39, 23, 52, 23);
+      mdOverpass(39, 47, 52, 47);
+      mdRoad([[9, 30], [9, 41]]);
+      mdRoad([[82, 30], [82, 41]]);
+      mdRoad([[22, 9], [69, 9]]);
+      mdRoad([[22, 62], [69, 62]]);
+      mdRoad([[30, 24], [38, 24]]);
+      mdRoad([[53, 24], [61, 24]]);
+      mdRoad([[30, 48], [38, 48]]);
+      mdRoad([[53, 48], [61, 48]]);
+      mdSpecial(34, 22, "empTower");
+      mdSpecial(58, 56, "paradropHangar");
+      mdSpecial(20, 44, "rogueDen");
+      mdForest(20, 46, 3, 3);
+      mdFinish();
+    },
+    // OCTAGON FRONT: eight bases around a central mesa; spokes run to a
+    // ring road around its foot, ramps climb it from all four sides.
+    octagon(seed) {
+      mdBegin(seed, "octagon");
+      mdPlateau(38, 29, 53, 42, 2.4);
+      mdRamp(45, 28, "n", 4);
+      mdRamp(45, 43, "s", 4);
+      mdRamp(37, 35, "w", 4);
+      mdRamp(54, 35, "e", 4);
+      const S8 = [[76, 33], [67, 51], [43, 60], [19, 51], [10, 33], [19, 15], [43, 6], [67, 15]];
+      for (const s of S8) mdSpot(s[0], s[1]);
+      mdRoad([[30, 22], [61, 22], [67, 35], [61, 49], [30, 49], [24, 35], [30, 22]]);
+      for (const s of S8) {
+        const cx = s[0] + 3, cy = s[1] + 3, a = Math.atan2(35.5 - cy, 45.5 - cx);
+        const L = Math.hypot(45.5 - cx, 35.5 - cy);
+        mdRoad([[cx + Math.cos(a) * 4, cy + Math.sin(a) * 4], [cx + Math.cos(a) * Math.max(11, L - 15), cy + Math.sin(a) * Math.max(11, L - 15)]]);
+        mdOre(cx - Math.cos(a) * -2 + Math.sin(a) * 7, cy + Math.sin(a) * 2 - Math.cos(a) * 7, 2.8);
+      }
+      mdOre(45.5, 35.5, 3.2);
+      mdOre(45.5, 35.5, 1.4, 2);
+      mdForest(4, 4, 4, 3);
+      mdForest(87, 4, 4, 3);
+      mdForest(4, 67, 4, 3);
+      mdForest(87, 67, 4, 3);
+      mdTown(45.5, 22);
+      mdSpecial(41, 32, "empTower");
+      mdSpecial(30, 58, "paradropHangar");
+      mdSpecial(60, 12, "oilDerek");
+      mdSpecial(84, 60, "rogueDen");
+      mdFinish();
+    },
+    // THE BASTION: six hill forts, each with a single gate ramp facing the
+    // open ore plain between them.
+    bastion(seed) {
+      mdBegin(seed, "bastion");
+      const S6 = [[43, 6], [70, 18], [70, 47], [43, 59], [16, 47], [16, 18]];
+      for (const s of S6) {
+        mdSpot(s[0], s[1]);
+        const x0 = s[0] - 3, y0 = s[1] - 3, x1 = s[0] + 8, y1 = s[1] + 8;
+        mdPlateau(x0, y0, x1, y1, 2.4);
+        const cx = s[0] + 3, cy = s[1] + 3, dx = 45.5 - cx, dy = 35.5 - cy;
+        if (Math.abs(dx) > Math.abs(dy)) mdRamp(dx > 0 ? x1 + 1 : x0 - 1, cy, dx > 0 ? "e" : "w", 5);
+        else mdRamp(cx, dy > 0 ? y1 + 1 : y0 - 1, dy > 0 ? "s" : "n", 5);
+        const gx = Math.abs(dx) > Math.abs(dy) ? dx > 0 ? x1 + 6 : x0 - 6 : cx, gy = Math.abs(dx) > Math.abs(dy) ? cy : dy > 0 ? y1 + 6 : y0 - 6;
+        mdRoad([[cx, cy], [gx, gy], [45.5 + (gx - 45.5) * 0.35, 35.5 + (gy - 35.5) * 0.35]]);
+        mdOre(cx + (cx < 45 ? 5 : -5) * (Math.abs(dy) > Math.abs(dx) ? 1 : 0), cy + (Math.abs(dy) > Math.abs(dx) ? 0 : 5), 2.4);
+        mdOre(45.5 + (gx - 45.5) * 0.55, 35.5 + (gy - 35.5) * 0.55, 2.6, 1, true);
+      }
+      mdOre(45.5, 35.5, 3.4);
+      mdOre(45.5, 35.5, 1.4, 2);
+      mdTown(45.5, 35.5);
+      mdForest(4, 4, 4, 3);
+      mdForest(87, 4, 4, 3);
+      mdForest(4, 67, 4, 3);
+      mdForest(87, 67, 4, 3);
+      mdForest(45.5, 25, 3, 2, 0.5);
+      mdSpecial(56, 30, "empTower");
+      mdSpecial(33, 42, "paradropHangar");
+      mdSpecial(56, 42, "oilDerek");
+      mdSpecial(5, 35, "rogueDen");
+      mdFinish();
+    },
+    // BOOMTOWN: a mining town at the crossroads of a rich plain; six bases on
+    // the rim, lots of ore, low bluffs for spotting.
+    boomtown(seed) {
+      mdBegin(seed, "boomtown");
+      const S6 = [[43, 6], [72, 20], [72, 47], [43, 60], [14, 47], [14, 20]];
+      for (const s of S6) {
+        mdSpot(s[0], s[1]);
+        const cx = s[0] + 3, cy = s[1] + 3, a = Math.atan2(35.5 - cy, 45.5 - cx);
+        mdRoad([[cx + Math.cos(a) * 4, cy + Math.sin(a) * 4], [45.5 - Math.cos(a) * 6, 35.5 - Math.sin(a) * 6]]);
+        mdOre(cx + Math.cos(a) * 9 + Math.sin(a) * 5, cy + Math.sin(a) * 9 - Math.cos(a) * 5, 3.2);
+        mdOre(cx + Math.cos(a) * 16 - Math.sin(a) * 6, cy + Math.sin(a) * 16 + Math.cos(a) * 6, 3, 1, true);
+      }
+      mdRoad([[30, 35.5], [61, 35.5]]);
+      mdRoad([[45.5, 22], [45.5, 49]]);
+      mdOre(38, 28, 2.4, 2);
+      mdOre(53, 43, 2.4, 2);
+      mdPlateau(27, 5, 34, 11, 2);
+      mdRamp(30, 12, "s", 4);
+      mdPlateau(57, 60, 64, 66, 2);
+      mdRamp(60, 59, "n", 4);
+      mdTown(45.5, 35.5);
+      mdTown(45.5, 26);
+      mdSpecial(30, 7, "empTower");
+      mdSpecial(60, 30, "paradropHangar");
+      mdSpecial(34, 44, "oilDerek");
+      mdSpecial(84, 34, "rogueDen");
+      mdForest(86, 34, 3, 6);
+      mdForest(5, 34, 3, 6);
+      mdFinish();
+    },
+    // FROZEN PASS: an iced river divides the valley; two ground bridges on the
+    // flanks and a high overpass between the central bluffs, over the river and
+    // the bank roads that run beneath it.
+    frost(seed) {
+      mdBegin(seed, "frost", 1);
+      mdRiver([[-2, 35.5], [93, 35.5]], 4);
+      mdPlateau(38, 19, 53, 29);
+      mdPlateau(38, 42, 53, 52);
+      mdOverpass(45, 30, 45, 41);
+      symRun("m4", (T) => {
+        mdSpot(T.X(6) - (T.fx ? 5 : 0), T.Y(6) - (T.fy ? 5 : 0));
+        mdRamp(T.X(37), T.Y(24), T.D("w"), 5);
+        mdRoad(T.PL([[11, 11], [26, 11], [26, 31]]));
+        mdRoad(T.PL([[26, 24], [33, 24]]));
+        mdRoad(T.PL([[33, 24], [45, 24], [45, 29]]));
+        mdOre(T.X(16), T.Y(17), 3.6);
+        mdOre(T.X(46), T.Y(21.5), 2.4, 2);
+        mdOre(T.X(14), T.Y(28), 2.8, 1, true);
+        mdForest(T.X(4), T.Y(24), 3, 6);
+        mdForest(T.X(26), T.Y(3), 6, 2);
+        mdForest(T.X(62), T.Y(12), 4, 3);
+        mdCannon(T.X(40), T.Y(27));
+      });
+      mdRoad([[26, 31], [26, 40]]);
+      mdRoad([[65, 31], [65, 40]]);
+      mdRoad([[26, 32], [65, 32]]);
+      mdRoad([[26, 39], [65, 39]]);
+      mdTown(16, 33);
+      mdTown(75, 38);
+      mdSpecial(50, 21, "empTower");
+      mdSpecial(20, 44, "paradropHangar");
+      mdSpecial(70, 26, "oilDerek");
+      mdSpecial(84, 50, "rogueDen");
+      mdFinish();
+    }
+  };
+  function buildAuthoredMap(key, seed) {
+    MAPDEFS[key](seed);
+  }
+  Object.assign(window, { MAPDEFS, buildAuthoredMap, mdSharpenCliffs });
 })();
 
 </script>
@@ -6495,9 +7299,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (LOWPROP[e] && !LOWPOLY) return lowPoly(PROPMODEL)(e, t);
     const _a = getAssetModel(e);
     if (_a) return _a;
-    return "tree" === e ? treeModel(t) : "grass" === e ? grassModel(t) : "flower" === e ? flowerModel(t) : "rock" === e ? rockModel(t) : "scrub" === e ? scrubModel(t) : "lamp" === e ? lampModel() : "fall" === e ? fallModel(t) : "tower" === e ? towerModel(t) : "crater" === e ? craterModel(t) : "wreck" === e ? wreckModel(t) : "rubble" === e ? rubbleModel(t) : "bridge" === e ? bridgeModel(t) : "monument" === e ? monumentModel(t) : "stall" === e ? stallModel(t) : stoneModel(t);
+    return "tree" === e ? treeModel(t) : "grass" === e ? grassModel(t) : "flower" === e ? flowerModel(t) : "rock" === e ? rockModel(t) : "scrub" === e ? scrubModel(t) : "lamp" === e ? lampModel() : "fall" === e ? fallModel(t) : "tower" === e ? towerModel(t) : "crater" === e ? craterModel(t) : "wreck" === e ? wreckModel(t) : "rubble" === e ? rubbleModel(t) : "overpass" === e ? bridgeModel(t % 10, Math.floor(t / 10)) : "bridge" === e ? bridgeModel(t) : "monument" === e ? monumentModel(t) : "stall" === e ? stallModel(t) : stoneModel(t);
   }
-  function bridgeModel(v) {
+  function bridgeModel(v, ph) {
     const e = [], L = 32.3, side = v === 1 || v === 2 ? v : 0, sg = 1 === side ? -1 : 1, ASPH = "#34353a";
     const yIn = side ? -sg * 16 : -20, yOut = side ? sg * 19 : 20, W = Math.abs(yOut - yIn), yc = (yIn + yOut) / 2;
     e.push(P_(BOXM(L, W, 1.7, 0.1), 0, yc, 0, ASPH));
@@ -6512,8 +7316,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       e.push(P_(BOXM(L, 0.4, 0.6, 0.1), 0, yo - o * 0.9, 3.9, "steel"));
     }
     e.push(P_(BOXM(L, W, 0.06), 0, yc, 1.7, ASPH));
-    e.push(P_(BOXM(5, side ? W - 7 : W - 10, 16, 0.4), 0, yc, -18, "concrete2"));
-    e.push(P_(BOXM(6.4, (side ? W - 7 : W - 10) + 1.4, 2, 0.3), 0, yc, -19, "concrete"));
+    const PH = null == ph ? 16 : ph;
+    PH > 0 && (e.push(P_(BOXM(5, side ? W - 7 : W - 10, PH, 0.4), 0, yc, -(PH + 2), "concrete2")), e.push(P_(BOXM(6.4, (side ? W - 7 : W - 10) + 1.4, 2, 0.3), 0, yc, -(PH + 3), "concrete")));
     return e;
   }
   function craterModel(v) {
@@ -9195,7 +9999,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     o || (o = makeSprite(blossomModel(e.tree.type), 0.4, TIBPAL), SPRITES.set(a, o)), groundShadow(e.x, e.y, 7, 0.22), blit(o, r, n, t);
   }
   function drawUnit(e) {
-    const t = cam.z, r = e.alt || 0, n = w2sx(e.x, e.y), a = w2sy(e.x, e.y, r);
+    const t = cam.z, r = (e.alt || 0) + lvlOff(e), n = w2sx(e.x, e.y), a = w2sy(e.x, e.y, r);
     if (n < -110 || a < -170 || n > CW + 110 || a > CH + 110) return;
     const o = palette(e.owner), s = faceIdx(e.ang), i = unitFrame(e), v3l = "v3" === e.key ? e.cool <= 0 : void 0, dep = !(!e.d.deploy || !e.deployed), fac = S.players[e.owner].fac, l = e.key + "|" + e.owner + "|" + i + ("v3" === e.key ? "|L" + (v3l ? 1 : 0) : "") + (e.d.deploy ? "|D" + (dep ? 1 : 0) : "") + "|", c = cachedSprite(l + s, () => makeSprite(UMODEL(e.key, i, { l: v3l, dep, fac }), faceAng(s), o, 2.5), s, l);
     r > 0 ? groundShadow(e.x, e.y, 0.9 * e.d.radius, 0.2) : groundShadow(e.x, e.y, 0.55 * e.d.radius, 0.26);
@@ -9409,7 +10213,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function mapTileRGB(i) {
     const t = G.terr[i], x = i % 92, m = G.mtn ? G.mtn[i] || 0 : 0;
     let c;
-    if (G.bridge && G.bridge[i] > 0) c = [132, 104, 72];
+    if (G.over && G.over[i]) c = [150, 138, 116];
+    else if (G.bridge && G.bridge[i] > 0) c = [132, 104, 72];
     else if (2 === t) c = [30, 68, 108];
     else if (G.pave && G.pave[i] > 0) c = [88, 92, 98];
     else if (3 === t) c = [92, 95, 102];
@@ -9680,7 +10485,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     drawFxProj(), drawRallyFlags(), drawGhost(), drawBox(), drawMarker(), drawMM();
   }
   function unitHUD(e) {
-    const t = cam.z, r = e.alt || 0, n = w2sx(e.x, e.y), a = w2sy(e.x, e.y, r);
+    const t = cam.z, r = (e.alt || 0) + lvlOff(e), n = w2sx(e.x, e.y), a = w2sy(e.x, e.y, r);
     if (n < -110 || a < -170 || n > CW + 110 || a > CH + 110) return;
     if (e.muzzle > 0) {
       const n2 = e.tang, a2 = muzzleDist(e), o2 = e.x + Math.cos(n2) * a2, s2 = e.y + Math.sin(n2) * a2, i = w2sx(o2, s2), l = w2sy(o2, s2, ("inf" === e.d.kind ? 9 : 14) + r), c = ctx.createRadialGradient(i, l, 0, i, l, 6 * t);
@@ -10768,7 +11573,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       o >= 0 && s >= 0 && o < 92 && s < 72 && (mtn += G.mtn[idx(o, s)], shore += G.shore ? G.shore[idx(o, s)] : 0, cnt++);
     }
     mtn = cnt ? mtn / cnt : 0, shore = cnt ? shore / cnt : 0;
-    const peak = fbm(0.24 * e + r + 70, 0.24 * t - r + 70, r + 70), hills = (fbm(0.045 * e + r + 130, 0.045 * t - r + 130, r + 130) - 0.5) * 30, base = (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * 9 + hills + Math.pow(mtn, 2.1) * (190 + 70 * peak), land = Math.max(0, 1 - 1.15 * shore);
+    const peak = fbm(0.24 * e + r + 70, 0.24 * t - r + 70, r + 70), hills = (fbm(0.045 * e + r + 130, 0.045 * t - r + 130, r + 130) - 0.5) * (G.calm ? 7 : 30), base = (fbm(0.1 * e + r + 50, 0.1 * t - r + 50, r + 50) - 0.5) * (G.calm ? 3 : 9) + hills + Math.pow(mtn, 2.1) * (190 + 70 * peak), land = Math.max(0, 1 - 1.15 * shore);
     return base * land * land;
   }
   function cornerOv(e, t) {
@@ -10827,7 +11632,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return void 0 === v && (v = UTURRET(k, 0, { gunKey: g }).some((q) => q.b), _hasB.set(key, v)), v;
   }
   function groundTilt(e, yaw, turret) {
-    if (e.d.fly || e.d.naval || "inf" === e.d.kind || e.inside) return null;
+    if (e.d.fly || e.d.naval || "inf" === e.d.kind || e.inside || e.lvl) return null;
     const d = Math.max(8, 0.45 * (e.d.radius || 12));
     if (!turret || e._tiltT !== S.time) {
       const gx = (heightAt(e.x + d, e.y) - heightAt(e.x - d, e.y)) / (2 * d), gyy = (heightAt(e.x, e.y + d) - heightAt(e.x, e.y - d)) / (2 * d), k = Math.min(1, 0.12 + (e._tiltT === void 0 ? 1 : 0));
@@ -11082,15 +11887,15 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
         float ch = vWorldFog.y + (texture2D(tDetail, wp / 520.0).g - 0.5) * 34.0;
         #define TRI(U, V, CH) (texture2D(tDetail, vec2(wp.y / (U), (CH) / (V))) CH_SEL * tw.x + texture2D(tDetail, vec2(wp.x / (U), (CH) / (V))) CH_SEL * tw.y)
         #define CH_SEL .b
-        float bandA = TRI(1100.0, 260.0, ch), bandB = TRI(1100.0, 260.0, ch + 3.5), bandC = TRI(700.0, 110.0, ch * 1.07 + 9.0);
+        float bandA = TRI(1100.0, 150.0, ch), bandB = TRI(1100.0, 150.0, ch + 3.0), bandC = TRI(700.0, 60.0, ch * 1.07 + 9.0);
         #undef CH_SEL
         #define CH_SEL .r
-        float fiss = TRI(120.0, 620.0, ch), grit = TRI(40.0, 40.0, ch);
+        float fiss = TRI(70.0, 420.0, ch), grit = TRI(30.0, 30.0, ch);
         #undef CH_SEL
         #undef TRI
         float strat = mix(bandA, bandC, 0.4);
         float ledge = clamp((bandA - bandB) * 3.2, -1.0, 1.0);
-        vec3 rockLo = vec3(0.27, 0.22, 0.17), rockHi = vec3(0.46, 0.39, 0.3), rockDk = vec3(0.16, 0.13, 0.1);
+        vec3 rockLo = vec3(0.25, 0.2, 0.155), rockHi = vec3(0.42, 0.355, 0.275), rockDk = vec3(0.16, 0.13, 0.1);
         vec3 rockC = mix(rockLo, rockHi, smoothstep(0.25, 0.8, strat));
         rockC = mix(rockC, rockC * vec3(1.1, 0.9, 0.74), smoothstep(0.5, 0.8, tdM1) * 0.8);
         rockC *= 0.9 + 0.3 * ledge;
@@ -11596,7 +12401,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f) continue;
       if (!seen(e2)) continue;
       _usc = FPS.on ? fpsUnitScale(e2) : 1, _ux = e2.x, _uy = e2.y, _uz = (e2.d.naval ? 0.8 : heightAt(e2.x, e2.y)) + (e2.d.fly ? e2.alt || 0 : 0);
-      const hitFlash = e2.hitT > 0 && "inf" === e2.d.kind, t2 = hitFlash ? { body: "#ffffff", dark: "#ddb8b0", trim: "#ffffff" } : palette(e2.owner), r2 = unitFrame(e2), gy = (e2.d.naval ? 0.8 : heightAt(e2.x, e2.y)) + (FPS.on && e2 === FPS.u ? 0 : unitBob(e2)), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
+      const hitFlash = e2.hitT > 0 && "inf" === e2.d.kind, t2 = hitFlash ? { body: "#ffffff", dark: "#ddb8b0", trim: "#ffffff" } : palette(e2.owner), r2 = unitFrame(e2), gy = (e2.d.naval ? 0.8 : unitGroundH(e2)) + (FPS.on && e2 === FPS.u ? 0 : unitBob(e2)), v3l = "v3" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
       let gt, tt;
       const hb = hdBakeOk(e2) ? hdBakeGeo(e2, r2 & 15) : null;
       c((hb ? "UH" : "U") + e2.key + "|" + e2.owner + "|" + r2 + ("v3" === e2.key ? "|L" + (v3l ? 1 : 0) : "") + (dep ? "|D" : "") + (hitFlash && !hb ? "|H" : "") + (e2.heroMode ? "|" + e2.heroMode : ""), () => UMODEL(e2.key, r2, { l: v3l, dep: e2.deployed, fac: S.players[e2.owner] && S.players[e2.owner].fac, heroMode: e2.heroMode }), t2, e2.x, e2.y, gy + (e2.alt || 0), e2.ang, void 0, hb || void 0, (gt = groundTilt(e2, e2.ang)) ? gt[0] : e2.bank || 0, gt ? gt[1] : e2.pitchA || 0), hasTurret(e2.key) && (tt = gt && groundTilt(e2, e2.tang, 1), ((tk, rc) => {
@@ -11607,7 +12412,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     }
     _usc = 1;
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
-    if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind || "grass" === e2.kind || "flower" === e2.kind);
+    if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, null != e2.z ? e2.z : heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind || "grass" === e2.kind || "flower" === e2.kind);
     if (G.skirtProps) for (const e2 of G.skirtProps) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.4 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, e2.z, e2.r, true);
     if (S.traffic) for (const e2 of S.traffic) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("CAR" + e2.v, () => carModel(e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.ang, false);
     if (G.trees) for (const e2 of G.trees) e2.px || (e2.px = 32 * e2.tx + 16, e2.py = 32 * e2.ty + 16), Math.abs(e2.px - cam.x) + Math.abs(e2.py - cam.y) > 1.4 * h || c("P" + e2.type, () => blossomModel(e2.type), TIBPAL, e2.px, e2.py, heightAt(e2.px, e2.py), (7 * e2.tx + 3 * e2.ty) % 8 / 8 * 6.283, 1);
@@ -11659,7 +12464,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     }
     fpsGfxPost();
   }
-  Object.assign(window, { setMenuCam, trackMark });
+  Object.assign(window, { setMenuCam, trackMark, cornerBumpBase });
   Object.assign(window, {
     glMerge,
     fogPatch,
@@ -11813,7 +12618,10 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
             t.alt = FLOOR_Z + p * (ROOF_Z - FLOOR_Z);
           } else t.alt = (void 0 !== t.alt ? t.alt : FLOOR_Z) > (FLOOR_Z + ROOF_Z) / 2 ? ROOF_Z : FLOOR_Z;
         }
-      } else fpsPassable(l, c, t) ? (t.x = l, t.y = c) : fpsPassable(l, t.y, t) ? t.x = l : fpsPassable(t.x, c, t) && (t.y = c), t.x = clamp(t.x, 6, 2938), t.y = clamp(t.y, 6, 2298);
+      } else {
+        const _fi = tileOfU(t);
+        fpsPassable(l, c, t) ? (t.x = l, t.y = c) : fpsPassable(l, t.y, t) ? t.x = l : fpsPassable(t.x, c, t) && (t.y = c), t.x = clamp(t.x, 6, 2938), t.y = clamp(t.y, 6, 2298), G.hasOver && syncLevel(t, _fi);
+      }
       if ("inf" === t.d.kind && !t.inside) {
         const wtx = Math.floor(t.x / 32), wty = Math.floor(t.y / 32);
         FPS.swimming = inMap(wtx, wty) && G.terr[idx(wtx, wty)] >= 2;
@@ -12828,18 +13636,18 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     const e = FPS.u, t = FPS.cam;
     t.aspect !== CW / CH && (t.aspect = CW / CH);
     if (e.dead) {
-      const dt = Math.min(1, (FPS.deathT || 0) / 1.4), gy = heightAt(e.x, e.y) + (e.alt || 0), r = gy + fpsEyeH(e) * (1 - 0.85 * dt), fall = 1.25 * dt, roll = 0.5 * dt;
+      const dt = Math.min(1, (FPS.deathT || 0) / 1.4), gy = unitGroundH(e) + (e.alt || 0), r = gy + fpsEyeH(e) * (1 - 0.85 * dt), fall = 1.25 * dt, roll = 0.5 * dt;
       return t.fov = 68, t.position.set(e.x, r, e.y), t.up.set(Math.sin(roll), Math.cos(roll), 0), t.lookAt(e.x + Math.cos(FPS.yaw) * Math.cos(fall) * 50, r - 50 * Math.sin(fall), e.y + Math.sin(FPS.yaw) * Math.cos(fall) * 50), FPS.vm && (FPS.vm.visible = false), FPS.vvm && (FPS.vvm.visible = false), void 0;
     }
     t.up.set(0.05 * (FPS.shakeX || 0), 1, 0), t.up.normalize();
     const kp = FPS.pitch + (FPS.viewKick || 0) + 0.05 * (FPS.shakeY || 0), a = Math.cos(kp);
     if (FPS.thirdPerson) {
-      const k = fpsUnitScale(e), backH = 52 * k, gy = heightAt(e.x, e.y) + (e.alt || 0), eyeY = gy + fpsEyeH(e) + (FPS.jumpZ || 0) * k, camY = eyeY + backH, rawDist = tpCameraDist(e, 105 * k, camY);
+      const k = fpsUnitScale(e), backH = 52 * k, gy = unitGroundH(e) + (e.alt || 0), eyeY = gy + fpsEyeH(e) + (FPS.jumpZ || 0) * k, camY = eyeY + backH, rawDist = tpCameraDist(e, 105 * k, camY);
       FPS.tpDist = null == FPS.tpDist ? rawDist : FPS.tpDist + (rawDist - FPS.tpDist) * 0.25;
       const dist2 = FPS.tpDist, camWx = e.x - Math.cos(FPS.yaw) * dist2, camWy = e.y - Math.sin(FPS.yaw) * dist2, finalY = Math.max(camY, heightAt(camWx, camWy) + 8 * k);
       t.position.set(camWx, finalY, camWy), t.lookAt(e.x + Math.cos(FPS.yaw) * a * 120, eyeY + 140 * Math.sin(kp), e.y + Math.sin(FPS.yaw) * a * 120), t.fov = FPS.aiming ? 50 : 68;
     } else {
-      const k = fpsUnitScale(e), r = fpsEyeH(e) + (e.alt || 0) + heightAt(e.x, e.y) + ((FPS.jumpZ || 0) - (FPS.swimming ? 10 : 0)) * k, n = 0.1 * -e.d.radius * k;
+      const k = fpsUnitScale(e), r = fpsEyeH(e) + (e.alt || 0) + unitGroundH(e) + ((FPS.jumpZ || 0) - (FPS.swimming ? 10 : 0)) * k, n = 0.1 * -e.d.radius * k;
       t.position.set(e.x + Math.cos(FPS.yaw) * n, r, e.y + Math.sin(FPS.yaw) * n), t.lookAt(t.position.x + Math.cos(FPS.yaw) * a * 100, t.position.y + 100 * Math.sin(kp), t.position.z + Math.sin(FPS.yaw) * a * 100), t.fov = FPS.aiming ? "inf" === e.d.kind ? 46 : 28 : 74;
     }
     if (FPS.chargingGrenade && "inf" === e.d.kind && !e.inside) {
@@ -13891,7 +14699,7 @@ varying vec3 vFgWN;
       F.bs == null && (F.bs = F.root.scale.x);
       const k = fpsUnitScale(u);
       F.root.scale.setScalar(F.bs * k);
-      F.root.position.set(u.x, heightAt(u.x, u.y) + (u.alt || 0) - (F.deathSink || 0) * k, u.y);
+      F.root.position.set(u.x, unitGroundH(u) + (u.alt || 0) - (F.deathSink || 0) * k, u.y);
       F.root.rotation.y = -(u === me ? FPS.yaw : u.ang);
       try {
         hdPose(F, dt);
@@ -17225,7 +18033,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
         const kbRow = (action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>";
         const kbRows = Object.keys(KEYBINDS).filter((a) => !BUILD_HOTKEY_ACTIONS.includes(a)).map(kbRow).join(""), buildKbRows = BUILD_HOTKEY_ACTIONS.map(kbRow).join("");
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("sfxVolOpt", "Sound Effects", sfxVol) + vol("musicVolOpt", "Music", musicVol) + '<div class="fld"><label>Music' + (musicNowPlaying() ? ' <span style="color:#9db4cc">\xB7 now playing: ' + musicNowPlaying() + "</span>" : "") + '</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("musicVolOpt", "Music", musicVol) + vol("sfxVolOpt", "Sound Effects &amp; Voices", sfxVol) + '<div class="sub" style="margin-top:14px">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div><div class="fld"><label>Music' + (musicNowPlaying() ? ' <span style="color:#9db4cc">\xB7 now playing: ' + musicNowPlaying() + "</span>" : "") + '</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
@@ -17402,12 +18210,16 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const fmt = (s) => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
     const list = Object.keys(groups).map((g) => '<div class="sub" style="margin:10px 0 4px">' + g.toUpperCase() + "</div>" + groups[g].map(([i, f]) => '<div class="jbRow" data-i="' + i + '" style="display:flex;align-items:center;gap:8px;padding:6px 8px;margin:2px 0;border-radius:6px;background:#1a2536;cursor:pointer"><span class="jbIc" style="width:16px;color:#f0a72c">\u25B6</span><span style="flex:1;color:#cfe0f5">' + f.name + '</span><span style="font-size:11px;color:#9db4cc">' + (f.fac ? FACN[f.fac] + " \xB7 " : "") + (f.mood === "battle" ? "Battle" : "Calm") + " \xB7 " + fmt(f.secs) + "</span></div>").join("")).join("");
     const vol = Math.round(100 * musicVol);
-    $("#panelMain").innerHTML = '<h1>MUSIC</h1><div class="sub">Soundtrack \xB7 ' + MUSIC_TRACKS.length + ' tracks</div><div id="jbNow" class="small" style="margin:6px 0;color:#f0a72c;min-height:16px"></div><div class="fld"><label>Music Volume</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="jbVol" min="0" max="100" value="' + vol + '" style="flex:1"><span id="jbVolV" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + vol + '%</span></div></div><div class="fld"><label>In-game music</label><select id="jbSel">' + musicModeOptions().concat(MUSIC_TRACKS.map((e, t) => '<option value="' + t + '">' + musicTrackLabel(t) + "</option>")).join("") + '</select></div><div style="max-height:44vh;overflow-y:auto;margin-top:6px;padding-right:4px">' + list + '</div><div style="display:flex;gap:8px;margin-top:10px"><button id="jbStop" style="flex:1;padding:11px;border-radius:8px;border:1px solid #a04040;background:#2a1c1c;color:#f0a0a0;font-size:13px">\u25A0 STOP</button><button id="jbBack" ' + SECBTN.replace("width:100%;", "flex:1;") + ">BACK</button></div>";
+    $("#panelMain").innerHTML = '<h1>MUSIC</h1><div class="sub">Soundtrack \xB7 ' + MUSIC_TRACKS.length + ' tracks</div><div id="jbNow" class="small" style="margin:6px 0;color:#f0a72c;min-height:16px"></div><div class="fld"><label>Music Volume</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="jbVol" min="0" max="100" value="' + vol + '" style="flex:1"><span id="jbVolV" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + vol + '%</span></div></div><div class="fld"><label>Sound Effects &amp; Voices</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="jbSfx" min="0" max="100" value="' + Math.round(100 * sfxVol) + '" style="flex:1"><span id="jbSfxV" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * sfxVol) + '%</span></div></div><div class="fld"><label>In-game music</label><select id="jbSel">' + musicModeOptions().concat(MUSIC_TRACKS.map((e, t) => '<option value="' + t + '">' + musicTrackLabel(t) + "</option>")).join("") + '</select></div><div style="max-height:44vh;overflow-y:auto;margin-top:6px;padding-right:4px">' + list + '</div><div style="display:flex;gap:8px;margin-top:10px"><button id="jbStop" style="flex:1;padding:11px;border-radius:8px;border:1px solid #a04040;background:#2a1c1c;color:#f0a0a0;font-size:13px">\u25A0 STOP</button><button id="jbBack" ' + SECBTN.replace("width:100%;", "flex:1;") + ">BACK</button></div>";
     $("#jbSel").value = "" + trackSel, $("#jbSel").onchange = (e) => setTrackSel(+e.target.value);
     const v = $("#jbVol");
     v.oninput = () => {
       $("#jbVolV").textContent = v.value + "%", setMusicVol(+v.value / 100);
     };
+    const fv = $("#jbSfx");
+    fv.oninput = () => {
+      $("#jbSfxV").textContent = fv.value + "%", setSfxVol(+fv.value / 100);
+    }, fv.onchange = () => sfx("sel");
     document.querySelectorAll(".jbRow").forEach((r) => r.onclick = () => {
       musicPlay(+r.dataset.i), setTimeout(jbRefresh, 50);
     });
@@ -17607,7 +18419,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return p.credits = rec.credits, p.power = rec.power, p.drain = rec.drain, p.queues = rec.queues || { bld: null, def: null, inf: null, veh: null, air: null }, p.ready = rec.ready || { bld: null, def: null }, p.kills = rec.kills || 0, p.lost = rec.lost || 0, p.defeated = !!rec.defeated, p.spawnX = rec.spawnX, p.spawnY = rec.spawnY, p.spyCD = rec.spyCD || 0, p.paradropCD = rec.paradropCD || 0, p.empCD = rec.empCD || 0, p.isAI && rec.ai && (p.ai.t = rec.ai.t, p.ai.wave = rec.ai.wave || 0, p.ai.expand = rec.ai.expand || 0, rec.ai.personality && (p.ai.personality = rec.ai.personality), p.ai.diffScale = rec.ai.diffScale || 1, p.ai.adaptT = rec.ai.adaptT || 0), p;
   }
   function serializeMap() {
-    return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), roadLines: G.roadLines || [], snow: G.snow || 0, vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), bridge: packArr(G.bridge), bridgeHp: packArr(G.bridgeHp), bridgeSite: packArr(G.bridgeSite), bridgeHoriz: packArr(G.bridgeHoriz), elevOverride: packArr(G.elevOverride), flatCorner: packArr(G.flatCorner), flatCornerSet: packArr(G.flatCornerSet), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
+    return { map: G.map, seed: G.seed, terr: packArr(G.terr), ore: packArr(G.ore), tib: packArr(G.tib), blk: packArr(G.blk), pave: packArr(G.pave), roadLines: G.roadLines || [], snow: G.snow || 0, vis: packArr(G.vis), elev: packArr(G.elev), mtn: packArr(G.mtn), tint: packArr(G.tint), bridge: packArr(G.bridge), bridgeHp: packArr(G.bridgeHp), bridgeSite: packArr(G.bridgeSite), bridgeHoriz: packArr(G.bridgeHoriz), over: packArr(G.over), overZ: packArr(G.overZ), calm: G.calm || 0, elevOverride: packArr(G.elevOverride), flatCorner: packArr(G.flatCorner), flatCornerSet: packArr(G.flatCornerSet), civ: G.civ, special: G.special, props: G.props, oreSpots: G.oreSpots, fall: G.fall, spots: G.spots };
   }
   function restoreMap(rec) {
     G.map = rec.map, G.seed = rec.seed, G.terr = unpackArr(rec.terr, Uint8Array, 6624), G.ore = unpackArr(rec.ore, Float32Array, 6624), G.tib = unpackArr(rec.tib, Uint8Array, 6624), G.blk = unpackArr(rec.blk, Uint8Array, 6624), G.pave = unpackArr(rec.pave, Uint8Array, 6624), G.vis = unpackArr(rec.vis, Uint8Array, 6624), G.elev = unpackArr(rec.elev, Float32Array, 6624), G.mtn = unpackArr(rec.mtn, Float32Array, 6624), G.tint = unpackArr(rec.tint, Uint8Array, 6624), G.bridge = rec.bridge ? unpackArr(rec.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = rec.bridgeHp ? unpackArr(rec.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = rec.bridgeSite ? unpackArr(rec.bridgeSite, Uint8Array, 6624) : new Uint8Array(G.bridge), G.bridgeHoriz = rec.bridgeHoriz ? unpackArr(rec.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624), G.elevOverride = rec.elevOverride ? unpackArr(rec.elevOverride, Float32Array, 6624) : new Float32Array(6624), G.flatCorner = rec.flatCorner ? unpackArr(rec.flatCorner, Float32Array, 93 * 73) : new Float32Array(93 * 73), G.flatCornerSet = rec.flatCornerSet ? unpackArr(rec.flatCornerSet, Uint8Array, 93 * 73) : new Uint8Array(93 * 73), G.occ = new Int32Array(6624), G.civ = rec.civ || [], G.special = rec.special || [], G.props = rec.props || [], G.oreSpots = rec.oreSpots || [], G.fall = rec.fall || [], G.spots = rec.spots || [], G.trees = [];

@@ -488,6 +488,15 @@ declare global {
   function tickInfiltrate(u: any, dt: number): void;
   function trackPair(u: any): void;
   function snowTrails(): void;
+  const MAPDEFS: any;
+  function buildAuthoredMap(key: string, seed: number): void;
+  function unitGroundH(u: any): number;
+  function lvlOff(u: any): number;
+  function levelStep(fi: number, lv: number, ti: number): number;
+  function syncLevel(u: any, fi: number): void;
+  function tileOfU(u: any): number;
+  function isHighTile(i: number): boolean;
+  const PLAT_MIN: number;
   function footStep(u: any): void;
   const NO_TREAD: RegExp;
   function trackMark(x: number, y: number, ang: number, w: number, l: number, life: number): void;

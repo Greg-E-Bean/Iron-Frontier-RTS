@@ -833,7 +833,7 @@ function fpsHDSet() {
     const u = F.u;
     F.bs == null && (F.bs = F.root.scale.x);
     const k = fpsUnitScale(u); F.root.scale.setScalar(F.bs * k);
-    F.root.position.set(u.x, heightAt(u.x, u.y) + (u.alt || 0) - (F.deathSink || 0) * k, u.y);
+    F.root.position.set(u.x, unitGroundH(u) + (u.alt || 0) - (F.deathSink || 0) * k, u.y);
     F.root.rotation.y = -(u === me ? FPS.yaw : u.ang);
     try { hdPose(F, dt); } catch (e) { }
     u.dead || set.add(u);

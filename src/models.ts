@@ -476,8 +476,8 @@ function carModel(v){const cols=["red","white","black","gunmetal"],col=cols[v%co
 function stallModel(v){const e=[],col=v%3==0?"red":v%3==1?"green":"gold";return e.push(P_(BOXM(10,7,3,.3),0,0,0,"wood")),[[-4.2,-2.8],[-4.2,2.8],[4.2,-2.8],[4.2,2.8]].forEach(([dx,dy])=>e.push(P_(CYL(.25,5,6),dx,dy,3,"darkmetal"))),e.push(P_(BOXM(11,8,.4,.2),0,0,8,col)),e.push(P_(BOXM(9,6,1.6,.2),0,0,1.8,"wood")),e}
 function grassModel(v){const t=[],cols=["green3","green","olive","green3"],n=8+v%3;for(let k=0;k<n;k++){const a=k*2.399+v,rr=.5+1.6*((k*7+v)%5)/5,h=2.4+1.8*((k*3+v)%4)/3;t.push(P_(CONE(.28,.02,h,4),Math.cos(a)*rr,Math.sin(a)*rr,0,cols[(k+v)%4],{ty:.28+.1*(k%3),r:a}))}v%2&&t.push(P_(CONE(.12,.1,3.6,4),.3,-.2,0,"sand",{ty:.15}),P_(DOME(.35,.7,5),.85,-.2,3.4,"sand"));return t}
 function flowerModel(v){const t=grassModel(v+1),c=["gold","white","red","psi"][v%4];for(let k=0;k<5;k++){const a=k*1.257+v,rr=.8+.9*(k%2),h=2.6+.8*(k%3);t.push(P_(CYL(.07,h,4),Math.cos(a)*rr,Math.sin(a)*rr,0,"green2"));t.push(P_(DOME(.55,.35,6),Math.cos(a)*rr,Math.sin(a)*rr,h,c,{e:"psi"===c?1:0}));t.push(P_(DOME(.2,.2,5),Math.cos(a)*rr,Math.sin(a)*rr,h+.3,"gold"))}return t}
-const LOWPROP={tree:1,grass:1,flower:1,rock:1,scrub:1,stone:1,crater:1};function PROPMODEL(e,t){if(LOWPROP[e]&&!LOWPOLY)return lowPoly(PROPMODEL)(e,t);const _a=getAssetModel(e);if(_a)return _a;return"tree"===e?treeModel(t):"grass"===e?grassModel(t):"flower"===e?flowerModel(t):"rock"===e?rockModel(t):"scrub"===e?scrubModel(t):"lamp"===e?lampModel():"fall"===e?fallModel(t):"tower"===e?towerModel(t):"crater"===e?craterModel(t):"wreck"===e?wreckModel(t):"rubble"===e?rubbleModel(t):"bridge"===e?bridgeModel(t):"monument"===e?monumentModel(t):"stall"===e?stallModel(t):stoneModel(t)}
-function bridgeModel(v){
+const LOWPROP={tree:1,grass:1,flower:1,rock:1,scrub:1,stone:1,crater:1};function PROPMODEL(e,t){if(LOWPROP[e]&&!LOWPOLY)return lowPoly(PROPMODEL)(e,t);const _a=getAssetModel(e);if(_a)return _a;return"tree"===e?treeModel(t):"grass"===e?grassModel(t):"flower"===e?flowerModel(t):"rock"===e?rockModel(t):"scrub"===e?scrubModel(t):"lamp"===e?lampModel():"fall"===e?fallModel(t):"tower"===e?towerModel(t):"crater"===e?craterModel(t):"wreck"===e?wreckModel(t):"rubble"===e?rubbleModel(t):"overpass"===e?bridgeModel(t%10,Math.floor(t/10)):"bridge"===e?bridgeModel(t):"monument"===e?monumentModel(t):"stall"===e?stallModel(t):stoneModel(t)}
+function bridgeModel(v,ph?){
 // Road bridge deck for one tile. v: 0 single-lane span (railed both sides); 1/2 = near/far half of a two-tile road bridge,
 // railed on the outer side, open along the inner seam.
 const e=[],L=32.3,side=v===1||v===2?v:0,sg=1===side?-1:1,ASPH="#34353a";
@@ -492,8 +492,7 @@ for(const o of outs){const yo=side?yOut:o*20;
  e.push(P_(BOXM(L,.5,.9,.1),0,yo-o*.9,5.2,"steel"));
  e.push(P_(BOXM(L,.4,.6,.1),0,yo-o*.9,3.9,"steel"))}
 e.push(P_(BOXM(L,W,.06),0,yc,1.7,ASPH));
-e.push(P_(BOXM(5,side?W-7:W-10,16,.4),0,yc,-18,"concrete2"));
-e.push(P_(BOXM(6.4,(side?W-7:W-10)+1.4,2,.3),0,yc,-19,"concrete"));
+const PH=null==ph?16:ph;PH>0&&(e.push(P_(BOXM(5,side?W-7:W-10,PH,.4),0,yc,-(PH+2),"concrete2")),e.push(P_(BOXM(6.4,(side?W-7:W-10)+1.4,2,.3),0,yc,-(PH+3),"concrete")));
 return e}
 function craterModel(v){
 const t=[],R=7+3*(v%3);
