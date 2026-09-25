@@ -10,8 +10,9 @@
 <meta name="theme-color" content="#0c1216">
 <meta name="description" content="A real-time strategy game — build, expand, and battle across the frontier.">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <title>Frontier Command</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -12386,7 +12387,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     if (TRK.dirty) TRK.mesh.instanceMatrix.needsUpdate = true, TRK.dirty = false;
   }
   var SNOWF = { pts: null, pos: null, n: 2600, ph: null };
-  function glSnowFall(on, cx, cy) {
+  function glSnowFall(on, cx, cy, amt = 1) {
     if (!on) {
       SNOWF.pts && (SNOWF.pts.visible = false);
       return;
@@ -12400,7 +12401,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
       SNOWF.pts = new THREE.Points(g, m), SNOWF.pts.frustumCulled = false, SNOWF.pos = p2;
     }
     SNOWF.pts.parent !== GL.scene && GL.scene.add(SNOWF.pts);
-    SNOWF.pts.visible = true, SNOWF.pts.position.set(cx, 0, cy);
+    SNOWF.pts.visible = true, SNOWF.pts.position.set(cx, 0, cy), SNOWF.pts.material.opacity = 0.85 * amt;
     const p = SNOWF.pos, T = S.time, fall = 55 * RDT;
     for (let i = 0; i < SNOWF.n; i++) {
       const k = 3 * i;
@@ -12433,8 +12434,8 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     const n = cam.x, a = cam.y;
     GL.sky && (GL.sky.position.set(n, 0, a), GL.sky.rotation.y = 35e-4 * S.time);
     const dph = S.time % DAY_LEN / DAY_LEN, elev = 1.15 * Math.sin(6.283 * dph), ce = Math.cos(elev), se = Math.sin(elev), bmag = 859, ux = -495 / bmag, uz = -702 / bmag, sdx = bmag * ce * ux, sdz = bmag * ce * uz, sdy = 700 * se, dayF = Math.max(0, se), nightF = Math.max(0, -se);
-    const wMood = S.weather || "clear", isRain = "rain" === wMood, isSnow = "snow" === wMood, wAmt = "clear" === wMood ? 0 : isRain ? 0.85 : isSnow ? 0.45 : 0.55;
-    glSnowFall(isSnow, n, a);
+    const wMood = S.weather || "clear", isRain = "rain" === wMood, isSnow = "snow" === wMood, wxA = null == S.wxAmt ? 1 : S.wxAmt, wAmt = ("clear" === wMood ? 0 : isRain ? 0.85 : isSnow ? 0.45 : 0.55) * wxA;
+    glSnowFall(isSnow && wxA > 0.03, n, a, wxA);
     GL.sun.color.copy(_dawnCol).lerp(_noonCol, Math.min(1, dayF / 0.9)), GL.sun.intensity = (0.05 + dayF * 2.05) * (1 - 0.55 * wAmt);
     GL.hemi.intensity = 0.1 + 0.5 * dayF + 0.05 * nightF, GL.hemi.color.copy(_hemiDay).lerp(_hemiNight, nightF), GL.hemi.groundColor.copy(_hemiGroundDay).lerp(_hemiGroundNight, nightF);
     wAmt > 0 && (GL.hemi.color.lerp(isRain ? _hemiRain : _hemiOver, wAmt), GL.hemi.groundColor.lerp(isRain ? _hemiGroundRain : _hemiGroundOver, wAmt));
@@ -12448,7 +12449,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
       void 0 === cl._baseOp && (cl._baseOp = cl.material.opacity), cl.material.opacity = Math.min(1, cl._baseOp * (0.3 + 0.7 * dayF) * (1 + 0.6 * wAmt));
     });
     if (GL.rain) {
-      const targetOp = isRain ? 0.5 : 0;
+      const targetOp = isRain ? 0.5 * wxA : 0;
       GL.rain.material.opacity += (targetOp - GL.rain.material.opacity) * 0.04;
       if (GL.rain.material.opacity > 0.01) {
         GL.rain.visible = true, GL.rain.position.set(n, 0, a);
@@ -18293,15 +18294,15 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       if (t.classList.remove("hidden"), "pause" === e) {
         const e2 = P();
         $("#panelMain").innerHTML = '<h1>PAUSED</h1><div class="sub">' + e2.f.name.toUpperCase() + " COMMAND vs " + rivalNames(e2) + '</div><div class="small" style="margin:0 0 6px">$' + Math.floor(e2.credits) + " &nbsp;\xB7&nbsp; power " + e2.power + "/" + e2.drain + " &nbsp;\xB7&nbsp; " + S.units.filter((e3) => 0 === e3.owner).length + " units &nbsp;\xB7&nbsp; " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + "s<br>Killed " + e2.kills + " \xB7 lost " + e2.lost + '</div><button id="play">RESUME</button><button id="openSettings" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SETTINGS</button><button id="openSaveG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SAVE GAME</button><button id="openLoadG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="restart" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">RESTART</button><div class="small">Tap a card repeatedly to queue it \xB7 long-press a card (or tap a chip in the queue bar) to remove one \xB7 \u25BE expands the build panel \xB7 DEPLOY toggles Desolators, evacuates a garrison, sends aircraft home.</div>', $("#play").addEventListener("click", () => {
-          S.running = true, openMenu(null);
-        }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => S.mission ? S.mission.tutorial ? launchTutorial() : launchMission(S.mission.fac, S.mission.idx) : location.reload());
+          S.needMusic && (S.needMusic = false, audio(), startMusic()), S.running = true, openMenu(null);
+        }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => (clearResume(), S.mission) ? S.mission.tutorial ? launchTutorial() : launchMission(S.mission.fac, S.mission.idx) : location.reload());
       } else if ("settings" === e) {
         const trackOpts = musicModeOptions().concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + musicTrackLabel(t2) + "</option>")).concat(CUSTOM_MUSIC.map((e2, t2) => '<option value="' + (MUSIC_TRACKS.length + t2) + '">' + e2.name + " (custom)</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
         const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
         const kbRow = (action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>";
         const kbRows = Object.keys(KEYBINDS).filter((a) => !BUILD_HOTKEY_ACTIONS.includes(a)).map(kbRow).join(""), buildKbRows = BUILD_HOTKEY_ACTIONS.map(kbRow).join("");
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("musicVolOpt", "Music", musicVol) + vol("sfxVolOpt", "Sound Effects &amp; Voices", sfxVol) + '<div class="sub" style="margin-top:14px">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div><div class="fld"><label>Music' + (musicNowPlaying() ? ' <span style="color:#9db4cc">\xB7 now playing: ' + musicNowPlaying() + "</span>" : "") + '</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("musicVolOpt", "Music", musicVol) + vol("sfxVolOpt", "Sound Effects &amp; Voices", sfxVol) + '<div class="sub" style="margin-top:14px">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="fld"><label>Weather</label><select id="weatherOpt"><option value="dynamic">Dynamic \u2014 rain and snow come and go</option><option value="fixed">Fixed \u2014 set at the start of each game</option><option value="off">Off \u2014 always clear</option></select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div><div class="fld"><label>Music' + (musicNowPlaying() ? ' <span style="color:#9db4cc">\xB7 now playing: ' + musicNowPlaying() + "</span>" : "") + '</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#weatherOpt").value = weatherPref, $("#weatherOpt").addEventListener("change", (e2) => setWeatherPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
@@ -18359,7 +18360,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return '<div class="sub" style="margin-top:10px">RESULTS</div><div class="small">' + rows + "</div>";
   }
   function gameOver(win) {
-    S.over = true, S.running = false, setRainAmbience(false), sfx(win ? "win" : "lose");
+    clearResume(), S.over = true, S.running = false, setRainAmbience(false), sfx(win ? "win" : "lose");
     $("#menu").classList.remove("hidden");
     const t = P(), mission = S.mission, tut = !!(mission && mission.tutorial);
     mission && !tut && win && unlockNext(mission.fac, mission.idx);
@@ -18374,16 +18375,54 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       S.mission = null, showMissionList(mission.fac);
     });
   }
+  var weatherPref = (() => {
+    try {
+      const v = localStorage.getItem("ifr_weather");
+      return "off" === v || "fixed" === v ? v : "dynamic";
+    } catch (e) {
+      return "dynamic";
+    }
+  })();
+  function setWeatherPref(v) {
+    weatherPref = v;
+    try {
+      localStorage.setItem("ifr_weather", v);
+    } catch (e) {
+    }
+    S.wxT = Math.min(S.wxT || 0, "dynamic" === v ? 20 : 0);
+  }
+  function rollWeather(prev) {
+    const opts = G.snow ? ["clear", "overcast", "snow", "snow"] : ["clear", "clear", "overcast", "rain", "rain"];
+    let w = pick(opts);
+    for (let i = 0; i < 4 && w === prev; i++) w = pick(opts);
+    return w;
+  }
   function pickWeather() {
-    if (G.snow) return "snow";
-    const r = Math.random();
-    return r < 0.55 ? "clear" : r < 0.8 ? "overcast" : "rain";
+    S.wxAmt = 1, S.wxT = 150 + 150 * Math.random();
+    if ("off" === weatherPref) return S.wxGoal = "clear";
+    if (G.snow && "fixed" === weatherPref) return S.wxGoal = "snow";
+    const r = Math.random(), w = r < 0.55 ? "clear" : r < 0.8 ? "overcast" : G.snow ? "snow" : "rain";
+    return S.wxGoal = w;
+  }
+  function tickWeather(dt) {
+    if (null == S.wxAmt && (S.wxAmt = 1), "off" === weatherPref) S.wxGoal = "clear";
+    else if ("dynamic" === weatherPref && (S.wxT = (S.wxT || 0) - dt) <= 0) {
+      S.wxT = 150 + 210 * Math.random();
+      const g = rollWeather(S.weather);
+      g !== S.weather && (S.wxGoal = g, "rain" === g ? hint("Rain is moving in") : "snow" === g ? hint("Snow is starting to fall") : "rain" !== S.weather && "snow" !== S.weather || hint("The weather is clearing"));
+    }
+    const goal = S.wxGoal || S.weather;
+    if (goal !== S.weather) {
+      if ("clear" === S.weather || (S.wxAmt -= dt / 22) <= 0) S.weather = goal, S.wxAmt = 0;
+    } else S.wxAmt = Math.min(1, S.wxAmt + dt / 28);
+    const rain = "rain" === S.weather && S.wxAmt > 0.3;
+    rain !== !!S.wxRainSnd && (S.wxRainSnd = rain, setRainAmbience(rain));
   }
   function startGame() {
     menuBgStop(), audio(), startMusic(), genMap(Math.floor(1e3 * Math.random()), cfg.map), mmCache = null, NEUTRAL = 1 + cfg.slots.length, S.players = [newPlayer(0, cfg.fac, false, "normal", cfg.team, colorSet(cfg.color))];
     cfg.slots.forEach((e, t) => {
       S.players.push(newPlayer(t + 1, e.fac, true, e.diff || "normal", e.team, colorSet(e.color)));
-    }), S.players[NEUTRAL] = newPlayer(NEUTRAL, "allied", false, "normal"), S.players[NEUTRAL].team = -1, S.players[NEUTRAL].f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, S.players[NEUTRAL].fac = "neutral", S.players[NEUTRAL].neutral = true, S.rads = [], S.weather = pickWeather(), setRainAmbience("rain" === S.weather), GL ? rebuildTerrainGL() : initGL(), FOG_ON = "off" !== cfg.fog, G.vis.fill(FOG_ON ? 0 : 2), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), resizeGL(), S.units = [], S.blds = [], S.bldById = /* @__PURE__ */ new Map(), S.projs = [], S.fx = [], S.rockets = [], S.sel = [], S.time = 0, S.over = false, S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.history = [], S.histT = 0;
+    }), S.players[NEUTRAL] = newPlayer(NEUTRAL, "allied", false, "normal"), S.players[NEUTRAL].team = -1, S.players[NEUTRAL].f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, S.players[NEUTRAL].fac = "neutral", S.players[NEUTRAL].neutral = true, S.rads = [], S.weather = pickWeather(), S.wxRainSnd = "rain" === S.weather, setRainAmbience("rain" === S.weather), GL ? rebuildTerrainGL() : initGL(), FOG_ON = "off" !== cfg.fog, G.vis.fill(FOG_ON ? 0 : 2), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), resizeGL(), S.units = [], S.blds = [], S.bldById = /* @__PURE__ */ new Map(), S.projs = [], S.fx = [], S.rockets = [], S.sel = [], S.time = 0, S.over = false, S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.history = [], S.histT = 0;
     for (let i = 1; i < NEUTRAL; i++) S.players[i].credits = DIFFS[S.players[i].diff].cash;
     const allSpots = (G.spots && G.spots.length ? G.spots : [[13, 13], [76, 56], [16, 66], [76, 10]]).map((e) => [e[0], e[1]]), wanted = [cfg.spawn, ...cfg.slots.map((e) => e.spawn)].map((e) => clamp(e, 0, allSpots.length - 1)), usedSpots = /* @__PURE__ */ new Set(), order = wanted.map((e) => {
       let t = e;
@@ -18447,6 +18486,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     openMenu,
     gameOver,
     pickWeather,
+    tickWeather,
+    setWeatherPref,
     startGame,
     captureKeybind,
     resetKeybinds,
@@ -18642,10 +18683,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var entRef = (v) => v ? { id: v.id, e: v.e } : null;
   function unitToObj(u) {
-    return { id: u.id, key: u.key, owner: u.owner, x: u.x, y: u.y, hp: u.hp, maxhp: u.maxhp, ang: u.ang, tang: u.tang, order: u.order, tx: u.tx, ty: u.ty, cool: u.cool, cargo: u.cargo, ore: u.ore, unload: u.unload, deployed: u.deployed, xp: u.xp, vet: u.vet, alt: u.alt, ammo: u.ammo, inside: entRef(u.inside), host: entRef(u.host), drone: entRef(u.drone), erase: u.erase, frozen: u.frozen, state: u.state, home: entRef(u.home), padHome: entRef(u.padHome), padIdx: null != u.padIdx ? u.padIdx : null, origOwner: u.origOwner, slaves: (u.slaves || []).map(entRef), ctrlBy: entRef(u.ctrlBy), target: entRef(u.target), ref: entRef(u.ref), guard: u.guard, ctrl: u.ctrl, rangeMul: u.rangeMul, slowT: u.slowT, retreatT: u.retreatT, revealT: u.revealT, gunner: u.gunner || null, heroMode: u.heroMode };
+    return { mtag: u.mtag, cloakM: u.cloakM, arrived: u.arrived, id: u.id, key: u.key, owner: u.owner, x: u.x, y: u.y, hp: u.hp, maxhp: u.maxhp, ang: u.ang, tang: u.tang, order: u.order, tx: u.tx, ty: u.ty, cool: u.cool, cargo: u.cargo, ore: u.ore, unload: u.unload, deployed: u.deployed, xp: u.xp, vet: u.vet, alt: u.alt, ammo: u.ammo, inside: entRef(u.inside), host: entRef(u.host), drone: entRef(u.drone), erase: u.erase, frozen: u.frozen, state: u.state, home: entRef(u.home), padHome: entRef(u.padHome), padIdx: null != u.padIdx ? u.padIdx : null, origOwner: u.origOwner, slaves: (u.slaves || []).map(entRef), ctrlBy: entRef(u.ctrlBy), target: entRef(u.target), ref: entRef(u.ref), guard: u.guard, ctrl: u.ctrl, rangeMul: u.rangeMul, slowT: u.slowT, retreatT: u.retreatT, revealT: u.revealT, gunner: u.gunner || null, heroMode: u.heroMode };
   }
   function bldToObj(b) {
-    return { id: b.id, key: b.key, owner: b.owner, tx: b.tx, ty: b.ty, size: b.size, hp: b.hp, maxhp: b.maxhp, cool: b.cool, target: entRef(b.target), rally: b.rally, sellT: b.sellT, repair: b.repair, chargeT: b.chargeT, charge: b.charge, rise: b.rise, spin: b.spin, capturedFac: b.capturedFac, garrison: (b.garrison || []).map(entRef), deployed: b.deployed, rot: b.rot, open: b.open, pairId: entRef(b.pairId ? { id: b.pairId, e: "b" } : null), pads: b.pads ? b.pads.map(entRef) : null };
+    return { mtag: b.mtag, blackoutT: b.blackoutT, id: b.id, key: b.key, owner: b.owner, tx: b.tx, ty: b.ty, size: b.size, hp: b.hp, maxhp: b.maxhp, cool: b.cool, target: entRef(b.target), rally: b.rally, sellT: b.sellT, repair: b.repair, chargeT: b.chargeT, charge: b.charge, rise: b.rise, spin: b.spin, capturedFac: b.capturedFac, garrison: (b.garrison || []).map(entRef), deployed: b.deployed, rot: b.rot, open: b.open, pairId: entRef(b.pairId ? { id: b.pairId, e: "b" } : null), pads: b.pads ? b.pads.map(entRef) : null };
   }
   function restoreUnit(rec) {
     const base = UNITS[rec.key];
@@ -18693,8 +18734,47 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function restoreMap(rec) {
     G.map = rec.map, G.seed = rec.seed, G.terr = unpackArr(rec.terr, Uint8Array, 6624), G.ore = unpackArr(rec.ore, Float32Array, 6624), G.tib = unpackArr(rec.tib, Uint8Array, 6624), G.blk = unpackArr(rec.blk, Uint8Array, 6624), G.pave = unpackArr(rec.pave, Uint8Array, 6624), G.vis = unpackArr(rec.vis, Uint8Array, 6624), G.elev = unpackArr(rec.elev, Float32Array, 6624), G.mtn = unpackArr(rec.mtn, Float32Array, 6624), G.tint = unpackArr(rec.tint, Uint8Array, 6624), G.bridge = rec.bridge ? unpackArr(rec.bridge, Uint8Array, 6624) : new Uint8Array(6624), G.bridgeHp = rec.bridgeHp ? unpackArr(rec.bridgeHp, Float32Array, 6624) : new Float32Array(6624), G.bridgeSite = rec.bridgeSite ? unpackArr(rec.bridgeSite, Uint8Array, 6624) : new Uint8Array(G.bridge), G.bridgeHoriz = rec.bridgeHoriz ? unpackArr(rec.bridgeHoriz, Uint8Array, 6624) : new Uint8Array(6624), G.elevOverride = rec.elevOverride ? unpackArr(rec.elevOverride, Float32Array, 6624) : new Float32Array(6624), G.flatCorner = rec.flatCorner ? unpackArr(rec.flatCorner, Float32Array, 93 * 73) : new Float32Array(93 * 73), G.flatCornerSet = rec.flatCornerSet ? unpackArr(rec.flatCornerSet, Uint8Array, 93 * 73) : new Uint8Array(93 * 73), G.occ = new Int32Array(6624), G.civ = rec.civ || [], G.special = rec.special || [], G.props = rec.props || [], G.oreSpots = rec.oreSpots || [], G.fall = rec.fall || [], G.spots = rec.spots || [], G.trees = [];
   }
+  var RESUME_KEY = "ifr_resume";
+  function gameActive() {
+    return !!(S.players && S.players.length && !S.over && !S.quitting && !$("#top").classList.contains("hidden"));
+  }
+  function autoSave() {
+    if (!gameActive()) return;
+    try {
+      const d = serializeGame();
+      d.fpsU = FPS.on && FPS.u ? FPS.u.id : null, localStorage.setItem(RESUME_KEY, JSON.stringify({ t: Date.now(), d }));
+    } catch (e) {
+    }
+  }
+  function clearResume() {
+    try {
+      localStorage.removeItem(RESUME_KEY);
+    } catch (e) {
+    }
+  }
+  function tryResume() {
+    let r = null;
+    try {
+      r = JSON.parse(localStorage.getItem(RESUME_KEY) || "null");
+    } catch (e) {
+    }
+    if (!r || !r.d) return false;
+    if (Date.now() - r.t > 14 * 864e5) return clearResume(), false;
+    try {
+      "function" == typeof menuBgStop && menuBgStop(), restoreGame(r.d);
+    } catch (e) {
+      return console.error(e), clearResume(), false;
+    }
+    S.running = false, S.needMusic = true, document.body.classList.toggle("fpsOnly", !!(S.mission && S.mission.fpsOnly));
+    if (r.d.fpsU) {
+      const u = S.units.find((u2) => u2.id === r.d.fpsU && !u2.dead);
+      u && enterFPS(u);
+    }
+    openMenu("pause"), hint("Welcome back \u2014 resumed where you left off");
+    return true;
+  }
   function serializeGame() {
-    return { v: 1, time: S.time, fogOn: FOG_ON, neutral: NEUTRAL, cfg: JSON.parse(JSON.stringify(cfg)), cam: { x: cam.x, y: cam.y, z: cam.z }, nextId: S.nextId, mission: S.mission, players: S.players.map(playerToObj), units: S.units.filter((u) => !u.dead).map(unitToObj), blds: S.blds.filter((b) => !b.dead).map(bldToObj), rads: (S.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), weather: S.weather, map: serializeMap() };
+    return { v: 1, time: S.time, fogOn: FOG_ON, neutral: NEUTRAL, cfg: JSON.parse(JSON.stringify(cfg)), cam: { x: cam.x, y: cam.y, z: cam.z }, nextId: S.nextId, mission: S.mission, players: S.players.map(playerToObj), units: S.units.filter((u) => !u.dead).map(unitToObj), blds: S.blds.filter((b) => !b.dead).map(bldToObj), rads: (S.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), weather: S.weather, wx: { amt: S.wxAmt, goal: S.wxGoal, t: S.wxT }, map: serializeMap() };
   }
   function restoreGame(data) {
     cfg = data.cfg || cfg;
@@ -18705,9 +18785,20 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     S.blds = data.blds.map(restoreBld).filter(Boolean);
     S.bldById = new Map(S.blds.map((b) => [b.id, b]));
     resolveRefs();
+    {
+      const um = new Map(data.units.map((r) => [r.id, r])), bm = new Map(data.blds.map((r) => [r.id, r]));
+      for (const u of S.units) {
+        const r = um.get(u.id);
+        r && (u.mtag = r.mtag, u.cloakM = r.cloakM, u.arrived = r.arrived);
+      }
+      for (const b of S.blds) {
+        const r = bm.get(b.id);
+        r && (b.mtag = r.mtag, b.blackoutT = r.blackoutT);
+      }
+    }
     for (const b of S.blds) if (!("gate" === b.key && b.open)) for (let ty = b.ty; ty < b.ty + b.size; ty++) for (let tx = b.tx; tx < b.tx + b.size; tx++) inMap(tx, ty) && (G.occ[idx(tx, ty)] = b.id);
     for (const p of S.players) recalcPower(p.id);
-    S.time = data.time, S.weather = data.weather || "clear", setRainAmbience("rain" === S.weather), S.over = false, S.running = true, S.sel = [], S.projs = [], S.fx = [], S.rockets = [], S.traffic = [], S.history = [], S.histT = 0, S.rads = (data.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.nextId = data.nextId || Math.max(1, ...S.units.map((u) => u.id), ...S.blds.map((b) => b.id)) + 1, S.mission = data.mission || null, FOG_ON = data.fogOn, cam.x = data.cam.x, cam.y = data.cam.y, cam.z = camZTarget = data.cam.z, mmCache = null, GL ? rebuildTerrainGL() : initGL(), resizeGL(), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), S.running = true, openMenu(null), hint("Game loaded");
+    S.time = data.time, S.weather = data.weather || "clear", S.wxAmt = data.wx ? data.wx.amt : 1, S.wxGoal = data.wx ? data.wx.goal : S.weather, S.wxT = data.wx ? data.wx.t : 120, S.wxRainSnd = "rain" === S.weather, setRainAmbience("rain" === S.weather), S.over = false, S.running = true, S.sel = [], S.projs = [], S.fx = [], S.rockets = [], S.traffic = [], S.history = [], S.histT = 0, S.rads = (data.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.nextId = data.nextId || Math.max(1, ...S.units.map((u) => u.id), ...S.blds.map((b) => b.id)) + 1, S.mission = data.mission || null, FOG_ON = data.fogOn, cam.x = data.cam.x, cam.y = data.cam.y, cam.z = camZTarget = data.cam.z, mmCache = null, GL ? rebuildTerrainGL() : initGL(), resizeGL(), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), S.running = true, openMenu(null), hint("Game loaded");
   }
   function loadSlot(n) {
     try {
@@ -18733,7 +18824,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     loadSlot,
     saveMeta,
     packArr,
-    unpackArr
+    unpackArr,
+    autoSave,
+    clearResume,
+    tryResume,
+    gameActive
   });
 })();
 
@@ -22692,7 +22787,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   function step(e) {
     buildUnitGrid(), S.time += e, sampleHistory(e), updateFog(e), lightningT = Math.max(0, lightningT - e);
-    if ("rain" === S.weather) {
+    tickWeather(e);
+    if ("rain" === S.weather && S.wxAmt > 0.6) {
       (S.thunderT = (void 0 === S.thunderT ? 6 + 10 * Math.random() : S.thunderT) - e) <= 0 && (S.thunderT = 9 + 14 * Math.random(), sfx("thunder"), lightningT = 0.16 + 0.12 * Math.random());
     }
     S.spyReveals && S.spyReveals.length && (S.spyReveals.forEach((r) => r.t -= e), S.spyReveals = S.spyReveals.filter((r) => r.t > 0));
@@ -22719,7 +22815,25 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
     }
   }
-  resize(), showSetup(), accountPromptSeen() || setTimeout(() => showAccount(true)), requestAnimationFrame(frame), $("#fpsPrompt").addEventListener("click", (ev) => {
+  resize(), showSetup(), (() => {
+    const go = () => {
+      tryResume() || accountPromptSeen() || showAccount(true);
+    };
+    "complete" === document.readyState ? setTimeout(go) : addEventListener("load", go, { once: true });
+  })(), requestAnimationFrame(frame), // Leaving the app pauses and saves; coming back shows the pause menu with everything where it was.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (gameActive()) {
+        S.pausedByHide = S.running || S.pausedByHide, S.running = false, autoSave();
+        try {
+          speakStop();
+        } catch (e) {
+        }
+      }
+    } else S.pausedByHide && gameActive() && (S.pausedByHide = false, openMenu("pause"));
+  }), addEventListener("pagehide", autoSave), setInterval(() => {
+    S.running && autoSave();
+  }, 6e4), $("#fpsPrompt").addEventListener("click", (ev) => {
     ev.stopPropagation(), fpsPromptTarget && !FPS.on && !FPS.entering && (GL ? beginFpsEntry(fpsPromptTarget) : hint("First person needs 3D graphics support"));
   }), $("#fpsexit").addEventListener("click", (e) => {
     e.stopPropagation(), S.mission && S.mission.fpsOnly && !S.over || exitFPS();

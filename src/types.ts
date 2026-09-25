@@ -360,6 +360,13 @@ export interface GameState {
   deployUnit?: Unit | null;
   mission?: any;
   weather?: string;
+  wxAmt?: number;
+  wxGoal?: string;
+  wxT?: number;
+  wxRainSnd?: boolean;
+  needMusic?: boolean;
+  quitting?: boolean;
+  pausedByHide?: boolean;
   rads?: any[];
   aiVis?: Map<number, Uint8Array>;
   knownEnemy?: Map<number, Set<number>>;
