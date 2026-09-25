@@ -24,7 +24,9 @@ function nextDefaultFac(){const e=["allied","soviet","yuri"],t=[cfg.fac,...cfg.s
 function nextDefaultSpawn(mp){const e=[cfg.spawn,...cfg.slots.map(e=>e.spawn)];for(let t=0;t<(mp||4);t++)if(!e.includes(t))return t;return 0}
 function mapMax(key){const m=MAPS.find(e=>e.k===key);return m&&m.mp||4}
 function nextDefaultTeam(){const e=[cfg.team,...cfg.slots.map(e=>e.team)];for(let t=1;t<=8;t++)if(!e.includes(t))return t;return 1}const MAP_SPAWNS={divide:[[10,30],[78,30]],high:[[14,52],[74,14]],dust:[[40,10],[40,56]],lakes:[[13,13],[76,56]],line:[[16,58],[76,14]],ring:[[46,8],[46,66]],city:[[76,36],[67,54],[46,61],[25,54],[16,36],[25,18],[46,11],[67,18]],octagon:[[76,36],[67,54],[46,61],[25,54],[16,36],[25,18],[46,11],[67,18]],bastion:[[46,12],[72,24],[72,48],[46,60],[20,48],[20,24]],boomtown:[[46,9],[75,23],[75,50],[46,63],[17,50],[17,23]]};
-function mapSpots(key){if(CUSTOM_MAPS[key]&&CUSTOM_MAPS[key].spots&&CUSTOM_MAPS[key].spots.length)return CUSTOM_MAPS[key].spots;const e=MAP_SPAWNS[key]||[[13,13],[76,56]],cx=46,cy=36,rot=e=>[clamp(Math.round(cx-(e[1]-cy)),6,85),clamp(Math.round(cy+(e[0]-cx)),6,65)];return e.concat([rot(e[0]),rot(e[1])])}
+// Base centres of the hand-authored maps, in the order the game assigns spawns.
+const AUTHORED_SPOTS={"high":[[8,8],[84,8],[8,64],[84,64]],"basin":[[9,9],[83,9],[9,63],[83,63]],"divide":[[8,9],[8,63],[84,63],[84,9]],"dust":[[9,9],[83,9],[9,63],[83,63]],"lakes":[[8,8],[84,8],[8,64],[84,64]],"line":[[9,9],[83,9],[9,63],[83,63]],"ring":[[7,7],[85,7],[7,65],[85,65]],"harbor":[[8,9],[8,63],[84,63],[84,9]],"grand":[[8,8],[84,8],[8,64],[84,64]],"octagon":[[79,36],[70,54],[46,63],[22,54],[13,36],[22,18],[46,9],[70,18]],"bastion":[[46,9],[73,21],[73,50],[46,62],[19,50],[19,21]],"boomtown":[[46,9],[75,23],[75,50],[46,63],[17,50],[17,23]],"frost":[[9,9],[83,9],[9,63],[83,63]]};
+function mapSpots(key){if(CUSTOM_MAPS[key]&&CUSTOM_MAPS[key].spots&&CUSTOM_MAPS[key].spots.length)return CUSTOM_MAPS[key].spots;if(AUTHORED_SPOTS[key])return AUTHORED_SPOTS[key];const e=MAP_SPAWNS[key]||[[13,13],[76,56]],cx=46,cy=36,rot=e=>[clamp(Math.round(cx-(e[1]-cy)),6,85),clamp(Math.round(cy+(e[0]-cx)),6,65)];return e.concat([rot(e[0]),rot(e[1])])}
 const _mapPrevCache={};// Map previews come from the real generator (fixed seed) so they match the
 // maps as they now play: terrain, mountains, city blocks, ore and the actual
 // spawn points the game will use.
@@ -62,7 +64,7 @@ function startGame(){menuBgStop(),audio(),startMusic(),genMap(Math.floor(1e3*Mat
 
 Object.assign(window, {
   endPtr, updateGhost, tryPlace, entAt, tap, boxSelect, colorSet, nextDefaultFac,
-  nextDefaultSpawn, mapMax, nextDefaultTeam, mapSpots, mapPreviewSVG, fillSelect,
+  nextDefaultSpawn, mapPreviewImg, mapMax, nextDefaultTeam, mapSpots, mapPreviewSVG, fillSelect,
   refreshMenu, openMenu, gameOver, pickWeather, startGame,
   captureKeybind, resetKeybinds, keyLabel, tickEdgeScroll, setEdgePan, setAutopilot,
 });

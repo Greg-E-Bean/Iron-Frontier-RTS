@@ -91,17 +91,17 @@ allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legio
  win:[["reyes","A second front. Draganov will have to split his army now."]],
  lose:[["reyes","The convoy is lost. We cannot open the east bank without it."]]},
 
-{name:"Ghost Protocol",map:"line",loc:"Firing Line",spawn:2,hero:1,
- brief:[["reyes","The Legion has built a research centre behind the Firing Line. Something in there is changing their soldiers."],["ghost","Ghost here. One of me, a lot of them. Just how I like it."],["reyes","Cross the ridge, destroy the Tech Centre and their Construction Yard. You set charges from inside — get to the doors. V switches your view."]],
- foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","power","barracks","lab","def1"]}],start:{},
- obj:[{id:"lab",t:"destroy",keys:["lab"],text:"Destroy the Legion Tech Centre"},{id:"cy",t:"destroy",keys:["conyard"],text:"Destroy the Construction Yard"},
-      {id:"pow",t:"destroy",keys:["power"],sec:1,text:"Blow every Power Plant"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
- ev:[{at:3,do:[say("ghost","On the ground. Lovely night for it."),["ping",38,35]]},
-     {near:[38,35,3],do:[say("ghost","Crossing the high bridge. They never look up.")]},
-     {near:[84,10,14],do:[say("draganov","An intruder in my base? Find her!"),["wave",0,[["base",4]],{to:"hero"}]]},
-     {done:"pow",do:[say("hale","Their lights just went out. Nice work, Ghost.")]},
-     {done:"lab",do:[say("ghost","Tech Centre's gone. Colonel — they had Syndicate tissue on ice in there. Grown from our DNA.")]},
-     {at:420,do:[["wave",0,[["base",3],["anti",1]],{to:"hero"}]]}],
+{name:"Ghost Protocol",map:"line",loc:"Firing Line",spawn:2,hero:1,fpsOnly:1,stealth:1,
+ brief:[["reyes","The Legion is growing Syndicate tissue in a lab behind the Firing Line. If that research works, they will breed a hive of their own."],["ghost","One of me, a lot of them. Just how I like it."],["reyes","You go in alone and unseen. Reach our relay on the north bluff and Hale will EMP their defences. Blow the Power Plant, then the Construction Yard. Get inside a building and press B to set a charge."]],
+ foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","barracks","lab","def1","def1","def2"]}],start:{},
+ alarm:[["draganov","An intruder in my base? Sound the alarm! Find her!"]],
+ obj:[{id:"relay",t:"reach",x:38,y:26,r:3,text:"Reach the relay on the north bluff"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Construction Yard"},
+      {id:"quiet",t:"stealth",text:"Stay undetected"},{id:"lab",t:"destroy",keys:["lab"],sec:1,text:"Destroy the Tech Centre"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
+ ev:[{at:3,do:[say("ghost","On the ground. Lovely night for it."),["ping",38,26],["hint","Cross the high bridge to the north bluff — enemies cannot see you unless they get close"]]},
+     {near:[38,34,3],do:[say("ghost","Crossing the high bridge. They never look up.")]},
+     {done:"relay",do:[["emp",0],say("hale","Relay's live — EMP away! Their guns are dark. Move, Ghost!")]},
+     {done:"pow",do:[["show","cy"],say("reyes","Power is down. Their defences are dead for good. Now the Construction Yard.")]},
+     {done:"lab",do:[say("ghost","Tech Centre's gone. Colonel — they had Syndicate tissue on ice in there. Grown from our DNA.")]}],
  win:[["reyes","Get out of there, Ghost. And not a word about those samples to anyone."]],
  lose:[["reyes","Ghost is down. Abort, abort."]]},
 
@@ -197,16 +197,17 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
  win:[["volkova","Nothing left standing. The Marshal will be pleased."]],
  lose:[["volkova","The strike group is gone. Wasteful."]]},
 
-{name:"Reaper's Harvest",map:"high",loc:"Carrow Highlands",spawn:2,hero:1,
- brief:[["draganov","The Vanguard have an airfield on the Highlands. Their bombers are killing our columns."],["reaper","Send me."],["draganov","Go, Reaper. The Airfield first, then their Construction Yard. Set charges from inside — V changes your view."]],
- foes:[{fac:"allied",diff:"normal",spawn:1,base:["power","power","airfield","barracks","def1"]}],start:{},
- obj:[{id:"air",t:"destroy",keys:["airfield"],text:"Destroy the Vanguard Airfield"},{id:"cy",t:"destroy",keys:["conyard"],text:"Destroy the Construction Yard"},
-      {id:"pow",t:"destroy",keys:["power"],sec:1,text:"Blow every Power Plant"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
- ev:[{at:3,do:[say("reaper","Walking."),["ping",45,35]]},
+{name:"Reaper's Harvest",map:"high",loc:"Carrow Highlands",spawn:2,hero:1,fpsOnly:1,stealth:1,
+ brief:[["draganov","The Vanguard have dug in on the north mesa of the Highlands. Their bombers are killing our columns."],["reaper","Send me."],["draganov","Alone and unseen, Reaper. Reach the EMP Spire on the mesa — Bogdan has rigged it to blind their guns. Then the Power Plant, then the Construction Yard. Set charges from inside with B."]],
+ foes:[{fac:"allied",diff:"normal",spawn:1,base:["power","airfield","barracks","def1","def1","def2"]}],start:{},
+ alarm:[["reyes","Legion commando in the base! All units, find him!"]],
+ obj:[{id:"relay",t:"reach",x:52,y:11,r:3,text:"Reach the EMP Spire on the north mesa"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Construction Yard"},
+      {id:"quiet",t:"stealth",text:"Stay undetected"},{id:"air",t:"destroy",keys:["airfield"],sec:1,text:"Destroy the Airfield"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
+ ev:[{at:3,do:[say("reaper","Walking."),["ping",52,11],["hint","Climb the west ramp onto the north mesa — stay away from patrols"]]},
      {near:[45,35,3],do:[say("reaper","Under their bridge. Quiet here.")]},
-     {near:[84,8,14],do:[say("reyes","Legion commando in the base! All units!"),["wave",0,[["base",4]],{to:"hero"}]]},
-     {at:300,do:[say("voice","Reaper. Why do you serve a man who hears voices?"),say("reaper","...Who is this?")]},
-     {done:"air",do:[say("draganov","The sky is clear. Finish it.")]}],
+     {done:"relay",do:[["emp",0],say("bogdan","Spire's firing! Their guns are blind — go, go!")]},
+     {done:"pow",do:[["show","cy"],say("draganov","Their lights are out. Finish it.")]},
+     {at:300,do:[say("voice","Reaper. Why do you serve a man who hears voices?"),say("reaper","...Who is this?")]}],
  win:[["reaper","Done. Marshal — someone spoke to me on a dead channel."],["draganov","...I know. They speak to me too."]],
  lose:[["draganov","Reaper is silent. No..."]]},
 
@@ -291,15 +292,16 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
  win:[["voice","The song is sung. Every radio on the Frontier carries it now."]],
  lose:[["senna","The Amplifier is silent. Forgive me, Master."]]},
 
-{name:"Silent Hand",map:"line",film:"yuri_reveal",loc:"Firing Line",spawn:2,hero:1,
- brief:[["voice","The Legion keep their brightest minds in a Tech Centre behind the Firing Line."],["phantom","And you want them brought home."],["voice","I want their laboratory gone and their Construction Yard with it. Go quietly, Phantom. V shifts your sight."]],
- foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","power","barracks","lab","def1"]}],start:{},
- obj:[{id:"lab",t:"destroy",keys:["lab"],text:"Destroy the Legion Tech Centre"},{id:"cy",t:"destroy",keys:["conyard"],text:"Destroy the Construction Yard"},
-      {id:"pow",t:"destroy",keys:["power"],sec:1,text:"Blow every Power Plant"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
- ev:[{at:3,do:[say("phantom","In the shadows. They never feel me."),["ping",38,35]]},
-     {near:[84,10,14],do:[say("volkova","Syndicate infiltrator! Find her!"),["wave",0,[["base",4]],{to:"hero"}]]},
-     {done:"lab",do:[say("voice","Their research is ashes. Their scientists will dream of me tonight.")]},
-     {at:420,do:[["wave",0,[["base",3],["anti",1]],{to:"hero"}]]}],
+{name:"Silent Hand",map:"line",film:"yuri_reveal",loc:"Firing Line",spawn:2,hero:1,fpsOnly:1,stealth:1,
+ brief:[["voice","The Legion is learning to burn us out. Their base behind the Firing Line must go dark."],["phantom","Then I will be the dark."],["voice","A seeded mind in their grid will pulse when you reach the north-east relay. Their Power Plant first, then their Construction Yard. Unseen, Phantom. Charges from inside with B."]],
+ foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","barracks","lab","def1","def1","def2"]}],start:{},
+ alarm:[["volkova","Syndicate infiltrator! Lights on — find her!"]],
+ obj:[{id:"relay",t:"reach",x:53,y:26,r:3,text:"Reach the relay on the north-east bluff"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Construction Yard"},
+      {id:"quiet",t:"stealth",text:"Stay undetected"},{id:"lab",t:"destroy",keys:["lab"],sec:1,text:"Destroy the Tech Centre"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
+ ev:[{at:3,do:[say("phantom","In the shadows. They never feel me."),["ping",53,26],["hint","Cross the east high bridge onto the bluff — keep your distance from patrols"]]},
+     {done:"relay",do:[["emp",0],say("voice","The seed has bloomed. Their guns are sleeping. Go.")]},
+     {done:"pow",do:[["show","cy"],say("voice","Darkness. Now take their heart.")]},
+     {done:"lab",do:[say("voice","Their research is ashes. Their scientists will dream of me tonight.")]}],
  win:[["phantom","Done. Nobody saw a thing."]],
  lose:[["voice","Phantom's mind has gone quiet. A loss."]]},
 
@@ -353,12 +355,19 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
  lose:[["voice","Even the Hive can die. Remember that."]]}
 ]}};
 
+// ---- difficulty ----------------------------------------------------------------
+const CDIFF={easy:{n:"RECRUIT",d:"Weaker enemies, smaller attacks, more credits. Stealth: short sight range, slow to spot you.",shift:-1,wave:.6,cash:1.4,det:80,detT:2.8,emp:100,alarmT:15},
+normal:{n:"VETERAN",d:"The intended challenge.",shift:0,wave:1,cash:1,det:120,detT:1.7,emp:65,alarmT:25},
+hard:{n:"ELITE",d:"Brutal enemies and bigger attacks. Stealth: being spotted fails the mission.",shift:1,wave:1.45,cash:.8,det:160,detT:1.1,emp:45,alarmT:30}};
+function campDiff(){try{const d=localStorage.getItem("ifr_campdiff");return CDIFF[d]?d:"normal"}catch(e){return"normal"}}
+function setCampDiff(d){try{localStorage.setItem("ifr_campdiff",d)}catch(e){}}
+const DORDER=["easy","normal","hard"],shiftDiff=(d,k)=>DORDER[clamp(DORDER.indexOf(d)+k,0,2)];
 // ---- launching ---------------------------------------------------------------
 let pendingMission=null;
 function launchMission(fac,idx){const camp=CAMPAIGNS[fac],m=camp&&camp.missions[idx];if(!m)return;radioStop();
 cfg.fac=fac,cfg.map=m.map,cfg.fog="on",cfg.team=1,cfg.spawn=m.spawn||0;
-cfg.slots=m.foes.map(f=>({fac:f.fac,team:f.ally?1:f.team||2,color:"def",spawn:f.spawn,diff:f.diff}));
-pendingMission={fac,idx,noBuild:!!m.noBuild,hero:!!m.hero},startGame()}
+const cd=campDiff();cfg.slots=m.foes.map(f=>({fac:f.fac,team:f.ally?1:f.team||2,color:"def",spawn:f.spawn,diff:f.ally?f.diff:shiftDiff(f.diff,CDIFF[cd].shift)}));
+pendingMission={fac,idx,noBuild:!!m.noBuild,hero:!!m.hero,diff:cd},startGame(),showLoading(fac,idx)}
 const TUTORIAL_STEPS=[
   {text:"Select your Mobile HQ and tap DEPLOY to build your base.",done:()=>hasBld(0,"conyard")},
   {text:"Build a Power Plant.",done:()=>hasBld(0,"power")},
@@ -387,16 +396,18 @@ function preBuild(owner,list){const p=S.players[owner],mcv=S.units.find(u=>u.own
 // ---- mission state ---------------------------------------------------------------
 function applyPendingMission(){if(!pendingMission)return void(S.mission=null);if(pendingMission.tutorial)return S.mission={tutorial:!0,curStep:0,doneSteps:[]},S.tutorialMoved=!1,S.tutorialAmoved=!1,void(pendingMission=null);
 const pm=pendingMission,def=CAMPAIGNS[pm.fac].missions[pm.idx],st=def.start||{};pendingMission=null;
-S.mission={fac:pm.fac,idx:pm.idx,def,noBuild:pm.noBuild,hero:pm.hero,objs:def.obj.map(o=>Object.assign({},o,{state:0,shown:!o.hide})),evs:def.ev.map(()=>({n:0,next:0})),escorts:{},started:!1,lastT:0,lost0:0,kills0:0,stars:0};
+const D=CDIFF[pm.diff||"normal"];S.mission={fac:pm.fac,idx:pm.idx,def,diff:pm.diff||"normal",D,fpsOnly:!!def.fpsOnly,noBuild:pm.noBuild,hero:pm.hero,objs:def.obj.map(o=>Object.assign({},o,{state:0,shown:!o.hide},"stealth"===o.t?{sec:"hard"!==pm.diff}:{})),evs:def.ev.map(()=>({n:0,next:0})),escorts:{},started:!1,lastT:0,lost0:0,kills0:0,stars:0};
 def.foes.forEach((f,i)=>{f.base&&preBuild(i+1,f.base)});
 st.base&&preBuild(0,st.base);
 const sp=[S.players[0].spawnX/32,S.players[0].spawnY/32];
 st.units&&spawnGroup(0,st.units,sp[0]+2,sp[1]+3);
 if(st.convoy){const c=st.convoy,at=c.at||sp;spawnGroup(0,[[c.key,c.n]],at[0],at[1],c.tag)}
+if(def.stealth){S.mission.st={sus:0,alarm:0,alarms:0};const hu=playerHero();hu&&(hu.cloakM=1);def.foes.forEach((f,i)=>{S.blds.filter(b=>b.owner===i+1&&"power"===b.key).forEach(b=>b.mtag="pp")})}
+document.body.classList.toggle("fpsOnly",!!def.fpsOnly);
 if(S.mission.hero){const hu=playerHero();hu&&enterFPS(hu)}
 S.mission.intro=!0}
 // Runs once the world has fully started (startGame resets credits after us).
-function missionStart(m){const st=m.def.start||{};m.started=!0;null!=st.credits?S.players[0].credits=st.credits:(m.noBuild||m.hero)&&(S.players[0].credits=0);m.lost0=S.players[0].lost||0,m.kills0=S.players[0].kills||0;
+function missionStart(m){const st=m.def.start||{};m.started=!0;null!=st.credits?S.players[0].credits=Math.round(st.credits*m.D.cash/100)*100:(m.noBuild||m.hero)&&(S.players[0].credits=0);m.lost0=S.players[0].lost||0,m.kills0=S.players[0].kills||0;
 for(const o of m.objs)"kills"===o.t&&(o.k0=m.kills0);
 setTimeout(()=>{S.mission===m&&S.running&&(hint("OBJECTIVES — "+m.objs.filter(o=>o.shown&&!o.sec).map(o=>o.text).join(" · ")))},1500)}
 
@@ -406,10 +417,12 @@ const SPECIALS=["oilDerek","paradropHangar","empTower","rogueDen"];
 // 1 done, -1 failed, 0 pending
 function evalObj(o,m,dt){switch(o.t){
 case"elim":{const ow=null!=o.slot?[o.slot+1]:enemyOwners();return ow.every(i=>S.players[i].defeated)?1:0}
-case"destroy":{const ow=null!=o.slot?[o.slot+1]:enemyOwners(),left=S.blds.filter(b=>!b.dead&&ow.includes(b.owner)&&o.keys.includes(b.key)).length;o.left=left;if(left)return o.seen=1,0;return o.seen||S.time>240?1:0}
+case"destroy":{const ow=null!=o.slot?[o.slot+1]:enemyOwners(),left=S.blds.filter(b=>!b.dead&&(o.tag?b.mtag===o.tag:ow.includes(b.owner)&&o.keys.includes(b.key))).length;o.left=left;if(left)return o.seen=1,0;return o.seen||S.time>240?1:0}
 case"survive":return S.time>=o.time?1:0;
 case"protect":{const n=ownedCount(b=>b.key===o.key);if(n)o.had=1;return o.had&&!n?-1:0}
 case"capture":{const n=ownedCount(b=>b.d.civ||SPECIALS.includes(b.key));o.cur=n;return n>=o.n?1:0}
+case"reach":return S.units.some(u=>0===u.owner&&!u.dead&&inZone(u,o.x,o.y,o.r))?1:0;
+case"stealth":return m.st&&m.st.alarms>0?-1:0;
 case"own":return ownedCount(b=>b.key===o.key)?1:0;
 case"build":{const n=S.blds.filter(b=>0===b.owner&&!b.dead&&!b.building&&(b.key===o.key||"refinery"===o.key&&"hive"===b.key)).length;o.cur=n;return n>=o.n?1:0}
 case"kills":{const n=(S.players[0].kills||0)-(o.k0||0);o.cur=n;return n>=o.n?1:0}
@@ -418,10 +431,11 @@ case"escort":{const us=S.units.filter(u=>u.mtag===o.tag&&0===u.owner);let arrive
 case"lossMax":return(S.players[0].lost||0)-m.lost0>o.n?-1:0;
 case"timeMax":return S.time>o.time?-1:0}
 return 0}
-const END_OK={protect:1,lossMax:1,timeMax:1};
+const END_OK={protect:1,lossMax:1,timeMax:1,stealth:1};
 
 function fireAction(a,m,ev,evs){switch(a[0]){
 case"say":radioSay(a[1],a[2]);break;
+case"emp":{const ow=a[1]+1,T=m.D.emp;for(const b of S.blds)!b.dead&&b.owner===ow&&(b.blackoutT=T,spark(b.x,b.y,"#9fe8ff"));for(const u of S.units)!u.dead&&u.owner===ow&&"veh"===u.d.armor&&(u.frozen=Math.min(T,12));m.empUntil=S.time+T;sfx("psiwave"),hint("EMP — enemy defences offline for "+T+"s");break}
 case"hint":hint(a[1]);break;
 case"credits":S.players[0].credits+=a[1],hint("+"+a[1]+" credits"),sfx("sel");break;
 case"reveal":S.spyReveals.push({x:T2P(a[1]),y:T2P(a[2]),r:32*a[3],t:a[4]||20});break;
@@ -429,7 +443,7 @@ case"ping":S.marker={x:T2P(a[1]),y:T2P(a[2]),t:0,c:"#ffd75e"};break;
 case"show":{const o=m.objs.find(o=>o.id===a[1]);o&&!o.shown&&(o.shown=!0,sfx("ready"),hint("NEW OBJECTIVE: "+o.text));break}
 case"go":{m.escorts[a[1]]=[a[2],a[3]];const us=S.units.filter(u=>!u.dead&&u.mtag===a[1]&&!u.arrived);us.length&&cmdMove(us,T2P(a[2]),T2P(a[3]));break}
 case"reinf":{const[spec,from,to]=[a[1],a[2],a[3]],us=spawnGroup(0,spec,from[0],from[1]);to&&us.length&&cmdMove(us,T2P(to[0]),T2P(to[1]),!0);S.marker={x:T2P(from[0]),y:T2P(from[1]),t:0,c:"#7dff8a"},hint("Reinforcements have arrived"),sfx("ready");break}
-case"wave":{const owner=a[1]+1,p=S.players[owner];if(!p||p.defeated)break;const opt=a[3]||{},k=evs.n-1,grow=opt.grow||0,spec=a[2].map(([key,n])=>[key,n+Math.floor(k*grow)]);
+case"wave":{const owner=a[1]+1,p=S.players[owner];if(!p||p.defeated)break;const opt=a[3]||{},k=evs.n-1,grow=opt.grow||0,spec=a[2].map(([key,n])=>[key,Math.max(1,Math.round((n+Math.floor(k*grow))*m.D.wave))]);
 const from=opt.from?opt.from:[p.spawnX/32,p.spawnY/32];let tgt;const to=opt.to||"base";
 if("hero"===to){const h=playerHero();tgt=h&&{x:h.x,y:h.y}}else if("army"===to)tgt=playerArmyPos();else if(Array.isArray(to))tgt={x:T2P(to[0]),y:T2P(to[1])};else tgt=playerBase();if(!tgt)break;
 // Step the spawn point a few tiles toward the target so units leave the base.
@@ -441,6 +455,7 @@ function checkMissionOutcome(){const m=S.mission;if(m.tutorial){if(S.players[0].
 if(!m.def)return null;
 m.started||missionStart(m);
 const dt=Math.max(0,Math.min(.5,S.time-m.lastT));m.lastT=S.time;radioTick(dt);
+m.st&&stealthTick(m,dt);
 // events
 m.def.ev.forEach((e,i)=>{const s=m.evs[i];evTriggered(e,s,m)&&(s.n++,e.do.forEach(a=>fireAction(a,m,e,s)))});
 // escorts keep moving if they stop short
@@ -453,6 +468,16 @@ if(m.objs.some(o=>!o.sec&&-1===o.state))return"lose";
 const prim=m.objs.filter(o=>!o.sec&&!END_OK[o.t]);
 if(prim.every(o=>o.shown&&1===o.state)){for(const o of m.objs)0===o.state&&(o.state=END_OK[o.t]?1:-1);m.stars=1+m.objs.filter(o=>o.sec&&1===o.state).length;saveStars(m.fac,m.idx,m.stars);return"win"}
 return null}
+
+// ---- stealth: enemies cannot target the cloaked hero until the alarm is raised;
+// staying near an enemy (or a live defence) fills the detection meter.
+function stealthBlock(e,t){const m=S.mission;return!!(m&&m.st&&!(m.st.alarm>0)&&0===t.owner)}
+function stealthTick(m,dt){const st=m.st,h=playerHero();if(!h||h.dead)return;if(st.alarm>0){if((st.alarm-=dt)<=0)st.sus=0,hint("The alarm has died down — you're hidden again");return}
+const D=m.D,R2=D.det*D.det,hx=h.x,hy=h.y;let seen=null;
+if(!h.inside){for(const u of S.units){if(u.dead||u.owner===0||u.owner===NEUTRAL||teamOf(u.owner)===teamOf(0)||"miner"===u.d.role)continue;if(dist2(u.x,u.y,hx,hy)<R2&&hasLineOfFire(u.x,u.y,hx,hy,heightAt(u.x,u.y)+14,heightAt(hx,hy)+14)){seen=u;break}}
+if(!seen)for(const b of S.blds){if(b.dead||!b.w||b.owner===NEUTRAL||teamOf(b.owner)===teamOf(0)||b.blackoutT>0)continue;const p=S.players[b.owner];if(p.drain>p.power)continue;if(dist2(b.x,b.y,hx,hy)<1.4*R2){seen=b;break}}}
+st.seeing=!!seen,st.sus=seen?st.sus+dt:Math.max(0,st.sus-.6*dt);
+if(st.sus>=D.detT){st.alarm=D.alarmT,st.alarms++,st.sus=D.detT;(m.def.alarm||[]).forEach(([w,t])=>radioSay(w,t));sfx("alert");const us=S.units.filter(u=>!u.dead&&u.owner>0&&u.owner<NEUTRAL&&teamOf(u.owner)!==teamOf(0)&&u.d.dmg>0&&!u.d.fly).slice(0,8);us.length&&cmdMove(us,hx,hy,!0);hint("YOU'VE BEEN SPOTTED — alarm raised!")}}
 
 // ---- progress --------------------------------------------------------------------
 function campaignUnlocked(fac){try{return+localStorage.getItem("ifr_campaign_"+fac)||1}catch(e){return 1}}
@@ -475,8 +500,8 @@ const fmtT=s=>Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
 function objLabel(o){let t=o.text;"survive"===o.t&&0===o.state&&(t+=" — "+fmtT(Math.max(0,o.time-S.time)));"hold"===o.t&&0===o.state&&(t+=" — "+Math.floor(100*Math.min(1,(o.prog||0)/o.time))+"%"+(o.contest?" (contested)":""));
 ("capture"===o.t||"build"===o.t||"kills"===o.t)&&0===o.state&&null!=o.cur&&(t+=" ("+Math.min(o.cur,o.n)+"/"+o.n+")");"escort"===o.t&&0===o.state&&(t+=" ("+(o.cur||0)+"/"+o.need+")");"timeMax"===o.t&&0===o.state&&(t+=" — "+fmtT(Math.max(0,o.time-S.time)));
 "lossMax"===o.t&&(t+=" ("+((S.players[0].lost||0)-S.mission.lost0)+"/"+o.n+")");return t}
-function updateObjPanel(m){const el=$("#tutorialPanel");if(!el)return;el.classList.remove("hidden");el.classList.add("obj");const rows=m.objs.filter(o=>o.shown).map(o=>{const cls=1===o.state?" done":-1===o.state?" fail":" cur";return'<div class="ts'+cls+(o.sec?" sec":"")+'"><b>'+(1===o.state?"✓":-1===o.state?"✗":o.sec?"★":"◆")+"</b><span>"+objLabel(o)+"</span></div>"}).join(""),sig=rows+(el._min?"m":"");if(el._sig===sig)return;el._sig=sig;
-el.innerHTML='<div class="th">'+(m.idx+1)+". "+m.def.name.toUpperCase()+'<button class="tMin">'+(el._min?"+":"–")+"</button></div>"+(el._min?"":rows)}
+function updateObjPanel(m){const el=$("#tutorialPanel");if(!el)return;el.classList.remove("hidden");el.classList.add("obj");const rows=m.objs.filter(o=>o.shown).map(o=>{const cls=1===o.state?" done":-1===o.state?" fail":" cur";return'<div class="ts'+cls+(o.sec?" sec":"")+'"><b>'+(1===o.state?"✓":-1===o.state?"✗":o.sec?"★":"◆")+"</b><span>"+objLabel(o)+"</span></div>"}).join(""),st=m.st,meter=st?st.alarm>0?'<div class="stl alarm">⚠ ALARM — '+Math.ceil(st.alarm)+"s</div>":'<div class="stl'+(st.seeing?" warn":"")+'">'+(st.seeing?"BEING SPOTTED":"HIDDEN")+'<i style="width:'+Math.round(10*st.sus/m.D.detT)*10+'%"></i></div>':"",sig=rows+meter+(el._min?"m":"");if(el._sig===sig)return;el._sig=sig;
+el.innerHTML='<div class="th">'+(m.idx+1)+". "+m.def.name.toUpperCase()+'<button class="tMin">'+(el._min?"+":"–")+"</button></div>"+(el._min?"":meter+rows)}
 function skipTutorial(){S.mission=null,hint("Tutorial skipped — good luck!")}
 function updateTutorialPanel(){const m=S.mission,el=$("#tutorialPanel");if(m&&m.def)return;el.classList.remove("obj");if(!m||!m.tutorial)return void el.classList.add("hidden");el.classList.remove("hidden");const sig=(m.doneSteps||[]).join(",")+"|"+m.curStep;if(el._sig===sig)return;el._sig=sig;const rows=TUTORIAL_STEPS.map((s,i)=>{const done=m.doneSteps&&m.doneSteps[i],cur=i===m.curStep;return'<div class="ts'+(done?" done":cur?" cur":"")+'"><b>'+(done?"✓":i+1+".")+"</b><span>"+s.text+"</span></div>"}).join("");el.innerHTML='<div class="th">TUTORIAL<button class="tSkip">SKIP</button></div>'+rows}
 $("#tutorialPanel").addEventListener("click",e=>{if(e.target.closest(".tSkip"))return skipTutorial();const el=$("#tutorialPanel");e.target.closest(".tMin")&&(el._min=!el._min,el._sig=null)});
@@ -486,18 +511,37 @@ const FAC_ICON={allied:"✦",soviet:"✪",yuri:"◉"};
 const mapName=k=>{const e=(typeof MAPS!="undefined"?MAPS:[]).find(x=>x.k===k);return e?e.n:k.toUpperCase()};
 const TYPE_TAG=m=>m.hero?"COMMANDO":m.noBuild?"STRIKE GROUP":m.obj.some(o=>"survive"===o.t)?"DEFENCE":m.obj.some(o=>"escort"===o.t)?"ESCORT":"ASSAULT";
 function campStars(fac){return CAMPAIGNS[fac].missions.reduce((a,_,i)=>a+missionStars(fac,i),0)}
-function showCampaign(){radioStop(),$("#menu").classList.remove("hidden");const rows=["allied","soviet","yuri"].map(fac=>{const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac),total=camp.missions.length,done=Math.min(total,Math.max(0,unlocked-1));return'<button class="campCard f-'+fac+'" data-fac="'+fac+'"><div class="ccTop"><span class="ccIcon">'+FAC_ICON[fac]+'</span><span class="ccFac">'+FAC_NAME[fac].toUpperCase()+'</span><span class="ccProg">'+done+"/"+total+'</span></div><div class="ccTitle">'+camp.title+'</div><div class="ccTag">'+camp.tag+'</div><div class="ccBar"><i style="width:'+Math.round(100*done/total)+'%"></i></div><div class="ccStars">★ '+campStars(fac)+" / "+3*total+"</div></button>"}).join("");
+function hideLoading(){const l=$("#loadScreen");l&&(l._tok=(l._tok||0)+1,l.classList.add("hidden"))}
+function showCampaign(){radioStop(),hideLoading(),$("#menu").classList.remove("hidden");const rows=["allied","soviet","yuri"].map(fac=>{const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac),total=camp.missions.length,done=Math.min(total,Math.max(0,unlocked-1));return'<button class="campCard f-'+fac+'" data-fac="'+fac+'"><div class="ccTop"><span class="ccIcon">'+FAC_ICON[fac]+'</span><span class="ccFac">'+FAC_NAME[fac].toUpperCase()+'</span><span class="ccProg">'+done+"/"+total+'</span></div><div class="ccTitle">'+camp.title+'</div><div class="ccTag">'+camp.tag+'</div><div class="ccBar"><i style="width:'+Math.round(100*done/total)+'%"></i></div><div class="ccStars">★ '+campStars(fac)+" / "+3*total+"</div></button>"}).join("");
 $("#panelMain").innerHTML='<h1>CAMPAIGN</h1><div class="sub">Three wars for the Frontier</div><button class="bPlay" id="filmPro">▶ PROLOGUE — THE IRON FRONTIER</button><div id="campList">'+rows+'</div><button id="backSetup" '+SECBTN+">BACK</button>";$("#filmPro").onclick=()=>playFilm("prologue");$("#panelMain").querySelectorAll(".campCard").forEach(b=>b.onclick=()=>showMissionList(b.dataset.fac)),$("#backSetup").onclick=showSetup;filmSeen("prologue")||playFilm("prologue")}
-function showMissionList(fac){radioStop();const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac);const rows=camp.missions.map((m,i)=>{const locked=i>=unlocked,done=i<unlocked-1;return'<button class="mRow'+(locked?" locked":done?" done":" next")+'" data-i="'+i+'"'+(locked?" disabled":"")+'><span class="mNum">'+(i+1)+'</span><span class="mMain"><b>'+m.name+"</b><small>"+(locked?"LOCKED":mapName(m.map)+" · "+TYPE_TAG(m))+"</small></span>"+(done?starStr(missionStars(fac,i)):locked?'<span class="mLock">🔒</span>':'<span class="mGo">PLAY ›</span>')+"</button>"}).join("");
+function showMissionList(fac){radioStop(),hideLoading();const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac);const rows=camp.missions.map((m,i)=>{const locked=i>=unlocked,done=i<unlocked-1;return'<button class="mRow'+(locked?" locked":done?" done":" next")+'" data-i="'+i+'"'+(locked?" disabled":"")+'><span class="mNum">'+(i+1)+'</span><span class="mMain"><b>'+m.name+"</b><small>"+(locked?"LOCKED":mapName(m.map)+" · "+TYPE_TAG(m))+"</small></span>"+(done?starStr(missionStars(fac,i)):locked?'<span class="mLock">🔒</span>':'<span class="mGo">PLAY ›</span>')+"</button>"}).join("");
 $("#panelMain").innerHTML='<h1 class="f-'+fac+'">'+FAC_ICON[fac]+" "+FAC_NAME[fac].toUpperCase()+'</h1><div class="sub">'+camp.title+'</div><div class="small" style="margin:4px 0 8px;opacity:.8">'+camp.tag+'</div><div class="filmRow"><button class="bPlay" id="filmIntro">▶ INTRO</button>'+(unlocked>camp.missions.length?'<button class="bPlay" id="filmEnd">▶ ENDING</button>':"")+'</div><div id="missionList">'+rows+'</div><button id="backCampList" '+SECBTN+">BACK</button>";$("#filmIntro").onclick=()=>playFilm(fac+"_intro");$("#filmEnd")&&($("#filmEnd").onclick=()=>playFilm(fac+"_end"));filmSeen(fac+"_intro")||playFilm(fac+"_intro");$("#panelMain").querySelectorAll(".mRow").forEach(b=>b.onclick=()=>{b.disabled||showBriefing(fac,+b.dataset.i)}),$("#backCampList").onclick=showCampaign}
 let briefPlay=0;
 function showBriefing(fac,idx){radioStop();const m=CAMPAIGNS[fac].missions[idx],mp=Math.max(4,(m.foes.length||0)+1);
 const lines=m.brief.map(([w,t])=>{const c=castOf(w);return'<div class="bLine"><span class="bWho" style="color:'+c.c+'">'+c.n+"</span><span>"+t+"</span></div>"}).join("");
 const objs=m.obj.filter(o=>!o.hide).map(o=>'<div class="bObj'+(o.sec?" sec":"")+'"><b>'+(o.sec?"★":"◆")+"</b>"+o.text+"</div>").join("");
 const foes=m.foes.map(f=>'<span class="bFoe'+(f.ally?" ally":"")+'">'+(f.ally?"ALLY ":"")+FAC_NAME[f.fac].toUpperCase()+" · "+DIFFS[f.diff].name+"</span>").join(" ");
-$("#panelMain").innerHTML='<div class="bHead"><div><div class="bOp">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+"</div><h1>"+m.name.toUpperCase()+'</h1><div class="sub">'+m.loc+" · "+mapName(m.map)+" · "+TYPE_TAG(m)+'</div></div>'+starStr(missionStars(fac,idx))+'</div><div class="bMap">'+mapPreviewSVG(m.map,mp)+'</div><div class="bLines">'+lines+'</div><div class="filmRow"><button id="bPlay" class="bPlay">▶ PLAY TRANSMISSION</button>'+(m.film?'<button id="bFilm" class="bPlay">▶ CUTSCENE</button>':"")+'</div><div class="bSec">OBJECTIVES</div>'+objs+'<div class="bSec">OPPOSITION</div><div>'+foes+'</div><button id="launchM">LAUNCH MISSION</button><button id="backCamp" '+SECBTN+">BACK</button>";
-$("#launchM").onclick=()=>{briefPlay++,launchMission(fac,idx)},$("#backCamp").onclick=()=>{briefPlay++,showMissionList(fac)};
+$("#panelMain").innerHTML='<div class="bHead"><div><div class="bOp">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+"</div><h1>"+m.name.toUpperCase()+'</h1><div class="sub">'+m.loc+" · "+mapName(m.map)+" · "+TYPE_TAG(m)+'</div></div>'+starStr(missionStars(fac,idx))+'</div><div class="bMap">'+mapPreviewSVG(m.map,mp)+'</div><div class="bLines">'+lines+'</div><div class="filmRow"><button id="bPlay" class="bPlay">▶ PLAY TRANSMISSION</button>'+(m.film?'<button id="bFilm" class="bPlay">▶ CUTSCENE</button>':"")+'</div><div class="bSec">DIFFICULTY</div><div class="dPick">'+DORDER.map(k=>'<button data-d="'+k+'" class="'+(k===campDiff()?"on":"")+'">'+CDIFF[k].n+"</button>").join("")+'</div><div class="small dDesc" style="margin-top:4px;text-align:left">'+CDIFF[campDiff()].d+'</div><div class="bSec">OBJECTIVES</div>'+objs+(m.fpsOnly?'<div class="bObj"><b>⌖</b>First-person only — one operative, no base</div>':"")+'<div class="bSec">OPPOSITION</div><div>'+foes+'</div><button id="launchM">LAUNCH MISSION</button><button id="backCamp" '+SECBTN+">BACK</button>";
+document.querySelectorAll(".dPick button").forEach(b=>b.onclick=()=>{setCampDiff(b.dataset.d),document.querySelectorAll(".dPick button").forEach(x=>x.classList.toggle("on",x===b)),$(".dDesc").textContent=CDIFF[b.dataset.d].d});$("#launchM").onclick=()=>{briefPlay++,launchMission(fac,idx)},$("#backCamp").onclick=()=>{briefPlay++,showMissionList(fac)};
 m.film&&($("#bFilm").onclick=()=>{briefPlay++,playFilm(m.film)},filmSeen(m.film)||playFilm(m.film));$("#bPlay").onclick=()=>{audio();const tok=++briefPlay;let k=0;const next=()=>{if(tok!==briefPlay||k>=m.brief.length||!$("#bPlay"))return;const[w,t]=m.brief[k++],c=castOf(w);document.querySelectorAll(".bLine").forEach((e,i)=>e.classList.toggle("on",i===k-1));try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r)}catch(e){}setTimeout(next,1e3*clamp(1.2+.062*t.length,3,11))};next()}}
+// ---- loading screen: the map with objective markers, and the commander
+// reading out the objectives while the world finishes loading.
+function missionMapSVG(m){const W=920,H=720,img=mapPreviewImg(m.map),X=x=>(x/92*W).toFixed(1),Y=y=>(y/72*H).toFixed(1),spots=mapSpots(m.map)||[],c=[];
+const sp=spots[m.spawn||0];sp&&c.push('<circle cx="'+X(sp[0])+'" cy="'+Y(sp[1])+'" r="26" fill="none" stroke="#7dff8a" stroke-width="5"/><text x="'+X(sp[0])+'" y="'+(sp[1]>60?+Y(sp[1])-40:+Y(sp[1])+56)+'" class="mL" fill="#7dff8a">YOU</text>');
+m.foes.forEach(f=>{const q=spots[f.spawn];q&&c.push('<circle cx="'+X(q[0])+'" cy="'+Y(q[1])+'" r="24" fill="'+(f.ally?"#6fb8e055":"#e0473a55")+'" stroke="'+(f.ally?"#6fb8e0":"#e0473a")+'" stroke-width="4"/><text x="'+X(q[0])+'" y="'+(q[1]>60?+Y(q[1])-38:+Y(q[1])+54)+'" class="mL" fill="'+(f.ally?"#a8d8f0":"#f3a397")+'">'+(f.ally?"ALLY":FAC_NAME[f.fac].toUpperCase())+"</text>")});
+let k=0;for(const o of m.obj)if(null!=o.x&&!o.hide){k++;c.push('<circle cx="'+X(o.x)+'" cy="'+Y(o.y)+'" r="'+Math.max(16,o.r/92*W)+'" fill="#ffd75e22" stroke="#ffd75e" stroke-width="4" stroke-dasharray="10 7"/><text x="'+X(o.x)+'" y="'+Y(o.y)+'" dy=".35em" class="mL big" fill="#ffd75e">'+k+"</text>")}
+return'<svg viewBox="0 0 '+W+" "+H+'" preserveAspectRatio="xMidYMid meet"><image href="'+img+'" width="'+W+'" height="'+H+'" preserveAspectRatio="none"/>'+c.join("")+"</svg>"}
+const LOAD_TIPS=["Bonus objectives earn stars — replay missions to collect them all.","High ground gives your units 30% more sight range.","Units on an overpass can't be hit by units passing underneath.","Garrison town buildings with infantry to hold them.","Power down a base and its defences stop firing."];
+function showLoading(fac,idx){const m=CAMPAIGNS[fac].missions[idx],cd=campDiff();let el=$("#loadScreen");el||(el=document.createElement("div"),el.id="loadScreen",document.body.appendChild(el));
+const prim=m.obj.filter(o=>!o.sec&&!o.hide),sec=m.obj.filter(o=>o.sec&&!o.hide&&!("stealth"===o.t&&"hard"===cd)),speaker=m.brief[0][0],c=castOf(speaker);let k=0;
+el.innerHTML='<div class="lsMap">'+missionMapSVG(m)+'</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-'+fac+'">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+" · "+CDIFF[cd].n+'</div><h1>'+m.name.toUpperCase()+'</h1><div class="lsLoc">'+m.loc+" · "+mapName(m.map)+'</div><div class="lsSec">PRIMARY OBJECTIVES</div>'+prim.map(o=>'<div class="bObj"><b>'+(null!=o.x?++k:"◆")+"</b>"+o.text+"</div>").join("")+(sec.length?'<div class="lsSec">BONUS</div>'+sec.map(o=>'<div class="bObj sec"><b>★</b>'+o.text+"</div>").join(""):"")+'<div class="lsVo"><span class="rbPort" style="--rc:'+c.c+'">'+c.n.split(" ").map(w=>w[0]).join("").slice(-2)+'</span><span><b style="color:'+c.c+'">'+c.n.toUpperCase()+'</b><i class="lsWave"></i></span></div><div class="lsTip">TIP — '+pick(LOAD_TIPS)+'</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING…</button></div>';
+el.classList.remove("hidden"),S.running=!1;const bar=el.querySelector(".lsBar i"),go=el.querySelector(".lsGo");bar.style.width="0%",requestAnimationFrame(()=>{bar.style.transition="width 1.6s ease-out",bar.style.width="100%"});
+try{cineMood("tense")}catch(e){}
+const vo=[m.name+". Primary objectives."].concat(prim.map((o,i)=>(prim.length>1?["First","Then","And finally"][Math.min(i,2)]+": ":"")+o.text+"."),m.fpsOnly?["You are on your own out there. Stay out of sight."]:[]);let vi=0;const tok=el._tok=(el._tok||0)+1;
+const say=()=>{if(el._tok!==tok||el.classList.contains("hidden")||vi>=vo.length)return;const t=vo[vi++];try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r,!0)}catch(e){}setTimeout(say,1e3*clamp(1+.065*t.length,1.6,8))};setTimeout(say,500);
+setTimeout(()=>{if(el._tok!==tok)return;go.disabled=!1,go.textContent="BEGIN MISSION ›",go.classList.add("ready")},1700);
+go.onclick=()=>{el._tok++,el.classList.add("hidden");try{speakStop(),cineStop()}catch(e){}S.running=!0}}
+
 // Debrief block for the results screen.
 function missionDebrief(win){const m=S.mission;if(!m||!m.def)return"";radioStop();const lines=(win?m.def.win:m.def.lose)||[],last=win&&m.idx===CAMPAIGNS[m.fac].missions.length-1,endKey=m.fac+"_end",autoEnd=last&&!filmSeen(endKey);
 last&&setTimeout(()=>{const b=$("#dEnd");b&&(b.onclick=()=>playFilm(endKey));autoEnd&&playFilm(endKey)},autoEnd?2500:0);
@@ -508,7 +552,7 @@ return'<div class="dBrief">'+(last?'<button class="bPlay" id="dEnd">▶ WATCH TH
 Object.assign(window, {
   FAC_NAME, CAMPAIGNS, launchMission, checkMissionOutcome, campaignUnlocked, unlockNext, applyPendingMission,
   otherFacs, launchTutorial, updateTutorial, updateTutorialPanel, skipTutorial,
-  showCampaign, showMissionList, showBriefing, missionDebrief, missionStars, radioStop, CAST, castOf,
+  showCampaign, showMissionList, showBriefing, missionDebrief, stealthBlock, showLoading, campDiff, CDIFF, missionStars, radioStop, CAST, castOf,
 });
 
 Object.defineProperties(window, {

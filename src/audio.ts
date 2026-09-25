@@ -927,34 +927,62 @@ let cine: any = null;
 function cineStop() {
   if (!cine) return;
   const c = cine; cine = null; clearInterval(c.iv);
-  try { const t = AC.currentTime; c.out.gain.cancelScheduledValues(t), c.out.gain.setValueAtTime(c.out.gain.value, t), c.out.gain.linearRampToValueAtTime(0, t + 1.2); setTimeout(() => { c.nodes.forEach((n: any) => { try { n.stop(); } catch (e) { } }); try { c.out.disconnect(); } catch (e) { } }, 1400); } catch (e) { }
+  try { const t = AC.currentTime; c.out.gain.cancelScheduledValues(t), c.out.gain.setValueAtTime(c.out.gain.value, t), c.out.gain.linearRampToValueAtTime(0, t + 1.2); setTimeout(() => { c.nodes.forEach((n: any) => { try { n.stop(); } catch (e) { } }); try { c.out.disconnect(), c.verb && c.verb.disconnect(); } catch (e) { } }, 1400); } catch (e) { }
   if (musicBus) { const t = AC.currentTime; musicBus.gain.cancelScheduledValues(t), musicBus.gain.setValueAtTime(musicBus.gain.value, t), musicBus.gain.linearRampToValueAtTime(MUSIC_BASE * musicVol, t + 2); }
   customTrackEl && (customTrackEl.volume = muted ? 0 : masterVol * musicVol);
 }
-const CINE_MOODS: Record<string, { f: number[]; w: OscillatorType; lp: number; trem?: number; drums?: number; g: number }> = {
-  tense: { f: [41.2, 55, 82.4, 98], w: "sawtooth", lp: 380, g: .09 },
-  dread: { f: [36.7, 43.65, 55, 77.8], w: "sawtooth", lp: 300, g: .1 },
-  hive: { f: [110, 116.5, 164.8, 233, 880], w: "sine", lp: 2400, trem: 5.5, g: .06 },
-  war: { f: [41.2, 55, 61.7, 82.4], w: "sawtooth", lp: 420, drums: 1.15, g: .085 },
-  hope: { f: [130.8, 196, 261.6, 329.6, 392], w: "triangle", lp: 1400, g: .05 },
+// Each mood is a slow chord progression played by a string pad, a sub bass,
+// a soft arpeggio and (for some moods) drums or a wordless choir. The whole
+// score dips while a character is speaking so it never masks dialogue.
+const CINE_MOODS: Record<string, any> = {
+  tense: { bpm: 66, prog: [[45, 48, 52], [41, 45, 48], [48, 52, 55], [43, 47, 50]], arp: 1, lp: 1500, g: .1 },
+  dread: { bpm: 56, prog: [[38, 41, 45], [39, 43, 46], [38, 41, 45], [45, 48, 52]], arp: .5, lp: 900, g: .11, low: 1 },
+  war: { bpm: 84, prog: [[40, 43, 47], [36, 40, 43], [38, 42, 45], [40, 43, 47]], arp: 1, lp: 1800, g: .1, drums: 1 },
+  hive: { bpm: 58, prog: [[45, 47, 52], [44, 47, 51], [42, 45, 50], [44, 47, 52]], arp: .6, lp: 2200, g: .09, choir: 1 },
+  hope: { bpm: 70, prog: [[48, 52, 55], [43, 47, 50], [45, 48, 52], [41, 45, 48]], arp: 1, lp: 2600, g: .09, bright: 1 },
 };
+const mtof = (n: number) => 440 * Math.pow(2, (n - 69) / 12);
+function cineNote(c: any, t: number, f: number, d: number, o: any) {
+  const os = AC.createOscillator(), g = AC.createGain(); os.type = o.w || "sawtooth", os.frequency.value = f, o.det && (os.detune.value = o.det);
+  let n: any = os; if (o.lp) { const fl = AC.createBiquadFilter(); fl.type = o.bp ? "bandpass" : "lowpass", fl.frequency.value = o.lp, fl.Q.value = o.q || .7, os.connect(fl), n = fl; }
+  const a = o.a || .01, r = o.r || .3; g.gain.setValueAtTime(0, t), g.gain.linearRampToValueAtTime(o.g, t + a), g.gain.setValueAtTime(o.g, t + Math.max(a, d - r)), g.gain.linearRampToValueAtTime(0, t + d);
+  n.connect(g), g.connect(c.bus), o.verb && c.verb && g.connect(c.verb), os.start(t), os.stop(t + d + .05);
+}
+function cineSchedule(c: any) {
+  const M = c.M, beat = 60 / M.bpm, bar = 4 * beat, chordLen = 2 * bar;
+  while (c.next < AC.currentTime + .6) {
+    const t = c.next, ci = c.step >> 4 & 3, ch = M.prog[(c.step >> 4) % M.prog.length], sub = c.step & 15, o = M.low ? -12 : 0;
+    if (0 === sub) {
+      // pad: detuned saws, slow swell
+      for (const n of ch) for (const det of [-9, 8]) cineNote(c, t, mtof(n + 12 + o), chordLen + .8, { w: "sawtooth", det, lp: M.lp, g: .028, a: 1.4, r: 1.4, verb: 1 });
+      cineNote(c, t, mtof(ch[0] - 12 + o), chordLen, { w: "sine", g: .12, a: .3, r: 1 });
+      if (M.choir) for (const n of [ch[1] + 12, ch[2] + 12]) for (const fm of [700, 1150]) cineNote(c, t, mtof(n), chordLen + .5, { w: "sawtooth", lp: fm, bp: 1, q: 6, g: .05, a: 2, r: 1.8, verb: 1 });
+      if (M.bright) cineNote(c, t, mtof(ch[2] + 24), bar, { w: "triangle", g: .025, a: .02, r: bar - .1, verb: 1 });
+    }
+    // arpeggio on eighth notes
+    if (Math.random() < M.arp) { const pat = [0, 1, 2, 1, 0, 2, 1, 2], n = ch[pat[sub & 7]] + 24 + (sub > 7 && M.bright ? 12 : 0) + o; cineNote(c, t, mtof(n), beat * .9, { w: "triangle", g: .022, a: .005, r: beat * .8, lp: 3000, verb: 1 }); }
+    if (M.drums) { const onBeat = sub % 2 == 0, bi = sub >> 1;
+      if (onBeat && (0 === bi || 3 === bi || 5 === bi)) sNoise(t, { brown: 1, f: 220, g: .32 * c.vol, d: .5, verb: .25, dest: c.bus }), sOsc(t, { f: 90, f2: 38, g: .3 * c.vol, d: .4, dest: c.bus });
+      if (onBeat && (2 === bi || 6 === bi)) sNoise(t, { type: "bandpass", f: 1400, q: .9, g: .1 * c.vol, d: .18, verb: .3, dest: c.bus });
+      sub % 2 == 1 && sNoise(t, { type: "highpass", f: 7000, g: .02 * c.vol, d: .04, dest: c.bus }); }
+    void ci; c.step++, c.next += beat / 2;
+  }
+}
 function cineMood(mood: string) {
   if (!sOK()) return;
+  if (cine && cine.mood === mood) return;
   cineStop();
-  const M = CINE_MOODS[mood] || CINE_MOODS.tense, t = AC.currentTime, out = AC.createGain(), nodes: any[] = [];
-  out.gain.setValueAtTime(0, t), out.gain.linearRampToValueAtTime(M.g * musicVol * 2.4, t + 2.5), out.connect(masterGain);
-  const lp = AC.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = M.lp, lp.Q.value = 2, lp.connect(out);
-  const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = .07, lg.gain.value = .45 * M.lp, lfo.connect(lg), lg.connect(lp.frequency), lfo.start(t), nodes.push(lfo);
-  let dest: any = lp;
-  if (M.trem) { const tg = AC.createGain(), tl = AC.createOscillator(), td = AC.createGain(); tg.gain.value = .6, tl.frequency.value = M.trem, td.gain.value = .4, tl.connect(td), td.connect(tg.gain), tg.connect(lp), tl.start(t), nodes.push(tl), dest = tg; }
-  M.f.forEach((f, i) => { for (const det of [-7, 6]) { const o = AC.createOscillator(), g = AC.createGain(); o.type = i === M.f.length - 1 && "hive" === mood ? "triangle" : M.w, o.frequency.value = f, o.detune.value = det + 3 * i, g.gain.value = 1 / (1 + i * .6) / M.f.length, o.connect(g), g.connect(dest), o.start(t), nodes.push(o); } });
-  const sub = AC.createOscillator(), sg = AC.createGain(); sub.frequency.value = M.f[0] / 2, sg.gain.value = .35, sub.connect(sg), sg.connect(out), sub.start(t), nodes.push(sub);
-  try { verbIn && out.connect(verbIn); } catch (e) { }
-  let iv: any = 0;
-  if (M.drums) { let k = 0; iv = setInterval(() => { if (!cine || !sOK()) return; const tt = AC.currentTime + .01, acc = k++ % 4 == 0; sNoise(tt, { brown: 1, f: acc ? 260 : 180, g: (acc ? .5 : .28) * musicVol, d: .5, verb: .3 }), sOsc(tt, { f: acc ? 95 : 80, f2: 38, g: (acc ? .4 : .22) * musicVol, d: .45 }); }, 1e3 * M.drums); }
+  const M = CINE_MOODS[mood] || CINE_MOODS.tense, t = AC.currentTime, out = AC.createGain(), bus = AC.createGain();
+  const vol = Math.max(.05, musicVol), base = M.g * vol * 3.2;
+  out.gain.setValueAtTime(0, t), out.gain.linearRampToValueAtTime(base, t + 2), bus.connect(out), out.connect(masterGain);
+  let verb: any = null; try { verb = AC.createGain(), verb.gain.value = .5, verb.connect(verbIn); } catch (e) { verb = null; }
+  const c: any = { out, bus, verb, M, mood, next: t + .05, step: 0, nodes: [], vol, base };
+  // keep the score under the dialogue
+  c.iv = setInterval(() => { if (cine !== c || !sOK()) return; cineSchedule(c); const talking = "undefined" != typeof speechSynthesis && speechSynthesis.speaking; c.out.gain.setTargetAtTime(talking ? c.base * .42 : c.base, AC.currentTime, .35); }, 120);
+  cineSchedule(c);
   if (musicBus) { const tt = AC.currentTime; musicBus.gain.cancelScheduledValues(tt), musicBus.gain.setValueAtTime(musicBus.gain.value, tt), musicBus.gain.linearRampToValueAtTime(0, tt + 1.2); }
   customTrackEl && (customTrackEl.volume = 0);
-  cine = { out, nodes, iv, mood };
+  cine = c;
 }
 function cineHit(kind: string) {
   if (!sOK()) return;

@@ -799,6 +799,8 @@ declare global {
   function cineHit(k: string): void;
   function playFilm(key: string, done?: () => void): void;
   function missionDebrief(win: boolean): string;
+  function stealthBlock(e: any, t: any): boolean;
+  function mapPreviewImg(key: string): string;
   function radioStop(): void;
   const RDT: number;
 
