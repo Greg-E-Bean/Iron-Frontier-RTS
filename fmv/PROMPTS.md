@@ -15,19 +15,24 @@ Save each result in this folder under the file name shown, and the game picks it
 
 ## Cast
 
-| File | Character | Prompt |
+The bundled portraits (`fmv/<id>.webp`) come from `fmv/source/cast-sheet.jpg`.
+`scripts/fmv_portraits.py` cuts them out and grades them. Keep new footage consistent with these looks:
+a clean ink-outlined illustration, dark sci-fi command room, and faction insignia.
+
+| File | Character | Look |
 |---|---|---|
-| `reyes.*` | Col. Ada Reyes — Vanguard commander | A woman in her late 40s, olive skin, dark hair in a tight bun, steely green eyes, faint lines at the eyes. Navy-blue beret with a gold badge, olive Western military uniform with rank patches and dog tags. Cool blue rim light, NATO-style command room behind her. |
-| `hale.*` | Lt. Marcus Hale — Vanguard field officer | A man in his early 30s, brown skin, close-cropped black hair, light stubble, square jaw. Olive combat helmet with goggles pushed up, olive field uniform, radio headset. Blue rim light, field command tent. |
-| `ghost.*` | Ghost — Vanguard commando | A woman in her mid 20s, fair freckled skin, long copper-red hair, sea-green eyes, a thin scar on one cheekbone. Black tactical gear with shoulder straps. Cold blue light, night-ops briefing. |
-| `marsh.*` | Dr. Elias Marsh — Project Starfall scientist | A man in his 60s, pale skin, grey hair swept to one side, round wire glasses, tired eyes. White lab coat, shirt and dark tie. Teal-green monitor light, 1990s research lab. |
-| `draganov.*` | Marshal Draganov — Legion supreme commander | A man in his late 60s, weathered face, silver hair, thick grey moustache, heavy brows. Olive-brown eastern-bloc marshal's peaked cap with red band and red star, greatcoat with red collar tabs and medals. Warm red-orange rim light, war room with red banners. |
-| `volkova.*` | Commissar Volkova — Legion political officer | A woman in her mid 30s, pale skin, blonde hair pinned up, pale blue eyes, stern expression. Peaked cap with red band and star, dark greatcoat with red collar tabs. Red rim light, Soviet-style command bunker. |
-| `bogdan.*` | Chief Engineer Bogdan — Legion engineer | A burly man in his late 50s, ruddy skin, full brown beard, friendly squint. Battered brown steel helmet with goggles, brown engineer's coveralls with yellow hazard stripe. Warm workshop light with sparks behind. |
-| `reaper.*` | Reaper — Legion commando | A hard-faced man in his 40s, black cropped hair, cold eyes. Black tactical balaclava covering the lower face, black helmet, black webbing. Deep red rim light, darkness behind. |
-| `voice.*` | The Voice — the Syndicate hive-mind (wearing Marsh's face) | The same grey-haired older scientist as Dr. Marsh, but uncanny: skin pale grey-violet, faint glowing violet veins beneath the skin, irises glowing violet. A dark purple hood framing the face. Violet rim light, dark organic chamber. |
-| `senna.*` | Adept Senna — Syndicate clone | A young woman, pale with a faint violet tint, sleek black hair, glowing lilac irises, serene expression. Dark purple hooded robe with glowing violet seams. Violet light, organic hive chamber. |
-| `phantom.*` | Phantom — Syndicate infiltrator (a clone of Ghost) | The same face as Ghost — copper-red hair, freckles, cheek scar — but with violet-tinted skin, faint violet veins and glowing violet eyes. Black tactical gear. Violet rim light, darkness behind. |
+| `reyes.*` | Col. Ada Reyes — Vanguard commander | A woman in her 50s, weathered face, short brown hair, stern grey eyes. Navy undershirt, olive plate carrier with a name tape, blue Vanguard chevron patch on the shoulder. |
+| `hale.*` | Lt. Marcus Hale — Vanguard field officer | A young man, tanned, short brown hair. Grey armour plate over a navy undershirt, blue Vanguard chevron shoulder patch. |
+| `ghost.*` | Ghost — Vanguard commando | A woman in her 30s, blonde hair tied back, blue-grey eyes, calm. Olive tactical vest over a black undershirt, blue chevron patch. |
+| `draganov.*` | Marshal Draganov — Legion supreme commander | A man in his 60s, grey swept-back hair, heavy brows, hard stare. Olive field jacket and vest, red collar tabs with gold stars, medal ribbons, red Legion star shield. |
+| `volkova.*` | Commissar Volkova — Legion political officer | A woman in her 30s, black hair pulled back, sharp features. Khaki armour, red collar tabs with gold stars, red star shoulder shield. |
+| `bogdan.*` | Chief Engineer Bogdan — Legion engineer | A rugged man in his 40s, short beard, scarred brow. Grey armour, red collar tabs, red Legion star shield on the chest. |
+| `reaper.*` | Reaper — Legion commando | A square-jawed man in his 30s, dark cropped hair, cold eyes. Olive field jacket with pouches, red collar tabs, red star shoulder patch. |
+| `voice.*` | The Voice — the Syndicate hive-mind | A tall ridged alien head, grey-violet chitin, narrow glowing violet eyes, no hair, an organic armoured body. |
+| `senna.*` | Adept Senna — Syndicate hybrid clone | A human woman's face in a violet hood that grows into organic spines, with dark hive veins across the cheeks. |
+| `phantom.*` | Phantom — Syndicate infiltrator grown from Ghost's DNA | A smooth chrome-violet synthetic face with glowing white-violet eyes, in iridescent armour. |
+
+Dr. Elias Marsh is only heard, in archive footage, so he needs no portrait.
 
 ## Scenes
 
@@ -44,7 +49,7 @@ The close-up shots use the character files above.
 | `prologue_01` | _drawn by the game — leave empty_ | In this history the Cold War never ended. It ran out of oil — and the East answered the resource war with numbers. |
 | `prologue_02` | Endless ranks of eastern-bloc infantry in greatcoats and steel helmets marching past red banners, searchlights crossing a smoky red sky. | The Legion. Millions of soldiers and endless armour, pouring west across the Frontier. |
 | `prologue_03` | Dusk battlefield on open plains: a line of main battle tanks firing, muzzle flashes, explosions, smoke columns against an orange sky. | The Western Vanguard could not match them. City by city, the West fell back. |
-| `prologue_04` | Close-up of **marsh** (use `fmv/marsh.*`) | There is something out past Jupiter. Mass, metal — and structure. It is not natural. And we can bring it down. |
+| `prologue_04` | Archive footage of the Starfall lab (Marsh speaking off-screen) | There is something out past Jupiter. Mass, metal — and structure. It is not natural. And we can bring it down. |
 | `prologue_05` | A dark, jagged meteor streaked with glowing violet veins drifting toward Earth, seen from orbit with the planet's blue limb below, stars, cinematic. | Project Starfall. A last gamble: catch a wandering meteor, and use whatever was inside it to turn the tide. |
 | `prologue_06` | Dusk over a snowy mountain range; a huge burning meteor streaks down trailing fire and smoke and strikes the horizon in a blinding flash. | On the fourteenth of April, they brought it down on the Frontier. |
 | `prologue_07` | Night, a vast ice crater lit by sweeping military floodlights; scaffolding surrounds a dark glowing meteorite fragment; tiny figures in cold-weather gear at the rim. | At Site Nine they cut the Fragment out of the ice. It was warm. It was growing. |

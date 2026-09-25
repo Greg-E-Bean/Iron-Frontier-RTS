@@ -204,6 +204,8 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 @keyframes rbIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 #radioBox .rbPort{flex:0 0 40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;letter-spacing:1px;
   color:#0a0f13;background:var(--rc);box-shadow:0 0 14px var(--rc),inset 0 0 0 2px rgba(255,255,255,.3);background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.12) 0 2px,transparent 2px 4px)}
+.rbPort.img{background-size:170%!important;background-position:50% 12%!important;background-repeat:no-repeat;background-color:#10161c!important;box-shadow:0 0 0 2px var(--rc),0 0 14px var(--rc)!important}
+#radioBox .rbPort.img{flex-basis:52px;height:52px}
 #radioBox .rbName{font-size:10px;font-weight:700;letter-spacing:1.5px;margin-bottom:2px}
 #radioBox .rbText{font-size:12.5px;line-height:1.4;color:#dfe8ee}
 body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 190px)}

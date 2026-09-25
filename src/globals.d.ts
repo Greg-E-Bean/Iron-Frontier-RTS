@@ -800,6 +800,8 @@ declare global {
   function playFilm(key: string, done?: () => void): void;
   function missionDebrief(win: boolean): string;
   function stealthBlock(e: any, t: any): boolean;
+  function probeMedia(key: string): any;
+  function fmvSrc(key: string): string | null;
   function mapPreviewImg(key: string): string;
   function radioStop(): void;
   const RDT: number;

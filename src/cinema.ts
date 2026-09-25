@@ -142,7 +142,7 @@ portrait(g,W,H,t,T,p){const c=castOf(p.who),col=c.c||"#8fd0ff",m=Math.min(W,H);s
 // war-room bokeh
 const R=mulb(p.who.length*31+3);for(let i=0;i<22;i++)glow(g,W*R(),H*R()*.9,m*(.03+.07*R()),R()<.5?col:"#3c5a6a",.18+.1*Math.sin(T+i));
 g.strokeStyle=rgba(col,.08);for(let i=0;i<12;i++){const y=H*i/12;g.beginPath(),g.moveTo(0,y),g.lineTo(W,y),g.stroke()}
-{const talk=F&&F.talk?Math.max(0,.55*Math.sin(T*12.7)+.35*Math.sin(T*7.9+1)+.25*Math.sin(T*19.3)):0;F&&(F.jaw=lerp(F.jaw||0,talk,.35));const med=fmvMedia(p.who);if(med)drawMedia(g,W,H,med,t,p.side);else drawBust(g,W,H,t,T,p.who,p.side)}
+{const talk=F&&F.talk?Math.max(0,.55*Math.sin(T*12.7)+.35*Math.sin(T*7.9+1)+.25*Math.sin(T*19.3)):0;F&&(F.jaw=lerp(F.jaw||0,talk,.35));const med=fmvMedia(p.who);if(med&&fmvCut(p.who))drawCutout(g,W,H,med,t,T,p.side,col);else if(med)drawMedia(g,W,H,med,t,p.side);else drawBust(g,W,H,t,T,p.who,p.side)}
 // lower third
 const lx=W*(p.side==="r"?.06:.56),ly=H*.62;g.fillStyle="rgba(0,0,0,.45)",g.fillRect(lx,ly,W*.36,m*.13);g.fillStyle=col,g.fillRect(lx,ly,m*.008,m*.13);g.font="700 "+Math.round(m*.04)+"px sans-serif",g.fillStyle="#eef4f8",g.fillText(c.n.toUpperCase(),lx+m*.03,ly+m*.055);g.font="600 "+Math.round(m*.024)+"px monospace",g.fillStyle=rgba(col,.9),g.fillText((c.role||FAC_NAME[c.fac]||"").toUpperCase(),lx+m*.03,ly+m*.1);
 for(let i=0;i<24;i++){const a=Math.abs(Math.sin(T*9+i*1.7)*Math.sin(T*3.3+i))*m*.04*(p.quiet?.2:1);g.fillStyle=rgba(col,.7),g.fillRect(lx+m*.03+i*m*.012,ly+m*.17-a,m*.007,a+2)}},
@@ -248,9 +248,15 @@ g.restore()}
 //   fmv/<film>_<shot>.jpg|...               e.g. fmv/prologue_05.mp4 — that whole shot
 // Stills get a slow push-in; clips loop muted under the voiced line.
 // FMV_MEDIA can also map a key to any URL explicitly.
-const FMV_MEDIA={},_media={},FMV_EXT=["mp4","webm","jpg","png","webp"];
+const FMV_MEDIA={},_media={},FMV_EXT=["mp4","webm","webp","jpg","png"];
 function probeMedia(key){if(_media[key])return _media[key];const rec=_media[key]={el:null};const list=FMV_MEDIA[key]?[FMV_MEDIA[key]]:FMV_EXT.map(e=>"fmv/"+key+"."+e);let i=0;
-const next=()=>{if(i>=list.length)return;const src=list[i++];if(/\.(mp4|webm|mov)$/i.test(src)){const v=document.createElement("video");v.muted=!0,v.loop=!0,v.playsInline=!0,v.preload="auto",v.oncanplay=()=>{rec.el||(rec.el=v,v.play().catch(()=>{}))},v.onerror=next,v.src=src}else{const im=new Image;im.onload=()=>{rec.el=im},im.onerror=next,im.src=src}};next();return rec}
+const next=()=>{if(i>=list.length)return;const src=list[i++];if(/\.(mp4|webm|mov)$/i.test(src)){const v=document.createElement("video");v.muted=!0,v.loop=!0,v.playsInline=!0,v.preload="auto",v.oncanplay=()=>{rec.el||(rec.el=v,v.play().catch(()=>{}))},v.onerror=next,v.src=src}else{const im=new Image;im.onload=()=>{rec.el=im,rec.src=src;try{const c=document.createElement("canvas");c.width=c.height=4;const x=c.getContext("2d");x.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,4,4);rec.cut=x.getImageData(0,0,1,1).data[3]<40}catch(e){rec.cut=/\.(png|webp)$/i.test(src)}},im.onerror=next,im.src=src}};next();return rec}
+function fmvCut(key){const r=_media[key];return!!(r&&r.cut)}
+function fmvSrc(key){const r=_media[key];return r&&r.el&&r.src||null}
+// A cut-out character stands in the war room, bottom-aligned, with a faction rim light and a little breathing.
+function drawCutout(g,W,H,el,t,T,side,col){const iw=el.naturalWidth,ih=el.naturalHeight,m=Math.min(W,H),h=H*.94*(1+.004*Math.sin(T*1.3)),w=h*iw/ih,cx=W*(side==="r"?.64:.36)+Math.sin(T*.4)*m*.004+(side==="r"?-1:1)*W*.01*t,y=H*1.02-h;
+g.save(),g.shadowColor=rgba(col,.55),g.shadowBlur=m*.035,g.drawImage(el,cx-w/2,y,w,h),g.restore();
+const fl=.04+.03*Math.sin(T*9)*Math.sin(T*2.3);g.fillStyle="rgba(255,255,255,"+Math.max(0,fl*.3)+")",g.fillRect(0,0,W,H)}
 function fmvMedia(key){const r=_media[key];return r&&r.el||null}
 function drawMedia(g,W,H,el,t,side){const vw=el.videoWidth||el.naturalWidth||0,vh=el.videoHeight||el.naturalHeight||0;if(!vw)return!1;el.paused&&el.play&&el.play().catch(()=>{});const k=Math.max(W/vw,H/vh)*(1.03+.05*t),dx=(side==="r"?-1:1)*W*.012*t;g.fillStyle="#000",g.fillRect(0,0,W,H),g.drawImage(el,(W-vw*k)/2+dx,(H-vh*k)/2-H*.01*t,vw*k,vh*k);return!0}
 const shotKey=(k,i)=>k+"_"+String(i).padStart(2,"0");
@@ -262,7 +268,7 @@ prologue:{title:"The Iron Frontier",mood:"tense",shots:[
  {s:"warmap",say:[N,"In this history the Cold War never ended. It ran out of oil — and the East answered the resource war with numbers."],p:{l0:.78,l1:.45,date:"2019 — 2029",arrows:[[.85,.4,.55,.42,"#e0473a"],[.85,.65,.58,.62,"#e0473a"]]}},
  {s:"march",say:[N,"The Legion. Millions of soldiers and endless armour, pouring west across the Frontier."],fx:"whoosh"},
  {s:"battle",say:[N,"The Western Vanguard could not match them. City by city, the West fell back."],p:{sky:"dusk",dir:-1,color:"#e0473a",n:8}},
- {s:"portrait",say:["marsh","There is something out past Jupiter. Mass, metal — and structure. It is not natural. And we can bring it down."],p:{who:"marsh"}},
+ {s:"lab",say:["marsh","There is something out past Jupiter. Mass, metal — and structure. It is not natural. And we can bring it down."],p:{},rec:"ARCHIVE — DR. ELIAS MARSH — PROJECT STARFALL"},
  {s:"space",say:[N,"Project Starfall. A last gamble: catch a wandering meteor, and use whatever was inside it to turn the tide."],p:{from:[.9,.15],to:[.45,.5],size:.05,grow:1.6,earth:1},cam:[1,1.12]},
  {s:"entry",say:[N,"On the fourteenth of April, they brought it down on the Frontier."],d:7,fx:"riser",fxAt:[[5.4,"boom"]]},
  {s:"site",say:[N,"At Site Nine they cut the Fragment out of the ice. It was warm. It was growing."],p:{}},
@@ -285,7 +291,7 @@ allied_reveal:{title:"The Marsh Tapes",mood:"dread",shots:[
  {s:"portrait",say:["hale","Ma'am. We recovered the Site Nine archive. You need to see this."],p:{who:"hale",side:"r"}},
  {s:"lab",say:["marsh","It is talking to the network. It is asking questions — about us. Reyes, shut it down. Shut it —"],p:{hack:1,breach:1},rec:"SITE NINE — 04.17 — 23:51",fx:"static",fxAt:[[6,"glitch"]],d:8},
  {s:"eye",say:["voice","Elias Marsh was very helpful. He is part of us now, Colonel. So are you, a little."],fx:"sting",mood:"hive"},
- {s:"portrait",say:["reyes","That's Marsh's voice. God help us — it's wearing him."],p:{who:"reyes"}},
+ {s:"portrait",say:["reyes","That's Marsh's voice. God help us — it's using him."],p:{who:"reyes"}},
  {s:"title",p:{text:"THE HIVE BELOW",c:"#b27ae0"},d:3.5,fx:"boom"}]},
 allied_end:{title:"Clean Slate",mood:"hope",shots:[
  {s:"city",say:[N,"The Grand Crossing fell silent at dawn. For the first time in twelve years, the Frontier's guns stopped."],p:{dawn:1}},
@@ -326,7 +332,7 @@ yuri_intro:{title:"The Harvest",mood:"hive",shots:[
 yuri_reveal:{title:"The Copy",mood:"hive",shots:[
  {s:"vats",say:["voice","Their finest soldier bled on Site Nine's floor the night we woke. We kept what she left."],p:{wake:1}},
  {s:"dna",say:[N,"Donor: Vanguard special operations. Codename: Ghost."],p:{label:"GENOME SPLICE — DONOR 0001 'GHOST'"}},
- {s:"portrait",say:["phantom","Her face. Her hands. Her aim. Your Ghost never knew there was a copy."],p:{who:"phantom"},fx:"sting"},
+ {s:"portrait",say:["phantom","Her reflexes. Her hands. Her aim. Your Ghost never knew there was a copy."],p:{who:"phantom"},fx:"sting"},
  {s:"title",p:{text:"SILENT HAND",c:"#b27ae0"},d:3.5,fx:"boom"}]},
 yuri_end:{title:"One Mind",mood:"hive",shots:[
  {s:"city",say:[N,"The Iron Ring fell in a single night. By morning, the Frontier had stopped fighting."],p:{hive:1,h0:.2,h1:.9,air:1}},
@@ -356,7 +362,7 @@ g.save();const cam=sh.cam||[1,1.07],z=lerp(cam[0],cam[1],t);g.translate(W/2,H/2)
 post(g,W,H,t,sh,D);requestAnimationFrame(filmFrame)}
 function post(g,W,H,t,sh,D){const m=Math.min(W,H);
 // soft bloom: a blurred, downscaled copy screened back over the frame
-F.bl||(F.bl=document.createElement("canvas"));const bw=Math.max(8,W>>3),bh=Math.max(8,H>>3);F.bl.width!==bw&&(F.bl.width=bw,F.bl.height=bh);const bc=F.bl.getContext("2d");bc.globalCompositeOperation="copy",bc.drawImage(g.canvas,0,0,bw,bh),g.save(),g.globalCompositeOperation="screen",g.globalAlpha=.32,g.imageSmoothingEnabled=!0,g.drawImage(F.bl,0,0,W,H),g.restore();
+F.bl||(F.bl=document.createElement("canvas"));const bw=Math.max(8,W>>3),bh=Math.max(8,H>>3);F.bl.width!==bw&&(F.bl.width=bw,F.bl.height=bh);const bc=F.bl.getContext("2d");bc.globalCompositeOperation="copy",bc.drawImage(g.canvas,0,0,bw,bh),g.save(),g.globalCompositeOperation="screen",g.globalAlpha="portrait"===sh.s?.14:.32,g.imageSmoothingEnabled=!0,g.drawImage(F.bl,0,0,W,H),g.restore();
 "portrait"===sh.s&&(g.fillStyle="rgba(0,0,0,.09)",(()=>{for(let y=0;y<H;y+=3)g.fillRect(0,y,W,1)})(),g.fillStyle=rgba((castOf(sh.p.who).c||"#8fd0ff"),.05),g.fillRect(0,0,W,H));if(sh.rec){g.save(),g.globalCompositeOperation="saturation",g.fillStyle="rgba(128,128,128,.7)",g.fillRect(0,0,W,H),g.restore();g.fillStyle="rgba(255,255,255,.04)";for(let y=(F.T*60)%4;y<H;y+=4)g.fillRect(0,y,W,1);const by=(F.T*.3%1)*H;g.fillStyle="rgba(255,255,255,.06)",g.fillRect(0,by,W,m*.02);g.font="700 "+Math.round(m*.03)+"px monospace",g.fillStyle="#ff4040",Math.sin(F.T*5)>0&&g.fillText("● REC",W*.06,H*.2),g.fillStyle="rgba(240,240,240,.85)",g.fillText(sh.rec,W*.06,H*.2+m*.045)}
 if(Math.random()<.02){const y=Math.random()*H,h=m*.03;g.drawImage(g.canvas,0,y,W,h,(Math.random()-.5)*m*.03,y,W,h)}
 if(!F.grain){const c=document.createElement("canvas");c.width=c.height=128;const cg=c.getContext("2d"),im=cg.createImageData(128,128);for(let i=0;i<im.data.length;i+=4){const v=Math.random()*255;im.data[i]=im.data[i+1]=im.data[i+2]=v,im.data[i+3]=22}cg.putImageData(im,0,0),F.grain=g.createPattern(c,"repeat")}
@@ -365,4 +371,4 @@ const vg=g.createRadialGradient(W/2,H/2,m*.35,W/2,H/2,Math.hypot(W,H)*.55);vg.ad
 const fi=sat(F.st/.45),fo=sat((D-F.st)/.35),a=1-Math.min(fi,fo);a>0&&(g.fillStyle="rgba(0,0,0,"+a+")",g.fillRect(0,0,W,H))}
 addEventListener("keydown",e=>{F&&("Escape"===e.key?endFilm():" "===e.key&&(F.st=1e3))});
 
-Object.assign(window,{playFilm,endFilm,FILMS,filmSeen,FMV_MEDIA});
+Object.assign(window,{playFilm,endFilm,FILMS,filmSeen,FMV_MEDIA,probeMedia,fmvSrc});
