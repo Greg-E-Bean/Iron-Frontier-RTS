@@ -220,7 +220,10 @@ const MAPDEFS: Record<string, (seed: number) => void> = {
   // basin; a ring road circles the lake and links the east and west towns.
   basin(seed) {
     mdBegin(seed, "basin");
-    mdLake(45.5, 35.5, 8, 5.5);
+    mdLake(45.5, 35.5, 8, 2.8);
+    mdPlateau(40, 28, 51, 31, 2.2); mdPlateau(40, 40, 51, 43, 2.2);
+    symRun("m4", T => mdRamp(T.X(39), T.Y(30), T.D("w"), 4));
+    mdOverpass(45, 32, 45, 39);
     symRun("m4", T => {
       mdPlateau(T.X(3), T.Y(3), T.X(20), T.Y(17));
       mdSpot(T.X(6) - (T.fx ? 5 : 0), T.Y(6) - (T.fy ? 5 : 0));
@@ -233,7 +236,7 @@ const MAPDEFS: Record<string, (seed: number) => void> = {
     });
     mdRoad([[31, 25], [60, 25], [60, 46], [31, 46], [31, 25]]);
     mdRoad([[11, 35], [31, 35]]); mdRoad([[60, 35], [80, 35]]);
-    mdOre(45.5, 25.5, 2.4, 2); mdOre(45.5, 45.5, 2.4, 2);
+    mdOre(42.5, 29.5, 1.6, 2); mdOre(48.5, 41.5, 1.6, 2);
     mdTown(15, 35); mdTown(76, 35);
     mdSpecial(46, 14, "empTower"); mdSpecial(20, 31, "paradropHangar"); mdSpecial(40, 20, "oilDerek"); mdSpecial(46, 58, "rogueDen");
     mdForest(46, 60, 4, 3);
@@ -253,8 +256,10 @@ const MAPDEFS: Record<string, (seed: number) => void> = {
       mdOre(T.X(20), T.Y(36), 2.6, 2);
       mdTown(T.X(36), T.Y(15));
       mdForest(T.X(3), T.Y(36), 3, 6); mdForest(T.X(30), T.Y(3), 6, 2);
+      mdPlateau(T.X(33), T.Y(34), T.X(41), T.Y(38), 2.4); mdRamp(T.X(32), T.Y(36), T.D("w"), 4); mdRoad(T.PL([[24, 36], [29, 36]]));
       mdCannon(T.X(37), T.Y(22));
     });
+    mdOverpass(42, 35, 49, 35);
     mdSpecial(35, 26, "empTower"); mdSpecial(60, 50, "paradropHangar"); mdSpecial(20, 40, "oilDerek"); mdSpecial(70, 34, "rogueDen");
     mdFinish();
   },
@@ -265,15 +270,16 @@ const MAPDEFS: Record<string, (seed: number) => void> = {
     for (let i = 0; i < G.terr.length; i++) G.terr[i] = fbm(i % 92 * .05 + seed, (i / 92 | 0) * .05, seed + 3) > .62 ? 0 : 1;
     mdLake(20, 35.5, 3.5, 3); mdLake(71, 35.5, 3.5, 3);
     mdOre(45.5, 35.5, 5, 1); mdOre(45.5, 35.5, 2, 2);
+    mdOverpass(41, 22, 50, 22); mdOverpass(41, 48, 50, 48);
     symRun("m4", T => {
       mdSpot(T.X(6) - (T.fx ? 5 : 0), T.Y(6) - (T.fy ? 5 : 0));
       mdPlateau(T.X(33), T.Y(20), T.X(40), T.Y(26), 2.2); mdRamp(T.X(36), T.Y(27), T.D("s"), 4);
-      mdRoad(T.PL([[11, 11], [30, 26]]));
+      mdRoad(T.PL([[11, 11], [30, 30]]));
       mdOre(T.X(16), T.Y(15), 3.6); mdOre(T.X(27), T.Y(8), 3, 1, !0);
       mdCannon(T.X(37), T.Y(23));
     });
-    mdRoad([[30, 26], [61, 26], [61, 45], [30, 45], [30, 26]]);
-    mdTown(45, 12); mdTown(45, 59); mdRoad([[30, 26], [45, 12], [61, 26]]); mdRoad([[30, 45], [45, 59], [61, 45]]);
+    mdRoad([[30, 30], [61, 30], [61, 41], [30, 41], [30, 30]]);
+    mdTown(45, 12); mdTown(45, 59); mdRoad([[30, 30], [30, 16], [45, 12], [61, 16], [61, 30]]); mdRoad([[30, 41], [30, 55], [45, 59], [61, 55], [61, 41]]);
     mdSpecial(52, 22, "empTower"); mdSpecial(56, 12, "paradropHangar"); mdSpecial(24, 31, "oilDerek"); mdSpecial(66, 40, "oilDerek");
     mdForest(20, 35.5, 5, 4.5, .35); mdForest(71, 35.5, 5, 4.5, .35);
     mdFinish();
@@ -313,6 +319,7 @@ const MAPDEFS: Record<string, (seed: number) => void> = {
       mdTown(T.X(22), T.Y(28));
       mdCannon(T.X(40), T.Y(28));
     });
+    mdOverpass(38, 30, 38, 41); mdOverpass(52, 30, 52, 41);
     mdRoad([[16, 35], [75, 35]]);
     mdSpecial(54, 22, "empTower"); mdSpecial(36, 50, "paradropHangar"); mdSpecial(70, 22, "oilDerek"); mdSpecial(20, 50, "rogueDen");
     mdFinish();
@@ -324,6 +331,7 @@ const MAPDEFS: Record<string, (seed: number) => void> = {
     mdPlateau(26, 14, 65, 19); mdPlateau(26, 52, 65, 57); mdPlateau(20, 20, 25, 51); mdPlateau(66, 20, 71, 51);
     mdRamp(45, 13, "n", 5); mdRamp(45, 20, "s", 5); mdRamp(45, 58, "s", 5); mdRamp(45, 51, "n", 5);
     mdRamp(19, 35, "w", 5); mdRamp(26, 35, "e", 5); mdRamp(72, 35, "e", 5); mdRamp(65, 35, "w", 5);
+    mdOverpass(33, 20, 33, 51); mdOverpass(57, 20, 57, 51);
     mdOre(45.5, 35.5, 4.5); mdOre(45.5, 35.5, 1.8, 2);
     symRun("m4", T => {
       mdSpot(T.X(4) - (T.fx ? 5 : 0), T.Y(4) - (T.fy ? 5 : 0));
@@ -350,6 +358,7 @@ const MAPDEFS: Record<string, (seed: number) => void> = {
       mdTown(T.X(35), T.Y(13)); mdTown(T.X(33), T.Y(22));
       mdForest(T.X(3), T.Y(36), 2.5, 7);
     });
+    mdOverpass(36, 35, 55, 35);
     mdSpecial(33, 40, "empTower"); mdSpecial(58, 26, "paradropHangar"); mdSpecial(26, 50, "oilDerek"); mdSpecial(65, 20, "oilDerek");
     mdFinish();
   },
@@ -407,6 +416,7 @@ const MAPDEFS: Record<string, (seed: number) => void> = {
       mdOre(45.5 + (gx - 45.5) * .55, 35.5 + (gy - 35.5) * .55, 2.6, 1, !0);
     }
     mdOre(45.5, 35.5, 3.4); mdOre(45.5, 35.5, 1.4, 2); mdTown(45.5, 35.5);
+    mdOverpass(25, 20, 66, 20); mdOverpass(25, 50, 66, 50);
     mdForest(4, 4, 4, 3); mdForest(87, 4, 4, 3); mdForest(4, 67, 4, 3); mdForest(87, 67, 4, 3); mdForest(45.5, 25, 3, 2, .5);
     mdSpecial(56, 30, "empTower"); mdSpecial(33, 42, "paradropHangar"); mdSpecial(56, 42, "oilDerek"); mdSpecial(5, 35, "rogueDen");
     mdFinish();
