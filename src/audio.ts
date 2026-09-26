@@ -87,21 +87,27 @@ const VOICE_LINES: any = {
     air: { sel: ["Flight ready.", "Wings up, awaiting vector.", "Pilot here.", "Airspace looks clear."], go: ["Vector received.", "Inbound.", "On approach.", "Banking now."] },
     sea: { sel: ["Helm ready.", "Bridge here.", "Vessel standing by."], go: ["Setting course.", "Full ahead.", "Underway."] },
     sup: { sel: ["Construction crew standing by.", "Ready to deploy.", "Logistics, go ahead."], go: ["Relocating.", "Moving the convoy.", "En route."] },
+    tech: { sel: ["Technician here.", "Tools ready, Commander.", "Point me at it and I'll sort it."], go: ["On my way.", "Heading over with the kit.", "Moving."] },
+    harv: { sel: ["Prospector ready.", "Hopper's empty. Where's the ore?", "Collector standing by."], go: ["Heading out.", "Going for the ore.", "On the move."] },
+    sub: { sel: ["Periscope up.", "Sub's ready."], go: ["Diving.", "Running silent."] },
     hero: { sel: ["You called?", "Let's make this quick.", "Ready for anything."], go: ["I'm on it.", "Leave it to me.", "Watch this."] },
     unit: ["Unit ready.", "Reinforcements have arrived.", "New unit reporting in."],
     ready: ["Construction complete.", "Structure ready.", "Building ready for placement."],
-    ann: { underAttack: "Warning. Our base is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." },
+    ann: { underAttack: "Warning. Our base is under attack.", unitAttack: "Unit under attack.", harvAttack: "Our harvester is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." },
   },
   legion: {
     inf: { sel: [["Da, komandir?", "Да, командир?"], ["Ready for orders.", "Рэди фор ордерс."], ["Comrade, I listen.", "Камрад, ай лисэн."], ["Legion stands ready.", "Лиджэн стэндс рэди."], ["Speak, commander.", "Спик, коммандэр."]], go: [["Moving out.", "Мувинг аут."], ["For the Motherland!", "Фор зэ мазэрлэнд!"], ["As ordered.", "Эз ордэрд."], ["Davai, davai!", "Давай, давай!"], ["We march.", "Ви марч."]] },
-    veh: { sel: [["Tank is ready, comrade.", "Тэнк из рэди, камрад."], ["Engine is warm.", "Энджин из ворм."], ["Armour of the Legion.", "Армор оф зэ лиджэн."], ["Da, komandir.", "Да, командир."]], go: [["Rolling forward.", "Роллинг форвэрд."], ["Crushing through.", "Крашинг сру."], ["Vperyod!", "Вперёд!"], ["Advancing, comrade.", "Эдвансинг, камрад."]] },
+    veh: { sel: [["Crew is ready, comrade.", "Крю из рэди, камрад."], ["Engine is warm.", "Энджин из ворм."], ["Armour of the Legion.", "Армор оф зэ лиджэн."], ["Da, komandir.", "Да, командир."]], go: [["Rolling forward.", "Роллинг форвэрд."], ["Crushing through.", "Крашинг сру."], ["Vperyod!", "Вперёд!"], ["Advancing, comrade.", "Эдвансинг, камрад."]] },
     air: { sel: [["Pilot ready.", "Пайлот рэди."], ["Wings of the Legion.", "Вингз оф зэ лиджэн."]], go: [["Flying now.", "Флайинг нау."], ["On course.", "Он корс."]] },
     sea: { sel: [["Ship is ready.", "Шип из рэди."], ["Captain here.", "Кэптэн хиа."]], go: [["Full speed.", "Фул спид."], ["Sailing.", "Сэйлинг."]] },
     sup: { sel: [["Engine idling, comrade.", "Энджин айдлинг, камрад."], ["Ready to build.", "Рэди ту билд."]], go: [["Moving slowly.", "Мувинг слоули."], ["Convoy moving.", "Конвой мувинг."]] },
+    tech: { sel: [["Technician here, comrade.", "Тэкнишн хиа, камрад."], ["Tools ready.", "Тулз рэди."]], go: [["I go to fix it.", "Ай гоу ту фикс ит."], ["Moving, comrade.", "Мувинг, камрад."]] },
+    harv: { sel: [["Hauler ready.", "Хоулер рэди."], ["Where is the ore?", "Вэа из зэ ор?"]], go: [["Going for ore.", "Гоуинг фор ор."], ["Hauling.", "Хоулинг."]] },
+    sub: { sel: [["Submarine ready.", "Сабмарин рэди."]], go: [["Diving.", "Дайвинг."], ["Running silent.", "Раннинг сайлент."]] },
     hero: { sel: [["You need me, comrade?", "Ю нид ми, камрад?"], ["I am here.", "Ай эм хиа."]], go: [["They will not stop me.", "Зэй вил нот стоп ми."], ["Leave it to me.", "Лив ит ту ми."]] },
     unit: [["Unit ready, comrade.", "Юнит рэди, камрад."], ["New recruit reporting.", "Нью рэкрут рипортинг."]],
     ready: [["Construction complete, comrade.", "Констракшн комплит, камрад."], ["Structure is ready.", "Стракчер из рэди."]],
-    ann: { underAttack: ["Our base is under attack!", "Ауэр бэйс из андэр эттак!"], unitLost: ["Unit lost.", "Юнит лост."], funds: ["Not enough funds, comrade.", "Нот инаф фандз, камрад."], radarOn: ["Radar online.", "Рэйдар онлайн."], radarOff: ["Radar offline.", "Рэйдар офлайн."], strike: ["Strike incoming.", "Страйк инкаминг."], deployed: ["Headquarters deployed.", "Констракшн ярд диплойд."], captured: ["Building captured.", "Билдинг кэпчерд."] },
+    ann: { underAttack: ["Our base is under attack!", "Ауэр бэйс из андэр эттак!"], unitAttack: ["Our units are under attack!", "Ауэр юнитс ар андэр эттак!"], harvAttack: ["Ore hauler under attack!", "Ор хоулер андэр эттак!"], unitLost: ["Unit lost.", "Юнит лост."], funds: ["Not enough funds, comrade.", "Нот инаф фандз, камрад."], radarOn: ["Radar online.", "Рэйдар онлайн."], radarOff: ["Radar offline.", "Рэйдар офлайн."], strike: ["Strike incoming.", "Страйк инкаминг."], deployed: ["Headquarters deployed.", "Констракшн ярд диплойд."], captured: ["Building captured.", "Билдинг кэпчерд."] },
   },
   syndicate: {
     inf: { sel: ["We are listening.", "Speak, and we obey.", "Our minds are yours.", "The Syndicate hears you."], go: ["It will be done.", "Moving, unseen.", "As the Syndicate wills.", "Silently."] },
@@ -109,18 +115,23 @@ const VOICE_LINES: any = {
     air: { sel: ["We watch from above.", "The sky is ours."], go: ["Descending.", "Gliding into place."] },
     sea: { sel: ["From the depths.", "The deep one waits."], go: ["Sinking into position.", "Beneath the surface."] },
     sup: { sel: ["The vessel waits.", "Ready to take root."], go: ["Relocating the nest.", "Moving the brood."] },
+    tech: { sel: ["The tinkerer listens.", "Our hands are ready to reshape."], go: ["We go to reshape it.", "Moving."] },
+    harv: { sel: ["The gatherer waits.", "Hungry for ore."], go: ["Gathering.", "Feeding."] },
     hero: { sel: ["You summoned me.", "Minds bend before me."], go: ["They will not see me coming.", "Their thoughts are mine."] },
     unit: ["A new servant awakens.", "Another mind joins us."],
     ready: ["The structure has grown.", "It is complete."],
-    ann: { underAttack: "Our domain is under attack.", unitLost: "A servant has fallen.", funds: "We lack resources.", radarOn: "The eye opens.", radarOff: "The eye is blind.", strike: "Strike inbound.", deployed: "The nest takes root.", captured: "A structure bends to our will." },
+    ann: { underAttack: "Our domain is under attack.", unitAttack: "Our servants are under attack.", harvAttack: "Our gatherers are under attack.", unitLost: "A servant has fallen.", funds: "We lack resources.", radarOn: "The eye opens.", radarOff: "The eye is blind.", strike: "Strike inbound.", deployed: "The nest takes root.", captured: "A structure bends to our will." },
   },
 };
 function voiceRoleFor(u: any) {
   if (!u || !u.d) return "inf";
   const d = u.d, role = d.role;
-  if ("mhq" === u.key || "hivetrans" === u.key || "mhq" === role || "hivetrans" === role || "miner" === role || "engineer" === u.key) return "sup";
-  if (d.hero || /operative|reaper|phantom|titan/.test(u.key)) return "hero";
-  return d.fly ? "air" : d.naval ? "sea" : "inf" === d.kind ? "inf" : "veh";
+  if ("engineer" === u.key || "engineer" === role) return "tech";
+  if ("mhq" === u.key || "hivetrans" === u.key || "mhq" === role || "hivetrans" === role || "bastionRig" === role) return "sup";
+  if ("miner" === role || "drone" === u.key) return "harv";
+  if (/^titan_/.test(u.key)) return "walker";
+  if (d.hero || /^(operative|reaper|phantom)$/.test(u.key)) return "hero";
+  return d.fly ? "air" : d.naval ? (d.sub ? "sub" : "sea") : "inf" === d.kind ? "inf" : "veh";
 }
 // ---- unit personas: every unit type has its own voice — accent, gender and
 // a natural pitch/rate. Vanguard crews come from all over the English-
@@ -142,8 +153,8 @@ const ACCENT_LANG: Record<string, RegExp> = { us: /^en[-_]US/i, rp: /^en[-_]GB/i
 // the accent's generic lines.
 const ACCENT_LINES: any = {
   us: { inf: { sel: ["Squad's ready, Commander.", "Go ahead, we're listening.", "Standing by for orders.", "What do you need?", "Locked and loaded."], go: ["Roger that, moving.", "On it.", "Copy, heading out.", "You got it.", "Moving, moving!"] },
-    veh: { sel: ["Tank crew ready.", "Armor's warmed up, Commander.", "Crew standing by.", "Talk to me."], go: ["Rolling.", "Copy, advancing.", "We're Oscar Mike.", "Moving to the grid."] },
-    air: { sel: ["Hornet on station.", "Pilot here, go ahead.", "Wings level, awaiting tasking.", "Eyes in the sky, Commander."], go: ["Roger, inbound.", "Vector copied.", "On my way, hold tight.", "Commencing attack run."] },
+    veh: { sel: ["Crew ready.", "Armor's warmed up, Commander.", "Crew standing by.", "Talk to me."], go: ["Rolling.", "Copy, advancing.", "We're Oscar Mike.", "Moving to the grid."] },
+    air: { sel: ["On station, Commander.", "Pilot here, go ahead.", "Wings level, awaiting tasking.", "Eyes in the sky, Commander."], go: ["Roger, inbound.", "Vector copied.", "On my way, hold tight.", "Commencing attack run."] },
     sea: { sel: ["Bridge here.", "Helm's ready."], go: ["Aye aye, Commander.", "Setting course."] } },
   rp: { inf: { sel: ["Ready when you are, sir.", "At your service.", "Awaiting instructions.", "Standing by, Commander."], go: ["Right away.", "Understood, moving now.", "Consider it done.", "On our way."] },
     veh: { sel: ["Crew ready, Commander.", "Engines running, sir.", "Quite ready, thank you."], go: ["Advancing.", "Proceeding now.", "Moving up, sir."] },
@@ -153,9 +164,10 @@ const ACCENT_LINES: any = {
     veh: { sel: ["She's warmed up, boss.", "Engine's grand, ready when you are.", "Aye, what d'you need?"], go: ["Right, off we go.", "Shiftin' her now.", "On us way.", "Steady does it."] },
     sup: { sel: ["Ey up. Where d'you want us?", "Right then, where are we settin' up?", "Big lass is ready, boss.", "Aye, point us at some flat ground."], go: ["Right, shiftin' the lot.", "Takin' her steady.", "On us way, mind yer backs.", "No bother, off we go."] } },
   scot: { inf: { sel: ["Aye, Commander?", "Och, what is it now?", "Ready, so we are."], go: ["Aye, on ma way.", "Nae bother.", "Right ye are."] },
-    hero: { sel: ["Aye, Commander? Walker's ready.", "Point me at 'em.", "Och, finally, some proper work.", "Big lad's awake."], go: ["Aye, on ma way.", "Nae bother at all.", "Stompin' over now.", "Right ye are, here we go."] } },
+    walker: { sel: ["Aye, Commander? Walker's ready.", "Point me at 'em.", "Och, finally, some proper work.", "Big lad's awake."], go: ["Aye, on ma way.", "Nae bother at all.", "Stompin' over now.", "Right ye are, here we go."] } },
   au: { inf: { sel: ["G'day, Commander.", "Ready to go, mate.", "What's the plan, boss?"], go: ["No worries.", "On it, mate.", "Righto, movin'."] },
-    sea: { sel: ["G'day, Commander. Boat's ready.", "Periscope up, what's the go?", "Sub's ready, mate."], go: ["No worries, divin' now.", "Too easy, on our way.", "She'll be right, headin' there."] },
+    sea: { sel: ["G'day, Commander. Boat's ready.", "Ready to sail, mate."], go: ["No worries, underway.", "Too easy, on our way.", "She'll be right, headin' there."] },
+    sub: { sel: ["Periscope up, what's the go?", "Sub's ready, mate."], go: ["No worries, divin' now.", "Runnin' quiet, mate."] },
     air: { sel: ["Chopper's hot, mate.", "Ready for a lift?"], go: ["Too easy.", "No worries, liftin' off."] } },
   ie: { inf: { sel: ["Grand, what're we at?", "Ready so, Commander.", "Go on, I'm listenin'."], go: ["Grand, on me way.", "Sure look, we're off.", "No bother at all."] } },
   za: { inf: { sel: ["Ja, Commander?", "Ready, boss.", "Shot, what's the plan?"], go: ["Ja, moving now.", "Lekker, on our way.", "Sharp sharp."] } },
@@ -262,20 +274,31 @@ function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, see
     noClick || radioClick(fac), setTimeout(() => { try { speechSynthesis.speak(u); } catch (e) { } }, 70);
   } catch (e) { }
 }
+// Each role only ever falls back to a role that suits the same kind of unit, so
+// technicians never talk like convoys and harvesters never ask where to deploy.
+const ROLE_FALLBACK: Record<string, string> = { tech: "inf", hero: "inf", walker: "veh", harv: "veh", sup: "veh", sub: "sea", sea: "veh", air: "veh" };
 function unitLines(fac: string, category: string, role: string, key?: string | null, per?: Persona) {
   if (key && HERO_LINES[key]) return HERO_LINES[key][category];
-  if ("vanguard" === fac && per) { const A = ACCENT_LINES[per.acc] || ACCENT_LINES.rp, b = A[role] || ("sup" === role || "hero" === role ? A.veh || A.inf : A.inf) || A.inf; if (b && b[category]) return b[category]; }
+  role = role || "inf";
   const F = VOICE_LINES[fac] || VOICE_LINES.vanguard;
-  return (F[role || "inf"] || F.inf)[category];
+  // Vanguard accents only cover common roles; specialist roles use the faction set.
+  if ("vanguard" === fac && per) { const A = ACCENT_LINES[per.acc] || ACCENT_LINES.rp, b = A[role] || (("inf" === role || "veh" === role) && (A[role] || A.inf)); if (b && b[category]) return b[category]; }
+  for (let r: string | undefined = role; r; r = ROLE_FALLBACK[r]) if (F[r] && F[r][category]) return F[r][category];
+  return F.inf[category];
 }
-function playVoiceLine(fac: string, category: string, role?: string | null, key?: string | null) {
+const ackMem: any = {}, lastPick: any = {};
+function playVoiceLine(fac: string, category: string, role?: string | null, key?: string | null, uid?: number) {
   const now = performance.now();
   if (now - lastVoiceT < 900) return;
+  // A unit that is still selected and keeps getting orders answers once, not every click.
+  if (uid && ("sel" === category || "go" === category)) { const m = ackMem[category]; if (m && m.id === uid && now - m.t < ("go" === category ? 12e3 : 8e3)) return; ackMem[category] = { id: uid, t: now }; }
   const unitCat = "sel" === category || "go" === category;
   const per = unitCat || ("unit" === category && key) ? personaFor(fac, key, role) : undefined;
   const set = unitCat ? unitLines(fac, category, role || "inf", key, per) : "unit" === category && key && per ? unitLines(fac, "sel", role || "inf", key, per) : (VOICE_LINES[fac] || VOICE_LINES.vanguard)[category];
   if (!set || !set.length) return;
-  lastVoiceT = now, speakLine(fac, set[Math.floor(Math.random() * set.length)], !1, per, hashKey(key || role || ""));
+  let i = Math.floor(Math.random() * set.length);
+  set.length > 1 && lastPick[category] === set[i] && (i = (i + 1) % set.length), lastPick[category] = set[i];
+  lastVoiceT = now, speakLine(fac, set[i], !1, per, hashKey(key || role || ""));
 }
 // Faction announcer for important events.
 function announce(ev: string) {
@@ -288,12 +311,12 @@ function announce(ev: string) {
 function announceHint(msg: string) {
   if (!msg || "string" != typeof msg) return;
   const m = msg.toLowerCase();
-  m.includes("under attack") ? announce("underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
+  m.includes("under attack") ? announce(m.includes("harvester") ? "harvAttack" : m.includes("unit") ? "unitAttack" : "underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
 }
 
 // ------------------------------------------------------------------ effects
 function sfx(e: string, u?: any) {
-  ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key);
+  ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
   if (sfxBudget > 7 || !sOK()) return;
   sfxBudget++;
   const t = AC.currentTime + .004, pn = (Math.random() - .5) * .5;

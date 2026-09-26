@@ -2798,8 +2798,16 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var lastAlertT = -99;
   var mmPings = [];
+  var _alertT = { base: -99, harv: -99, unit: -99 };
   function alertCheck(e, r) {
-    e.dead || null == r || teamOf(e.owner) !== teamOf(0) || teamOf(r) === teamOf(0) || S.time - lastAlertT < 6 || (lastAlertT = S.time, S.lastAlert = { x: e.x, y: e.y }, mmPings.push({ x: e.x, y: e.y, spawnTime: S.time }), hint("UNDER ATTACK"), sfx("alert"));
+    if (e.dead || null == r || 0 !== e.owner || teamOf(r) === teamOf(0)) return;
+    const k = "b" === e.e ? "base" : "miner" === e.d.role || "drone" === e.key || "hivetrans" === e.key ? "harv" : "unit";
+    if (S.time - _alertT[k] < ("unit" === k ? 12 : 8)) return;
+    if ("unit" === k) {
+      const sx = w2sx(e.x, e.y), sy = w2sy(e.x, e.y, e.alt || 0);
+      if (sx > 0 && sy > 0 && sx < CW && sy < CH) return;
+    }
+    _alertT[k] = S.time, lastAlertT = S.time, S.lastAlert = { x: e.x, y: e.y }, mmPings.push({ x: e.x, y: e.y, spawnTime: S.time }), hint("base" === k ? "BASE UNDER ATTACK" : "harv" === k ? "HARVESTER UNDER ATTACK" : "UNIT UNDER ATTACK"), sfx("alert");
   }
   function damage(e, t, r, n) {
     if (e.d && e.d.indestructible) return;
@@ -16284,21 +16292,27 @@ varying vec3 vFgWN;
       air: { sel: ["Flight ready.", "Wings up, awaiting vector.", "Pilot here.", "Airspace looks clear."], go: ["Vector received.", "Inbound.", "On approach.", "Banking now."] },
       sea: { sel: ["Helm ready.", "Bridge here.", "Vessel standing by."], go: ["Setting course.", "Full ahead.", "Underway."] },
       sup: { sel: ["Construction crew standing by.", "Ready to deploy.", "Logistics, go ahead."], go: ["Relocating.", "Moving the convoy.", "En route."] },
+      tech: { sel: ["Technician here.", "Tools ready, Commander.", "Point me at it and I'll sort it."], go: ["On my way.", "Heading over with the kit.", "Moving."] },
+      harv: { sel: ["Prospector ready.", "Hopper's empty. Where's the ore?", "Collector standing by."], go: ["Heading out.", "Going for the ore.", "On the move."] },
+      sub: { sel: ["Periscope up.", "Sub's ready."], go: ["Diving.", "Running silent."] },
       hero: { sel: ["You called?", "Let's make this quick.", "Ready for anything."], go: ["I'm on it.", "Leave it to me.", "Watch this."] },
       unit: ["Unit ready.", "Reinforcements have arrived.", "New unit reporting in."],
       ready: ["Construction complete.", "Structure ready.", "Building ready for placement."],
-      ann: { underAttack: "Warning. Our base is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." }
+      ann: { underAttack: "Warning. Our base is under attack.", unitAttack: "Unit under attack.", harvAttack: "Our harvester is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." }
     },
     legion: {
       inf: { sel: [["Da, komandir?", "\u0414\u0430, \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440?"], ["Ready for orders.", "\u0420\u044D\u0434\u0438 \u0444\u043E\u0440 \u043E\u0440\u0434\u0435\u0440\u0441."], ["Comrade, I listen.", "\u041A\u0430\u043C\u0440\u0430\u0434, \u0430\u0439 \u043B\u0438\u0441\u044D\u043D."], ["Legion stands ready.", "\u041B\u0438\u0434\u0436\u044D\u043D \u0441\u0442\u044D\u043D\u0434\u0441 \u0440\u044D\u0434\u0438."], ["Speak, commander.", "\u0421\u043F\u0438\u043A, \u043A\u043E\u043C\u043C\u0430\u043D\u0434\u044D\u0440."]], go: [["Moving out.", "\u041C\u0443\u0432\u0438\u043D\u0433 \u0430\u0443\u0442."], ["For the Motherland!", "\u0424\u043E\u0440 \u0437\u044D \u043C\u0430\u0437\u044D\u0440\u043B\u044D\u043D\u0434!"], ["As ordered.", "\u042D\u0437 \u043E\u0440\u0434\u044D\u0440\u0434."], ["Davai, davai!", "\u0414\u0430\u0432\u0430\u0439, \u0434\u0430\u0432\u0430\u0439!"], ["We march.", "\u0412\u0438 \u043C\u0430\u0440\u0447."]] },
-      veh: { sel: [["Tank is ready, comrade.", "\u0422\u044D\u043D\u043A \u0438\u0437 \u0440\u044D\u0434\u0438, \u043A\u0430\u043C\u0440\u0430\u0434."], ["Engine is warm.", "\u042D\u043D\u0434\u0436\u0438\u043D \u0438\u0437 \u0432\u043E\u0440\u043C."], ["Armour of the Legion.", "\u0410\u0440\u043C\u043E\u0440 \u043E\u0444 \u0437\u044D \u043B\u0438\u0434\u0436\u044D\u043D."], ["Da, komandir.", "\u0414\u0430, \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440."]], go: [["Rolling forward.", "\u0420\u043E\u043B\u043B\u0438\u043D\u0433 \u0444\u043E\u0440\u0432\u044D\u0440\u0434."], ["Crushing through.", "\u041A\u0440\u0430\u0448\u0438\u043D\u0433 \u0441\u0440\u0443."], ["Vperyod!", "\u0412\u043F\u0435\u0440\u0451\u0434!"], ["Advancing, comrade.", "\u042D\u0434\u0432\u0430\u043D\u0441\u0438\u043D\u0433, \u043A\u0430\u043C\u0440\u0430\u0434."]] },
+      veh: { sel: [["Crew is ready, comrade.", "\u041A\u0440\u044E \u0438\u0437 \u0440\u044D\u0434\u0438, \u043A\u0430\u043C\u0440\u0430\u0434."], ["Engine is warm.", "\u042D\u043D\u0434\u0436\u0438\u043D \u0438\u0437 \u0432\u043E\u0440\u043C."], ["Armour of the Legion.", "\u0410\u0440\u043C\u043E\u0440 \u043E\u0444 \u0437\u044D \u043B\u0438\u0434\u0436\u044D\u043D."], ["Da, komandir.", "\u0414\u0430, \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440."]], go: [["Rolling forward.", "\u0420\u043E\u043B\u043B\u0438\u043D\u0433 \u0444\u043E\u0440\u0432\u044D\u0440\u0434."], ["Crushing through.", "\u041A\u0440\u0430\u0448\u0438\u043D\u0433 \u0441\u0440\u0443."], ["Vperyod!", "\u0412\u043F\u0435\u0440\u0451\u0434!"], ["Advancing, comrade.", "\u042D\u0434\u0432\u0430\u043D\u0441\u0438\u043D\u0433, \u043A\u0430\u043C\u0440\u0430\u0434."]] },
       air: { sel: [["Pilot ready.", "\u041F\u0430\u0439\u043B\u043E\u0442 \u0440\u044D\u0434\u0438."], ["Wings of the Legion.", "\u0412\u0438\u043D\u0433\u0437 \u043E\u0444 \u0437\u044D \u043B\u0438\u0434\u0436\u044D\u043D."]], go: [["Flying now.", "\u0424\u043B\u0430\u0439\u0438\u043D\u0433 \u043D\u0430\u0443."], ["On course.", "\u041E\u043D \u043A\u043E\u0440\u0441."]] },
       sea: { sel: [["Ship is ready.", "\u0428\u0438\u043F \u0438\u0437 \u0440\u044D\u0434\u0438."], ["Captain here.", "\u041A\u044D\u043F\u0442\u044D\u043D \u0445\u0438\u0430."]], go: [["Full speed.", "\u0424\u0443\u043B \u0441\u043F\u0438\u0434."], ["Sailing.", "\u0421\u044D\u0439\u043B\u0438\u043D\u0433."]] },
       sup: { sel: [["Engine idling, comrade.", "\u042D\u043D\u0434\u0436\u0438\u043D \u0430\u0439\u0434\u043B\u0438\u043D\u0433, \u043A\u0430\u043C\u0440\u0430\u0434."], ["Ready to build.", "\u0420\u044D\u0434\u0438 \u0442\u0443 \u0431\u0438\u043B\u0434."]], go: [["Moving slowly.", "\u041C\u0443\u0432\u0438\u043D\u0433 \u0441\u043B\u043E\u0443\u043B\u0438."], ["Convoy moving.", "\u041A\u043E\u043D\u0432\u043E\u0439 \u043C\u0443\u0432\u0438\u043D\u0433."]] },
+      tech: { sel: [["Technician here, comrade.", "\u0422\u044D\u043A\u043D\u0438\u0448\u043D \u0445\u0438\u0430, \u043A\u0430\u043C\u0440\u0430\u0434."], ["Tools ready.", "\u0422\u0443\u043B\u0437 \u0440\u044D\u0434\u0438."]], go: [["I go to fix it.", "\u0410\u0439 \u0433\u043E\u0443 \u0442\u0443 \u0444\u0438\u043A\u0441 \u0438\u0442."], ["Moving, comrade.", "\u041C\u0443\u0432\u0438\u043D\u0433, \u043A\u0430\u043C\u0440\u0430\u0434."]] },
+      harv: { sel: [["Hauler ready.", "\u0425\u043E\u0443\u043B\u0435\u0440 \u0440\u044D\u0434\u0438."], ["Where is the ore?", "\u0412\u044D\u0430 \u0438\u0437 \u0437\u044D \u043E\u0440?"]], go: [["Going for ore.", "\u0413\u043E\u0443\u0438\u043D\u0433 \u0444\u043E\u0440 \u043E\u0440."], ["Hauling.", "\u0425\u043E\u0443\u043B\u0438\u043D\u0433."]] },
+      sub: { sel: [["Submarine ready.", "\u0421\u0430\u0431\u043C\u0430\u0440\u0438\u043D \u0440\u044D\u0434\u0438."]], go: [["Diving.", "\u0414\u0430\u0439\u0432\u0438\u043D\u0433."], ["Running silent.", "\u0420\u0430\u043D\u043D\u0438\u043D\u0433 \u0441\u0430\u0439\u043B\u0435\u043D\u0442."]] },
       hero: { sel: [["You need me, comrade?", "\u042E \u043D\u0438\u0434 \u043C\u0438, \u043A\u0430\u043C\u0440\u0430\u0434?"], ["I am here.", "\u0410\u0439 \u044D\u043C \u0445\u0438\u0430."]], go: [["They will not stop me.", "\u0417\u044D\u0439 \u0432\u0438\u043B \u043D\u043E\u0442 \u0441\u0442\u043E\u043F \u043C\u0438."], ["Leave it to me.", "\u041B\u0438\u0432 \u0438\u0442 \u0442\u0443 \u043C\u0438."]] },
       unit: [["Unit ready, comrade.", "\u042E\u043D\u0438\u0442 \u0440\u044D\u0434\u0438, \u043A\u0430\u043C\u0440\u0430\u0434."], ["New recruit reporting.", "\u041D\u044C\u044E \u0440\u044D\u043A\u0440\u0443\u0442 \u0440\u0438\u043F\u043E\u0440\u0442\u0438\u043D\u0433."]],
       ready: [["Construction complete, comrade.", "\u041A\u043E\u043D\u0441\u0442\u0440\u0430\u043A\u0448\u043D \u043A\u043E\u043C\u043F\u043B\u0438\u0442, \u043A\u0430\u043C\u0440\u0430\u0434."], ["Structure is ready.", "\u0421\u0442\u0440\u0430\u043A\u0447\u0435\u0440 \u0438\u0437 \u0440\u044D\u0434\u0438."]],
-      ann: { underAttack: ["Our base is under attack!", "\u0410\u0443\u044D\u0440 \u0431\u044D\u0439\u0441 \u0438\u0437 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], unitLost: ["Unit lost.", "\u042E\u043D\u0438\u0442 \u043B\u043E\u0441\u0442."], funds: ["Not enough funds, comrade.", "\u041D\u043E\u0442 \u0438\u043D\u0430\u0444 \u0444\u0430\u043D\u0434\u0437, \u043A\u0430\u043C\u0440\u0430\u0434."], radarOn: ["Radar online.", "\u0420\u044D\u0439\u0434\u0430\u0440 \u043E\u043D\u043B\u0430\u0439\u043D."], radarOff: ["Radar offline.", "\u0420\u044D\u0439\u0434\u0430\u0440 \u043E\u0444\u043B\u0430\u0439\u043D."], strike: ["Strike incoming.", "\u0421\u0442\u0440\u0430\u0439\u043A \u0438\u043D\u043A\u0430\u043C\u0438\u043D\u0433."], deployed: ["Headquarters deployed.", "\u041A\u043E\u043D\u0441\u0442\u0440\u0430\u043A\u0448\u043D \u044F\u0440\u0434 \u0434\u0438\u043F\u043B\u043E\u0439\u0434."], captured: ["Building captured.", "\u0411\u0438\u043B\u0434\u0438\u043D\u0433 \u043A\u044D\u043F\u0447\u0435\u0440\u0434."] }
+      ann: { underAttack: ["Our base is under attack!", "\u0410\u0443\u044D\u0440 \u0431\u044D\u0439\u0441 \u0438\u0437 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], unitAttack: ["Our units are under attack!", "\u0410\u0443\u044D\u0440 \u044E\u043D\u0438\u0442\u0441 \u0430\u0440 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], harvAttack: ["Ore hauler under attack!", "\u041E\u0440 \u0445\u043E\u0443\u043B\u0435\u0440 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], unitLost: ["Unit lost.", "\u042E\u043D\u0438\u0442 \u043B\u043E\u0441\u0442."], funds: ["Not enough funds, comrade.", "\u041D\u043E\u0442 \u0438\u043D\u0430\u0444 \u0444\u0430\u043D\u0434\u0437, \u043A\u0430\u043C\u0440\u0430\u0434."], radarOn: ["Radar online.", "\u0420\u044D\u0439\u0434\u0430\u0440 \u043E\u043D\u043B\u0430\u0439\u043D."], radarOff: ["Radar offline.", "\u0420\u044D\u0439\u0434\u0430\u0440 \u043E\u0444\u043B\u0430\u0439\u043D."], strike: ["Strike incoming.", "\u0421\u0442\u0440\u0430\u0439\u043A \u0438\u043D\u043A\u0430\u043C\u0438\u043D\u0433."], deployed: ["Headquarters deployed.", "\u041A\u043E\u043D\u0441\u0442\u0440\u0430\u043A\u0448\u043D \u044F\u0440\u0434 \u0434\u0438\u043F\u043B\u043E\u0439\u0434."], captured: ["Building captured.", "\u0411\u0438\u043B\u0434\u0438\u043D\u0433 \u043A\u044D\u043F\u0447\u0435\u0440\u0434."] }
     },
     syndicate: {
       inf: { sel: ["We are listening.", "Speak, and we obey.", "Our minds are yours.", "The Syndicate hears you."], go: ["It will be done.", "Moving, unseen.", "As the Syndicate wills.", "Silently."] },
@@ -16306,18 +16320,23 @@ varying vec3 vFgWN;
       air: { sel: ["We watch from above.", "The sky is ours."], go: ["Descending.", "Gliding into place."] },
       sea: { sel: ["From the depths.", "The deep one waits."], go: ["Sinking into position.", "Beneath the surface."] },
       sup: { sel: ["The vessel waits.", "Ready to take root."], go: ["Relocating the nest.", "Moving the brood."] },
+      tech: { sel: ["The tinkerer listens.", "Our hands are ready to reshape."], go: ["We go to reshape it.", "Moving."] },
+      harv: { sel: ["The gatherer waits.", "Hungry for ore."], go: ["Gathering.", "Feeding."] },
       hero: { sel: ["You summoned me.", "Minds bend before me."], go: ["They will not see me coming.", "Their thoughts are mine."] },
       unit: ["A new servant awakens.", "Another mind joins us."],
       ready: ["The structure has grown.", "It is complete."],
-      ann: { underAttack: "Our domain is under attack.", unitLost: "A servant has fallen.", funds: "We lack resources.", radarOn: "The eye opens.", radarOff: "The eye is blind.", strike: "Strike inbound.", deployed: "The nest takes root.", captured: "A structure bends to our will." }
+      ann: { underAttack: "Our domain is under attack.", unitAttack: "Our servants are under attack.", harvAttack: "Our gatherers are under attack.", unitLost: "A servant has fallen.", funds: "We lack resources.", radarOn: "The eye opens.", radarOff: "The eye is blind.", strike: "Strike inbound.", deployed: "The nest takes root.", captured: "A structure bends to our will." }
     }
   };
   function voiceRoleFor(u) {
     if (!u || !u.d) return "inf";
     const d = u.d, role = d.role;
-    if ("mhq" === u.key || "hivetrans" === u.key || "mhq" === role || "hivetrans" === role || "miner" === role || "engineer" === u.key) return "sup";
-    if (d.hero || /operative|reaper|phantom|titan/.test(u.key)) return "hero";
-    return d.fly ? "air" : d.naval ? "sea" : "inf" === d.kind ? "inf" : "veh";
+    if ("engineer" === u.key || "engineer" === role) return "tech";
+    if ("mhq" === u.key || "hivetrans" === u.key || "mhq" === role || "hivetrans" === role || "bastionRig" === role) return "sup";
+    if ("miner" === role || "drone" === u.key) return "harv";
+    if (/^titan_/.test(u.key)) return "walker";
+    if (d.hero || /^(operative|reaper|phantom)$/.test(u.key)) return "hero";
+    return d.fly ? "air" : d.naval ? d.sub ? "sub" : "sea" : "inf" === d.kind ? "inf" : "veh";
   }
   var P_ = (acc, g, p = 1, r = 1) => ({ acc, g, p, r });
   var PERSONA_VANGUARD = {
@@ -16352,8 +16371,8 @@ varying vec3 vFgWN;
   var ACCENT_LINES = {
     us: {
       inf: { sel: ["Squad's ready, Commander.", "Go ahead, we're listening.", "Standing by for orders.", "What do you need?", "Locked and loaded."], go: ["Roger that, moving.", "On it.", "Copy, heading out.", "You got it.", "Moving, moving!"] },
-      veh: { sel: ["Tank crew ready.", "Armor's warmed up, Commander.", "Crew standing by.", "Talk to me."], go: ["Rolling.", "Copy, advancing.", "We're Oscar Mike.", "Moving to the grid."] },
-      air: { sel: ["Hornet on station.", "Pilot here, go ahead.", "Wings level, awaiting tasking.", "Eyes in the sky, Commander."], go: ["Roger, inbound.", "Vector copied.", "On my way, hold tight.", "Commencing attack run."] },
+      veh: { sel: ["Crew ready.", "Armor's warmed up, Commander.", "Crew standing by.", "Talk to me."], go: ["Rolling.", "Copy, advancing.", "We're Oscar Mike.", "Moving to the grid."] },
+      air: { sel: ["On station, Commander.", "Pilot here, go ahead.", "Wings level, awaiting tasking.", "Eyes in the sky, Commander."], go: ["Roger, inbound.", "Vector copied.", "On my way, hold tight.", "Commencing attack run."] },
       sea: { sel: ["Bridge here.", "Helm's ready."], go: ["Aye aye, Commander.", "Setting course."] }
     },
     rp: {
@@ -16369,11 +16388,12 @@ varying vec3 vFgWN;
     },
     scot: {
       inf: { sel: ["Aye, Commander?", "Och, what is it now?", "Ready, so we are."], go: ["Aye, on ma way.", "Nae bother.", "Right ye are."] },
-      hero: { sel: ["Aye, Commander? Walker's ready.", "Point me at 'em.", "Och, finally, some proper work.", "Big lad's awake."], go: ["Aye, on ma way.", "Nae bother at all.", "Stompin' over now.", "Right ye are, here we go."] }
+      walker: { sel: ["Aye, Commander? Walker's ready.", "Point me at 'em.", "Och, finally, some proper work.", "Big lad's awake."], go: ["Aye, on ma way.", "Nae bother at all.", "Stompin' over now.", "Right ye are, here we go."] }
     },
     au: {
       inf: { sel: ["G'day, Commander.", "Ready to go, mate.", "What's the plan, boss?"], go: ["No worries.", "On it, mate.", "Righto, movin'."] },
-      sea: { sel: ["G'day, Commander. Boat's ready.", "Periscope up, what's the go?", "Sub's ready, mate."], go: ["No worries, divin' now.", "Too easy, on our way.", "She'll be right, headin' there."] },
+      sea: { sel: ["G'day, Commander. Boat's ready.", "Ready to sail, mate."], go: ["No worries, underway.", "Too easy, on our way.", "She'll be right, headin' there."] },
+      sub: { sel: ["Periscope up, what's the go?", "Sub's ready, mate."], go: ["No worries, divin' now.", "Runnin' quiet, mate."] },
       air: { sel: ["Chopper's hot, mate.", "Ready for a lift?"], go: ["Too easy.", "No worries, liftin' off."] }
     },
     ie: { inf: { sel: ["Grand, what're we at?", "Ready so, Commander.", "Go on, I'm listenin'."], go: ["Grand, on me way.", "Sure look, we're off.", "No bother at all."] } },
@@ -16547,23 +16567,35 @@ varying vec3 vFgWN;
     } catch (e) {
     }
   }
+  var ROLE_FALLBACK = { tech: "inf", hero: "inf", walker: "veh", harv: "veh", sup: "veh", sub: "sea", sea: "veh", air: "veh" };
   function unitLines(fac, category, role, key, per) {
     if (key && HERO_LINES[key]) return HERO_LINES[key][category];
+    role = role || "inf";
+    const F = VOICE_LINES[fac] || VOICE_LINES.vanguard;
     if ("vanguard" === fac && per) {
-      const A = ACCENT_LINES[per.acc] || ACCENT_LINES.rp, b = A[role] || ("sup" === role || "hero" === role ? A.veh || A.inf : A.inf) || A.inf;
+      const A = ACCENT_LINES[per.acc] || ACCENT_LINES.rp, b = A[role] || ("inf" === role || "veh" === role) && (A[role] || A.inf);
       if (b && b[category]) return b[category];
     }
-    const F = VOICE_LINES[fac] || VOICE_LINES.vanguard;
-    return (F[role || "inf"] || F.inf)[category];
+    for (let r = role; r; r = ROLE_FALLBACK[r]) if (F[r] && F[r][category]) return F[r][category];
+    return F.inf[category];
   }
-  function playVoiceLine(fac, category, role, key) {
+  var ackMem = {};
+  var lastPick = {};
+  function playVoiceLine(fac, category, role, key, uid) {
     const now = performance.now();
     if (now - lastVoiceT < 900) return;
+    if (uid && ("sel" === category || "go" === category)) {
+      const m = ackMem[category];
+      if (m && m.id === uid && now - m.t < ("go" === category ? 12e3 : 8e3)) return;
+      ackMem[category] = { id: uid, t: now };
+    }
     const unitCat = "sel" === category || "go" === category;
     const per = unitCat || "unit" === category && key ? personaFor(fac, key, role) : void 0;
     const set = unitCat ? unitLines(fac, category, role || "inf", key, per) : "unit" === category && key && per ? unitLines(fac, "sel", role || "inf", key, per) : (VOICE_LINES[fac] || VOICE_LINES.vanguard)[category];
     if (!set || !set.length) return;
-    lastVoiceT = now, speakLine(fac, set[Math.floor(Math.random() * set.length)], false, per, hashKey(key || role || ""));
+    let i = Math.floor(Math.random() * set.length);
+    set.length > 1 && lastPick[category] === set[i] && (i = (i + 1) % set.length), lastPick[category] = set[i];
+    lastVoiceT = now, speakLine(fac, set[i], false, per, hashKey(key || role || ""));
   }
   function announce(ev) {
     const fac = S.players && S.players[0] && S.players[0].fac || "vanguard", F = VOICE_LINES[fac] || VOICE_LINES.vanguard, line = F.ann && F.ann[ev];
@@ -16575,10 +16607,10 @@ varying vec3 vFgWN;
   function announceHint(msg) {
     if (!msg || "string" != typeof msg) return;
     const m = msg.toLowerCase();
-    m.includes("under attack") ? announce("underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
+    m.includes("under attack") ? announce(m.includes("harvester") ? "harvAttack" : m.includes("unit") ? "unitAttack" : "underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
   }
   function sfx(e, u) {
-    ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key);
+    ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
     if (sfxBudget > 7 || !sOK()) return;
     sfxBudget++;
     const t = AC.currentTime + 4e-3, pn = (Math.random() - 0.5) * 0.5;
