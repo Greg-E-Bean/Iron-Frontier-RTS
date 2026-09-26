@@ -803,6 +803,7 @@ declare global {
   function playFilm(key: string, done?: () => void): void;
   function missionDebrief(win: boolean): string;
   function stealthBlock(e: any, t: any): boolean;
+  function techAllowed(k: string, isBld: boolean, abil?: boolean): boolean;
   function tickWeather(dt: number): void;
   function autoSave(): void;
   function clearResume(): void;

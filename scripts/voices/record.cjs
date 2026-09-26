@@ -55,5 +55,8 @@ for (const it of items) {
   man[key] = [file, Math.round(secs * 100) / 100];
   if (++done % 10 === 0) { fs.writeFileSync(manPath, JSON.stringify(man)); console.log(done + "/" + items.length, ((Date.now() - t0) / 1000 | 0) + "s"); }
 }
+// drop recordings for lines that no longer exist
+const live = new Set(items.map(it => it.vox + "|" + it.text));
+for (const k of Object.keys(man)) if (!live.has(k)) { try { fs.unlinkSync(path.join(OUT, man[k][0])); } catch (e) { } delete man[k]; }
 fs.writeFileSync(manPath, JSON.stringify(man));
 console.log("done", done, "lines in", ((Date.now() - t0) / 1000 | 0) + "s");
