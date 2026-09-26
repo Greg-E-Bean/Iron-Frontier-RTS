@@ -770,6 +770,20 @@ body.sidebar .cbtn.icon[data-l]:after{font-size:8px}
 .tab .tc.pz{background:#8fa3bb}
 @media (max-height:500px){.card .qx{font-size:9.5px;line-height:12px}.card .pz{top:18px;transform:scale(.8)}}
 
+/* ---- account form fields match the buttons ---- */
+.fld input[type=email],.fld input[type=password],.fld input[type=text]{width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);color:#dce8ef;border:1px solid rgba(170,200,220,.16);border-radius:8px;padding:10px;font-size:14px}
+/* ---- narrow phones: keep every top-bar button on screen, hints clear of the minimap ---- */
+@media (max-width:430px){
+  #top{gap:6px;padding-left:6px;padding-right:6px}
+  #top .pbar{width:34px}
+  #top .tbtn{padding:6px 7px}
+  #popTxt{font-size:10px!important}
+  body:not(.sidebar) #hint{left:8px;transform:none;max-width:calc(100% - 160px);text-align:left}
+}
+/* ---- short landscape sidebar: nine command buttons, labels stay readable ---- */
+@media (max-height:500px){
+  body.sidebar .cbtn[data-s]:after{font-size:7px;letter-spacing:0}
+}
 /* ---- portrait: command row fits ---- */
 @media (max-width:620px){
   body:not(.sidebar) #ctrls{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;padding:4px 5px 5px;overflow:visible}
@@ -1113,6 +1127,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     silo: "Stores extra credits beyond what your refineries alone can hold.",
     repair: "Repairs damaged vehicles and aircraft that return to it.",
     support: { vanguard: "Projects a light-bending veil: your units and structures within 8 cells can't be targeted from beyond close range. Needs power.", legion: "Unlocks the Aegis Field power \u2014 everything of yours in the target area becomes invulnerable for 12 seconds.", syndicate: "Every infantry trained at your Spawning Pit steps out with a free clone. Needs power." },
+    oilDerek: "Neutral oil derrick. Capture it with a Technician for a steady trickle of extra credits.",
+    paradropHangar: "Neutral airstrip hangar. Capture it with a Technician to unlock the Paradrop power.",
+    empTower: "Neutral EMP spire. Capture it with a Technician to unlock the EMP Burst power, which shuts down vehicles and defences.",
+    rogueDen: "Neutral mercenary den. Capture it with a Technician and it sends you free Rogue fighters over time.",
+    bridgehut: "Bridge control hut. Capture it with a Technician and it rebuilds destroyed bridges nearby.",
+    cannon: "Heavy gun emplacement. Capture it with a Technician to turn it on your enemies.",
     super: "Your faction's superweapon \u2014 charges over time, then unleashes a devastating strike anywhere on the map.",
     def2: "Your strongest static defense \u2014 a heavy tower that hits hard against everything, with a unique weapon per faction.",
     wall: "Cheap defensive barrier \u2014 blocks enemy movement and fire, but has no weapon of its own.",

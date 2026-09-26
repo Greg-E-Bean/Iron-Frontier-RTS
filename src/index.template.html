@@ -770,6 +770,20 @@ body.sidebar .cbtn.icon[data-l]:after{font-size:8px}
 .tab .tc.pz{background:#8fa3bb}
 @media (max-height:500px){.card .qx{font-size:9.5px;line-height:12px}.card .pz{top:18px;transform:scale(.8)}}
 
+/* ---- account form fields match the buttons ---- */
+.fld input[type=email],.fld input[type=password],.fld input[type=text]{width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);color:#dce8ef;border:1px solid rgba(170,200,220,.16);border-radius:8px;padding:10px;font-size:14px}
+/* ---- narrow phones: keep every top-bar button on screen, hints clear of the minimap ---- */
+@media (max-width:430px){
+  #top{gap:6px;padding-left:6px;padding-right:6px}
+  #top .pbar{width:34px}
+  #top .tbtn{padding:6px 7px}
+  #popTxt{font-size:10px!important}
+  body:not(.sidebar) #hint{left:8px;transform:none;max-width:calc(100% - 160px);text-align:left}
+}
+/* ---- short landscape sidebar: nine command buttons, labels stay readable ---- */
+@media (max-height:500px){
+  body.sidebar .cbtn[data-s]:after{font-size:7px;letter-spacing:0}
+}
 /* ---- portrait: command row fits ---- */
 @media (max-width:620px){
   body:not(.sidebar) #ctrls{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;padding:4px 5px 5px;overflow:visible}
