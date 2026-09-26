@@ -84,6 +84,9 @@ export type EntityKind = "u" | "b" | "p";
 
 /** A live unit instance, as created by addUnit() in src/sim.js. */
 export interface Unit {
+  patrol?: { ax: number; ay: number; bx: number; by: number; leg: boolean };
+  hold?: boolean;
+  ironUntil?: number;
   id: number;
   e: "u";
   key: string;
@@ -205,6 +208,7 @@ export interface Building {
   tang?: number;
   deployed?: boolean;
   blackoutT?: number;
+  ironUntil?: number;
   capturedFac?: string;
   charge?: number;
   garrison?: Unit[];
@@ -267,6 +271,7 @@ export interface Player {
   spyCD?: number;
   paradropCD?: number;
   empCD?: number;
+  curtainCD?: number;
   [field: string]: unknown;
 }
 
@@ -372,6 +377,10 @@ export interface GameState {
   knownEnemy?: Map<number, Set<number>>;
   selMode?: boolean;
   spyReveals?: { t: number; [k: string]: unknown }[];
+  crates?: { x: number; y: number; k: string; r: number }[];
+  crateT?: number;
+  cratesOn?: boolean;
+  lastAlert?: { x: number; y: number } | null;
   thunderT?: number;
   traffic?: any[];
   history?: { t: number; p: { kills: number; lost: number; units: number; value: number }[] }[];

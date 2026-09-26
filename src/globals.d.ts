@@ -170,6 +170,15 @@ declare global {
   const spawnUnit: AnyFn;
   const placeReady: AnyFn;
   function cmdMove(units: Unit[], x: number, y: number, amove?: boolean, queue?: boolean): void;
+  function cmdPatrol(units: Unit[], x: number, y: number): void;
+  function veiled(a: any, t: any): boolean;
+  function ironCurtain(owner: number, x: number, y: number): void;
+  function tickIronFx(): void;
+  function aiCurtain(p: any): void;
+  function spawnCrate(): boolean;
+  function collectCrate(c: any, u: any): void;
+  function tickCrates(dt: number): void;
+  function crateModel(): any[];
   function nextWaypoint(u: Unit): boolean;
   function cmdAttack(units: Unit[], target: GameEntity): void;
   function cmdHarvest(units: Unit[], tx: number, ty: number): void;
@@ -827,6 +836,7 @@ declare global {
   var spyAim: boolean;
   var paradropAim: boolean;
   var empAim: boolean;
+  var curtainAim: boolean;
   // fpsgfx.ts / cross-module render helpers
   const DOME: AnyFn; const BOXM: AnyFn; const ell: AnyFn; const taper3: AnyFn; const lowPoly: AnyFn; const SLAB: AnyFn; const TSLAB: AnyFn; const INF_FAC: any;
   const glMerge: AnyFn; const fogPatch: AnyFn; const glPixelRatioCap: AnyFn; const GLGEO: Map<string, any>;

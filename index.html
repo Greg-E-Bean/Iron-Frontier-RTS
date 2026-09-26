@@ -725,7 +725,7 @@ body.sidebar #hint{left:calc((100% - var(--sbw,280px))/2)}
 body.fps.sidebar #side{display:none}
 body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:auto}
 @media (max-height:500px){
-  body.sidebar #ctrls{grid-template-columns:repeat(6,1fr);gap:2px;padding:3px}
+  body.sidebar #ctrls{grid-template-columns:repeat(9,1fr);gap:2px;padding:3px}
   body.sidebar .cbtn[data-s]{font-size:0}
   body.sidebar .cbtn[data-s]:after{content:attr(data-s);font-size:8px}
   body.sidebar .card{height:66px}
@@ -772,7 +772,7 @@ body.sidebar .cbtn.icon[data-l]:after{font-size:8px}
 
 /* ---- portrait: command row fits ---- */
 @media (max-width:620px){
-  body:not(.sidebar) #ctrls{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:4px 5px 5px;overflow:visible}
+  body:not(.sidebar) #ctrls{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;padding:4px 5px 5px;overflow:visible}
   body:not(.sidebar) .cbtn{min-width:0;padding:8px 1px;font-size:9px;letter-spacing:.2px}
   body:not(.sidebar) .cbtn[data-s]{font-size:0}
   body:not(.sidebar) .cbtn[data-s]:after{content:attr(data-s);font-size:9.5px;letter-spacing:.4px}
@@ -820,6 +820,9 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
 <symbol id="i-spanner" viewBox="0 0 24 24"><path d="M14.6 3.6a5.2 5.2 0 0 0-5.3 7l-6.1 6.1a2 2 0 0 0 0 2.8l1.3 1.3a2 2 0 0 0 2.8 0l6.1-6.1a5.2 5.2 0 0 0 7-5.3l-3.1 3.1-3.2-.8-.8-3.2z"/><circle cx="5.7" cy="18.3" r=".7" fill="currentColor" stroke="none"/></symbol>
 <symbol id="i-sell" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="6.4" opacity=".45"/><path d="M14.3 9.4c-.4-.8-1.3-1.2-2.3-1.2-1.3 0-2.3.7-2.3 1.8s.9 1.5 2.3 1.8 2.5.7 2.5 1.9-1.1 1.9-2.5 1.9c-1 0-1.9-.4-2.4-1.3"/><path d="M12 6.8v1.4M12 15.6v1.6"/></symbol>
 <symbol id="i-deselect" viewBox="0 0 24 24"><path d="M3.5 8V3.5H8M16 3.5h4.5V8M20.5 16v4.5H16M8 20.5H3.5V16"/><path d="M9 9l6 6M15 9l-6 6"/></symbol>
+<symbol id="i-amove" viewBox="0 0 24 24"><path d="M4 20L15 9"/><path d="M11 8h5v5"/><circle cx="18" cy="6" r="3"/><path d="M18 1.8v2M18 8.2v2M13.8 6h2M20.2 6h2"/></symbol>
+<symbol id="i-patrol" viewBox="0 0 24 24"><path d="M5 9h12l-3-3M19 15H7l3 3"/><circle cx="4" cy="9" r="1.6"/><circle cx="20" cy="15" r="1.6"/></symbol>
+<symbol id="i-hold" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.6-3 8-7 10-4-2-7-5.4-7-10V6z"/><path d="M9 12h6M12 9v6" opacity=".7"/></symbol>
 <symbol id="i-boxsel" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="14" height="12" stroke-dasharray="2.6 2.2"/><path d="M12.5 11.5l8 3-3.4 1.2 2.8 2.8-1.4 1.4-2.8-2.8-1.2 3.4z" fill="currentColor" fill-opacity=".25"/></symbol>
 </defs>
 </svg>
@@ -863,6 +866,9 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
     <div class="cbtn icon" id="bSel" title="Box Select" data-l="SELECT"><svg class="ico"><use href="#i-boxsel"></use></svg></div>
     <div class="cbtn" id="bAll" data-s="ALL">ALL UNITS</div>
     <div class="cbtn" id="bStop" data-s="STOP">STOP</div>
+    <div class="cbtn icon" id="bAmove" title="Attack-Move (Q)" data-l="A-MOVE"><svg class="ico"><use href="#i-amove"></use></svg></div>
+    <div class="cbtn icon" id="bPatrol" title="Patrol (X)" data-l="PATROL"><svg class="ico"><use href="#i-patrol"></use></svg></div>
+    <div class="cbtn icon" id="bHold" title="Hold Position (G)" data-l="HOLD"><svg class="ico"><use href="#i-hold"></use></svg></div>
     <div class="cbtn icon" id="bDeselect" title="Deselect" data-l="DESELECT"><svg class="ico"><use href="#i-deselect"></use></svg></div>
     <div class="cbtn icon" id="bSell" title="Sell" data-l="SELL"><svg class="ico"><use href="#i-sell"></use></svg></div>
     <div class="cbtn icon" id="bRepair" title="Repair" data-l="REPAIR"><svg class="ico"><use href="#i-spanner"></use></svg></div>
@@ -910,6 +916,7 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
     <div class="row2">
       <div class="fld"><label>Map</label><select id="mapSel"></select><div id="mapPreview"></div></div>
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
+      <div class="fld"><label>Crates</label><select id="crateSel"></select></div>
     </div>
     <button id="play">START SKIRMISH</button><div class="mGrid"><button id="campaignBtn" class="mBtn"><span class="ic">★</span>CAMPAIGN</button><button id="tutorialBtn" class="mBtn"><span class="ic">◎</span>TUTORIAL</button><button id="loadBtn" class="mBtn"><span class="ic">⤓</span>LOAD GAME</button><button id="musicBtn" class="mBtn"><span class="ic">♪</span>MUSIC</button><button id="setBtn" class="mBtn"><span class="ic">⚙</span>SETTINGS</button><button id="accountBtn" class="mBtn"><span class="ic">◉</span>ACCOUNT</button></div><button id="adminBtn" class="mLink">+ IMPORT / CREATE</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
@@ -947,7 +954,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 (() => {
   // src/gamedata.ts
-  var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { allied: "Command Spire", soviet: "Fortress HQ", yuri: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { allied: "Solar Array", soviet: "Thermal Plant", yuri: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { allied: "Ore Processor", soviet: "Smelting Works", yuri: "Digester", neutral: "Ore Processor" } }, orerig: { key: "orerig", size: 3, hp: 900, cost: 1200, power: -20, build: 12, tab: "bld", prereq: ["power"], noAnchor: true, drillRig: true, names: { allied: "Ore Pump Station", soviet: "Deep Bore Rig", yuri: "Feeder Maw", neutral: "Ore Rig" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { allied: "Spawning Hive", soviet: "Spawning Hive", yuri: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { allied: "Training Hall", soviet: "Muster Bunker", yuri: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { allied: "Assembly Bay", soviet: "Foundry", yuri: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { allied: "Research Spire", soviet: "War Institute", yuri: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { allied: "Auto Turret", soviet: "Gun Bunker", yuri: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { allied: "Airstrip", soviet: "Landing Pad", yuri: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { allied: "Shipwright", soviet: "Drydock", yuri: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { allied: "Interceptor Battery", soviet: "Flak Cannon", yuri: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 1500, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { allied: "Sentinel Line", soviet: "Iron Rampart", yuri: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 280, dmg: 65, rof: 0.85, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true, aaBonus: 2.4 } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Outpost", soviet: "Outpost", yuri: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Storehouse", soviet: "Storehouse", yuri: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "High-Rise", soviet: "High-Rise", yuri: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Chapel", soviet: "Chapel", yuri: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Tenement", soviet: "Tenement", yuri: "Tenement", neutral: "Tenement" } }, civ6: { key: "civ6", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Market Row", soviet: "Market Row", yuri: "Market Row", neutral: "Market Row" } }, civ7: { key: "civ7", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Workshop", soviet: "Workshop", yuri: "Workshop", neutral: "Workshop" } }, civ8: { key: "civ8", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Tavern", soviet: "Tavern", yuri: "Tavern", neutral: "Tavern" } }, civ9: { key: "civ9", size: 3, hp: 1100, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Terrace Flats", soviet: "Terrace Flats", yuri: "Terrace Flats", neutral: "Terrace Flats" } }, bridgehut: { key: "bridgehut", size: 1, hp: 220, cost: 0, power: 0, build: 1, tab: null, prereq: [], noAnchor: true, indestructible: true, names: { allied: "Bridge Watch", soviet: "Bridge Watch", yuri: "Bridge Watch", neutral: "Bridge Watch" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Garrison Cannon", soviet: "Garrison Cannon", yuri: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { allied: "Ore Vault", soviet: "Stockpile", yuri: "Gullet", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { allied: "Service Bay", soviet: "Field Works", yuri: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { allied: "Photon Lance", soviet: "Missile Silo", yuri: "Psychic Amplifier", neutral: "Photon Lance" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { allied: "Photon Tower", soviet: "Arc Tower", yuri: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { allied: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "prism" }, soviet: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "tesla" }, yuri: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { allied: "Barrier Wall", soviet: "Iron Wall", yuri: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { allied: "Checkpoint Gate", soviet: "Blast Gate", yuri: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Oil Derrick", soviet: "Oil Derrick", yuri: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Paradrop Hangar", soviet: "Paradrop Hangar", yuri: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "EMP Spire", soviet: "EMP Spire", yuri: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Rogue Den", soviet: "Rogue Den", yuri: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 } };
+  var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { allied: "Command Spire", soviet: "Fortress HQ", yuri: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { allied: "Solar Array", soviet: "Thermal Plant", yuri: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { allied: "Ore Processor", soviet: "Smelting Works", yuri: "Digester", neutral: "Ore Processor" } }, orerig: { key: "orerig", size: 3, hp: 900, cost: 1200, power: -20, build: 12, tab: "bld", prereq: ["power"], noAnchor: true, drillRig: true, names: { allied: "Ore Pump Station", soviet: "Deep Bore Rig", yuri: "Feeder Maw", neutral: "Ore Rig" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { allied: "Spawning Hive", soviet: "Spawning Hive", yuri: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { allied: "Training Hall", soviet: "Muster Bunker", yuri: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { allied: "Assembly Bay", soviet: "Foundry", yuri: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { allied: "Research Spire", soviet: "War Institute", yuri: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { allied: "Auto Turret", soviet: "Gun Bunker", yuri: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { allied: "Airstrip", soviet: "Landing Pad", yuri: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { allied: "Shipwright", soviet: "Drydock", yuri: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { allied: "Interceptor Battery", soviet: "Flak Cannon", yuri: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 1500, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { allied: "Sentinel Line", soviet: "Iron Rampart", yuri: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 280, dmg: 65, rof: 0.85, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true, aaBonus: 2.4 } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Outpost", soviet: "Outpost", yuri: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Storehouse", soviet: "Storehouse", yuri: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "High-Rise", soviet: "High-Rise", yuri: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Chapel", soviet: "Chapel", yuri: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Tenement", soviet: "Tenement", yuri: "Tenement", neutral: "Tenement" } }, civ6: { key: "civ6", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Market Row", soviet: "Market Row", yuri: "Market Row", neutral: "Market Row" } }, civ7: { key: "civ7", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Workshop", soviet: "Workshop", yuri: "Workshop", neutral: "Workshop" } }, civ8: { key: "civ8", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { allied: "Tavern", soviet: "Tavern", yuri: "Tavern", neutral: "Tavern" } }, civ9: { key: "civ9", size: 3, hp: 1100, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { allied: "Terrace Flats", soviet: "Terrace Flats", yuri: "Terrace Flats", neutral: "Terrace Flats" } }, bridgehut: { key: "bridgehut", size: 1, hp: 220, cost: 0, power: 0, build: 1, tab: null, prereq: [], noAnchor: true, indestructible: true, names: { allied: "Bridge Watch", soviet: "Bridge Watch", yuri: "Bridge Watch", neutral: "Bridge Watch" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Garrison Cannon", soviet: "Garrison Cannon", yuri: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { allied: "Ore Vault", soviet: "Stockpile", yuri: "Gullet", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { allied: "Service Bay", soviet: "Field Works", yuri: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { allied: "Photon Lance", soviet: "Missile Silo", yuri: "Psychic Amplifier", neutral: "Photon Lance" } }, support: { key: "support", size: 2, hp: 1e3, cost: 2200, power: -100, build: 20, tab: "bld", prereq: ["lab"], limit: 1, names: { allied: "Veil Generator", soviet: "Iron Curtain", yuri: "Cloning Vats", neutral: "Veil Generator" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { allied: "Photon Tower", soviet: "Arc Tower", yuri: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { allied: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "prism" }, soviet: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "tesla" }, yuri: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { allied: "Barrier Wall", soviet: "Iron Wall", yuri: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { allied: "Checkpoint Gate", soviet: "Blast Gate", yuri: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Oil Derrick", soviet: "Oil Derrick", yuri: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Paradrop Hangar", soviet: "Paradrop Hangar", yuri: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "EMP Spire", soviet: "EMP Spire", yuri: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { allied: "Rogue Den", soviet: "Rogue Den", yuri: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 } };
   function U(e) {
     return Object.assign({ kind: "veh", armor: "veh", radius: 11, speed: 44, sight: 260, vsInf: 1, vsVeh: 1, vsBldg: 1, proj: "shell", rof: 1, dmg: 10, range: 130, from: "factory", tab: "veh" }, e);
   }
@@ -1091,6 +1098,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     triturret: "Heavy defensive turret with both a ground cannon and a separate anti-air gun \u2014 what the Bastion Rig deploys into.",
     silo: "Stores extra credits beyond what your refineries alone can hold.",
     repair: "Repairs damaged vehicles and aircraft that return to it.",
+    support: { allied: "Projects a light-bending veil: your units and structures within 8 cells can't be targeted from beyond close range. Needs power.", soviet: "Unlocks the Iron Curtain power \u2014 everything of yours in the target area becomes invulnerable for 12 seconds.", yuri: "Every infantry trained at your Spawning Pit steps out with a free clone. Needs power." },
     super: "Your faction's superweapon \u2014 charges over time, then unleashes a devastating strike anywhere on the map.",
     def2: "Your strongest static defense \u2014 a heavy tower that hits hard against everything, with a unique weapon per faction.",
     wall: "Cheap defensive barrier \u2014 blocks enemy movement and fire, but has no weapon of its own.",
@@ -2718,7 +2726,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     i && (o = 32 * i[0] + 16, s = 32 * i[1] + 16);
     const l = addUnit(e.id, t, o, s);
     l && "factory" === a.key && !r.fly && !r.naval && (l.x = a.x, l.y = a.y + 0.25 * 32 * a.size + 2, l.ang = l.tang = Math.PI / 2, l.rollout = { x: o, y: s }, a.rollT = 2.2);
-    l && (r.fly && (l.alt = 0, l.ammo = r.ammo || 0, l.home = "airfield" === a.key ? a : null, "airfield" === a.key && "kirov" !== t && dockNew(l, a)), "miner" === r.role ? l.order = "harvest" : a.rally && cmdMove([l], a.rally.x, a.rally.y), e.isAI || sfx("unit"));
+    l && (r.fly && (l.alt = 0, l.ammo = r.ammo || 0, l.home = "airfield" === a.key ? a : null, "airfield" === a.key && "kirov" !== t && dockNew(l, a)), "miner" === r.role ? l.order = "harvest" : a.rally && cmdMove([l], a.rally.x, a.rally.y), e.isAI || sfx("unit"), "inf" === r.kind && "barracks" === a.key && "yuri" === e.f.key && !r.limit && t !== e.f.hero && "engineer" !== t && !(e.drain > e.power) && hasActiveBld(e.id, "support") && ((c) => {
+      c && (c.order = "idle", a.rally && cmdMove([c], a.rally.x + rnd(-14, 14), a.rally.y + rnd(-14, 14)), S.fx.push({ kind: "ring", x: c.x, y: c.y, z: 4, s: 0.45, c: "#d98cff", t: 0, life: 0.5 }));
+    })(addUnit(e.id, t, l.x + rnd(-12, 12), l.y + rnd(4, 14))));
   }
   function placeReady(e, kind, t, r) {
     const n = e.ready[kind];
@@ -2747,6 +2757,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       queue || (e2.queue = []), e2.deployed && toggleDeploy(e2), e2.order = n ? "amove" : "move", e2.target = null, e2.ore = null, e2.tx = a, e2.ty = c, e2.d.fly ? (e2.path = null, airOrdered(e2)) : repath(e2);
     }
   }
+  function cmdPatrol(e, t, r) {
+    const g = e.filter((u) => !u.d.fly && "miner" !== u.d.role), air = e.filter((u) => u.d.fly);
+    air.length && cmdMove(air, t, r, true), cmdMove(g, t, r, true);
+    for (const u of g) u.patrol = { ax: u.x, ay: u.y, bx: u.tx, by: u.ty, leg: false }, u.order = "patrol";
+  }
   function nextWaypoint(e) {
     if (!e.queue || !e.queue.length) return false;
     const t = e.queue.shift();
@@ -2770,10 +2785,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var lastAlertT = -99;
   var mmPings = [];
   function alertCheck(e, r) {
-    e.dead || null == r || teamOf(e.owner) !== teamOf(0) || teamOf(r) === teamOf(0) || S.time - lastAlertT < 6 || (lastAlertT = S.time, mmPings.push({ x: e.x, y: e.y, spawnTime: S.time }), hint("UNDER ATTACK"), sfx("alert"));
+    e.dead || null == r || teamOf(e.owner) !== teamOf(0) || teamOf(r) === teamOf(0) || S.time - lastAlertT < 6 || (lastAlertT = S.time, S.lastAlert = { x: e.x, y: e.y }, mmPings.push({ x: e.x, y: e.y, spawnTime: S.time }), hint("UNDER ATTACK"), sfx("alert"));
   }
   function damage(e, t, r, n) {
     if (e.d && e.d.indestructible) return;
+    if (e.ironUntil > S.time) return void (Math.random() < 0.3 && spark(e.x, e.y, "#ff4a3a"));
     alertCheck(e, r);
     if (n && n.d && n.d.drain && !n.dead && n.hp < n.maxhp && (n.hp = Math.min(n.maxhp, n.hp + 0.5 * t)), e === FPS.u && FPS.on && !e.dead && (FPS.damageFlashT = 0.5, FPS.damageDir = n ? Math.atan2(n.y - e.y, n.x - e.x) : FPS.damageDir, sfx("hurt")), !e.dead) {
       const fromPlayer = n === FPS.u && FPS.on;
@@ -3195,9 +3211,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if ("infiltrate" === e.order) return void tickInfiltrate(e, t);
       if ("load" === e.order) return void tickLoadMove(e, t);
       if ("garrison" !== e.order) if (e.deployed && ("rad" === r.deploy && (!e.rad || e.rad.life <= 0 ? (e.rad = { x: e.x, y: e.y, r: 80, life: 0.5, owner: e.owner }, S.rads.push(e.rad)) : (e.rad.life = 0.5, e.rad.x = e.x, e.rad.y = e.y)), e.moving = false, e.path = null), e.hitT > 0 && (e.hitT -= t), e.muzzle > 0 && (e.muzzle -= t), e.recoil > 0 && (e.recoil = Math.max(0, e.recoil - 6 * t)), "garrison" === r.deploy && e.deployed && tickTitanGarrison(e, t), e.cool > 0 && (e.cool -= t), e.revealT > 0 && (e.revealT -= t), e.reloadT > 0 && (e.reloadT -= t) <= 0 && (e.ammo = r.ammo, e.reloadT = 0), "miner" !== r.role) {
-        if (("idle" === e.order || "amove" === e.order || "guard" === e.order) && aaShouldRecheck(e, t, heroWpn(e))) {
+        if (("idle" === e.order || "amove" === e.order || "patrol" === e.order || "guard" === e.order) && aaShouldRecheck(e, t, heroWpn(e))) {
           const g = acquire(e);
-          g && (!e.target || e.target.dead || (g.alt || 0) > 2) && (e.target = g, "idle" === e.order && (e.order = "attack"));
+          g && (!e.target || e.target.dead || (g.alt || 0) > 2) && (e.target = g, "idle" === e.order && !e.hold && (e.order = "attack"));
         }
         "inf" === r.kind && "idle" === e.order && !e.target && e.holdT > 0 && (e.holdT -= t, infSuppress(e, t));
         "inf" === r.kind && e.target && !e.target.dead && (e.lastTgtX = e.target.x, e.lastTgtY = e.target.y, e.holdT = 1.5);
@@ -3205,9 +3221,18 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
           const r2 = e.target;
           return void ("inf" === e.d.kind ? infAttackMove(e, r2, t) : inRange(e, r2) ? (e.moving = false, e.path = null, faceAndShoot(e, r2, t)) : e.deployed ? (e.moving = false, e.path = null) : (e.tx = r2.x, e.ty = r2.y, e.repath -= t, (!e.path || e.repath <= 0) && (repath(e), e.repath = 0.7), moveAlong(e, t)));
         }
+        if ("patrol" === e.order) {
+          if (e.target && !e.target.dead && dist2(e.x, e.y, e.target.x, e.target.y) < effRange(e) * effRange(e)) return e.moving = false, void faceAndShoot(e, e.target, t);
+          if (moveAlong(e, t), !e.path || e.pi >= e.path.length) {
+            const p = e.patrol;
+            if (!p) return void (e.order = "idle");
+            p.leg = !p.leg, e.tx = p.leg ? p.ax : p.bx, e.ty = p.leg ? p.ay : p.by, repath(e);
+          }
+          return;
+        }
         if ("amove" === e.order) return e.target && dist2(e.x, e.y, e.target.x, e.target.y) < effRange(e) * effRange(e) ? (e.moving = false, void faceAndShoot(e, e.target, t)) : (moveAlong(e, t), void ((!e.path || e.pi >= e.path.length) && !nextWaypoint(e) && (e.order = "idle")));
         if ("move" === e.order) return e.deployed ? void (e.order = "idle") : (moveAlong(e, t), void ((!e.path || e.pi >= e.path.length) && !nextWaypoint(e) && (e.order = "idle")));
-        e.target && inRange(e, e.target) && faceAndShoot(e, e.target, t), e.moving = false, idleTurret(e, t);
+        e.target && (inRange(e, e.target) ? faceAndShoot(e, e.target, t) : e.hold && (e.target = null)), e.moving = false, idleTurret(e, t);
       } else tickMiner(e, t);
       else tickGarrisonMove(e, t);
     } else tickChrono(e, t);
@@ -3847,6 +3872,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     spawnUnit,
     placeReady,
     cmdMove,
+    cmdPatrol,
     cmdAttack,
     nextWaypoint,
     cmdHarvest,
@@ -3991,7 +4017,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function aiNextBld(e) {
     const t = (t2) => countBld(e.id, t2), y = "yuri" === e.f.key, rk = "refinery", pz = aiPersonality(e);
-    return e.drain + 25 > e.power ? "power" : !y && t(rk) < 1 ? rk : y && t("hive") < 1 && !S.units.some((u) => u.owner === e.id && !u.dead && "hivetrans" === u.key) ? "hive" : t("barracks") < 1 ? "barracks" : t("factory") < 1 ? "factory" : !y && t(rk) < 2 ? rk : t("def1") < Math.round(2 * pz.defMul) && t("barracks") > 0 ? "def1" : t("aa") < 1 && enemyAir(e) ? "aa" : t("lab") < 1 ? "lab" : t("silo") < 1 && (y ? t(rk) >= 1 : t(rk) > 1) ? "silo" : aiFreeDrill(e) && t("orerig") < Math.min(4, 1 + Math.floor(S.time / 200)) && e.credits > 1500 && (t(rk) > 0 || t("hive") > 0) ? "orerig" : t("repair") < 1 && e.credits > 2200 ? "repair" : t("super") < 1 && t("lab") > 0 && e.credits > 5200 && aiWantsSuper(e) ? "super" : t("airfield") < 1 && e.credits > 2500 ? "airfield" : t("navalyard") < 1 && e.credits > 2200 && aiHasCoast(e) ? "navalyard" : t("aa") < 3 && enemyAir(e) ? "aa" : !y && t(rk) < Math.round(5 * pz.refMul) && e.credits > 4e3 ? rk : y && t("hive") < Math.round(3 * pz.refMul) && e.credits > 4e3 ? "hive" : t("def2") < Math.round(4 * pz.defMul) && t("lab") > 0 ? "def2" : t("factory") < 4 && e.credits > 5e3 ? "factory" : t("barracks") < 4 && e.credits > 4e3 ? "barracks" : t("airfield") < 3 && e.credits > 4500 ? "airfield" : t("navalyard") < 3 && e.credits > 4500 && aiHasCoast(e) ? "navalyard" : t("def1") < Math.round(10 * pz.defMul) && e.credits > 3e3 ? "def1" : null;
+    return e.drain + 25 > e.power ? "power" : !y && t(rk) < 1 ? rk : y && t("hive") < 1 && !S.units.some((u) => u.owner === e.id && !u.dead && "hivetrans" === u.key) ? "hive" : t("barracks") < 1 ? "barracks" : t("factory") < 1 ? "factory" : !y && t(rk) < 2 ? rk : t("def1") < Math.round(2 * pz.defMul) && t("barracks") > 0 ? "def1" : t("aa") < 1 && enemyAir(e) ? "aa" : t("lab") < 1 ? "lab" : t("silo") < 1 && (y ? t(rk) >= 1 : t(rk) > 1) ? "silo" : aiFreeDrill(e) && t("orerig") < Math.min(4, 1 + Math.floor(S.time / 200)) && e.credits > 1500 && (t(rk) > 0 || t("hive") > 0) ? "orerig" : t("repair") < 1 && e.credits > 2200 ? "repair" : t("super") < 1 && t("lab") > 0 && e.credits > 5200 && aiWantsSuper(e) ? "super" : t("support") < 1 && t("lab") > 0 && e.credits > 3200 && S.time > 600 ? "support" : t("airfield") < 1 && e.credits > 2500 ? "airfield" : t("navalyard") < 1 && e.credits > 2200 && aiHasCoast(e) ? "navalyard" : t("aa") < 3 && enemyAir(e) ? "aa" : !y && t(rk) < Math.round(5 * pz.refMul) && e.credits > 4e3 ? rk : y && t("hive") < Math.round(3 * pz.refMul) && e.credits > 4e3 ? "hive" : t("def2") < Math.round(4 * pz.defMul) && t("lab") > 0 ? "def2" : t("factory") < 4 && e.credits > 5e3 ? "factory" : t("barracks") < 4 && e.credits > 4e3 ? "barracks" : t("airfield") < 3 && e.credits > 4500 ? "airfield" : t("navalyard") < 3 && e.credits > 4500 && aiHasCoast(e) ? "navalyard" : t("def1") < Math.round(10 * pz.defMul) && e.credits > 3e3 ? "def1" : null;
   }
   function enemyAir(e) {
     return S.units.some((t) => !t.dead && t.owner !== e.id && t.owner !== NEUTRAL && t.d.fly);
@@ -7394,6 +7420,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const e = [];
     return e.push(P_(BOXM(9, 9, 2, 0.3), 0, 0, 0, "concrete2")), e.push(P_(BOXM(6, 6, 3, 0.4), 0, 0, 2, "concrete2")), e.push(P_(CYL(1.6, 16, 8), 0, 0, 5, v % 2 ? "rock2" : "gold")), e.push(P_(CONE(1.6, 0.2, 2, 8), 0, 0, 21, v % 2 ? "rock2" : "gold")), e;
   }
+  function crateModel() {
+    const e = [];
+    e.push(P_(BOXM(14, 14, 10, 0.8), 0, 0, 0, "olive")), e.push(P_(BOXM(14.6, 2.2, 10.4, 0.3), 0, -4.2, 0, "darkmetal")), e.push(P_(BOXM(14.6, 2.2, 10.4, 0.3), 0, 4.2, 0, "darkmetal")), e.push(P_(BOXM(2.2, 14.6, 0.6, 0.2), 0, 0, 10, "darkmetal")), e.push(P_(CYL(3, 0.5, 12), 0, 0, 10.3, "gold", { e: 1 })), e.push(P_(BOXM(4, 1, 0.4, 0.1), 0, 0, 10.8, "glow", { e: 1 }));
+    return e;
+  }
   function stallModel(v) {
     const e = [], col = v % 3 == 0 ? "red" : v % 3 == 1 ? "green" : "gold";
     return e.push(P_(BOXM(10, 7, 3, 0.3), 0, 0, 0, "wood")), [[-4.2, -2.8], [-4.2, 2.8], [4.2, -2.8], [4.2, 2.8]].forEach(([dx, dy]) => e.push(P_(CYL(0.25, 5, 6), dx, dy, 3, "darkmetal"))), e.push(P_(BOXM(11, 8, 0.4, 0.2), 0, 0, 8, col)), e.push(P_(BOXM(9, 6, 1.6, 0.2), 0, 0, 1.8, "wood")), e;
@@ -8547,6 +8578,40 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         n.push(P_(BOXM(0.9 * r, 0.6 * r, 0.42 * r, 0.15), 0, 0, l, "concrete2")), n.push(P_(CONE(0.52 * r, 0.05 * r, 0.3 * r, 4), 0, 0, l + 0.42 * r, "armor3", { r: PI2 / 8 })), n.push(P_(CYL(0.025 * r, 0.5 * r, 6), 0.33 * r, 0.18 * r, l + 0.42 * r, "darkmetal"));
         break;
       }
+      case "support": {
+        if (a) {
+          tier(n, 0.74 * r, 0.74 * r, 0.36 * s, 0, 0, l, "armor", "spv", 0.93), windows(n, 0.7 * r, 0.7 * r, l + 0.1 * s, 0.16 * s, 3);
+          const z = l + 0.36 * s;
+          n.push(P_(CYL(0.1 * r, 0.66 * r, 14), 0, 0, z, "armor3"));
+          for (let k = 0; k < 3; k++) n.push(P_(CYL(0.27 * r - 0.05 * r * k, 0.035 * r, 22), 0, 0, z + 0.16 * r + 0.18 * r * k, k % 2 ? "steel" : "armor2", { a: { spin: (k % 2 ? -1 : 1) * 0.8 } })), n.push(P_(CYL(0.2 * r - 0.05 * r * k, 0.02 * r, 20), 0, 0, z + 0.19 * r + 0.18 * r * k, "crystal", { e: 1 }));
+          n.push(P_(DOME(0.09 * r, 0.14 * r, 14), 0, 0, z + 0.66 * r, "crystal", { e: 1 }));
+          for (const q of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) n.push(P_(CYL(1.5, 0.2 * r, 8), q[0] * r * 0.27, q[1] * r * 0.27, z, "steel")), n.push(P_(DOME(2.4, 2.4, 8), q[0] * r * 0.27, q[1] * r * 0.27, z + 0.2 * r, "crystal", { e: 1 }));
+        } else if (o) {
+          tier(n, 0.88 * r, 0.78 * r, 0.3 * s, 0, 0, l, "concrete", "spl", 0.95), railPosts(n, 0.84 * r, 0.74 * r, l + 0.3 * s, 2.6);
+          const z = l + 0.3 * s;
+          n.push(P_(CYL(0.25 * r, 0.08 * r, 22), 0, 0, z, "darkmetal")), n.push(P_(DOME(0.2 * r, 0.2 * r, 18), 0, 0, z + 0.08 * r, "red", { e: 1 }));
+          for (let k = 0; k < 6; k++) {
+            const t2 = 1.047 * k;
+            n.push(P_(BOXM(0.03 * r, 0.1 * r, 0.06 * r, 0.2), Math.cos(t2) * r * 0.22, Math.sin(t2) * r * 0.22, z + 0.06 * r, "darkmetal", { r: t2 }));
+          }
+          for (const e2 of [-1, 1]) {
+            n.push(P_(BOXM(0.1 * r, 0.15 * r, 0.64 * r, 0.6), e2 * r * 0.34, 0, z, "rust"));
+            for (let k = 0; k < 4; k++) n.push(P_(BOXM(0.13 * r, 0.18 * r, 0.025 * r, 0.2), e2 * r * 0.34, 0, z + 0.14 * r + 0.13 * r * k, "steel"));
+            n.push(P_(BOXM(0.16 * r, 0.2 * r, 0.05 * r, 0.3), e2 * r * 0.34, 0, z + 0.64 * r, "darkmetal")), n.push(P_(CYL(1.6, 1.6, 8), e2 * r * 0.34, 0, z + 0.69 * r, "red", { e: 1 }));
+          }
+          n.push(P_(BOXM(0.7 * r, 0.05 * r, 0.05 * r, 0.4), 0, 0, z + 0.58 * r, "darkmetal")), stack(n, 0.3 * -r, 0.3 * r, z, 3, 0.16 * r, "rust");
+        } else {
+          hive(n, { x: 0, y: -0.14 * r, z: l, r: 0.22 * r, h: 0.5 * s, crown: 0.1 * r, seg: 7, crest: false, vein: "psi" });
+          for (let k = 0; k < 3; k++) {
+            const x = (k - 1) * r * 0.27, y = 0.2 * r;
+            n.push(P_(CYL(0.1 * r, 0.05 * r, 14), x, y, l, "carapace2")), n.push(P_(CYL(0.08 * r, 0.22 * r, 14), x, y, l + 0.05 * r, "psi", { e: 1 })), n.push(P_(CYL(0.083 * r, 0.12 * r, 14), x, y, l + 0.27 * r, "glassdark"));
+            for (const hz of [0.05, 0.16, 0.27, 0.38]) n.push(P_(CYL(0.092 * r, 0.018 * r, 14), x, y, l + hz * r, "darkmetal"));
+            n.push(P_(DOME(0.095 * r, 0.05 * r, 14), x, y, l + 0.39 * r, "carapace")), n.push(P_(BOXM(0.03 * r, 0.16 * r, 0.03 * r, 0.1), x * 0.6, y - 0.12 * r, l + 0.3 * r, "carapace2"));
+          }
+          veins(n, 0, 0, l + 0.04 * r, 0.42 * r, 0.08 * r, 7, "psi");
+        }
+        break;
+      }
       case "empTower": {
         n.push(P_(CYL(0.22 * r, 0.7 * r, 16), 0, 0, l, "darkmetal"));
         for (let e2 = 0; e2 < 3; e2++) n.push(P_(CYL(0.28 * r, 0.06 * r, 16), 0, 0, l + 0.2 * r + e2 * 0.22 * r, "steel"));
@@ -9644,6 +9709,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    crateModel,
     attachFloating,
     partBox,
     DOME,
@@ -10391,6 +10457,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (let e2 = 0; e2 < 6624; e2++) G.ore[e2] > 0 && (!FOG_ON || G.vis[e2] > 0) && (mctx.fillStyle = 2 === G.tib[e2] ? "#8fd8e8" : "#d0a03a", mctx.fillRect(e2 % 92 * r, (e2 / 92 | 0) * n, Math.max(1, r), Math.max(1, n)));
     for (const e2 of S.blds) !e2.dead && seen(e2) && (mctx.fillStyle = e2.owner < 0 ? "#9c968a" : fc(e2.owner), mctx.fillRect(e2.tx * r, e2.ty * n, Math.max(2, e2.size * r), Math.max(2, e2.size * n)));
     for (const e2 of S.units) !e2.dead && seen(e2) && (mctx.fillStyle = fc(e2.owner), mctx.fillRect(e2.x / 32 * r - 1, e2.y / 32 * n - 1, 2.4, 2.4));
+    if (S.crates) for (const c of S.crates) (!FOG_ON || G.vis[idx(c.x / 32 | 0, c.y / 32 | 0)] > 0) && (mctx.fillStyle = S.time % 1 < 0.5 ? "#ffd75e" : "#fff4c8", mctx.fillRect(c.x / 32 * r - 1.5, c.y / 32 * n - 1.5, 3, 3));
     if (FOG_ON) {
       mctx.save();
       for (let e2 = 0; e2 < 72; e2++) {
@@ -10695,10 +10762,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var vDmg = (e) => "u" === e.e ? VET[e.vet || 0].dmg : 1;
   var vRof = (e) => "u" === e.e ? VET[e.vet || 0].rof : 1;
+  var _veilT = -1;
+  var _veils = [];
+  function veiled(e, t) {
+    if (_veilT !== S.time && (_veilT = S.time, _veils = S.blds.filter((b) => {
+      if (b.dead || "support" !== b.key || b.blackoutT > 0) return false;
+      const p = S.players[b.owner];
+      return !!p && "allied" === p.fac && !(p.drain > p.power);
+    })), !_veils.length) return false;
+    if (dist2(e.x, e.y, t.x, t.y) < 12100) return false;
+    const tm = teamOf(t.owner);
+    return _veils.some((b) => teamOf(b.owner) === tm && dist2(b.x, b.y, t.x, t.y) < 67600);
+  }
   function canTarget(e, t) {
     if (!t || t.dead) return false;
     if (t.cloakM && "function" == typeof stealthBlock && stealthBlock(e, t)) return false;
     if (t.owner === e.owner || teamOf(t.owner) === teamOf(e.owner)) return false;
+    if (veiled(e, t)) return false;
     const airOnly = e.d && e.d.airOnly || e.w && e.w.airOnly, eInside = "b" === e.e ? e : e.inside;
     if ("u" === t.e) {
       if (t.attached) return false;
@@ -11233,6 +11313,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    veiled,
     mapTileRGB,
     airOrdered,
     dockNew,
@@ -12536,6 +12617,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     }
     _usc = 1;
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
+    if (S.crates) for (const e2 of S.crates) (!FOG_ON || G.vis[idx(e2.x / 32 | 0, e2.y / 32 | 0)] > 0) && c("XCRATE", crateModel, TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y) + 1.2 + 1.2 * Math.sin(3 * S.time + e2.x), e2.r + 0.6 * S.time);
     if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, null != e2.z ? e2.z : heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind || "grass" === e2.kind || "flower" === e2.kind);
     if (G.skirtProps) for (const e2 of G.skirtProps) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.4 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, e2.z, e2.r, true);
     if (S.traffic) for (const e2 of S.traffic) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("CAR" + e2.v, () => carModel(e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.ang, false);
@@ -17688,7 +17770,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       nm = a.name, cost = a.cost || 0, desc = a.desc || "";
     } else if ("bld" === it.kind || "def" === it.kind) {
       const d = BLD[it.key];
-      nm = bname(it.key, t.fac), cost = d.cost, desc = BLD_DESC[it.key] || "", stats = "HP " + d.hp + (d.power ? " \xB7 PWR " + (d.power > 0 ? "+" : "") + d.power : "") + (d.range ? " \xB7 RNG " + d.range : "");
+      nm = bname(it.key, t.fac), cost = d.cost, desc = ("object" == typeof BLD_DESC[it.key] ? BLD_DESC[it.key][t.fac] : BLD_DESC[it.key]) || "", stats = "HP " + d.hp + (d.power ? " \xB7 PWR " + (d.power > 0 ? "+" : "") + d.power : "") + (d.range ? " \xB7 RNG " + d.range : "");
     } else {
       const d = UNITS[it.key];
       nm = uname(it.key, it.foreign ? unitFacOwner(it.key) : t.fac), cost = d.cost, tag = unitRoleTag(it.key), desc = UNIT_DESC[it.key] || (tag ? tag.label + " \u2014 " + tag.desc : ""), stats = "HP " + d.hp + (d.dmg ? " \xB7 DMG " + d.dmg : "") + (d.range ? " \xB7 RNG " + d.range : "") + " \xB7 SPD " + d.speed;
@@ -17707,14 +17789,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function _tabList(e) {
     const t = P().f, capFacs = new Set(S.blds.filter((b) => b.owner === P().id && !b.dead && b.capturedFac && b.capturedFac !== t.key).map((b) => b.capturedFac));
     if ("bld" === e) {
-      const own2 = ["power", "refinery", "orerig", "barracks", "factory", "silo", "repair", "lab", "airfield", "navalyard"].filter((e2) => "refinery" !== e2 || "yuri" !== t.key).map((e2) => ({ kind: "bld", key: e2 })).concat("yuri" === t.key ? [{ kind: "veh", key: "hivetrans" }] : []), foreign2 = [];
+      const own2 = ["power", "refinery", "orerig", "barracks", "factory", "silo", "repair", "lab", "support", "airfield", "navalyard"].filter((e2) => "refinery" !== e2 || "yuri" !== t.key).map((e2) => ({ kind: "bld", key: e2 })).concat("yuri" === t.key ? [{ kind: "veh", key: "hivetrans" }] : []), foreign2 = [];
       for (const fac of capFacs) {
         const econKey = "yuri" === fac ? "hive" : "refinery";
         own2.some((o) => o.key === econKey) || foreign2.some((o) => o.key === econKey) || foreign2.push({ kind: "bld", key: econKey, foreign: true }), "yuri" === fac && !own2.some((o) => "hivetrans" === o.key) && !foreign2.some((o) => "hivetrans" === o.key) && foreign2.push({ kind: "veh", key: "hivetrans", foreign: true });
       }
       return own2.concat(foreign2);
     }
-    if ("def" === e) return [{ kind: "def", key: "def1" }, { kind: "def", key: "aa" }, { kind: "def", key: "def2" }, { kind: "def", key: "wall" }, { kind: "def", key: "gate" }, { kind: "veh", key: "bastion" }, { kind: "def", key: "super" }, { kind: "ability", key: "super" }, { kind: "ability", key: "spy" }, { kind: "ability", key: "paradrop" }, { kind: "ability", key: "emp" }];
+    if ("def" === e) return [{ kind: "def", key: "def1" }, { kind: "def", key: "aa" }, { kind: "def", key: "def2" }, { kind: "def", key: "wall" }, { kind: "def", key: "gate" }, { kind: "veh", key: "bastion" }, { kind: "def", key: "super" }, { kind: "ability", key: "super" }, { kind: "ability", key: "spy" }, { kind: "ability", key: "paradrop" }, { kind: "ability", key: "emp" }].concat("soviet" === t.key ? [{ kind: "ability", key: "curtain" }] : []);
     const pb = selProducer(e);
     if (pb) {
       const pf = pb.capturedFac && pb.capturedFac !== t.key ? pb.capturedFac : null;
@@ -17763,7 +17845,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         }
       } else if ("bld" === t.kind || "def" === t.kind) {
         const bd = BLD_DESC[t.key];
-        bd && (r.title = bd);
+        bd && "string" == typeof bd && (r.title = bd);
       }
       r.removeAttribute("title"), r.addEventListener("pointerenter", (e2) => {
         "mouse" === e2.pointerType && showCardInfo(t, false);
@@ -17885,8 +17967,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         } else if ("emp" === t2.it.key) {
           const cd = e.empCD || 0;
           !hasBld(e.id, "empTower") ? (dis = true, badge = "\u2014") : cd > 0 ? (dis = true, badge = Math.ceil(cd) + "s") : e.credits < ABILITIES.emp.cost ? (dis = true, badge = "$") : (ready = true, badge = "EMP");
+        } else if ("curtain" === t2.it.key) {
+          const cd = e.curtainCD || 0;
+          !hasActiveBld(e.id, "support") ? (dis = true, badge = "\u2014") : cd > 0 ? (dis = true, badge = Math.ceil(cd) + "s") : (ready = true, badge = "ARM");
         }
-        t2.el.classList.toggle("dis", dis), t2.el.classList.toggle("rdy", ready), t2.el.classList.toggle("head", "super" === t2.it.key ? superAim : "spy" === t2.it.key ? spyAim : "paradrop" === t2.it.key ? paradropAim : "emp" === t2.it.key && empAim), t2.pg.style.transform = "scaleY(0)", t2.qn.style.display = "none", t2.bd.style.display = "", t2.bd.textContent = badge;
+        t2.el.classList.toggle("dis", dis), t2.el.classList.toggle("rdy", ready), t2.el.classList.toggle("head", "super" === t2.it.key ? superAim : "spy" === t2.it.key ? spyAim : "paradrop" === t2.it.key ? paradropAim : "emp" === t2.it.key ? empAim : "curtain" === t2.it.key && curtainAim), t2.pg.style.transform = "scaleY(0)", t2.qn.style.display = "none", t2.bd.style.display = "", t2.bd.textContent = badge;
         continue;
       }
       const r2 = e.queues[t2.it.kind], n = qCount(e, t2.it.kind, t2.it.key), a = r2 && r2.list.length && r2.list[0] === t2.it.key, isBld = "bld" === t2.it.kind || "def" === t2.it.kind, o = isBld && e.ready[t2.it.kind] === t2.it.key, s = isBld ? canBuildBld(e, t2.it.key) : canBuildUnit(e, t2.it.key);
@@ -17950,8 +18035,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
 (() => {
   // src/ui.ts
   var BUILD_HOTKEY_ACTIONS = ["buildSlot1", "buildSlot2", "buildSlot3", "buildSlot4", "buildSlot5", "buildSlot6", "buildSlot7", "buildSlot8"];
-  var KEYBINDS_DEFAULT = { camUp: "w", camDown: "s", camLeft: "a", camRight: "d", attackMove: "q", pause: " ", buildSlot1: "e", buildSlot2: "r", buildSlot3: "t", buildSlot4: "y", buildSlot5: "u", buildSlot6: "i", buildSlot7: "o", buildSlot8: "p" };
-  var KEYBIND_LABEL = { camUp: "Pan Camera Up", camDown: "Pan Camera Down", camLeft: "Pan Camera Left", camRight: "Pan Camera Right", attackMove: "Attack-Move", pause: "Pause / Resume", buildSlot1: "Build Card 1", buildSlot2: "Build Card 2", buildSlot3: "Build Card 3", buildSlot4: "Build Card 4", buildSlot5: "Build Card 5", buildSlot6: "Build Card 6", buildSlot7: "Build Card 7", buildSlot8: "Build Card 8" };
+  var KEYBINDS_DEFAULT = { camUp: "w", camDown: "s", camLeft: "a", camRight: "d", attackMove: "q", patrol: "x", hold: "g", lastAlert: "z", pause: " ", buildSlot1: "e", buildSlot2: "r", buildSlot3: "t", buildSlot4: "y", buildSlot5: "u", buildSlot6: "i", buildSlot7: "o", buildSlot8: "p" };
+  var KEYBIND_LABEL = { camUp: "Pan Camera Up", camDown: "Pan Camera Down", camLeft: "Pan Camera Left", camRight: "Pan Camera Right", attackMove: "Attack-Move", patrol: "Patrol", hold: "Hold Position", lastAlert: "Jump to Last Alert", pause: "Pause / Resume", buildSlot1: "Build Card 1", buildSlot2: "Build Card 2", buildSlot3: "Build Card 3", buildSlot4: "Build Card 4", buildSlot5: "Build Card 5", buildSlot6: "Build Card 6", buildSlot7: "Build Card 7", buildSlot8: "Build Card 8" };
   var KEYBINDS = { ...KEYBINDS_DEFAULT };
   try {
     const saved = JSON.parse(localStorage.getItem("ifr_keybinds") || "null");
@@ -18018,6 +18103,35 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   var sellMode = false;
   var repairMode = false;
   var amoveAim = false;
+  var patrolAim = false;
+  function selUnits() {
+    return S.sel.filter((u) => "u" === u.e && 0 === u.owner && !u.dead);
+  }
+  function armAmove() {
+    if (amoveAim) return amoveAim = false, void hint("Attack-move cancelled");
+    if (!selUnits().length) return void hint("Select units first");
+    amoveAim = true, patrolAim = false, hint("Attack-move \u2014 tap a destination");
+  }
+  function armPatrol() {
+    if (patrolAim) return patrolAim = false, void hint("Patrol cancelled");
+    const s = selUnits().filter((u) => !u.d.fly && "miner" !== u.d.role);
+    if (!s.length) return void hint("Select ground combat units first");
+    patrolAim = true, amoveAim = false, hint("Patrol \u2014 tap the far end of the route");
+  }
+  function toggleHold() {
+    const s = selUnits().filter((u) => "miner" !== u.d.role);
+    if (!s.length) return void hint("Select units first");
+    const on = !s.every((u) => u.hold);
+    s.forEach((u) => {
+      u.hold = on, on && "attack" === u.order && u.target && !inRange(u, u.target) && (u.order = "idle", u.target = null, u.path = null, u.moving = false);
+    }), $("#bHold").classList.toggle("on", on), hint(on ? "Holding position \u2014 units won't chase" : "Hold released \u2014 units engage freely"), sfx("sel");
+  }
+  function jumpToAlert() {
+    const a = S.lastAlert;
+    if (!a) return void hint("No recent alerts");
+    cam.x = a.x, cam.y = a.y, clampCam(), S.marker = { x: a.x, y: a.y, t: 0, c: "#ff5a4a" };
+  }
+  $("#bAmove").addEventListener("click", armAmove), $("#bPatrol").addEventListener("click", armPatrol), $("#bHold").addEventListener("click", toggleHold);
   $("#bSel").addEventListener("click", () => {
     S.selMode = !S.selMode, $("#bSel").classList.toggle("on", S.selMode), S.selMode && hint("Drag on the map to box-select");
   }), $("#bAll").addEventListener("click", () => {
@@ -18120,6 +18234,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (spyAim) return spyAim = false, void spyStrike(0, n, a);
     if (paradropAim) return paradropAim = false, void paradropStrike(0, n, a);
     if (empAim) return empAim = false, void fireEmp(0, n, a);
+    if (curtainAim) return curtainAim = false, void ironCurtain(0, n, a);
     const o = entAt(n, a, e, t);
     if (sellMode) return void (o && "b" === o.e && 0 === o.owner && "conyard" !== o.key ? (P().credits += 0.5 * o.d.cost, textFx(o.x, o.y, "+$" + Math.round(0.5 * o.d.cost)), killBld(o), sellMode = false, $("#bSell").classList.remove("on")) : hint("Select one of your structures"));
     if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, hint(o.repair ? "Repairing" : "Repair off"))));
@@ -18148,6 +18263,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       return;
     }
     const s = S.sel.filter((e2) => "u" === e2.e && 0 === e2.owner);
+    if (s.length && (patrolAim || amoveAim)) {
+      const pa = patrolAim;
+      return patrolAim = amoveAim = false, pa ? cmdPatrol(s, n, a) : cmdMove(s, n, a, true), S.marker = { x: n, y: a, t: 0, c: pa ? "#5ec8ff" : "#ff9a3c" }, void sfx("go", s[0]);
+    }
     if (s.length) {
       const e2 = Math.floor(n / 32), t2 = Math.floor(a / 32);
       return inMap(e2, t2) && G.ore[idx(e2, t2)] > 0 && s.some((e3) => "miner" === e3.d.role) ? (cmdHarvest(s, e2, t2), s.filter((e3) => "miner" !== e3.d.role).forEach((e3) => cmdMove([e3], n, a)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }) : (cmdMove(s, n, a), S.marker = { x: n, y: a, t: 0, c: "#7dff8a" }), void sfx("go", s[0]);
@@ -18157,13 +18276,21 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     S.sel = [];
   }
   function tapSelect(e, t) {
-    amoveAim = false;
+    if ((amoveAim || patrolAim) && !S.placing) {
+      const w = s2w(e, t), su = S.sel.filter((u) => "u" === u.e && 0 === u.owner), hit = entAt(w.x, w.y, e, t);
+      if (su.length && (!hit || 0 === hit.owner)) {
+        const pa = patrolAim;
+        return patrolAim = amoveAim = false, pa ? cmdPatrol(su, w.x, w.y) : cmdMove(su, w.x, w.y, true), S.marker = { x: w.x, y: w.y, t: 0, c: pa ? "#5ec8ff" : "#ff9a3c" }, void sfx("go", su[0]);
+      }
+    }
+    amoveAim = patrolAim = false;
     if (S.placing) return void tryPlace(e, t);
     const r = s2w(e, t), n = r.x, a = r.y;
     if (superAim) return superAim = false, void (fireSuper(0, n, a) && (cam.x = n, cam.y = a, clampCam(), S.marker = { x: n, y: a, t: 0 }, hint("Strike inbound")));
     if (spyAim) return spyAim = false, void spyStrike(0, n, a);
     if (paradropAim) return paradropAim = false, void paradropStrike(0, n, a);
     if (empAim) return empAim = false, void fireEmp(0, n, a);
+    if (curtainAim) return curtainAim = false, void ironCurtain(0, n, a);
     const o = entAt(n, a, e, t);
     if (sellMode) return void (o && "b" === o.e && 0 === o.owner && "conyard" !== o.key ? (P().credits += 0.5 * o.d.cost, textFx(o.x, o.y, "+$" + Math.round(0.5 * o.d.cost)), killBld(o), sellMode = false, $("#bSell").classList.remove("on")) : hint("Select one of your structures"));
     if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, hint(o.repair ? "Repairing" : "Repair off"))));
@@ -18175,9 +18302,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     S.sel = [];
   }
   function tapCommand(e, t, queueMod) {
-    if (S.placing || superAim || spyAim || paradropAim || empAim || sellMode || repairMode) return;
-    const wasAmove = amoveAim;
-    amoveAim = false;
+    if (S.placing || superAim || spyAim || paradropAim || empAim || curtainAim || sellMode || repairMode) return;
+    const wasAmove = amoveAim, wasPatrol = patrolAim;
+    amoveAim = patrolAim = false;
     const r = s2w(e, t), n = r.x, a = r.y, o = entAt(n, a, e, t);
     if (o) {
       if (0 === o.owner) {
@@ -18200,6 +18327,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
     }
     const s = S.sel.filter((e2) => "u" === e2.e && 0 === e2.owner);
+    if (s.length && wasPatrol) return cmdPatrol(s, n, a), S.marker = { x: n, y: a, t: 0, c: "#5ec8ff" }, void sfx("go", s[0]);
     if (s.length) {
       const ex = Math.floor(n / 32), ey = Math.floor(a / 32);
       return inMap(ex, ey) && G.ore[idx(ex, ey)] > 0 && s.some((e2) => "miner" === e2.d.role) ? (cmdHarvest(s, ex, ey), s.filter((e2) => "miner" !== e2.d.role).forEach((e2) => cmdMove([e2], n, a, wasAmove, queueMod)), S.marker = { x: n, y: a, t: 0, c: "#ffd75e" }, void sfx("go", s[0])) : (cmdMove(s, n, a, wasAmove, queueMod), S.marker = { x: n, y: a, t: 0, c: wasAmove ? "#ff9a3c" : "#7dff8a" }, void sfx("go", s[0]));
@@ -18263,7 +18391,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     e.key.toLowerCase() === KEYBINDS.pause && (e.preventDefault(), S.running = !S.running);
     const t = 50 / cam.z, k = e.key.toLowerCase();
     ("ArrowLeft" === e.key || k === KEYBINDS.camLeft) && (cam.x -= t, cam.y += t), ("ArrowRight" === e.key || k === KEYBINDS.camRight) && (cam.x += t, cam.y -= t), ("ArrowUp" === e.key || k === KEYBINDS.camUp) && (cam.x -= t, cam.y -= t), ("ArrowDown" === e.key || k === KEYBINDS.camDown) && (cam.x += t, cam.y += t), clampCam();
-    k === KEYBINDS.attackMove && (amoveAim ? amoveAim = false : S.sel.some((u) => "u" === u.e && 0 === u.owner) ? (amoveAim = true, hint("Attack-move armed \u2014 right-click a destination")) : hint("Select units first"));
+    k === KEYBINDS.attackMove && armAmove(), k === KEYBINDS.patrol && armPatrol(), k === KEYBINDS.hold && toggleHold(), k === KEYBINDS.lastAlert && jumpToAlert();
     for (let bi = 0; bi < BUILD_HOTKEY_ACTIONS.length; bi++) if (k === KEYBINDS[BUILD_HOTKEY_ACTIONS[bi]] && cardEls[bi]) {
       cardClick(cardEls[bi].it);
       break;
@@ -18399,6 +18527,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     MB.on ? menuBgSetMap(cfg.map) : menuBgStart();
     fillSelect("fogSel", [{ k: "on", n: "Shrouded" }, { k: "off", n: "Revealed" }], cfg.fog, (e) => {
       cfg.fog = e, refreshMenu();
+    }), fillSelect("crateSel", [{ k: "on", n: "Bonus crates" }, { k: "off", n: "No crates" }], cfg.crates || "on", (e) => {
+      cfg.crates = e, refreshMenu();
     });
   }
   var PERSONALITY_LABEL = { rush: "Aggressive", turtle: "Defensive", boom: "Economic" };
@@ -18537,7 +18667,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     menuBgStop(), audio(), startMusic(), genMap(Math.floor(1e3 * Math.random()), cfg.map), mmCache = null, NEUTRAL = 1 + cfg.slots.length, S.players = [newPlayer(0, cfg.fac, false, "normal", cfg.team, colorSet(cfg.color))];
     cfg.slots.forEach((e, t) => {
       S.players.push(newPlayer(t + 1, e.fac, true, e.diff || "normal", e.team, colorSet(e.color)));
-    }), S.players[NEUTRAL] = newPlayer(NEUTRAL, "allied", false, "normal"), S.players[NEUTRAL].team = -1, S.players[NEUTRAL].f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, S.players[NEUTRAL].fac = "neutral", S.players[NEUTRAL].neutral = true, S.rads = [], S.weather = pickWeather(), S.wxRainSnd = "rain" === S.weather, setRainAmbience("rain" === S.weather), GL ? rebuildTerrainGL() : initGL(), FOG_ON = "off" !== cfg.fog, G.vis.fill(FOG_ON ? 0 : 2), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), resizeGL(), S.units = [], S.blds = [], S.bldById = /* @__PURE__ */ new Map(), S.projs = [], S.fx = [], S.rockets = [], S.sel = [], S.time = 0, S.over = false, S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.history = [], S.histT = 0;
+    }), S.players[NEUTRAL] = newPlayer(NEUTRAL, "allied", false, "normal"), S.players[NEUTRAL].team = -1, S.players[NEUTRAL].f = { key: "neutral", name: "Civilian", color: "#9c968a", dark: "#6a6252", tint: "#ccc", units: [], miner: "miner_allied", base: "gi", main: "grizzly", anti: "gi", elite: "gi" }, S.players[NEUTRAL].fac = "neutral", S.players[NEUTRAL].neutral = true, S.rads = [], S.weather = pickWeather(), S.wxRainSnd = "rain" === S.weather, setRainAmbience("rain" === S.weather), GL ? rebuildTerrainGL() : initGL(), FOG_ON = "off" !== cfg.fog, G.vis.fill(FOG_ON ? 0 : 2), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), resizeGL(), S.units = [], S.blds = [], S.bldById = /* @__PURE__ */ new Map(), S.projs = [], S.fx = [], S.rockets = [], S.sel = [], S.time = 0, S.crates = [], S.crateT = 30, S.cratesOn = "off" !== cfg.crates && !pendingMission, S.lastAlert = null, S.over = false, S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.history = [], S.histT = 0;
     for (let i = 1; i < NEUTRAL; i++) S.players[i].credits = DIFFS[S.players[i].diff].cash;
     const allSpots = (G.spots && G.spots.length ? G.spots : [[13, 13], [76, 56], [16, 66], [76, 10]]).map((e) => [e[0], e[1]]), wanted = [cfg.spawn, ...cfg.slots.map((e) => e.spawn)].map((e) => clamp(e, 0, allSpots.length - 1)), usedSpots = /* @__PURE__ */ new Set(), order = wanted.map((e) => {
       let t = e;
@@ -18798,7 +18928,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var entRef = (v) => v ? { id: v.id, e: v.e } : null;
   function unitToObj(u) {
-    return { mtag: u.mtag, cloakM: u.cloakM, arrived: u.arrived, id: u.id, key: u.key, owner: u.owner, x: u.x, y: u.y, hp: u.hp, maxhp: u.maxhp, ang: u.ang, tang: u.tang, order: u.order, tx: u.tx, ty: u.ty, cool: u.cool, cargo: u.cargo, ore: u.ore, unload: u.unload, deployed: u.deployed, xp: u.xp, vet: u.vet, alt: u.alt, ammo: u.ammo, inside: entRef(u.inside), host: entRef(u.host), drone: entRef(u.drone), erase: u.erase, frozen: u.frozen, state: u.state, home: entRef(u.home), padHome: entRef(u.padHome), padIdx: null != u.padIdx ? u.padIdx : null, origOwner: u.origOwner, slaves: (u.slaves || []).map(entRef), ctrlBy: entRef(u.ctrlBy), target: entRef(u.target), ref: entRef(u.ref), guard: u.guard, ctrl: u.ctrl, rangeMul: u.rangeMul, slowT: u.slowT, retreatT: u.retreatT, revealT: u.revealT, gunner: u.gunner || null, heroMode: u.heroMode };
+    return { patrol: u.patrol, hold: u.hold, ironUntil: u.ironUntil, mtag: u.mtag, cloakM: u.cloakM, arrived: u.arrived, id: u.id, key: u.key, owner: u.owner, x: u.x, y: u.y, hp: u.hp, maxhp: u.maxhp, ang: u.ang, tang: u.tang, order: u.order, tx: u.tx, ty: u.ty, cool: u.cool, cargo: u.cargo, ore: u.ore, unload: u.unload, deployed: u.deployed, xp: u.xp, vet: u.vet, alt: u.alt, ammo: u.ammo, inside: entRef(u.inside), host: entRef(u.host), drone: entRef(u.drone), erase: u.erase, frozen: u.frozen, state: u.state, home: entRef(u.home), padHome: entRef(u.padHome), padIdx: null != u.padIdx ? u.padIdx : null, origOwner: u.origOwner, slaves: (u.slaves || []).map(entRef), ctrlBy: entRef(u.ctrlBy), target: entRef(u.target), ref: entRef(u.ref), guard: u.guard, ctrl: u.ctrl, rangeMul: u.rangeMul, slowT: u.slowT, retreatT: u.retreatT, revealT: u.revealT, gunner: u.gunner || null, heroMode: u.heroMode };
   }
   function bldToObj(b) {
     return { mtag: b.mtag, blackoutT: b.blackoutT, id: b.id, key: b.key, owner: b.owner, tx: b.tx, ty: b.ty, size: b.size, hp: b.hp, maxhp: b.maxhp, cool: b.cool, target: entRef(b.target), rally: b.rally, sellT: b.sellT, repair: b.repair, chargeT: b.chargeT, charge: b.charge, rise: b.rise, spin: b.spin, capturedFac: b.capturedFac, garrison: (b.garrison || []).map(entRef), deployed: b.deployed, rot: b.rot, open: b.open, pairId: entRef(b.pairId ? { id: b.pairId, e: "b" } : null), pads: b.pads ? b.pads.map(entRef) : null };
@@ -18889,7 +19019,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return true;
   }
   function serializeGame() {
-    return { v: 1, time: S.time, fogOn: FOG_ON, neutral: NEUTRAL, cfg: JSON.parse(JSON.stringify(cfg)), cam: { x: cam.x, y: cam.y, z: cam.z }, nextId: S.nextId, mission: S.mission, players: S.players.map(playerToObj), units: S.units.filter((u) => !u.dead).map(unitToObj), blds: S.blds.filter((b) => !b.dead).map(bldToObj), rads: (S.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), weather: S.weather, wx: { amt: S.wxAmt, goal: S.wxGoal, t: S.wxT }, map: serializeMap() };
+    return { v: 1, time: S.time, fogOn: FOG_ON, neutral: NEUTRAL, cfg: JSON.parse(JSON.stringify(cfg)), cam: { x: cam.x, y: cam.y, z: cam.z }, nextId: S.nextId, mission: S.mission, players: S.players.map(playerToObj), units: S.units.filter((u) => !u.dead).map(unitToObj), blds: S.blds.filter((b) => !b.dead).map(bldToObj), rads: (S.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), weather: S.weather, wx: { amt: S.wxAmt, goal: S.wxGoal, t: S.wxT }, crates: { on: !!S.cratesOn, t: S.crateT, list: S.crates || [] }, lastAlert: S.lastAlert || null, map: serializeMap() };
   }
   function restoreGame(data) {
     cfg = data.cfg || cfg;
@@ -18904,7 +19034,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const um = new Map(data.units.map((r) => [r.id, r])), bm = new Map(data.blds.map((r) => [r.id, r]));
       for (const u of S.units) {
         const r = um.get(u.id);
-        r && (u.mtag = r.mtag, u.cloakM = r.cloakM, u.arrived = r.arrived);
+        r && (u.mtag = r.mtag, u.cloakM = r.cloakM, u.arrived = r.arrived, u.patrol = r.patrol, u.hold = r.hold, u.ironUntil = r.ironUntil);
       }
       for (const b of S.blds) {
         const r = bm.get(b.id);
@@ -18913,7 +19043,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
     for (const b of S.blds) if (!("gate" === b.key && b.open)) for (let ty = b.ty; ty < b.ty + b.size; ty++) for (let tx = b.tx; tx < b.tx + b.size; tx++) inMap(tx, ty) && (G.occ[idx(tx, ty)] = b.id);
     for (const p of S.players) recalcPower(p.id);
-    S.time = data.time, S.weather = data.weather || "clear", S.wxAmt = data.wx ? data.wx.amt : 1, S.wxGoal = data.wx ? data.wx.goal : S.weather, S.wxT = data.wx ? data.wx.t : 120, S.wxRainSnd = "rain" === S.weather, setRainAmbience("rain" === S.weather), S.over = false, S.running = true, S.sel = [], S.projs = [], S.fx = [], S.rockets = [], S.traffic = [], S.history = [], S.histT = 0, S.rads = (data.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.nextId = data.nextId || Math.max(1, ...S.units.map((u) => u.id), ...S.blds.map((b) => b.id)) + 1, S.mission = data.mission || null, FOG_ON = data.fogOn, cam.x = data.cam.x, cam.y = data.cam.y, cam.z = camZTarget = data.cam.z, mmCache = null, GL ? rebuildTerrainGL() : initGL(), resizeGL(), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), S.running = true, openMenu(null), hint("Game loaded");
+    S.time = data.time, S.cratesOn = !!(data.crates && data.crates.on), S.crateT = data.crates ? data.crates.t : 30, S.crates = data.crates ? data.crates.list : [], S.lastAlert = data.lastAlert || null, S.weather = data.weather || "clear", S.wxAmt = data.wx ? data.wx.amt : 1, S.wxGoal = data.wx ? data.wx.goal : S.weather, S.wxT = data.wx ? data.wx.t : 120, S.wxRainSnd = "rain" === S.weather, setRainAmbience("rain" === S.weather), S.over = false, S.running = true, S.sel = [], S.projs = [], S.fx = [], S.rockets = [], S.traffic = [], S.history = [], S.histT = 0, S.rads = (data.rads || []).map((r) => ({ x: r.x, y: r.y, r: r.r, life: r.life, owner: r.owner })), S.aiVis = /* @__PURE__ */ new Map(), S.knownEnemy = /* @__PURE__ */ new Map(), S.nextId = data.nextId || Math.max(1, ...S.units.map((u) => u.id), ...S.blds.map((b) => b.id)) + 1, S.mission = data.mission || null, FOG_ON = data.fogOn, cam.x = data.cam.x, cam.y = data.cam.y, cam.z = camZTarget = data.cam.z, mmCache = null, GL ? rebuildTerrainGL() : initGL(), resizeGL(), "function" == typeof onFogUpdated && onFogUpdated(), "function" == typeof setFogUniform && setFogUniform(FOG_ON), $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), S.running = true, openMenu(null), hint("Game loaded");
   }
   function loadSlot(n) {
     try {
@@ -20943,7 +21073,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     m.tier = m.tier || i + 1;
     m.unlock && !m._u && (m.brief.push(m.unlock), m._u = 1);
   });
-  var TIER_BLD = { power: 2, refinery: 2, hive: 2, barracks: 2, wall: 2, gate: 2, def1: 2, orerig: 3, factory: 3, silo: 3, repair: 3, lab: 4, airfield: 4, aa: 4, def2: 4, triturret: 4, bastion: 5, navalyard: 6, super: 7 };
+  var TIER_BLD = { power: 2, refinery: 2, hive: 2, barracks: 2, wall: 2, gate: 2, def1: 2, orerig: 3, factory: 3, silo: 3, repair: 3, lab: 4, airfield: 4, aa: 4, def2: 4, triturret: 4, bastion: 5, support: 5, navalyard: 6, super: 7 };
   function unitTier(k) {
     const u = UNITS[k];
     if (!u) return 9;
@@ -20958,12 +21088,12 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function techAllowed(k, isBld, abil) {
     const m = S.mission, T = m && m.tier;
     if (!T || m.tutorial) return true;
-    if (abil) return "super" === k ? T >= 7 : T >= 3;
+    if (abil) return "super" === k ? T >= 7 : "curtain" === k ? T >= 5 : T >= 3;
     return (isBld ? TIER_BLD[k] || 2 : unitTier(k)) <= T;
   }
   function tierNews(fac, t) {
     const b = (k) => bname(k, fac), u = (k) => uname(k, fac), F = FACTIONS[fac];
-    return { 1: "Infantry only. Capture buildings with Technicians; no construction.", 2: b("conyard") + ": " + b("power") + ", " + b("refinery") + ", " + b("barracks") + " and " + b("def1") + ".", 3: b("factory") + ": " + u(F.main) + ", support vehicles and the " + b("repair") + ".", 4: b("lab") + ", " + b("airfield") + ", aircraft, advanced defences and elite infantry.", 5: "Titan walker: the " + u("titan_" + ("allied" === fac ? "allied" : "soviet" === fac ? "soviet" : "yuri")) + ".", 6: "Naval yard and the full conventional arsenal.", 7: "Superweapon: the " + b("super") + ".", 8: "Everything is authorised." }[t] || "";
+    return { 1: "Infantry only. Capture buildings with Technicians; no construction.", 2: b("conyard") + ": " + b("power") + ", " + b("refinery") + ", " + b("barracks") + " and " + b("def1") + ".", 3: b("factory") + ": " + u(F.main) + ", support vehicles and the " + b("repair") + ".", 4: b("lab") + ", " + b("airfield") + ", aircraft, advanced defences and elite infantry.", 5: "Titan walker: the " + u("titan_" + ("allied" === fac ? "allied" : "soviet" === fac ? "soviet" : "yuri")) + ", and the " + b("support") + " support structure.", 6: "Naval yard and the full conventional arsenal.", 7: "Superweapon: the " + b("super") + ".", 8: "Everything is authorised." }[t] || "";
   }
   var CDIFF = {
     easy: { n: "RECRUIT", d: "Weaker enemies, smaller attacks, more credits. Stealth: short sight range, slow to spot you.", shift: -1, wave: 0.6, cash: 1.4, det: 80, detT: 2.8, emp: 100, alarmT: 15 },
@@ -23027,7 +23157,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       (S.thunderT = (void 0 === S.thunderT ? 6 + 10 * Math.random() : S.thunderT) - e) <= 0 && (S.thunderT = 9 + 14 * Math.random(), sfx("thunder"), lightningT = 0.16 + 0.12 * Math.random());
     }
     S.spyReveals && S.spyReveals.length && (S.spyReveals.forEach((r) => r.t -= e), S.spyReveals = S.spyReveals.filter((r) => r.t > 0));
-    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), tickProduction(t, e), t.isAI ? (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e)) : 0 === t.id && S.autopilot && (tickAI(t, e), aiMicro(t, e)));
+    tickCrates(e), tickIronFx();
+    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), t.curtainCD > 0 && (t.curtainCD -= e), tickProduction(t, e), t.isAI ? (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e), aiCurtain(t)) : 0 === t.id && S.autopilot && (tickAI(t, e), aiMicro(t, e)));
     for (const t of S.units) tickUnit(t, e);
     snowTrails();
     tickSeparation(e);
@@ -23232,7 +23363,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   var spyAim = false;
   var paradropAim = false;
   var empAim = false;
-  var ABILITIES = { super: { name: "Superweapon" }, spy: { name: "Spy Plane", cost: 1500, cd: 75 }, paradrop: { name: "Paradrop", cost: 1200, cd: 60 }, emp: { name: "EMP Burst", cost: 1800, cd: 90 } };
+  var curtainAim = false;
+  var ABILITIES = { super: { name: "Superweapon" }, spy: { name: "Spy Plane", cost: 1500, cd: 75 }, paradrop: { name: "Paradrop", cost: 1200, cd: 60 }, emp: { name: "EMP Burst", cost: 1800, cd: 90 }, curtain: { name: "Iron Curtain", cost: 0, cd: 150, desc: "Everything of yours in the target area becomes invulnerable for 12 seconds. Needs an Iron Curtain." } };
   function spyStrike(owner, x, y) {
     const p = S.players[owner];
     p.credits -= ABILITIES.spy.cost, p.spyCD = ABILITIES.spy.cd, S.spyReveals = S.spyReveals || [], S.spyReveals.push({ x, y, r: 260, t: 8 }), S.fx.push({ kind: "ring", x, y, z: 6, s: 1.1, c: "#8fd0ff", t: 0, life: 1.2 }), 0 === owner && (cam.x = x, cam.y = y, clampCam(), S.marker = { x, y, t: 0, c: "#8fd0ff" }, hint("Recon sweep"), sfx("beam"));
@@ -23254,6 +23386,75 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     for (const u of S.units) !u.dead && u.owner !== owner && u.owner !== NEUTRAL && teamOf(u.owner) !== teamOf(owner) && ("veh" === u.d.armor || u.d.fly) && dist2(u.x, u.y, x, y) < R2 && (u.frozen = 6, hit++, spark(u.x, u.y, "#9fe8ff"));
     for (const b of S.blds) !b.dead && b.owner !== owner && b.owner !== NEUTRAL && teamOf(b.owner) !== teamOf(owner) && dist2(b.x, b.y, x, y) < R2 && (b.blackoutT = 10, bhit++, spark(b.x, b.y, "#9fe8ff"));
     S.fx.push({ kind: "ring", x, y, z: 6, s: 1.4, c: "#9fe8ff", t: 0, life: 1 }), 0 === owner && (cam.x = x, cam.y = y, clampCam(), S.marker = { x, y, t: 0, c: "#9fe8ff" }, hint("EMP burst \u2014 " + hit + " units, " + bhit + " buildings disabled"), sfx("tesla"));
+  }
+  function ironCurtain(owner, x, y) {
+    const p = S.players[owner];
+    if (!p) return;
+    p.curtainCD = ABILITIES.curtain.cd;
+    const R2 = 120 * 120, until = S.time + 12;
+    let n = 0;
+    for (const u of S.units) !u.dead && u.owner === owner && dist2(u.x, u.y, x, y) < R2 && (u.ironUntil = until, n++);
+    for (const b of S.blds) !b.dead && b.owner === owner && dist2(b.x, b.y, x, y) < R2 && (b.ironUntil = until, n++);
+    S.fx.push({ kind: "ring", x, y, z: 6, s: 1.2, c: "#ff4a3a", t: 0, life: 1.1 }), 0 === owner && (cam.x = x, cam.y = y, clampCam(), S.marker = { x, y, t: 0, c: "#ff4a3a" }, hint("Iron Curtain \u2014 " + n + " invulnerable for 12s"), sfx("tesla"));
+  }
+  function tickIronFx() {
+    for (const u of S.units) u.ironUntil > S.time && !u.dead && Math.random() < 0.2 && S.fx.push({ kind: "spark", x: u.x + rnd(-8, 8), y: u.y + rnd(-8, 8), z: 6 + rnd(0, 10), s: 0.5, c: "#ff4a3a", t: 0, life: 0.35 });
+    for (const b of S.blds) b.ironUntil > S.time && !b.dead && Math.random() < 0.3 && S.fx.push({ kind: "spark", x: b.x + rnd(-16 * b.size, 16 * b.size), y: b.y + rnd(-16 * b.size, 16 * b.size), z: 10 + rnd(0, 20), s: 0.6, c: "#ff4a3a", t: 0, life: 0.4 });
+  }
+  function aiCurtain(p) {
+    if ("soviet" !== p.fac || (p.curtainCD || 0) > 0 || !hasActiveBld(p.id, "support")) return;
+    const fighting = S.units.filter((u) => !u.dead && u.owner === p.id && "attack" === u.order && u.target && !u.target.dead && "inf" !== u.d.kind);
+    if (fighting.length < 4) return;
+    const c = fighting[Math.floor(Math.random() * fighting.length)];
+    ironCurtain(p.id, c.x, c.y);
+  }
+  var CRATE_KINDS = ["cash", "cash", "heal", "vet", "unit", "reveal"];
+  function spawnCrate() {
+    for (let tries = 0; tries < 80; tries++) {
+      const tx = 6 + Math.floor(Math.random() * 80), ty = 6 + Math.floor(Math.random() * 60);
+      if (!walkable(tx, ty) || G.ore[idx(tx, ty)] > 0) continue;
+      const x = 32 * tx + 16, y = 32 * ty + 16;
+      if (S.blds.some((b) => !b.dead && b.owner !== NEUTRAL && dist2(b.x, b.y, x, y) < 102400)) continue;
+      if (S.crates.some((c) => dist2(c.x, c.y, x, y) < 16e4)) continue;
+      return S.crates.push({ x, y, k: CRATE_KINDS[Math.floor(Math.random() * CRATE_KINDS.length)], r: Math.random() * 6.28 }), true;
+    }
+    return false;
+  }
+  function collectCrate(c, u) {
+    const o = u.owner, p = S.players[o], me = 0 === o;
+    let label = "";
+    if ("reveal" === c.k && !me && (c.k = "cash"), "unit" === c.k && !FACTIONS[p.fac] && (c.k = "cash"), "cash" === c.k) {
+      const amt = 1e3 + 250 * Math.floor(4 * Math.random());
+      p.credits += amt, label = "+$" + amt;
+    } else if ("heal" === c.k) {
+      let n = 0;
+      for (const v of S.units) !v.dead && v.owner === o && dist2(v.x, v.y, c.x, c.y) < 44100 && (v.hp = v.maxhp, n++, spark(v.x, v.y, "#7ef0a0"));
+      label = "REPAIRED \xD7" + n;
+    } else if ("vet" === c.k) {
+      let n = 0;
+      for (const v of S.units) if (!v.dead && v.owner === o && dist2(v.x, v.y, c.x, c.y) < 32400 && (v.vet || 0) < 2) {
+        const r = Math.max(150, v.d.cost);
+        addXp(v, (0 === (v.vet || 0) ? 0.9 * r : 2.6 * r) - (v.xp || 0) + 1), n++;
+      }
+      label = n ? "PROMOTED \xD7" + n : "PROMOTED";
+    } else if ("unit" === c.k) {
+      const k = FACTIONS[p.fac].main, a = addUnit(o, k, c.x, c.y);
+      a && (a.order = "idle"), label = "+ " + uname(k, p.fac).toUpperCase();
+    } else "reveal" === c.k && (S.spyReveals = S.spyReveals || [], S.spyReveals.push({ x: c.x, y: c.y, r: 520, t: 14 }), label = "AREA REVEALED");
+    S.fx.push({ kind: "ring", x: c.x, y: c.y, z: 4, s: 0.8, c: "#ffd75e", t: 0, life: 0.8 }), textFx(c.x, c.y - 16, label, "#ffd75e"), me && (hint("Crate \u2014 " + label), sfx("place"));
+  }
+  function tickCrates(dt) {
+    if (!S.cratesOn || S.mission || S.over) return;
+    S.crates = S.crates || [];
+    S.crateT = (null == S.crateT ? 30 : S.crateT) - dt;
+    S.crateT <= 0 && (S.crateT = 40 + 30 * Math.random(), S.crates.length < 3 && spawnCrate());
+    for (let i = S.crates.length - 1; i >= 0; i--) {
+      const c = S.crates[i];
+      let got = null;
+      gridNear(c.x, c.y, 26, (u) => {
+        got || u.dead || u.d.fly || u.inside || u.owner === NEUTRAL || !S.players[u.owner] || dist2(u.x, u.y, c.x, c.y) > 676 || (got = u);
+      }), got && (S.crates.splice(i, 1), collectCrate(c, got));
+    }
   }
   function abilityClick(key) {
     const t = P();
@@ -23282,6 +23483,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       if ((t.empCD || 0) > 0) return void hint("Recharging \u2014 " + Math.ceil(t.empCD) + "s");
       if (t.credits < ABILITIES.emp.cost) return void hint("Need $" + ABILITIES.emp.cost);
       empAim = !empAim, hint(empAim ? "Tap the map to trigger the EMP" : "EMP cancelled");
+    }
+    if ("curtain" === key) {
+      if (!hasActiveBld(t.id, "support")) return void hint("Needs a powered " + bname("support", t.fac));
+      if ((t.curtainCD || 0) > 0) return void hint("Recharging \u2014 " + Math.ceil(t.curtainCD) + "s");
+      curtainAim = !curtainAim, hint(curtainAim ? "Tap the map to raise the Iron Curtain" : "Iron Curtain cancelled");
     }
   }
   function updateSuperPanel() {
@@ -23312,7 +23518,13 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     paradropStrike,
     fireEmp,
     abilityClick,
-    updateSuperPanel
+    updateSuperPanel,
+    ironCurtain,
+    tickIronFx,
+    aiCurtain,
+    spawnCrate,
+    collectCrate,
+    tickCrates
   });
   Object.defineProperties(window, {
     superAim: { get: () => superAim, set: (v) => {
@@ -23326,6 +23538,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }, configurable: true },
     empAim: { get: () => empAim, set: (v) => {
       empAim = v;
+    }, configurable: true },
+    curtainAim: { get: () => curtainAim, set: (v) => {
+      curtainAim = v;
     }, configurable: true }
   });
 })();
