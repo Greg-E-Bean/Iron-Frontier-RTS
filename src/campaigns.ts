@@ -491,9 +491,9 @@ const starStr=(n,max)=>{let s="";for(let i=0;i<(max||3);i++)s+='<i class="'+(i<n
 let radioQ=[],radioCur=null;
 function radioSay(who,text){radioQ.push({who,text})}
 function radioStop(){radioQ=[],radioCur=null;const el=$("#radioBox");el&&el.classList.add("hidden")}
-function radioTick(dt){if(radioCur&&(radioCur.t-=dt)>0)return;radioCur=null;const el=$("#radioBox");if(!radioQ.length)return void(el&&el.classList.add("hidden"));radioCur=radioQ.shift();radioCur.t=clamp(1.4+.062*radioCur.text.length,3.2,11);const c=castOf(radioCur.who);
+function radioTick(dt){if(radioCur&&(radioCur.t-=dt)>0)return;radioCur=null;const el=$("#radioBox");if(!radioQ.length)return void(el&&el.classList.add("hidden"));radioCur=radioQ.shift();radioCur.t=lineT(radioCur.who,radioCur.text,clamp(1.4+.062*radioCur.text.length,3.2,11));const c=castOf(radioCur.who);
 const fs="function"==typeof fmvSrc&&fmvSrc(radioCur.who);if(el){el.innerHTML='<div class="rbPort'+(fs?" img":"")+'" style="--rc:'+c.c+(fs?";background-image:url("+fs+")":"")+'">'+(fs?"":c.n.split(" ").map(w=>w[0]).join("").slice(-2))+'</div><div class="rbBody"><div class="rbName" style="color:'+c.c+'">'+c.n.toUpperCase()+'</div><div class="rbText">'+radioCur.text+"</div></div>",el.classList.remove("hidden"),el.style.animation="none",el.offsetWidth,el.style.animation=""}
-try{speakAs(c.fac,radioCur.text,c.acc,c.g,c.p,c.r)}catch(e){}}
+try{speakAs(c.fac,radioCur.text,c.acc,c.g,c.p,c.r,!1,radioCur.who)}catch(e){}}
 $("#radioBox")&&$("#radioBox").addEventListener("click",()=>{radioCur&&(radioCur.t=0)});
 
 // ---- objectives panel -------------------------------------------------------------
@@ -507,6 +507,13 @@ function skipTutorial(){S.mission=null,hint("Tutorial skipped — good luck!")}
 function updateTutorialPanel(){const m=S.mission,el=$("#tutorialPanel");if(m&&m.def)return;el.classList.remove("obj");if(!m||!m.tutorial)return void el.classList.add("hidden");el.classList.remove("hidden");const sig=(m.doneSteps||[]).join(",")+"|"+m.curStep;if(el._sig===sig)return;el._sig=sig;const rows=TUTORIAL_STEPS.map((s,i)=>{const done=m.doneSteps&&m.doneSteps[i],cur=i===m.curStep;return'<div class="ts'+(done?" done":cur?" cur":"")+'"><b>'+(done?"✓":i+1+".")+"</b><span>"+s.text+"</span></div>"}).join("");el.innerHTML='<div class="th">TUTORIAL<button class="tSkip">SKIP</button></div>'+rows}
 $("#tutorialPanel").addEventListener("click",e=>{if(e.target.closest(".tSkip"))return skipTutorial();const el=$("#tutorialPanel");e.target.closest(".tMin")&&(el._min=!el._min,el._sig=null)});
 
+// Recorded clips set the pace when present; the estimate covers anything else.
+const lineT=(w,t,est)=>{const d="function"==typeof castDur?castDur(w,t):0;return d?d+.55:est};
+function loadingVO(m){const prim=m.obj.filter(o=>!o.sec&&!o.hide);return[m.name+". Primary objectives."].concat(prim.map((o,i)=>(prim.length>1?["First","Then","And finally"][Math.min(i,2)]+": ":"")+o.text+"."),m.fpsOnly?["You are on your own out there. Stay out of sight."]:[])}
+// Every (character, line) the campaigns and films can speak, for the recording script.
+function castLineList(){const out=[],seen={},add=(w,t)=>{const k=w+"|"+t;t&&!seen[k]&&(seen[k]=1,out.push({who:w,text:t}))};
+for(const fac in CAMPAIGNS)for(const m of CAMPAIGNS[fac].missions){m.brief.forEach(([w,t])=>add(w,t));m.ev.forEach(e=>e.do.forEach(a=>"say"===a[0]&&add(a[1],a[2])));(m.alarm||[]).concat(m.win||[],m.lose||[]).forEach(([w,t])=>add(w,t));loadingVO(m).forEach(t=>add(m.brief[0][0],t))}
+if("undefined"!=typeof FILMS)for(const k in FILMS)FILMS[k].shots.forEach(sh=>sh.say&&add(sh.say[0],sh.say[1]));return out}
 // ---- menus ---------------------------------------------------------------------------
 const FAC_ICON={allied:"✦",soviet:"✪",yuri:"◉"};
 const mapName=k=>{const e=(typeof MAPS!="undefined"?MAPS:[]).find(x=>x.k===k);return e?e.n:k.toUpperCase()};
@@ -524,7 +531,7 @@ const objs=m.obj.filter(o=>!o.hide).map(o=>'<div class="bObj'+(o.sec?" sec":"")+
 const foes=m.foes.map(f=>'<span class="bFoe'+(f.ally?" ally":"")+'">'+(f.ally?"ALLY ":"")+FAC_NAME[f.fac].toUpperCase()+" · "+DIFFS[f.diff].name+"</span>").join(" ");
 $("#panelMain").innerHTML='<div class="bHead"><div><div class="bOp">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+"</div><h1>"+m.name.toUpperCase()+'</h1><div class="sub">'+m.loc+" · "+mapName(m.map)+" · "+TYPE_TAG(m)+'</div></div>'+starStr(missionStars(fac,idx))+'</div><div class="bMap">'+mapPreviewSVG(m.map,mp)+'</div><div class="bLines">'+lines+'</div><div class="filmRow"><button id="bPlay" class="bPlay">▶ PLAY TRANSMISSION</button>'+(m.film?'<button id="bFilm" class="bPlay">▶ CUTSCENE</button>':"")+'</div><div class="bSec">DIFFICULTY</div><div class="dPick">'+DORDER.map(k=>'<button data-d="'+k+'" class="'+(k===campDiff()?"on":"")+'">'+CDIFF[k].n+"</button>").join("")+'</div><div class="small dDesc" style="margin-top:4px;text-align:left">'+CDIFF[campDiff()].d+'</div><div class="bSec">OBJECTIVES</div>'+objs+(m.fpsOnly?'<div class="bObj"><b>⌖</b>First-person only — one operative, no base</div>':"")+'<div class="bSec">OPPOSITION</div><div>'+foes+'</div><button id="launchM">LAUNCH MISSION</button><button id="backCamp" '+SECBTN+">BACK</button>";
 document.querySelectorAll(".dPick button").forEach(b=>b.onclick=()=>{setCampDiff(b.dataset.d),document.querySelectorAll(".dPick button").forEach(x=>x.classList.toggle("on",x===b)),$(".dDesc").textContent=CDIFF[b.dataset.d].d});$("#launchM").onclick=()=>{briefPlay++,launchMission(fac,idx)},$("#backCamp").onclick=()=>{briefPlay++,showMissionList(fac)};
-m.film&&($("#bFilm").onclick=()=>{briefPlay++,playFilm(m.film)},filmSeen(m.film)||playFilm(m.film));$("#bPlay").onclick=()=>{audio();const tok=++briefPlay;let k=0;const next=()=>{if(tok!==briefPlay||k>=m.brief.length||!$("#bPlay"))return;const[w,t]=m.brief[k++],c=castOf(w);document.querySelectorAll(".bLine").forEach((e,i)=>e.classList.toggle("on",i===k-1));try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r)}catch(e){}setTimeout(next,1e3*clamp(1.2+.062*t.length,3,11))};next()}}
+m.film&&($("#bFilm").onclick=()=>{briefPlay++,playFilm(m.film)},filmSeen(m.film)||playFilm(m.film));$("#bPlay").onclick=()=>{audio();const tok=++briefPlay;let k=0;const next=()=>{if(tok!==briefPlay||k>=m.brief.length||!$("#bPlay"))return;const[w,t]=m.brief[k++],c=castOf(w);document.querySelectorAll(".bLine").forEach((e,i)=>e.classList.toggle("on",i===k-1));try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r,!1,w)}catch(e){}setTimeout(next,1e3*lineT(w,t,clamp(1.2+.062*t.length,3,11)))};next()}}
 // ---- loading screen: the map with objective markers, and the commander
 // reading out the objectives while the world finishes loading.
 function missionMapSVG(m){const W=920,H=720,img=mapPreviewImg(m.map),X=x=>(x/92*W).toFixed(1),Y=y=>(y/72*H).toFixed(1),spots=mapSpots(m.map)||[],c=[];
@@ -538,22 +545,22 @@ function showLoading(fac,idx){const m=CAMPAIGNS[fac].missions[idx],cd=campDiff()
 el.innerHTML='<div class="lsMap">'+missionMapSVG(m)+'</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-'+fac+'">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+" · "+CDIFF[cd].n+'</div><h1>'+m.name.toUpperCase()+'</h1><div class="lsLoc">'+m.loc+" · "+mapName(m.map)+'</div><div class="lsSec">PRIMARY OBJECTIVES</div>'+prim.map(o=>'<div class="bObj"><b>'+(null!=o.x?++k:"◆")+"</b>"+o.text+"</div>").join("")+(sec.length?'<div class="lsSec">BONUS</div>'+sec.map(o=>'<div class="bObj sec"><b>★</b>'+o.text+"</div>").join(""):"")+'<div class="lsVo"><span class="rbPort'+(lsImg?" img":"")+'" style="--rc:'+c.c+(lsImg?";background-image:url("+lsImg+")":"")+'">'+(lsImg?"":c.n.split(" ").map(w=>w[0]).join("").slice(-2))+'</span><span><b style="color:'+c.c+'">'+c.n.toUpperCase()+'</b><i class="lsWave"></i></span></div><div class="lsTip">TIP — '+pick(LOAD_TIPS)+'</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING…</button></div>';
 el.classList.remove("hidden"),S.running=!1;const bar=el.querySelector(".lsBar i"),go=el.querySelector(".lsGo");bar.style.width="0%",requestAnimationFrame(()=>{bar.style.transition="width 1.6s ease-out",bar.style.width="100%"});
 try{cineMood("tense")}catch(e){}
-const vo=[m.name+". Primary objectives."].concat(prim.map((o,i)=>(prim.length>1?["First","Then","And finally"][Math.min(i,2)]+": ":"")+o.text+"."),m.fpsOnly?["You are on your own out there. Stay out of sight."]:[]);let vi=0;const tok=el._tok=(el._tok||0)+1;
-const say=()=>{if(el._tok!==tok||el.classList.contains("hidden")||vi>=vo.length)return;const t=vo[vi++];try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r,!0)}catch(e){}setTimeout(say,1e3*clamp(1+.065*t.length,1.6,8))};setTimeout(say,500);
+const vo=loadingVO(m);let vi=0;const tok=el._tok=(el._tok||0)+1;
+const say=()=>{if(el._tok!==tok||el.classList.contains("hidden")||vi>=vo.length)return;const t=vo[vi++];try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r,!1,speaker)}catch(e){}setTimeout(say,1e3*lineT(speaker,t,clamp(1+.065*t.length,1.6,8)))};setTimeout(say,500);
 setTimeout(()=>{if(el._tok!==tok)return;go.disabled=!1,go.textContent="BEGIN MISSION ›",go.classList.add("ready")},1700);
 go.onclick=()=>{el._tok++,el.classList.add("hidden");try{speakStop(),cineStop()}catch(e){}S.running=!0}}
 
 // Debrief block for the results screen.
 function missionDebrief(win){const m=S.mission;if(!m||!m.def)return"";radioStop();const lines=(win?m.def.win:m.def.lose)||[],last=win&&m.idx===CAMPAIGNS[m.fac].missions.length-1,endKey=m.fac+"_end",autoEnd=last&&!filmSeen(endKey);
 last&&setTimeout(()=>{const b=$("#dEnd");b&&(b.onclick=()=>playFilm(endKey));autoEnd&&playFilm(endKey)},autoEnd?2500:0);
-let tk=0;const speak=()=>{if(!lines[tk])return;const[w,t]=lines[tk++],c=castOf(w);try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r)}catch(e){}setTimeout(speak,1e3*clamp(1.2+.062*t.length,3,11))};autoEnd||setTimeout(speak,600);
+let tk=0;const speak=()=>{if(!lines[tk])return;const[w,t]=lines[tk++],c=castOf(w);try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r,!1,w)}catch(e){}setTimeout(speak,1e3*lineT(w,t,clamp(1.2+.062*t.length,3,11)))};autoEnd||setTimeout(speak,600);
 const objs=m.objs.filter(o=>o.shown).map(o=>'<div class="bObj'+(o.sec?" sec":"")+(1===o.state?" ok":-1===o.state?" bad":"")+'"><b>'+(1===o.state?"✓":-1===o.state?"✗":"–")+"</b>"+o.text+"</div>").join("");
 return'<div class="dBrief">'+(last?'<button class="bPlay" id="dEnd">▶ WATCH THE ENDING</button>':"")+(win?'<div class="dStars">'+starStr(m.stars)+"</div>":"")+lines.map(([w,t])=>{const c=castOf(w);return'<div class="bLine"><span class="bWho" style="color:'+c.c+'">'+c.n+"</span><span>"+t+"</span></div>"}).join("")+objs+"</div>"}
 
 Object.assign(window, {
   FAC_NAME, CAMPAIGNS, launchMission, checkMissionOutcome, campaignUnlocked, unlockNext, applyPendingMission,
   otherFacs, launchTutorial, updateTutorial, updateTutorialPanel, skipTutorial,
-  showCampaign, showMissionList, showBriefing, missionDebrief, stealthBlock, showLoading, campDiff, CDIFF, missionStars, radioStop, CAST, castOf,
+  castLineList, showCampaign, showMissionList, showBriefing, missionDebrief, stealthBlock, showLoading, campDiff, CDIFF, missionStars, radioStop, CAST, castOf,
 });
 
 Object.defineProperties(window, {

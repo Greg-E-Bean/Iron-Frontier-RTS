@@ -202,8 +202,55 @@ function radioClick(fac: string) {
   const t = AC.currentTime + .005;
   sNoise(t, { type: "bandpass", f: "yuri" === fac ? 900 : 2400, q: 2.5, g: .05, a: .002, d: .07 }), sOsc(t, { w: "sine", f: "yuri" === fac ? 420 : 1350, g: .025, d: .045 });
 }
-function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, seed?: number, noClick?: boolean) {
-  if (!voicesEnabled || muted || sfxVol <= 0 || "undefined" == typeof speechSynthesis || !line) return;
+// ---- recorded voice bank -------------------------------------------------------
+// Every scripted line is pre-rendered with a neural voice (see scripts/voices)
+// into voice/*.mp3 plus voice/manifest.json ("vox|text" -> [file, seconds]).
+// A line with a recording plays that clip; anything else falls back to the
+// browser's speech engine.
+let VOX: any = null;
+try { fetch("voice/manifest.json").then(r => r.ok ? r.json() : null).then(m => { VOX = m; }).catch(() => { }); } catch (e) { }
+const voxBufs: any = {};
+let voxSrc: any = null, voxEnd = 0, _radioCurve: any = null;
+function voxFor(fac: string, per?: Persona) {
+  if (!per) return "soviet" === fac ? "ru_f" : "yuri" === fac ? "hive_m" : "gb_f";
+  if ("soviet" === fac) return "f" === per.g ? "ru_f" : "ru_m";
+  if ("yuri" === fac) return "f" === per.g ? "hive_f" : "hive_m";
+  return ("us" === per.acc ? "us_" : "rp" === per.acc || "en" === per.acc ? "gb_" : "gb2_") + per.g;
+}
+function voxEntry(vx: string, t: string) { return VOX && VOX[vx + "|" + t]; }
+function voxDur(vx: string, t: string) { const e = voxEntry(vx, t); return e ? e[1] : 0; }
+function voxBusy() { return !!AC && AC.currentTime < voxEnd; }
+function stopVox() { try { voxSrc && voxSrc.stop && voxSrc.stop(); } catch (e) { } voxSrc = null, voxEnd = 0; }
+function playVox(vx: string, t: string, radio: boolean) {
+  const e = voxEntry(vx, t);
+  if (!e || !sOK()) return !1;
+  stopVox();
+  const tok: any = {}; voxSrc = tok;
+  const go = (buf: any) => {
+    if (voxSrc !== tok || !buf) return;
+    const s = AC.createBufferSource(); s.buffer = buf;
+    let n: any = s;
+    if (radio) {
+      // comms: band-limited with a touch of saturation, like a field radio
+      const hp = AC.createBiquadFilter(); hp.type = "highpass", hp.frequency.value = 300;
+      const pk = AC.createBiquadFilter(); pk.type = "peaking", pk.frequency.value = 1800, pk.Q.value = .9, pk.gain.value = 5;
+      const lp = AC.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = 3600;
+      const ws = AC.createWaveShaper(); if (!_radioCurve) { _radioCurve = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; _radioCurve[i] = Math.tanh(1.8 * x) / Math.tanh(1.8); } } ws.curve = _radioCurve;
+      n.connect(hp), hp.connect(pk), pk.connect(ws), ws.connect(lp), n = lp, radioClick("allied");
+    }
+    const g = AC.createGain(); g.gain.value = radio ? 1.15 : 1; n.connect(g), g.connect(sfxBus);
+    s.start(AC.currentTime + (radio ? .06 : 0)), voxSrc = s, voxEnd = AC.currentTime + buf.duration + .1;
+  };
+  const c = voxBufs[e[0]];
+  if (c && c.then) c.then(go); else if (c) go(c);
+  else voxBufs[e[0]] = fetch("voice/" + e[0]).then(r => r.arrayBuffer()).then(a => AC.decodeAudioData(a)).then((b: any) => (voxBufs[e[0]] = b, go(b), b)).catch(() => { delete voxBufs[e[0]]; });
+  return !0;
+}
+function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, seed?: number, noClick?: boolean, vox?: string | null) {
+  if (!voicesEnabled || muted || sfxVol <= 0 || !line) return;
+  if (!urgent && voxBusy()) return;
+  if (playVox(vox || voxFor(fac, per), Array.isArray(line) ? line[0] : line, !noClick)) return;
+  if ("undefined" == typeof speechSynthesis) return;
   try {
     per = per || ANNOUNCER[fac] || ANNOUNCER.allied;
     const v = pickVoiceFor(per, seed || 0), ru = !!v && /^(ru|uk|be|bg|sr)/i.test(v.lang), text = Array.isArray(line) ? (ru ? line[1] : line[0]) : line;
@@ -920,8 +967,22 @@ const ADMIN_MUSIC_KEY="ifr_admin_music";function loadAdminMusic(){try{return JSO
 let lightningT = 0;
 
 // Campaign characters speak over the radio in their own voice persona.
-function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number, noClick?: boolean) { speakLine(fac, text, !0, P_(acc, g, p || 1, r || 1), 0, noClick); }
-function speakStop() { try { "undefined" != typeof speechSynthesis && speechSynthesis.cancel(); } catch (e) { } }
+function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number, noClick?: boolean, who?: string) { speakLine(fac, text, !0, P_(acc, g, p || 1, r || 1), 0, noClick, who ? "c_" + who : null); }
+function speakStop() { stopVox(); try { "undefined" != typeof speechSynthesis && speechSynthesis.cancel(); } catch (e) { } }
+// Recorded length of a cast line in seconds (0 if not recorded).
+function castDur(who: string, text: string) { return voxDur("c_" + who, text); }
+// Every (voice, line) pair units and announcers can say, for the recording script.
+function voiceBankList() {
+  const out: any[] = [], seen: any = {}, add = (vx: string, t: any) => { const s = Array.isArray(t) ? t[0] : t; if (!s) return; const k = vx + "|" + s; seen[k] || (seen[k] = 1, out.push({ vox: vx, text: s })); };
+  for (const fac of ["allied", "soviet", "yuri"]) {
+    const F = VOICE_LINES[fac], units = (FACTIONS[fac] && FACTIONS[fac].units) || [];
+    for (const key of units) { const u: any = { key, d: UNITS[key] }; if (!u.d) continue; const role = voiceRoleFor(u), per = personaFor(fac, key, role), vx = voxFor(fac, per); for (const cat of ["sel", "go"]) (unitLines(fac, cat, role, key, per) || []).forEach((t: any) => add(vx, t)); }
+    const vxA = voxFor(fac, ANNOUNCER[fac]);
+    (F.unit || []).forEach((t: any) => add(vxA, t)), (F.ready || []).forEach((t: any) => add(vxA, t));
+    for (const k in F.ann || {}) add(vxA, F.ann[k]);
+  }
+  return out;
+}
 // ---- cutscene score: a sustained pad per mood, plus hits on cuts ----------
 let cine: any = null;
 function cineStop() {
@@ -978,7 +1039,7 @@ function cineMood(mood: string) {
   let verb: any = null; try { verb = AC.createGain(), verb.gain.value = .5, verb.connect(verbIn); } catch (e) { verb = null; }
   const c: any = { out, bus, verb, M, mood, next: t + .05, step: 0, nodes: [], vol, base };
   // keep the score under the dialogue
-  c.iv = setInterval(() => { if (cine !== c || !sOK()) return; cineSchedule(c); const talking = "undefined" != typeof speechSynthesis && speechSynthesis.speaking; c.out.gain.setTargetAtTime(talking ? c.base * .42 : c.base, AC.currentTime, .35); }, 120);
+  c.iv = setInterval(() => { if (cine !== c || !sOK()) return; cineSchedule(c); const talking = voxBusy() || "undefined" != typeof speechSynthesis && speechSynthesis.speaking; c.out.gain.setTargetAtTime(talking ? c.base * .42 : c.base, AC.currentTime, .35); }, 120);
   cineSchedule(c);
   if (musicBus) { const tt = AC.currentTime; musicBus.gain.cancelScheduledValues(tt), musicBus.gain.setValueAtTime(musicBus.gain.value, tt), musicBus.gain.linearRampToValueAtTime(0, tt + 1.2); }
   customTrackEl && (customTrackEl.volume = 0);
@@ -999,7 +1060,7 @@ function cineHit(kind: string) {
   }
 }
 Object.assign(window, {
-  speakAs, speakStop, cineMood, cineStop, cineHit, audio, sfx, sfxHit, setMuted, setMasterVol, setSfxVol, setMusicVol,
+  speakAs, speakStop, castDur, voxBusy, voiceBankList, cineMood, cineStop, cineHit, audio, sfx, sfxHit, setMuted, setMasterVol, setSfxVol, setMusicVol,
   setTrackSel, setRainAmbience, startFpsAmbience, stopFpsAmbience, startMusic, MUSIC_TRACKS,
   loadAdminMusic, saveAdminMusic, refreshCustomMusic, totalTrackCount, trackName,
   playVoiceLine, setVoicesEnabled, announce, announceHint, audioTap, musicRenderSection: renderSection, musicStems: musicSynth, musicSongABC,

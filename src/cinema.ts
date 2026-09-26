@@ -346,14 +346,14 @@ let F=null;
 function filmSeen(k){try{return!!localStorage.getItem("ifr_film_"+k)}catch(e){return!1}}
 function markFilm(k){try{localStorage.setItem("ifr_film_"+k,"1")}catch(e){}}
 function lineDur(t){return clamp(1.6+.066*t.length,3.2,13)}
-function shotDur(sh){return Math.max(sh.d||0,sh.say?lineDur(sh.say[1])+.8:4)}
+function shotDur(sh){const cd=sh.say&&"function"==typeof castDur?castDur(sh.say[0],sh.say[1]):0;return Math.max(sh.d||0,sh.say?(cd?cd+1:lineDur(sh.say[1])+.8):4)}
 function ensureCine(){let el=$("#cine");if(el)return el;el=document.createElement("div"),el.id="cine",el.className="hidden",el.innerHTML='<canvas></canvas><div class="cBar t"></div><div class="cBar b"></div><div class="cSub"><b></b><span></span></div><div class="cTitle"></div><button class="cSkip">SKIP ›</button>',document.body.appendChild(el);
 el.querySelector(".cSkip").addEventListener("click",e=>{e.stopPropagation(),endFilm()});el.addEventListener("click",()=>{F&&(F.st=shotDur(F.film.shots[F.i]))});return el}
 function playFilm(key,done){const film=FILMS[key];if(!film)return void(done&&done());endFilm(!0);const el=ensureCine();el.classList.remove("hidden");markFilm(key);try{audio()}catch(e){}
 film.shots.forEach((sh,i)=>{probeMedia(shotKey(key,i)),"portrait"===sh.s&&sh.p&&probeMedia(sh.p.who)});F={key,film,i:-1,st:0,T:0,last:performance.now(),done,el,cv:el.querySelector("canvas"),grain:null};el.querySelector(".cTitle").textContent=film.title.toUpperCase();try{cineMood(film.mood||"tense")}catch(e){}nextShot(),requestAnimationFrame(filmFrame)}
 function endFilm(silent){if(!F)return;const f=F;F=null;f.el.classList.add("hidden");try{speakStop(),cineStop()}catch(e){}silent||f.done&&f.done()}
 function nextShot(){F.i++;if(F.i>=F.film.shots.length)return endFilm();const sh=F.film.shots[F.i];F.st=0,F.fxDone={};const sub=F.el.querySelector(".cSub");
-if(sh.say){const c=castOf(sh.say[0]);sub.querySelector("b").textContent="narr"===sh.say[0]||"portrait"===sh.s?"":c.n.toUpperCase(),sub.querySelector("b").style.color=c.c,sub.querySelector("span").textContent=sh.say[1],sub.classList.add("on");try{speakAs(c.fac,sh.say[1],c.acc,c.g,c.p,c.r,"narr"===sh.say[0])}catch(e){}}else sub.classList.remove("on");
+if(sh.say){const c=castOf(sh.say[0]);sub.querySelector("b").textContent="narr"===sh.say[0]||"portrait"===sh.s?"":c.n.toUpperCase(),sub.querySelector("b").style.color=c.c,sub.querySelector("span").textContent=sh.say[1],sub.classList.add("on");try{speakAs(c.fac,sh.say[1],c.acc,c.g,c.p,c.r,!0,sh.say[0])}catch(e){}}else sub.classList.remove("on");
 try{sh.fx&&cineHit(sh.fx),sh.mood&&cineMood(sh.mood)}catch(e){}}
 function filmFrame(now){if(!F)return;const dt=Math.min(.1,(now-F.last)/1e3);F.last=now,F.T+=dt,F.st+=dt;const sh=F.film.shots[F.i],D=shotDur(sh);if(F.st>=D){nextShot();if(!F)return;return void requestAnimationFrame(filmFrame)}
 for(const[at,k]of sh.fxAt||[])F.st>=at&&!F.fxDone[at]&&(F.fxDone[at]=1,cineHit(k));

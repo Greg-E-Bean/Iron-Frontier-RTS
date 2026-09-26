@@ -16321,8 +16321,88 @@ varying vec3 vFgWN;
     const t = AC.currentTime + 5e-3;
     sNoise(t, { type: "bandpass", f: "yuri" === fac ? 900 : 2400, q: 2.5, g: 0.05, a: 2e-3, d: 0.07 }), sOsc(t, { w: "sine", f: "yuri" === fac ? 420 : 1350, g: 0.025, d: 0.045 });
   }
-  function speakLine(fac, line, urgent, per, seed, noClick) {
-    if (!voicesEnabled || muted || sfxVol <= 0 || "undefined" == typeof speechSynthesis || !line) return;
+  var VOX = null;
+  try {
+    fetch("voice/manifest.json").then((r) => r.ok ? r.json() : null).then((m) => {
+      VOX = m;
+    }).catch(() => {
+    });
+  } catch (e) {
+  }
+  var voxBufs = {};
+  var voxSrc = null;
+  var voxEnd = 0;
+  var _radioCurve = null;
+  function voxFor(fac, per) {
+    if (!per) return "soviet" === fac ? "ru_f" : "yuri" === fac ? "hive_m" : "gb_f";
+    if ("soviet" === fac) return "f" === per.g ? "ru_f" : "ru_m";
+    if ("yuri" === fac) return "f" === per.g ? "hive_f" : "hive_m";
+    return ("us" === per.acc ? "us_" : "rp" === per.acc || "en" === per.acc ? "gb_" : "gb2_") + per.g;
+  }
+  function voxEntry(vx, t) {
+    return VOX && VOX[vx + "|" + t];
+  }
+  function voxDur(vx, t) {
+    const e = voxEntry(vx, t);
+    return e ? e[1] : 0;
+  }
+  function voxBusy() {
+    return !!AC && AC.currentTime < voxEnd;
+  }
+  function stopVox() {
+    try {
+      voxSrc && voxSrc.stop && voxSrc.stop();
+    } catch (e) {
+    }
+    voxSrc = null, voxEnd = 0;
+  }
+  function playVox(vx, t, radio) {
+    const e = voxEntry(vx, t);
+    if (!e || !sOK()) return false;
+    stopVox();
+    const tok = {};
+    voxSrc = tok;
+    const go = (buf) => {
+      if (voxSrc !== tok || !buf) return;
+      const s = AC.createBufferSource();
+      s.buffer = buf;
+      let n = s;
+      if (radio) {
+        const hp = AC.createBiquadFilter();
+        hp.type = "highpass", hp.frequency.value = 300;
+        const pk = AC.createBiquadFilter();
+        pk.type = "peaking", pk.frequency.value = 1800, pk.Q.value = 0.9, pk.gain.value = 5;
+        const lp = AC.createBiquadFilter();
+        lp.type = "lowpass", lp.frequency.value = 3600;
+        const ws = AC.createWaveShaper();
+        if (!_radioCurve) {
+          _radioCurve = new Float32Array(1024);
+          for (let i = 0; i < 1024; i++) {
+            const x = i / 512 - 1;
+            _radioCurve[i] = Math.tanh(1.8 * x) / Math.tanh(1.8);
+          }
+        }
+        ws.curve = _radioCurve;
+        n.connect(hp), hp.connect(pk), pk.connect(ws), ws.connect(lp), n = lp, radioClick("allied");
+      }
+      const g = AC.createGain();
+      g.gain.value = radio ? 1.15 : 1;
+      n.connect(g), g.connect(sfxBus);
+      s.start(AC.currentTime + (radio ? 0.06 : 0)), voxSrc = s, voxEnd = AC.currentTime + buf.duration + 0.1;
+    };
+    const c = voxBufs[e[0]];
+    if (c && c.then) c.then(go);
+    else if (c) go(c);
+    else voxBufs[e[0]] = fetch("voice/" + e[0]).then((r) => r.arrayBuffer()).then((a) => AC.decodeAudioData(a)).then((b) => (voxBufs[e[0]] = b, go(b), b)).catch(() => {
+      delete voxBufs[e[0]];
+    });
+    return true;
+  }
+  function speakLine(fac, line, urgent, per, seed, noClick, vox) {
+    if (!voicesEnabled || muted || sfxVol <= 0 || !line) return;
+    if (!urgent && voxBusy()) return;
+    if (playVox(vox || voxFor(fac, per), Array.isArray(line) ? line[0] : line, !noClick)) return;
+    if ("undefined" == typeof speechSynthesis) return;
     try {
       per = per || ANNOUNCER[fac] || ANNOUNCER.allied;
       const v = pickVoiceFor(per, seed || 0), ru = !!v && /^(ru|uk|be|bg|sr)/i.test(v.lang), text = Array.isArray(line) ? ru ? line[1] : line[0] : line;
@@ -17281,14 +17361,39 @@ varying vec3 vFgWN;
     idx < MUSIC_TRACKS.length ? (stopCustomTrack(), playTrackRef && playTrackRef(idx)) : (musicGen++, playCustomTrack(idx - MUSIC_TRACKS.length));
   }
   var lightningT = 0;
-  function speakAs(fac, text, acc, g, p, r, noClick) {
-    speakLine(fac, text, true, P_(acc, g, p || 1, r || 1), 0, noClick);
+  function speakAs(fac, text, acc, g, p, r, noClick, who) {
+    speakLine(fac, text, true, P_(acc, g, p || 1, r || 1), 0, noClick, who ? "c_" + who : null);
   }
   function speakStop() {
+    stopVox();
     try {
       "undefined" != typeof speechSynthesis && speechSynthesis.cancel();
     } catch (e) {
     }
+  }
+  function castDur(who, text) {
+    return voxDur("c_" + who, text);
+  }
+  function voiceBankList() {
+    const out = [], seen = {}, add = (vx, t) => {
+      const s = Array.isArray(t) ? t[0] : t;
+      if (!s) return;
+      const k = vx + "|" + s;
+      seen[k] || (seen[k] = 1, out.push({ vox: vx, text: s }));
+    };
+    for (const fac of ["allied", "soviet", "yuri"]) {
+      const F = VOICE_LINES[fac], units = FACTIONS[fac] && FACTIONS[fac].units || [];
+      for (const key of units) {
+        const u = { key, d: UNITS[key] };
+        if (!u.d) continue;
+        const role = voiceRoleFor(u), per = personaFor(fac, key, role), vx = voxFor(fac, per);
+        for (const cat of ["sel", "go"]) (unitLines(fac, cat, role, key, per) || []).forEach((t) => add(vx, t));
+      }
+      const vxA = voxFor(fac, ANNOUNCER[fac]);
+      (F.unit || []).forEach((t) => add(vxA, t)), (F.ready || []).forEach((t) => add(vxA, t));
+      for (const k in F.ann || {}) add(vxA, F.ann[k]);
+    }
+    return out;
   }
   var cine = null;
   function cineStop() {
@@ -17380,7 +17485,7 @@ varying vec3 vFgWN;
     c.iv = setInterval(() => {
       if (cine !== c || !sOK()) return;
       cineSchedule(c);
-      const talking = "undefined" != typeof speechSynthesis && speechSynthesis.speaking;
+      const talking = voxBusy() || "undefined" != typeof speechSynthesis && speechSynthesis.speaking;
       c.out.gain.setTargetAtTime(talking ? c.base * 0.42 : c.base, AC.currentTime, 0.35);
     }, 120);
     cineSchedule(c);
@@ -17425,6 +17530,9 @@ varying vec3 vFgWN;
   Object.assign(window, {
     speakAs,
     speakStop,
+    castDur,
+    voxBusy,
+    voiceBankList,
     cineMood,
     cineStop,
     cineHit,
@@ -21234,14 +21342,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const el = $("#radioBox");
     if (!radioQ.length) return void (el && el.classList.add("hidden"));
     radioCur = radioQ.shift();
-    radioCur.t = clamp(1.4 + 0.062 * radioCur.text.length, 3.2, 11);
+    radioCur.t = lineT(radioCur.who, radioCur.text, clamp(1.4 + 0.062 * radioCur.text.length, 3.2, 11));
     const c = castOf(radioCur.who);
     const fs = "function" == typeof fmvSrc && fmvSrc(radioCur.who);
     if (el) {
       el.innerHTML = '<div class="rbPort' + (fs ? " img" : "") + '" style="--rc:' + c.c + (fs ? ";background-image:url(" + fs + ")" : "") + '">' + (fs ? "" : c.n.split(" ").map((w) => w[0]).join("").slice(-2)) + '</div><div class="rbBody"><div class="rbName" style="color:' + c.c + '">' + c.n.toUpperCase() + '</div><div class="rbText">' + radioCur.text + "</div></div>", el.classList.remove("hidden"), el.style.animation = "none", el.offsetWidth, el.style.animation = "";
     }
     try {
-      speakAs(c.fac, radioCur.text, c.acc, c.g, c.p, c.r);
+      speakAs(c.fac, radioCur.text, c.acc, c.g, c.p, c.r, false, radioCur.who);
     } catch (e) {
     }
   }
@@ -21295,6 +21403,28 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const el = $("#tutorialPanel");
     e.target.closest(".tMin") && (el._min = !el._min, el._sig = null);
   });
+  var lineT = (w, t, est) => {
+    const d = "function" == typeof castDur ? castDur(w, t) : 0;
+    return d ? d + 0.55 : est;
+  };
+  function loadingVO(m) {
+    const prim = m.obj.filter((o) => !o.sec && !o.hide);
+    return [m.name + ". Primary objectives."].concat(prim.map((o, i) => (prim.length > 1 ? ["First", "Then", "And finally"][Math.min(i, 2)] + ": " : "") + o.text + "."), m.fpsOnly ? ["You are on your own out there. Stay out of sight."] : []);
+  }
+  function castLineList() {
+    const out = [], seen = {}, add = (w, t) => {
+      const k = w + "|" + t;
+      t && !seen[k] && (seen[k] = 1, out.push({ who: w, text: t }));
+    };
+    for (const fac in CAMPAIGNS) for (const m of CAMPAIGNS[fac].missions) {
+      m.brief.forEach(([w, t]) => add(w, t));
+      m.ev.forEach((e) => e.do.forEach((a) => "say" === a[0] && add(a[1], a[2])));
+      (m.alarm || []).concat(m.win || [], m.lose || []).forEach(([w, t]) => add(w, t));
+      loadingVO(m).forEach((t) => add(m.brief[0][0], t));
+    }
+    if ("undefined" != typeof FILMS) for (const k in FILMS) FILMS[k].shots.forEach((sh) => sh.say && add(sh.say[0], sh.say[1]));
+    return out;
+  }
   var FAC_ICON = { allied: "\u2726", soviet: "\u272A", yuri: "\u25C9" };
   var mapName = (k) => {
     const e = (typeof MAPS != "undefined" ? MAPS : []).find((x) => x.k === k);
@@ -21365,10 +21495,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const [w, t] = m.brief[k++], c = castOf(w);
         document.querySelectorAll(".bLine").forEach((e, i) => e.classList.toggle("on", i === k - 1));
         try {
-          speakAs(c.fac, t, c.acc, c.g, c.p, c.r);
+          speakAs(c.fac, t, c.acc, c.g, c.p, c.r, false, w);
         } catch (e) {
         }
-        setTimeout(next, 1e3 * clamp(1.2 + 0.062 * t.length, 3, 11));
+        setTimeout(next, 1e3 * lineT(w, t, clamp(1.2 + 0.062 * t.length, 3, 11)));
       };
       next();
     };
@@ -21406,17 +21536,17 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       cineMood("tense");
     } catch (e) {
     }
-    const vo = [m.name + ". Primary objectives."].concat(prim.map((o, i) => (prim.length > 1 ? ["First", "Then", "And finally"][Math.min(i, 2)] + ": " : "") + o.text + "."), m.fpsOnly ? ["You are on your own out there. Stay out of sight."] : []);
+    const vo = loadingVO(m);
     let vi = 0;
     const tok = el._tok = (el._tok || 0) + 1;
     const say2 = () => {
       if (el._tok !== tok || el.classList.contains("hidden") || vi >= vo.length) return;
       const t = vo[vi++];
       try {
-        speakAs(c.fac, t, c.acc, c.g, c.p, c.r, true);
+        speakAs(c.fac, t, c.acc, c.g, c.p, c.r, false, speaker);
       } catch (e) {
       }
-      setTimeout(say2, 1e3 * clamp(1 + 0.065 * t.length, 1.6, 8));
+      setTimeout(say2, 1e3 * lineT(speaker, t, clamp(1 + 0.065 * t.length, 1.6, 8)));
     };
     setTimeout(say2, 500);
     setTimeout(() => {
@@ -21447,10 +21577,10 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       if (!lines[tk]) return;
       const [w, t] = lines[tk++], c = castOf(w);
       try {
-        speakAs(c.fac, t, c.acc, c.g, c.p, c.r);
+        speakAs(c.fac, t, c.acc, c.g, c.p, c.r, false, w);
       } catch (e) {
       }
-      setTimeout(speak, 1e3 * clamp(1.2 + 0.062 * t.length, 3, 11));
+      setTimeout(speak, 1e3 * lineT(w, t, clamp(1.2 + 0.062 * t.length, 3, 11)));
     };
     autoEnd || setTimeout(speak, 600);
     const objs = m.objs.filter((o) => o.shown).map((o) => '<div class="bObj' + (o.sec ? " sec" : "") + (1 === o.state ? " ok" : -1 === o.state ? " bad" : "") + '"><b>' + (1 === o.state ? "\u2713" : -1 === o.state ? "\u2717" : "\u2013") + "</b>" + o.text + "</div>").join("");
@@ -21472,6 +21602,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     updateTutorial,
     updateTutorialPanel,
     skipTutorial,
+    castLineList,
     showCampaign,
     showMissionList,
     showBriefing,
@@ -22426,7 +22557,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return clamp(1.6 + 0.066 * t.length, 3.2, 13);
   }
   function shotDur(sh) {
-    return Math.max(sh.d || 0, sh.say ? lineDur(sh.say[1]) + 0.8 : 4);
+    const cd = sh.say && "function" == typeof castDur ? castDur(sh.say[0], sh.say[1]) : 0;
+    return Math.max(sh.d || 0, sh.say ? cd ? cd + 1 : lineDur(sh.say[1]) + 0.8 : 4);
   }
   function ensureCine() {
     let el = $("#cine");
@@ -22483,7 +22615,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const c = castOf(sh.say[0]);
       sub.querySelector("b").textContent = "narr" === sh.say[0] || "portrait" === sh.s ? "" : c.n.toUpperCase(), sub.querySelector("b").style.color = c.c, sub.querySelector("span").textContent = sh.say[1], sub.classList.add("on");
       try {
-        speakAs(c.fac, sh.say[1], c.acc, c.g, c.p, c.r, "narr" === sh.say[0]);
+        speakAs(c.fac, sh.say[1], c.acc, c.g, c.p, c.r, true, sh.say[0]);
       } catch (e) {
       }
     } else sub.classList.remove("on");
