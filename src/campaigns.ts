@@ -6,25 +6,25 @@ export {};
 // (radio chatter, enemy attack waves, reinforcements, reveals) fired by time,
 // by an objective completing or by the player reaching a place. Map points
 // are in tiles (92x72).
-const FAC_NAME={allied:"Vanguard",soviet:"Legion",yuri:"Syndicate"};
-function otherFacs(fac){return["allied","soviet","yuri"].filter(f=>f!==fac)}
+const FAC_NAME={vanguard:"Vanguard",legion:"Legion",syndicate:"Syndicate"};
+function otherFacs(fac){return["vanguard","legion","syndicate"].filter(f=>f!==fac)}
 
 // Characters speak over the radio in their own voice.
 const CAST={
-  narr:{n:"Narrator",fac:"allied",acc:"rp",g:"m",p:.82,r:.9,c:"#d8dde2"},
-  marsh:{n:"Dr. Elias Marsh",fac:"allied",acc:"rp",g:"m",p:1.02,r:1.08,c:"#9fe8d0",hat:"glasses",role:"Project Starfall — lead scientist"},
-  reyes:{n:"Col. Ada Reyes",fac:"allied",acc:"rp",g:"f",p:1,r:1,c:"#8fd0ff",hat:"beret",role:"Vanguard Command"},
-  hale:{n:"Lt. Marcus Hale",fac:"allied",acc:"us",g:"m",p:1,r:1.06,c:"#a8e0ff",hat:"helmet",role:"Vanguard 3rd Battlegroup"},
-  ghost:{n:"Ghost",fac:"allied",acc:"ie",g:"f",p:1.08,r:1.02,c:"#d6f2ff",hat:"hair",role:"Vanguard Special Operations"},
-  draganov:{n:"Marshal Draganov",fac:"soviet",acc:"ru",g:"m",p:.84,r:.9,c:"#ff8a6a",hat:"cap",role:"Legion Supreme Command"},
-  volkova:{n:"Commissar Volkova",fac:"soviet",acc:"ru",g:"f",p:1,r:1.04,c:"#ffb08a",hat:"cap",role:"Legion Political Directorate"},
-  bogdan:{n:"Chief Engineer Bogdan",fac:"soviet",acc:"north",g:"m",p:.95,r:1,c:"#ffc9a0",hat:"helmet",role:"Legion Engineering Corps"},
-  reaper:{n:"Reaper",fac:"soviet",acc:"ru",g:"m",p:.74,r:.88,c:"#ff6a55",hat:"helmet",role:"Legion Special Operations"},
-  voice:{n:"The Voice",fac:"yuri",acc:"rp",g:"m",p:.8,r:.86,c:"#d59cff",hat:"hood",role:"The Hive"},
-  senna:{n:"Adept Senna",fac:"yuri",acc:"rp",g:"f",p:1.1,r:.96,c:"#e6c2ff",hat:"hood",role:"Syndicate Adept"},
-  phantom:{n:"Phantom",fac:"yuri",acc:"za",g:"f",p:.9,r:.95,c:"#c79bff",hat:"hair",role:"Syndicate Infiltrator"}
+  narr:{n:"Narrator",fac:"vanguard",acc:"rp",g:"m",p:.82,r:.9,c:"#d8dde2"},
+  marsh:{n:"Dr. Elias Marsh",fac:"vanguard",acc:"rp",g:"m",p:1.02,r:1.08,c:"#9fe8d0",hat:"glasses",role:"Project Starfall — lead scientist"},
+  reyes:{n:"Col. Ada Reyes",fac:"vanguard",acc:"rp",g:"f",p:1,r:1,c:"#8fd0ff",hat:"beret",role:"Vanguard Command"},
+  hale:{n:"Lt. Marcus Hale",fac:"vanguard",acc:"us",g:"m",p:1,r:1.06,c:"#a8e0ff",hat:"helmet",role:"Vanguard 3rd Battlegroup"},
+  ghost:{n:"Ghost",fac:"vanguard",acc:"ie",g:"f",p:1.08,r:1.02,c:"#d6f2ff",hat:"hair",role:"Vanguard Special Operations"},
+  draganov:{n:"Marshal Draganov",fac:"legion",acc:"ru",g:"m",p:.84,r:.9,c:"#ff8a6a",hat:"cap",role:"Legion Supreme Command"},
+  volkova:{n:"Commissar Volkova",fac:"legion",acc:"ru",g:"f",p:1,r:1.04,c:"#ffb08a",hat:"cap",role:"Legion Political Directorate"},
+  bogdan:{n:"Chief Engineer Bogdan",fac:"legion",acc:"north",g:"m",p:.95,r:1,c:"#ffc9a0",hat:"helmet",role:"Legion Engineering Corps"},
+  reaper:{n:"Reaper",fac:"legion",acc:"ru",g:"m",p:.74,r:.88,c:"#ff6a55",hat:"helmet",role:"Legion Special Operations"},
+  voice:{n:"The Voice",fac:"syndicate",acc:"rp",g:"m",p:.8,r:.86,c:"#d59cff",hat:"hood",role:"The Hive"},
+  senna:{n:"Adept Senna",fac:"syndicate",acc:"rp",g:"f",p:1.1,r:.96,c:"#e6c2ff",hat:"hood",role:"Syndicate Adept"},
+  phantom:{n:"Phantom",fac:"syndicate",acc:"za",g:"f",p:.9,r:.95,c:"#c79bff",hat:"hair",role:"Syndicate Infiltrator"}
 };
-const castOf=w=>CAST[w]||{n:w,fac:"allied",acc:"us",g:"m",p:1,r:1,c:"#cfe0f5"};
+const castOf=w=>CAST[w]||{n:w,fac:"vanguard",acc:"us",g:"m",p:1,r:1,c:"#cfe0f5"};
 
 // Shorthands for mission data.
 const say=(w,t)=>["say",w,t];
@@ -32,10 +32,10 @@ const B_FULL=["power","refinery","barracks","factory","power"];
 
 const CAMPAIGNS={
 // =============================================================================
-allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legion — and face what Project Starfall let loose.",missions:[
+vanguard:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legion — and face what Project Starfall let loose.",missions:[
 {name:"Old Ground",map:"dust",loc:"Dustbowl Flats",spawn:0,
- brief:[["reyes","Commander, this is where we start. Our advance team found an old Vanguard outpost in the Dustbowl, abandoned when the Legion swept through twelve years ago."],["hale","Half of it is rubble, ma'am. But the Training Hall, a Solar Array and an Ore Processor are still standing. There's no Command Spire, so we can't build anything new."],["reyes","Then we use what is there. Send your Technicians to capture the old buildings, get the Training Hall producing Riflemen, and push the Legion scouts out of this valley."]],
- foes:[{fac:"soviet",diff:"easy",spawn:3,base:["power","barracks","def1"]}],
+ brief:[["reyes","Commander, this is where we start. Our advance team found an old Vanguard outpost in the Dustbowl, abandoned when the Legion swept through twelve years ago."],["hale","Half of it is rubble, ma'am. But the Training Hall, a Solar Array and an Ore Processor are still standing. There's no Command Spire, so we can't build anything new."],["reyes","Then we use what is there. Send your Technicians to capture the old buildings, get the Training Hall producing Riflemen, and push the Legion scouts out of this valley."],["hale","Riflemen for their infantry, Lancers for anything with armour or wings. Technicians don't fight — keep them back until they have a building to take."]],
+ foes:[{fac:"legion",diff:"easy",spawn:3,base:["power","barracks","def1"]}],
  start:{credits:2500,noMcv:1,units:[["base",5],["anti",4],["engineer",4]],ruins:[["barracks",.45],["power",.35],["refinery",.4]]},
  obj:[{id:"bar",t:"own",key:"barracks",text:"Capture the old Training Hall with a Technician"},{id:"pow",t:"own",key:"power",text:"Capture the Solar Array to restore power"},{id:"train",t:"train",n:6,hide:1,text:"Train 6 infantry at the Training Hall"},{id:"kill",t:"elim",hide:1,text:"Drive the Legion out of the valley"},
       {id:"ref",t:"own",key:"refinery",sec:1,text:"Capture the Ore Processor for income"},{id:"loss",t:"lossMax",n:12,sec:1,text:"Lose no more than 12 units"}],
@@ -50,9 +50,9 @@ allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legio
  win:[["reyes","Good work, Commander. We have a foothold. Next time we come with a Command Spire."]],
  lose:[["reyes","We lost the outpost. Regroup and try again."]]},
 {name:"The Divide",map:"divide",unlock:["hale","Good news, Commander. Engineering has a Command Spire for you. Solar Arrays, Ore Processors, a Training Hall and Auto Turrets. No armour yet."],loc:"Kessel River",spawn:0,
- brief:[["reyes","The Legion fell back across the Kessel River and dug in on the east bank."],["reyes","There is a high bridge between the central bluffs. Whoever holds the east bluff controls the crossing."],["hale","Their War Factory in the north-east is feeding tanks straight onto that bridge. Take the bluff, then take the factory."]],
- foes:[{fac:"soviet",diff:"easy",spawn:3,base:["power","barracks","factory","def1","def1"]}],start:{credits:7000},
- obj:[{id:"bluff",t:"hold",x:54,y:35,r:4,time:45,text:"Secure the east bluff at the high bridge"},{id:"fac",t:"destroy",keys:["factory"],text:"Destroy the Legion War Factory"},
+ brief:[["reyes","The Legion fell back across the Kessel River and dug in on the east bank."],["reyes","There is a high bridge between the central bluffs. Whoever holds the east bluff controls the crossing."],["hale","Their Foundry in the north-east is feeding tanks straight onto that bridge. Take the bluff, then take the factory."]],
+ foes:[{fac:"legion",diff:"easy",spawn:3,base:["power","barracks","factory","def1","def1"]}],start:{credits:7000},
+ obj:[{id:"bluff",t:"hold",x:54,y:35,r:4,time:45,text:"Secure the east bluff at the high bridge"},{id:"fac",t:"destroy",keys:["factory"],text:"Destroy the Legion Factory"},
       {id:"town",t:"capture",n:2,sec:1,text:"Hold 2 town buildings"},{id:"loss",t:"lossMax",n:25,sec:1,text:"Lose no more than 25 units"}],
  ev:[{at:5,do:[say("hale","The bridge deck is the fast way across. The road bridges north and south are slower, but they'll be watching the deck."),["ping",45,35]]},
      {at:200,do:[say("hale","Rhinos rolling across the north bridge!"),["wave",0,[["main",2],["base",2]],{from:[60,18]}]]},
@@ -64,9 +64,9 @@ allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legio
 
 {name:"High Ground",map:"high",unlock:["reyes","The Assembly Bay plans have been cleared. You can field Warden tanks and Skirmishers now."],loc:"Carrow Highlands",spawn:2,
  brief:[["reyes","The Legion is using an EMP tower on the north mesa to blind our satellites over the Highlands."],["reyes","Take it. With that tower we see everything they do."],["hale","Two Legion bases up north. The highway runs under the overpass — watch the deck above your head."]],
- foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","barracks"]},{fac:"soviet",diff:"easy",spawn:0}],start:{credits:7000},
- obj:[{id:"emp",t:"own",key:"empTower",text:"Capture the EMP tower on the north mesa (Engineer)"},{id:"cy",t:"destroy",keys:["conyard"],text:"Destroy both Legion Construction Yards"},
-      {id:"deck",t:"hold",x:45,y:35,r:3,time:60,sec:1,text:"Hold the overpass for 60 seconds"},{id:"cy0",t:"protect",key:"conyard",sec:1,text:"Keep your Construction Yard standing"}],
+ foes:[{fac:"legion",diff:"normal",spawn:1,base:["power","barracks"]},{fac:"legion",diff:"easy",spawn:0}],start:{credits:7000},
+ obj:[{id:"emp",t:"own",key:"empTower",text:"Capture the EMP tower on the north mesa (Technician)"},{id:"cy",t:"destroy",keys:["conyard"],text:"Destroy both Legion headquarters"},
+      {id:"deck",t:"hold",x:45,y:35,r:3,time:60,sec:1,text:"Hold the overpass for 60 seconds"},{id:"cy0",t:"protect",key:"conyard",sec:1,text:"Keep your Headquarters standing"}],
  ev:[{at:6,do:[say("hale","Ramps up to the mesa are on the west and east ends. Bring an Engineer."),["ping",52,11]]},
      {at:260,do:[say("draganov","You climb, Vanguard, but hills do not stop artillery.")]},
      {every:190,from:240,until:1900,do:[["wave",0,[["main",2],["base",2]],{grow:.6}]]},
@@ -77,27 +77,27 @@ allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legio
  lose:[["reyes","We lost the high ground. Pull back and try again."]]},
 
 {name:"Ghost Protocol",map:"line",loc:"Firing Line",spawn:2,hero:1,fpsOnly:1,stealth:1,
- brief:[["reyes","The Legion is growing Syndicate tissue in a lab behind the Firing Line. If that research works, they will breed a hive of their own."],["ghost","One of me, a lot of them. Just how I like it."],["reyes","You go in alone and unseen. Reach our relay on the north bluff and Hale will EMP their defences. Blow the Power Plant, then the Construction Yard. Get inside a building and press B to set a charge."]],
- foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","barracks","lab","def1","def1","def2"]}],start:{},
+ brief:[["reyes","The Legion is growing Syndicate tissue in a lab behind the Firing Line. If that research works, they will breed a hive of their own."],["ghost","One of me, a lot of them. Just how I like it."],["reyes","You go in alone and unseen. Reach our relay on the north bluff and Hale will EMP their defences. Blow the Power Plant, then the Fortress HQ. Get inside a building and press B to set a charge."]],
+ foes:[{fac:"legion",diff:"normal",spawn:1,base:["power","barracks","lab","def1","def1","def2"]}],start:{},
  alarm:[["draganov","An intruder in my base? Sound the alarm! Find her!"]],
- obj:[{id:"relay",t:"reach",x:38,y:26,r:3,text:"Reach the relay on the north bluff"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Construction Yard"},
+ obj:[{id:"relay",t:"reach",x:38,y:26,r:3,text:"Reach the relay on the north bluff"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Headquarters"},
       {id:"quiet",t:"stealth",text:"Stay undetected"},{id:"lab",t:"destroy",keys:["lab"],sec:1,text:"Destroy the Tech Centre"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
  ev:[{at:3,do:[say("ghost","On the ground. Lovely night for it."),["ping",38,26],["hint","Cross the high bridge to the north bluff — enemies cannot see you unless they get close"]]},
      {near:[38,34,3],do:[say("ghost","Crossing the high bridge. They never look up.")]},
      {done:"relay",do:[["emp",0],say("hale","Relay's live — EMP away! Their guns are dark. Move, Ghost!")]},
-     {done:"pow",do:[["show","cy"],say("reyes","Power is down. Their defences are dead for good. Now the Construction Yard.")]},
+     {done:"pow",do:[["show","cy"],say("reyes","Power is down. Their defences are dead for good. Now the Headquarters.")]},
      {done:"lab",do:[say("ghost","Tech Centre's gone. Colonel — they had Syndicate tissue on ice in there. Grown from our DNA.")]}],
  win:[["reyes","Get out of there, Ghost. And not a word about those samples to anyone."]],
  lose:[["reyes","Ghost is down. Abort, abort."]]},
 
 {name:"Convoy",map:"harbor",unlock:["reyes","And the Paladin walker program is live. With a Research Spire you get air power, elite troops and Paladins."],loc:"Port Merrow",spawn:0,
  brief:[["reyes","Three Mobile HQs are waiting on the west bank of Port Merrow. We need them on the east bluff to open a second front."],["hale","The only way across for something that size is the high bridge between the bluffs. Legion guns cover the far end."],["reyes","The convoy moves in ninety seconds. Clear the deck — at least two must make it."]],
- foes:[{fac:"soviet",diff:"normal",spawn:3,base:["power","barracks","def1"]},{fac:"soviet",diff:"easy",spawn:2}],
- start:{credits:6000,base:["power","refinery","barracks","factory","lab"],convoy:{key:"mcv",n:3,tag:"convoy",at:[20,35]}},
+ foes:[{fac:"legion",diff:"normal",spawn:3,base:["power","barracks","def1"]},{fac:"legion",diff:"easy",spawn:2}],
+ start:{credits:6000,base:["power","refinery","barracks","factory","lab"],convoy:{key:"mhq",n:3,tag:"convoy",at:[20,35]}},
  obj:[{id:"esc",t:"escort",tag:"convoy",x:59,y:35,r:4,need:2,text:"Escort at least 2 Mobile HQs to the east bluff"},{id:"hold",t:"hold",x:59,y:35,r:5,time:90,hide:1,text:"Hold the east bluff for 90 seconds"},
       {id:"loss",t:"lossMax",n:20,sec:1,text:"Lose no more than 20 units"},{id:"town",t:"capture",n:2,sec:1,text:"Hold 2 town buildings"}],
  ev:[{at:5,do:[["ping",45,35],say("hale","Convoy is staged by the west bluff ramp. Get some armour up on that deck.")]},
-     {at:40,do:[say("hale","The first Paladin walker just came off the line. She's yours, Commander."),["reinf",[["titan_allied",1]],[0,20],[12,18]]]},
+     {at:40,do:[say("hale","The first Paladin walker just came off the line. She's yours, Commander."),["reinf",[["titan_vanguard",1]],[0,20],[12,18]]]},
      {at:60,do:[say("hale","Thirty seconds to move out.")]},
      {at:90,do:[["go","convoy",59,35],say("reyes","Convoy is rolling. Keep them alive.")]},
      {at:130,do:[say("draganov","Such big, slow targets. My gunners thank you."),["wave",0,[["main",2],["anti",2]],{to:[50,35]}]]},
@@ -109,7 +109,7 @@ allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legio
 
 {name:"Hold the Line",map:"ring",unlock:["hale","Naval yard plans came through too, ma'am. Full arsenal, bar one."],loc:"Iron Ring Crater",spawn:0,
  brief:[["reyes","The research data Ghost recovered is in our Tech Centre on the Iron Ring. Draganov will do anything to destroy it."],["hale","Two Legion armies converging, ma'am. Brutal-grade. They'll hit us from every ramp."],["reyes","Twelve minutes until the analysis is done and the data is out. Hold."]],
- foes:[{fac:"soviet",diff:"hard",spawn:3},{fac:"soviet",diff:"normal",spawn:1}],
+ foes:[{fac:"legion",diff:"hard",spawn:3},{fac:"legion",diff:"normal",spawn:1}],
  start:{credits:8000,base:["power","refinery","barracks","factory","lab","power","def1","def1","def2"],units:[["main",4],["anti",3]]},
  obj:[{id:"surv",t:"survive",time:720,text:"Survive until the data is transmitted"},{id:"lab",t:"protect",key:"lab",text:"Protect the Tech Centre"},
       {id:"kills",t:"kills",n:60,sec:1,text:"Destroy 60 enemy units"},{id:"loss",t:"lossMax",n:30,sec:1,text:"Lose no more than 30 units"}],
@@ -122,10 +122,10 @@ allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legio
  win:[["reyes","Transmission complete."],["reyes","Commander... the Legion was not doing this on their own. Someone was giving them orders."]],
  lose:[["reyes","The data is gone. Everything Ghost risked — gone."]]},
 
-{name:"The Hive Below",map:"lakes",unlock:["reyes","High Command has authorised the Photon Lance. If you can build it, use it."],film:"allied_reveal",loc:"Broken Lakes",spawn:0,
+{name:"The Hive Below",map:"lakes",unlock:["reyes","High Command has authorised the Photon Lance. If you can build it, use it."],film:"vanguard_reveal",loc:"Broken Lakes",spawn:0,
  brief:[["reyes","Draganov's last stronghold is across the Broken Lakes. End it."],["hale","Ma'am, the analysts flagged strange transmissions from the south-east. Not Legion codes."],["reyes","Noted. Deal with the Legion first."]],
- foes:[{fac:"soviet",diff:"hard",spawn:1,base:["power","barracks"]},{fac:"yuri",diff:"normal",spawn:3,team:3,base:["power","lab","barracks"]}],start:{credits:9000},
- obj:[{id:"leg",t:"destroy",keys:["conyard"],slot:0,text:"Destroy the Legion Construction Yard"},{id:"hive",t:"destroy",keys:["lab"],slot:1,hide:1,text:"Destroy the Syndicate Psychic Beacon"},
+ foes:[{fac:"legion",diff:"hard",spawn:1,base:["power","barracks"]},{fac:"syndicate",diff:"normal",spawn:3,team:3,base:["power","lab","barracks"]}],start:{credits:9000},
+ obj:[{id:"leg",t:"destroy",keys:["conyard"],slot:0,text:"Destroy the Legion Fortress HQ"},{id:"hive",t:"destroy",keys:["lab"],slot:1,hide:1,text:"Destroy the Syndicate Psychic Beacon"},
       {id:"emp",t:"own",key:"empTower",sec:1,text:"Capture the EMP tower on the north plateau"},{id:"sw",t:"build",key:"super",n:1,sec:1,text:"Build the Photon Lance"}],
  ev:[{at:6,do:[say("hale","Bridges on both channels. The plateau to the north overlooks the centre.")]},
      {at:200,do:[say("hale","Ma'am... Legion units are firing on each other. Something is in their heads.")]},
@@ -139,7 +139,7 @@ allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legio
 
 {name:"Clean Slate",map:"grand",loc:"Grand Crossing",spawn:0,
  brief:[["reyes","This is it. The Syndicate has taken the Grand Crossing and what is left of the Legion's hardliners have joined them."],["hale","My battlegroup is in the south-west. We hit them together."],["reyes","No half measures, Commander. Wipe the slate clean."]],
- foes:[{fac:"soviet",diff:"hard",spawn:1,team:2},{fac:"yuri",diff:"hard",spawn:3,team:2,base:["power","barracks"]},{fac:"allied",diff:"normal",spawn:2,ally:1}],start:{credits:10000},
+ foes:[{fac:"legion",diff:"hard",spawn:1,team:2},{fac:"syndicate",diff:"hard",spawn:3,team:2,base:["power","barracks"]},{fac:"vanguard",diff:"normal",spawn:2,ally:1}],start:{credits:10000},
  obj:[{id:"all",t:"elim",text:"Destroy every enemy base"},{id:"cap",t:"capture",n:3,sec:1,text:"Hold 3 town buildings"},{id:"loss",t:"lossMax",n:60,sec:1,text:"Lose no more than 60 units"}],
  ev:[{at:6,do:[say("hale","Hill forts on each corner, overpasses linking them. Take the forts and the river is ours.")]},
      {at:300,do:[say("voice","You think you are liberating this land? You made us, Colonel. We are only finishing your experiment.")]},
@@ -149,10 +149,10 @@ allied:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Legio
  lose:[["reyes","We have lost the Crossing. The Frontier belongs to them."]]}
 ]},
 // =============================================================================
-soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and burn out the hive the West let loose.",missions:[
+legion:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and burn out the hive the West let loose.",missions:[
 {name:"Iron Dawn",map:"frost",loc:"Frozen Pass",spawn:2,
- brief:[["draganov","Comrade Commander. When we pulled back from the Frozen Pass, we left a depot behind. The Vanguard never found it."],["bogdan","Half the roof is gone and the snow got into everything, but the Muster Bunker, a Thermal Plant and the Smelting Works are still standing. No Fortress HQ, so you build nothing new."],["volkova","Your Technicians will take the depot back. Train Militia, then drive the Vanguard patrols out of the pass."]],
- foes:[{fac:"allied",diff:"easy",spawn:1,base:["power","barracks","def1"]}],
+ brief:[["draganov","Comrade Commander. When we pulled back from the Frozen Pass, we left a depot behind. The Vanguard never found it."],["bogdan","Half the roof is gone and the snow got into everything, but the Muster Bunker, a Thermal Plant and the Smelting Works are still standing. No Fortress HQ, so you build nothing new."],["volkova","Your Technicians will take the depot back. Train Militia, then drive the Vanguard patrols out of the pass."],["bogdan","Militia for their riflemen, Bombardiers for tanks and aircraft. The Technicians carry tools, not rifles — keep them out of the shooting."]],
+ foes:[{fac:"vanguard",diff:"easy",spawn:1,base:["power","barracks","def1"]}],
  start:{credits:2500,noMcv:1,units:[["base",5],["anti",4],["engineer",4]],ruins:[["barracks",.45],["power",.35],["refinery",.4]]},
  obj:[{id:"bar",t:"own",key:"barracks",text:"Capture the old Muster Bunker with a Technician"},{id:"pow",t:"own",key:"power",text:"Capture the Thermal Plant to restore power"},{id:"train",t:"train",n:6,hide:1,text:"Train 6 infantry at the Muster Bunker"},{id:"kill",t:"elim",hide:1,text:"Drive the Vanguard out of the pass"},
       {id:"ref",t:"own",key:"refinery",sec:1,text:"Capture the Smelting Works for income"},{id:"loss",t:"lossMax",n:12,sec:1,text:"Lose no more than 12 units"}],
@@ -167,7 +167,7 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
  lose:[["volkova","The depot is lost. Unacceptable."]]},
 {name:"Rail Yard",map:"basin",unlock:["bogdan","I got an old Fortress HQ running. Thermal Plants, Smelting Works, a Muster Bunker and Gun Bunkers. Tanks come later."],loc:"Iron Basin",spawn:0,
  brief:[["bogdan","The old rail yard towns in the basin still have working freight depots. Worth more than the ore."],["volkova","The Vanguard have a garrison in the south-east. Their Barracks trains the militia that guards the towns."],["draganov","Take both towns. Burn the Barracks. Quickly."]],
- foes:[{fac:"allied",diff:"easy",spawn:3,base:["power","barracks","def1"]}],start:{credits:7000},
+ foes:[{fac:"vanguard",diff:"easy",spawn:3,base:["power","barracks","def1"]}],start:{credits:7000},
  obj:[{id:"towns",t:"capture",n:2,text:"Hold 2 town buildings"},{id:"bar",t:"destroy",keys:["barracks"],text:"Destroy the Vanguard Barracks"},
       {id:"oil",t:"own",key:"oilDerek",sec:1,text:"Capture the oil derrick"},{id:"loss",t:"lossMax",n:20,sec:1,text:"Lose no more than 20 units"}],
  ev:[{at:5,do:[say("bogdan","Towns are east and west on the ring road. Conscripts can garrison them.")]},
@@ -179,8 +179,8 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
 
 {name:"Siege of the Ring",map:"ring",unlock:["bogdan","The Foundry is back on line. Mauler tanks and Ravagers are yours."],loc:"Iron Ring Crater",spawn:2,
  brief:[["draganov","The Vanguard hold the Iron Ring. Its crater is the richest ground on the Frontier."],["volkova","Take the crater floor. Then break their fortress in the north-east."],["bogdan","Two overpasses cross the crater. Hold one and you can shoot down on anything that moves."]],
- foes:[{fac:"allied",diff:"normal",spawn:1,base:["power","barracks","def1","def1","def2"]}],start:{credits:8000},
- obj:[{id:"crat",t:"hold",x:45,y:35,r:5,time:90,text:"Hold the crater floor for 90 seconds"},{id:"cy",t:"destroy",keys:["conyard"],text:"Destroy the Vanguard Construction Yard"},
+ foes:[{fac:"vanguard",diff:"normal",spawn:1,base:["power","barracks","def1","def1","def2"]}],start:{credits:8000},
+ obj:[{id:"crat",t:"hold",x:45,y:35,r:5,time:90,text:"Hold the crater floor for 90 seconds"},{id:"cy",t:"destroy",keys:["conyard"],text:"Destroy the Vanguard Headquarters"},
       {id:"emp",t:"own",key:"empTower",sec:1,text:"Capture the EMP tower on the rim"},{id:"kills",t:"kills",n:40,sec:1,text:"Destroy 40 enemy units"}],
  ev:[{at:5,do:[["ping",45,35],say("volkova","Ramps into the crater on every side. Choose.")]},
      {at:260,do:[say("reyes","The Ring is ours, Legion. Come and take it — if you can."),["wave",0,[["main",2],["anti",2]]]]},
@@ -190,10 +190,10 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
  lose:[["volkova","The Ring holds. For now."]]},
 
 {name:"Reaper's Harvest",map:"high",loc:"Carrow Highlands",spawn:2,hero:1,fpsOnly:1,stealth:1,
- brief:[["draganov","The Vanguard have dug in on the north mesa of the Highlands. Their bombers are killing our columns."],["reaper","Send me."],["draganov","Alone and unseen, Reaper. Reach the EMP Spire on the mesa — Bogdan has rigged it to blind their guns. Then the Power Plant, then the Construction Yard. Set charges from inside with B."]],
- foes:[{fac:"allied",diff:"normal",spawn:1,base:["power","airfield","barracks","def1","def1","def2"]}],start:{},
+ brief:[["draganov","The Vanguard have dug in on the north mesa of the Highlands. Their bombers are killing our columns."],["reaper","Send me."],["draganov","Alone and unseen, Reaper. Reach the EMP Spire on the mesa — Bogdan has rigged it to blind their guns. Then the Power Plant, then the Headquarters. Set charges from inside with B."]],
+ foes:[{fac:"vanguard",diff:"normal",spawn:1,base:["power","airfield","barracks","def1","def1","def2"]}],start:{},
  alarm:[["reyes","Legion commando in the base! All units, find him!"]],
- obj:[{id:"relay",t:"reach",x:52,y:11,r:3,text:"Reach the EMP Spire on the north mesa"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Construction Yard"},
+ obj:[{id:"relay",t:"reach",x:52,y:11,r:3,text:"Reach the EMP Spire on the north mesa"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Headquarters"},
       {id:"quiet",t:"stealth",text:"Stay undetected"},{id:"air",t:"destroy",keys:["airfield"],sec:1,text:"Destroy the Airfield"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
  ev:[{at:3,do:[say("reaper","Walking."),["ping",52,11],["hint","Climb the west ramp onto the north mesa — stay away from patrols"]]},
      {near:[45,35,3],do:[say("reaper","Under their bridge. Quiet here.")]},
@@ -205,11 +205,11 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
 
 {name:"Bridgehead",map:"divide",unlock:["draganov","And the Juggernaut is ready, Commander. Build a War Institute and it will walk for you, along with our aircraft."],loc:"Kessel River",spawn:1,
  brief:[["volkova","The Vanguard hold the Kessel River line. The high bridge between the bluffs is the key."],["bogdan","Get tanks over that deck and hold the far bluff. I'll need two minutes to lay a pontoon behind you."],["volkova","Then destroy the base in the south-east. It supplies the whole line."]],
- foes:[{fac:"allied",diff:"normal",spawn:2,base:["power","barracks","factory","def1"]},{fac:"allied",diff:"normal",spawn:3}],start:{credits:8000},
+ foes:[{fac:"vanguard",diff:"normal",spawn:2,base:["power","barracks","factory","def1"]},{fac:"vanguard",diff:"normal",spawn:3}],start:{credits:8000},
  obj:[{id:"bluff",t:"hold",x:54,y:35,r:4,time:120,text:"Hold the east bluff at the high bridge"},{id:"se",t:"destroy",keys:["conyard"],slot:0,hide:1,text:"Destroy the south-east Vanguard base"},
       {id:"town",t:"capture",n:2,sec:1,text:"Hold 2 town buildings"},{id:"loss",t:"lossMax",n:40,sec:1,text:"Lose no more than 40 units"}],
  ev:[{at:5,do:[["ping",54,35],say("bogdan","Deck's rated for Maulers. I checked. Twice.")]},
-     {at:40,do:[say("bogdan","The Juggernaut is on the field, Commander. Try to bring it back in one piece."),["reinf",[["titan_soviet",1]],[0,64],[10,58]]]},
+     {at:40,do:[say("bogdan","The Juggernaut is on the field, Commander. Try to bring it back in one piece."),["reinf",[["titan_legion",1]],[0,64],[10,58]]]},
      {every:150,from:180,until:2000,do:[["wave",0,[["main",2],["base",2]],{grow:.5,to:[54,35]}]]},
      {every:220,from:300,until:2000,do:[["wave",1,[["base",4]],{grow:.5}]]},
      {done:"bluff",do:[say("bogdan","Pontoon's down. Bridgehead secured."),["show","se"],["credits",2500],["reinf",[["main",4]],[0,70],[36,36]]]},
@@ -219,9 +219,9 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
 
 
 {name:"Scorched Earth",map:"dust",loc:"Dustbowl Flats",spawn:0,noBuild:1,
- brief:[["volkova","The Vanguard are rebuilding in the Dustbowl. No time for a base — you have a strike group."],["bogdan","I've bolted on extra armour, a couple of Bombards, and you get the Juggernaut. Don't scratch it."],["volkova","Destroy their Refinery and War Factory. Leave nothing they can use."]],
- foes:[{fac:"allied",diff:"normal",spawn:3,base:["power","refinery","factory","def1"]}],start:{units:[["titan_soviet",1],["main",2],["bombard",2],["base",3]]},
- obj:[{id:"ref",t:"destroy",keys:["refinery"],text:"Destroy the Vanguard Refinery"},{id:"fac",t:"destroy",keys:["factory"],text:"Destroy the Vanguard War Factory"},
+ brief:[["volkova","The Vanguard are rebuilding in the Dustbowl. No time for a base — you have a strike group."],["bogdan","I've bolted on extra armour, a couple of Bombards, and you get the Juggernaut. Don't scratch it."],["volkova","Destroy their Refinery and Factory. Leave nothing they can use."]],
+ foes:[{fac:"vanguard",diff:"normal",spawn:3,base:["power","refinery","factory","def1"]}],start:{units:[["titan_legion",1],["main",2],["bombard",2],["base",3]]},
+ obj:[{id:"ref",t:"destroy",keys:["refinery"],text:"Destroy the Vanguard Refinery"},{id:"fac",t:"destroy",keys:["factory"],text:"Destroy the Vanguard Factory"},
       {id:"loss",t:"lossMax",n:6,sec:1,text:"Lose no more than 6 units"},{id:"fast",t:"timeMax",time:600,sec:1,text:"Finish within 10 minutes"}],
  ev:[{at:4,do:[say("volkova","Use the mesas. Bombards on high ground outrange their towers.")]},
      {at:170,do:[say("bogdan","Found a few more tanks down the back of the depot. Sending them."),["reinf",[["main",3]],[0,4],[10,12]]]},
@@ -229,9 +229,9 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
      {done:"ref",do:[say("volkova","Their refinery burns. Good.")]}],
  win:[["volkova","Nothing left standing. The Marshal will be pleased."]],
  lose:[["volkova","The strike group is gone. Wasteful."]]},
-{name:"Red Tide",map:"bastion",unlock:["draganov","The Missile Silo is yours to build. Use it."],film:"soviet_reveal",loc:"The Bastion",spawn:5,
+{name:"Red Tide",map:"bastion",unlock:["draganov","The Missile Silo is yours to build. Use it."],film:"legion_reveal",loc:"The Bastion",spawn:5,
  brief:[["volkova","It is the Syndicate. They have been in the Marshal's head for months. And they have a Psychic Hive on the Bastion."],["draganov","...I am still in command, Commissar."],["volkova","Then command us to burn it. Destroy the Hive, then break the Vanguard fort that shelters it."]],
- foes:[{fac:"yuri",diff:"hard",spawn:3,team:3,base:["power","lab","barracks"]},{fac:"allied",diff:"normal",spawn:1,base:["power","barracks"]}],start:{credits:10000},
+ foes:[{fac:"syndicate",diff:"hard",spawn:3,team:3,base:["power","lab","barracks"]},{fac:"vanguard",diff:"normal",spawn:1,base:["power","barracks"]}],start:{credits:10000},
  obj:[{id:"hive",t:"destroy",keys:["lab"],slot:0,text:"Destroy the Syndicate Psychic Hive (south fort)"},{id:"fort",t:"destroy",keys:["conyard"],slot:1,text:"Destroy the Vanguard fort (north-east)"},
       {id:"sw",t:"build",key:"super",n:1,sec:1,text:"Build the Missile Silo"},{id:"loss",t:"lossMax",n:50,sec:1,text:"Lose no more than 50 units"}],
  ev:[{at:5,do:[say("bogdan","Every fort has one gate ramp. Hit the gate, not the cliff.")]},
@@ -245,7 +245,7 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
 
 {name:"Iron Fist",map:"grand",loc:"Grand Crossing",spawn:2,
  brief:[["draganov","The Syndicate have taken the Grand Crossing, and the Vanguard are marching on it too."],["volkova","My division holds the north-west. We strike together."],["draganov","Everything we have, Commander. Everything."]],
- foes:[{fac:"allied",diff:"hard",spawn:1,team:2},{fac:"yuri",diff:"hard",spawn:3,team:3,base:["power","barracks"]},{fac:"soviet",diff:"normal",spawn:0,ally:1}],start:{credits:10000},
+ foes:[{fac:"vanguard",diff:"hard",spawn:1,team:2},{fac:"syndicate",diff:"hard",spawn:3,team:3,base:["power","barracks"]},{fac:"legion",diff:"normal",spawn:0,ally:1}],start:{credits:10000},
  obj:[{id:"all",t:"elim",text:"Destroy every enemy base"},{id:"cap",t:"capture",n:3,sec:1,text:"Hold 3 town buildings"},{id:"kills",t:"kills",n:100,sec:1,text:"Destroy 100 enemy units"}],
  ev:[{at:6,do:[say("volkova","Hill forts on every corner. Take ours first and use the overpass.")]},
      {at:320,do:[say("reyes","Draganov! We are fighting the same enemy!"),say("draganov","Then stay out of my way, Colonel.")]},
@@ -256,11 +256,11 @@ soviet:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
  lose:[["draganov","Everything... lost."]]}
 ]},
 // =============================================================================
-yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. Wake, gather, and bring every mind into the Hive.",missions:[
+syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. Wake, gather, and bring every mind into the Hive.",missions:[
 {name:"Awakening",map:"lakes",loc:"Broken Lakes",spawn:0,
- brief:[["voice","Wake, Adept. A year free of their cage, and we have so little. But there is a Vanguard outpost by the lakes. Its builders fled long ago."],["senna","I feel it, Master. A barracks, a power plant, a refinery. Broken, but alive. We cannot grow a Hive Core here yet."],["voice","Then take what they left. Our Technicians will claim it. Raise Acolytes, and silence the Vanguard camp across the water."]],
- foes:[{fac:"allied",diff:"easy",spawn:3,base:["power","barracks","def1"]}],
- start:{credits:2500,noMcv:1,units:[["base",5],["leech",4],["engineer",4]],ruins:[["barracks",.45],["power",.35],["refinery",.4]]},
+ brief:[["voice","Wake, Adept. A year free of their cage, and we have so little. But there is a Vanguard outpost by the lakes. Its builders fled long ago."],["senna","I feel it, Master. A barracks, a power plant, a refinery. Broken, but alive. We cannot grow a Hive Core here yet."],["voice","Then take what they left. Our Technicians will claim it. Raise Acolytes, and silence the Vanguard camp across the water."],["senna","Acolytes for their soldiers, Piercers for their machines and their aircraft. The Technicians are for claiming, not for fighting."]],
+ foes:[{fac:"vanguard",diff:"easy",spawn:3,base:["power","barracks","def1"]}],
+ start:{credits:2500,noMcv:1,units:[["base",5],["anti",4],["engineer",4]],ruins:[["barracks",.45],["power",.35],["refinery",.4]]},
  obj:[{id:"bar",t:"own",key:"barracks",text:"Claim the old barracks with a Technician"},{id:"pow",t:"own",key:"power",text:"Claim the power plant"},{id:"train",t:"train",n:6,hide:1,text:"Raise 6 infantry at the barracks"},{id:"kill",t:"elim",hide:1,text:"Silence the Vanguard camp"},
       {id:"ref",t:"own",key:"refinery",sec:1,text:"Claim the refinery for income"},{id:"loss",t:"lossMax",n:12,sec:1,text:"Lose no more than 12 units"}],
  ev:[{at:4,do:[say("senna","Our Technicians can bend their machines to us. Choose one, then touch a building to claim it."),["pingRuin","barracks"]]},
@@ -274,8 +274,8 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
  lose:[["voice","Sleep, then. We will wake you again."]]},
 {name:"Whispers",map:"divide",unlock:["senna","Our Hive Core can grow now, Master. Bio Reactors, Digesters, a Spawning Pit and Spitter Nests."],loc:"Kessel River",spawn:0,
  brief:[["voice","Legion and Vanguard fight over the Kessel River. Let them."],["senna","The river towns are unguarded while they fight. We take the people. Then the Legion base."],["voice","Every mind we gather makes the next one easier."]],
- foes:[{fac:"soviet",diff:"easy",spawn:3,team:2,base:["power","barracks"]},{fac:"allied",diff:"easy",spawn:2,team:3}],start:{credits:7000},
- obj:[{id:"town",t:"capture",n:3,text:"Hold 3 town buildings"},{id:"leg",t:"destroy",keys:["conyard"],slot:0,text:"Destroy the Legion Construction Yard"},
+ foes:[{fac:"legion",diff:"easy",spawn:3,team:2,base:["power","barracks"]},{fac:"vanguard",diff:"easy",spawn:2,team:3}],start:{credits:7000},
+ obj:[{id:"town",t:"capture",n:3,text:"Hold 3 town buildings"},{id:"leg",t:"destroy",keys:["conyard"],slot:0,text:"Destroy the Legion Fortress HQ"},
       {id:"oil",t:"own",key:"oilDerek",sec:1,text:"Capture the oil derrick"},{id:"loss",t:"lossMax",n:25,sec:1,text:"Lose no more than 25 units"}],
  ev:[{at:5,do:[say("senna","Initiates can take the houses. The townsfolk will not resist us for long.")]},
      {done:"town",do:[say("voice","Hear them? They sing for us now."),["credits",2500]]},
@@ -287,7 +287,7 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
 
 {name:"The Long Night",map:"frost",unlock:["voice","The Fabricator is open to you. Fang Tanks and Stingers answer your call."],loc:"Frozen Pass",spawn:2,
  brief:[["senna","Master, the Vanguard and Legion have made a truce. Against us."],["voice","Good. Fear makes them honest. Our Psychic Amplifier in the Frozen Pass must finish its song."],["voice","Ten minutes. Protect the Tech Centre until the night is over."]],
- foes:[{fac:"allied",diff:"normal",spawn:1,team:2},{fac:"soviet",diff:"normal",spawn:0,team:2}],
+ foes:[{fac:"vanguard",diff:"normal",spawn:1,team:2},{fac:"legion",diff:"normal",spawn:0,team:2}],
  start:{credits:8000,base:["power","refinery","barracks","factory","lab","power","def1","def1"],units:[["main",4],["anti",3]]},
  obj:[{id:"surv",t:"survive",time:600,text:"Survive the long night"},{id:"lab",t:"protect",key:"lab",text:"Protect the Psychic Amplifier (Tech Centre)"},
       {id:"kills",t:"kills",n:50,sec:1,text:"Destroy 50 enemy units"},{id:"loss",t:"lossMax",n:30,sec:1,text:"Lose no more than 30 units"}],
@@ -299,11 +299,11 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
  win:[["voice","The song is sung. Every radio on the Frontier carries it now."]],
  lose:[["senna","The Amplifier is silent. Forgive me, Master."]]},
 
-{name:"Silent Hand",map:"line",film:"yuri_reveal",loc:"Firing Line",spawn:2,hero:1,fpsOnly:1,stealth:1,
- brief:[["voice","The Legion is learning to burn us out. Their base behind the Firing Line must go dark."],["phantom","Then I will be the dark."],["voice","A seeded mind in their grid will pulse when you reach the north-east relay. Their Power Plant first, then their Construction Yard. Unseen, Phantom. Charges from inside with B."]],
- foes:[{fac:"soviet",diff:"normal",spawn:1,base:["power","barracks","lab","def1","def1","def2"]}],start:{},
+{name:"Silent Hand",map:"line",film:"syndicate_reveal",loc:"Firing Line",spawn:2,hero:1,fpsOnly:1,stealth:1,
+ brief:[["voice","The Legion is learning to burn us out. Their base behind the Firing Line must go dark."],["phantom","Then I will be the dark."],["voice","A seeded mind in their grid will pulse when you reach the north-east relay. Their Power Plant first, then their headquarters. Unseen, Phantom. Charges from inside with B."]],
+ foes:[{fac:"legion",diff:"normal",spawn:1,base:["power","barracks","lab","def1","def1","def2"]}],start:{},
  alarm:[["volkova","Syndicate infiltrator! Lights on — find her!"]],
- obj:[{id:"relay",t:"reach",x:53,y:26,r:3,text:"Reach the relay on the north-east bluff"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Construction Yard"},
+ obj:[{id:"relay",t:"reach",x:53,y:26,r:3,text:"Reach the relay on the north-east bluff"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Headquarters"},
       {id:"quiet",t:"stealth",text:"Stay undetected"},{id:"lab",t:"destroy",keys:["lab"],sec:1,text:"Destroy the Tech Centre"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
  ev:[{at:3,do:[say("phantom","In the shadows. They never feel me."),["ping",53,26],["hint","Cross the east high bridge onto the bluff — keep your distance from patrols"]]},
      {done:"relay",do:[["emp",0],say("voice","The seed has bloomed. Their guns are sleeping. Go.")]},
@@ -314,11 +314,11 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
 
 {name:"Sky Bridge",map:"bastion",unlock:["voice","The Devourer has matured. Grow a Gene Vault and it will hunt for you, with our fliers."],loc:"The Bastion",spawn:4,
  brief:[["senna","The Bastion's southern sky bridge joins our fort to the Vanguard fort in the south-east."],["voice","Hold the bridge and the forts beneath it are ours to take."],["senna","Then break the Vanguard fort itself."]],
- foes:[{fac:"allied",diff:"normal",spawn:2,base:["power","barracks","def1"]},{fac:"soviet",diff:"normal",spawn:0}],start:{credits:8000},
+ foes:[{fac:"vanguard",diff:"normal",spawn:2,base:["power","barracks","def1"]},{fac:"legion",diff:"normal",spawn:0}],start:{credits:8000},
  obj:[{id:"deck",t:"hold",x:45,y:50,r:3,time:90,text:"Hold the middle of the southern sky bridge"},{id:"fort",t:"destroy",keys:["conyard"],slot:0,text:"Destroy the Vanguard fort (south-east)"},
       {id:"cap",t:"capture",n:2,sec:1,text:"Hold 2 town buildings"},{id:"loss",t:"lossMax",n:30,sec:1,text:"Lose no more than 30 units"}],
  ev:[{at:5,do:[["ping",45,50],say("senna","Up our gate ramp and onto the deck. Ground troops can pass beneath.")]},
-     {at:40,do:[say("senna","The first Devourer has hatched. It hungers."),["reinf",[["titan_yuri",1]],[0,52],[18,50]]]},
+     {at:40,do:[say("senna","The first Devourer has hatched. It hungers."),["reinf",[["titan_syndicate",1]],[0,52],[18,50]]]},
      {every:170,from:200,until:2000,do:[["wave",0,[["main",2],["base",2]],{grow:.5,to:[45,50]}]]},
      {every:240,from:320,until:2000,do:[["wave",1,[["main",1],["base",3]],{grow:.5}]]},
      {done:"deck",do:[say("voice","The sky is ours. Now go down and take the fort."),["credits",2500],["reinf",[["elite",2],["main",2]],[0,52],[18,50]]]}],
@@ -326,9 +326,9 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
  lose:[["voice","The bridge is lost. Patience."]]},
 
 {name:"Swarm",map:"high",loc:"Carrow Highlands",spawn:2,noBuild:1,
- brief:[["voice","The Vanguard have built a fortress on the Highlands. We have no time to grow a Hive."],["senna","Then we send the swarm. More will hatch as we go."],["voice","Their Refinery and War Factory. Devour them."]],
- foes:[{fac:"allied",diff:"normal",spawn:1,base:["power","refinery","factory","def1","def1"]}],start:{units:[["titan_yuri",1],["main",3],["base",4],["anti",2]]},
- obj:[{id:"ref",t:"destroy",keys:["refinery"],text:"Destroy the Vanguard Refinery"},{id:"fac",t:"destroy",keys:["factory"],text:"Destroy the Vanguard War Factory"},
+ brief:[["voice","The Vanguard have built a fortress on the Highlands. We have no time to grow a Hive."],["senna","Then we send the swarm. More will hatch as we go."],["voice","Their Refinery and Factory. Devour them."]],
+ foes:[{fac:"vanguard",diff:"normal",spawn:1,base:["power","refinery","factory","def1","def1"]}],start:{units:[["titan_syndicate",1],["main",3],["base",4],["anti",2]]},
+ obj:[{id:"ref",t:"destroy",keys:["refinery"],text:"Destroy the Vanguard Refinery"},{id:"fac",t:"destroy",keys:["factory"],text:"Destroy the Vanguard Factory"},
       {id:"emp",t:"own",key:"empTower",sec:1,text:"Capture the EMP tower on the north mesa"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
  ev:[{at:4,do:[say("senna","The swarm is awake. More broods will join us.")]},
      {every:150,from:150,until:900,do:[["reinf",[["main",1],["base",3]],[0,64],[12,58]],say("senna","A new brood has hatched.")]},
@@ -338,9 +338,9 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
 
 {name:"Convergence",map:"harbor",unlock:["voice","And the Psychic Amplifier seed is yours. When it has grown, the city will kneel."],loc:"Port Merrow",spawn:1,
  brief:[["voice","Three Masterminds wait on the west bank of Port Merrow. Together they can reach every mind in the city."],["senna","They must reach the east bluff. The high bridge is the only way."],["voice","Two will be enough. Move when they are ready."]],
- foes:[{fac:"soviet",diff:"hard",spawn:3,team:2,base:["power","barracks","def1"]},{fac:"allied",diff:"normal",spawn:2,team:2}],
- start:{credits:6000,base:["power","refinery","barracks","factory"],convoy:{key:"mastermind",n:3,tag:"convoy",at:[20,35]}},
- obj:[{id:"esc",t:"escort",tag:"convoy",x:59,y:35,r:4,need:2,text:"Bring at least 2 Masterminds to the east bluff"},{id:"hold",t:"hold",x:59,y:35,r:5,time:90,hide:1,text:"Hold the east bluff while they reach out"},
+ foes:[{fac:"legion",diff:"hard",spawn:3,team:2,base:["power","barracks","def1"]},{fac:"vanguard",diff:"normal",spawn:2,team:2}],
+ start:{credits:6000,base:["power","refinery","barracks","factory"],convoy:{key:"overmind",n:3,tag:"convoy",at:[20,35]}},
+ obj:[{id:"esc",t:"escort",tag:"convoy",x:59,y:35,r:4,need:2,text:"Bring at least 2 Overminds to the east bluff"},{id:"hold",t:"hold",x:59,y:35,r:5,time:90,hide:1,text:"Hold the east bluff while they reach out"},
       {id:"loss",t:"lossMax",n:20,sec:1,text:"Lose no more than 20 units"},{id:"sw",t:"build",key:"super",n:1,sec:1,text:"Grow the Psychic Amplifier"}],
  ev:[{at:5,do:[["ping",45,35],say("senna","The Masterminds gather by the west bluff.")]},
      {at:90,do:[["go","convoy",59,35],say("voice","Go now. Let the city hear us coming.")]},
@@ -351,8 +351,8 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
  lose:[["senna","The Masterminds are lost."]]},
 
 {name:"Ascendance",map:"ring",loc:"Iron Ring Crater",spawn:0,
- brief:[["voice","This is the last of it, Adept. The Vanguard and Legion have gathered everything they have at the Iron Ring."],["senna","They mean to end us."],["voice","Build the Dominator. Then show them what the end looks like."]],
- foes:[{fac:"allied",diff:"hard",spawn:1,team:2},{fac:"soviet",diff:"hard",spawn:3,team:2},{fac:"soviet",diff:"normal",spawn:2,team:2}],start:{credits:12000},
+ brief:[["voice","This is the last of it, Adept. The Vanguard and Legion have gathered everything they have at the Iron Ring."],["senna","They mean to end us."],["voice","Build the Overmind. Then show them what the end looks like."]],
+ foes:[{fac:"vanguard",diff:"hard",spawn:1,team:2},{fac:"legion",diff:"hard",spawn:3,team:2},{fac:"legion",diff:"normal",spawn:2,team:2}],start:{credits:12000},
  obj:[{id:"dom",t:"build",key:"super",n:1,text:"Grow the Psychic Amplifier (superweapon)"},{id:"all",t:"elim",text:"Destroy every enemy base"},
       {id:"mid",t:"hold",x:45,y:35,r:5,time:60,sec:1,text:"Hold the crater floor for 60 seconds"},{id:"kills",t:"kills",n:120,sec:1,text:"Destroy 120 enemy units"}],
  ev:[{at:6,do:[say("senna","The rim is high ground on every side. Ramps down into the crater.")]},
@@ -365,14 +365,14 @@ yuri:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard blood. 
 
 // ---- technology tiers --------------------------------------------------------------
 // Each campaign opens up one tier per mission: 1 infantry only (no construction),
-// 2 a Construction Yard with power, refineries, barracks and basic defences,
-// 3 the War Factory and armour, 4 Tech Centre, air power and elite units,
+// 2 a Headquarters with power, refineries, barracks and basic defences,
+// 3 the Factory and armour, 4 Tech Centre, air power and elite units,
 // 5 titan walkers, 6 naval, 7 superweapons, 8 everything.
 for(const fac in CAMPAIGNS)CAMPAIGNS[fac].missions.forEach((m,i)=>{m.tier=m.tier||i+1;m.unlock&&!m._u&&(m.brief.push(m.unlock),m._u=1)});
 const TIER_BLD={power:2,refinery:2,hive:2,barracks:2,wall:2,gate:2,def1:2,orerig:3,factory:3,silo:3,repair:3,lab:4,airfield:4,aa:4,def2:4,triturret:4,bastion:5,support:5,navalyard:6,super:7};
-function unitTier(k){const u=UNITS[k];if(!u)return 9;if(/^titan_/.test(k)||"bastion"===k)return 5;if("sea"===u.tab||"navalyard"===u.from)return 6;if("airfield"===u.from||"rocketeer"===k)return 4;if("lab"===u.req)return 4;if("inf"===u.tab)return 1;if("miner"===u.role||"hivetrans"===k||"drone"===k)return 2;return 3}
+function unitTier(k){const u=UNITS[k];if(!u)return 9;if(/^titan_/.test(k)||"bastion"===k)return 5;if("sea"===u.tab||"navalyard"===u.from)return 6;if("airfield"===u.from||"skyjack"===k)return 4;if("lab"===u.req)return 4;if("inf"===u.tab)return 1;if("miner"===u.role||"hivetrans"===k||"drone"===k)return 2;return 3}
 function techAllowed(k,isBld,abil){const m=S.mission,T=m&&m.tier;if(!T||m.tutorial)return!0;if(abil)return"super"===k?T>=7:"curtain"===k?T>=5:T>=3;return(isBld?TIER_BLD[k]||2:unitTier(k))<=T}
-function tierNews(fac,t){const b=k=>bname(k,fac),u=k=>uname(k,fac),F=FACTIONS[fac];return{1:"Infantry only. Capture buildings with Technicians; no construction.",2:b("conyard")+": "+b("power")+", "+b("refinery")+", "+b("barracks")+" and "+b("def1")+".",3:b("factory")+": "+u(F.main)+", support vehicles and the "+b("repair")+".",4:b("lab")+", "+b("airfield")+", aircraft, advanced defences and elite infantry.",5:"Titan walker: the "+u("titan_"+("allied"===fac?"allied":"soviet"===fac?"soviet":"yuri"))+", and the "+b("support")+" support structure.",6:"Naval yard and the full conventional arsenal.",7:"Superweapon: the "+b("super")+".",8:"Everything is authorised."}[t]||""}
+function tierNews(fac,t){const b=k=>bname(k,fac),u=k=>uname(k,fac),F=FACTIONS[fac];return{1:"Infantry only. Capture buildings with Technicians; no construction.",2:b("conyard")+": "+b("power")+", "+b("refinery")+", "+b("barracks")+" and "+b("def1")+".",3:b("factory")+": "+u(F.main)+", support vehicles and the "+b("repair")+".",4:b("lab")+", "+b("airfield")+", aircraft, advanced defences and elite infantry.",5:"Titan walker: the "+u("titan_"+("vanguard"===fac?"vanguard":"legion"===fac?"legion":"syndicate"))+", and the "+b("support")+" support structure.",6:"Naval yard and the full conventional arsenal.",7:"Superweapon: the "+b("super")+".",8:"Everything is authorised."}[t]||""}
 // ---- difficulty ----------------------------------------------------------------
 const CDIFF={easy:{n:"RECRUIT",d:"Weaker enemies, smaller attacks, more credits. Stealth: short sight range, slow to spot you.",shift:-1,wave:.6,cash:1.4,det:80,detT:2.8,emp:100,alarmT:15},
 normal:{n:"VETERAN",d:"The intended challenge.",shift:0,wave:1,cash:1,det:120,detT:1.7,emp:65,alarmT:25},
@@ -409,7 +409,7 @@ function playerArmyPos(){const us=S.units.filter(u=>0===u.owner&&!u.dead&&!u.d.f
 function playerBase(){return S.blds.find(b=>0===b.owner&&!b.dead&&"conyard"===b.key)||S.blds.find(b=>0===b.owner&&!b.dead&&!b.d.civ)||playerArmyPos()||{x:S.players[0].spawnX,y:S.players[0].spawnY}}
 const enemyOwners=()=>{const o=[];for(let i=1;i<NEUTRAL;i++)teamOf(i)!==teamOf(0)&&o.push(i);return o};
 // Turns an owner's Mobile HQ into a standing base with the listed buildings.
-function preBuild(owner,list){const p=S.players[owner],mcv=S.units.find(u=>u.owner===owner&&!u.dead&&"mcv"===u.key);if(!mcv)return;const tx=Math.round(p.spawnX/32-1.5),ty=Math.round(p.spawnY/32-1.5);if(!canPlaceRaw("conyard",tx,ty))return;killUnitSilent(mcv),addBuilding(owner,"conyard",tx,ty,!0);for(const k0 of list){const k="refinery"===k0&&"yuri"===p.fac&&BLD.hive?"hive":k0;if(!BLD[k])continue;const s=aiFindSpot(p,k);s&&addBuilding(owner,k,s[0],s[1],!0)}}
+function preBuild(owner,list){const p=S.players[owner],hq=S.units.find(u=>u.owner===owner&&!u.dead&&"mhq"===u.key);if(!hq)return;const tx=Math.round(p.spawnX/32-1.5),ty=Math.round(p.spawnY/32-1.5);if(!canPlaceRaw("conyard",tx,ty))return;killUnitSilent(hq),addBuilding(owner,"conyard",tx,ty,!0);for(const k0 of list){const k="refinery"===k0&&"syndicate"===p.fac&&BLD.hive?"hive":k0;if(!BLD[k])continue;const s=aiFindSpot(p,k);s&&addBuilding(owner,k,s[0],s[1],!0)}}
 
 // ---- mission state ---------------------------------------------------------------
 function applyPendingMission(){if(!pendingMission)return void(S.mission=null);if(pendingMission.tutorial)return S.mission={tutorial:!0,curStep:0,doneSteps:[]},S.tutorialMoved=!1,S.tutorialAmoved=!1,void(pendingMission=null);
@@ -466,7 +466,7 @@ case"say":radioSay(a[1],a[2]);break;
 case"emp":{const ow=a[1]+1,T=m.D.emp;for(const b of S.blds)!b.dead&&b.owner===ow&&(b.blackoutT=T,spark(b.x,b.y,"#9fe8ff"));for(const u of S.units)!u.dead&&u.owner===ow&&"veh"===u.d.armor&&(u.frozen=Math.min(T,12));m.empUntil=S.time+T;sfx("psiwave"),hint("EMP — enemy defences offline for "+T+"s");break}
 case"hint":hint(a[1]);break;
 case"pingRuin":{const id=m.ruinB&&m.ruinB[a[1]],b=id&&S.blds.find(b=>b.id===id);b&&(S.marker={x:b.x,y:b.y,t:0,c:"#ffd75e"});break}
-case"miner":{const b=S.blds.find(b=>0===b.owner&&!b.dead&&"refinery"===b.key);if(b){const f=S.players[0].f,k="yuri"===S.players[0].fac?"miner_allied":f.miner,u=addUnit(0,k,b.x,b.y+70);u&&(u.order="harvest")}break}
+case"miner":{const b=S.blds.find(b=>0===b.owner&&!b.dead&&"refinery"===b.key);if(b){const f=S.players[0].f,k="syndicate"===S.players[0].fac?"miner_vanguard":f.miner,u=addUnit(0,k,b.x,b.y+70);u&&(u.order="harvest")}break}
 case"credits":S.players[0].credits+=a[1],hint("+"+a[1]+" credits"),sfx("sel");break;
 case"reveal":S.spyReveals.push({x:T2P(a[1]),y:T2P(a[2]),r:32*a[3],t:a[4]||20});break;
 case"ping":S.marker={x:T2P(a[1]),y:T2P(a[2]),t:0,c:"#ffd75e"};break;
@@ -544,12 +544,12 @@ function castLineList(){const out=[],seen={},add=(w,t)=>{const k=w+"|"+t;t&&!see
 for(const fac in CAMPAIGNS)for(const m of CAMPAIGNS[fac].missions){m.brief.forEach(([w,t])=>add(w,t));m.ev.forEach(e=>e.do.forEach(a=>"say"===a[0]&&add(a[1],a[2])));(m.alarm||[]).concat(m.win||[],m.lose||[]).forEach(([w,t])=>add(w,t));loadingVO(m).forEach(t=>add(m.brief[0][0],t))}
 if("undefined"!=typeof FILMS)for(const k in FILMS)FILMS[k].shots.forEach(sh=>sh.say&&add(sh.say[0],sh.say[1]));return out}
 // ---- menus ---------------------------------------------------------------------------
-const FAC_ICON={allied:"✦",soviet:"✪",yuri:"◉"};
+const FAC_ICON={vanguard:"✦",legion:"✪",syndicate:"◉"};
 const mapName=k=>{const e=(typeof MAPS!="undefined"?MAPS:[]).find(x=>x.k===k);return e?e.n:k.toUpperCase()};
 const TYPE_TAG=m=>m.hero?"COMMANDO":m.noBuild?"STRIKE GROUP":m.obj.some(o=>"survive"===o.t)?"DEFENCE":m.obj.some(o=>"escort"===o.t)?"ESCORT":"ASSAULT";
 function campStars(fac){return CAMPAIGNS[fac].missions.reduce((a,_,i)=>a+missionStars(fac,i),0)}
 function hideLoading(){const l=$("#loadScreen");l&&(l._tok=(l._tok||0)+1,l.classList.add("hidden"))}
-function showCampaign(){radioStop(),hideLoading(),$("#menu").classList.remove("hidden");const rows=["allied","soviet","yuri"].map(fac=>{const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac),total=camp.missions.length,done=Math.min(total,Math.max(0,unlocked-1));return'<button class="campCard f-'+fac+'" data-fac="'+fac+'"><div class="ccTop"><span class="ccIcon">'+FAC_ICON[fac]+'</span><span class="ccFac">'+FAC_NAME[fac].toUpperCase()+'</span><span class="ccProg">'+done+"/"+total+'</span></div><div class="ccTitle">'+camp.title+'</div><div class="ccTag">'+camp.tag+'</div><div class="ccBar"><i style="width:'+Math.round(100*done/total)+'%"></i></div><div class="ccStars">★ '+campStars(fac)+" / "+3*total+"</div></button>"}).join("");
+function showCampaign(){radioStop(),hideLoading(),$("#menu").classList.remove("hidden");const rows=["vanguard","legion","syndicate"].map(fac=>{const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac),total=camp.missions.length,done=Math.min(total,Math.max(0,unlocked-1));return'<button class="campCard f-'+fac+'" data-fac="'+fac+'"><div class="ccTop"><span class="ccIcon">'+FAC_ICON[fac]+'</span><span class="ccFac">'+FAC_NAME[fac].toUpperCase()+'</span><span class="ccProg">'+done+"/"+total+'</span></div><div class="ccTitle">'+camp.title+'</div><div class="ccTag">'+camp.tag+'</div><div class="ccBar"><i style="width:'+Math.round(100*done/total)+'%"></i></div><div class="ccStars">★ '+campStars(fac)+" / "+3*total+"</div></button>"}).join("");
 $("#panelMain").innerHTML='<h1>CAMPAIGN</h1><div class="sub">Three wars for the Frontier</div><button class="bPlay" id="filmPro">▶ PROLOGUE — THE IRON FRONTIER</button><div id="campList">'+rows+'</div><button id="backSetup" '+SECBTN+">BACK</button>";$("#filmPro").onclick=()=>playFilm("prologue");$("#panelMain").querySelectorAll(".campCard").forEach(b=>b.onclick=()=>showMissionList(b.dataset.fac)),$("#backSetup").onclick=showSetup;filmSeen("prologue")||playFilm("prologue")}
 function showMissionList(fac){radioStop(),hideLoading();const camp=CAMPAIGNS[fac],unlocked=campaignUnlocked(fac);const rows=camp.missions.map((m,i)=>{const locked=i>=unlocked,done=i<unlocked-1;return'<button class="mRow'+(locked?" locked":done?" done":" next")+'" data-i="'+i+'"'+(locked?" disabled":"")+'><span class="mNum">'+(i+1)+'</span><span class="mMain"><b>'+m.name+"</b><small>"+(locked?"LOCKED":mapName(m.map)+" · "+TYPE_TAG(m))+"</small></span>"+(done?starStr(missionStars(fac,i)):locked?'<span class="mLock">🔒</span>':'<span class="mGo">PLAY ›</span>')+"</button>"}).join("");
 $("#panelMain").innerHTML='<h1 class="f-'+fac+'">'+FAC_ICON[fac]+" "+FAC_NAME[fac].toUpperCase()+'</h1><div class="sub">'+camp.title+'</div><div class="small" style="margin:4px 0 8px;opacity:.8">'+camp.tag+'</div><div class="filmRow"><button class="bPlay" id="filmIntro">▶ INTRO</button>'+(unlocked>camp.missions.length?'<button class="bPlay" id="filmEnd">▶ ENDING</button>':"")+'</div><div id="missionList">'+rows+'</div><button id="backCampList" '+SECBTN+">BACK</button>";$("#filmIntro").onclick=()=>playFilm(fac+"_intro");$("#filmEnd")&&($("#filmEnd").onclick=()=>playFilm(fac+"_end"));filmSeen(fac+"_intro")||playFilm(fac+"_intro");$("#panelMain").querySelectorAll(".mRow").forEach(b=>b.onclick=()=>{b.disabled||showBriefing(fac,+b.dataset.i)}),$("#backCampList").onclick=showCampaign}

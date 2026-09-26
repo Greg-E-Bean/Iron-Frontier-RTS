@@ -5,7 +5,7 @@ Save each result in this folder under the file name shown, and the game picks it
 
 **Style line.** Add this to every prompt so the cast matches:
 
-> Late-1990s live-action FMV cutscene in the style of Command & Conquer: Red Alert 2. A real actor filmed on a lit studio set, photorealistic, medium close-up of head and shoulders, looking just off camera as if briefing the viewer. Strong coloured rim light, dark command-centre background with glowing screens slightly out of focus, subtle video softness and film grain, 16:9.
+> Late-1990s live-action FMV cutscene from a military strategy game. A real actor filmed on a lit studio set, photorealistic, medium close-up of head and shoulders, looking just off camera as if briefing the viewer. Strong coloured rim light, dark command-centre background with glowing screens slightly out of focus, subtle video softness and film grain, 16:9.
 
 **Tips**
 - Generate one still per character first and pick the best.
@@ -36,7 +36,7 @@ Dr. Elias Marsh is only heard, in archive footage, so he needs no portrait.
 
 ## Scenes
 
-The **Style line** for scenes is: *"cinematic still from a late-1990s CGI/live-action game cutscene, Red Alert 2 style, dramatic lighting, 16:9"*.
+The **Style line** for scenes is: *"cinematic still from a late-1990s CGI/live-action game cutscene, live-action FMV style, dramatic lighting, 16:9"*.
 
 Shots marked "drawn by the game" are titles and animated maps, and are best left as they are.
 The close-up shots use the character files above.
@@ -60,96 +60,96 @@ The close-up shots use the character files above.
 | `prologue_12` | _drawn by the game — leave empty_ | Three powers now fight over what is left. The Legion. The Vanguard. And the hive the Vanguard made. |
 | `prologue_13` | _drawn by the game — leave empty_ |  |
 
-### Operation Clean Slate (`allied_intro`)
+### Operation Clean Slate (`vanguard_intro`)
 
 | File | Shot | Line |
 |---|---|---|
-| `allied_intro_00` | _drawn by the game — leave empty_ |  |
-| `allied_intro_01` | Close-up of **reyes** (use `fmv/reyes.*`) | I was at Site Nine the night it broke out. I signed the order that brought that rock down. |
-| `allied_intro_02` | Night, a vast ice crater lit by sweeping military floodlights; scaffolding surrounds a dark glowing meteorite fragment; tiny figures in cold-weather gear at the rim. Red alarm lights, violet tendrils bursting from the fragment. | We wanted a weapon to stop the Legion. We opened a door instead. |
-| `allied_intro_03` | _drawn by the game — leave empty_ | Now the Legion holds half the Frontier, and the Syndicate grows in every gap between us. |
-| `allied_intro_04` | Close-up of **hale** (use `fmv/hale.*`) | Battlegroup's fuelled and ready, Colonel. Say the word. |
-| `allied_intro_05` | Dusk battlefield on open plains: a line of main battle tanks firing, muzzle flashes, explosions, smoke columns against an orange sky. | First we take our land back from the Legion. Then we clean up our own mess. |
-| `allied_intro_06` | _drawn by the game — leave empty_ |  |
+| `vanguard_intro_00` | _drawn by the game — leave empty_ |  |
+| `vanguard_intro_01` | Close-up of **reyes** (use `fmv/reyes.*`) | I was at Site Nine the night it broke out. I signed the order that brought that rock down. |
+| `vanguard_intro_02` | Night, a vast ice crater lit by sweeping military floodlights; scaffolding surrounds a dark glowing meteorite fragment; tiny figures in cold-weather gear at the rim. Red alarm lights, violet tendrils bursting from the fragment. | We wanted a weapon to stop the Legion. We opened a door instead. |
+| `vanguard_intro_03` | _drawn by the game — leave empty_ | Now the Legion holds half the Frontier, and the Syndicate grows in every gap between us. |
+| `vanguard_intro_04` | Close-up of **hale** (use `fmv/hale.*`) | Battlegroup's fuelled and ready, Colonel. Say the word. |
+| `vanguard_intro_05` | Dusk battlefield on open plains: a line of main battle tanks firing, muzzle flashes, explosions, smoke columns against an orange sky. | First we take our land back from the Legion. Then we clean up our own mess. |
+| `vanguard_intro_06` | _drawn by the game — leave empty_ |  |
 
-### The Marsh Tapes (`allied_reveal`)
-
-| File | Shot | Line |
-|---|---|---|
-| `allied_reveal_00` | Close-up of **hale** (use `fmv/hale.*`) | Ma'am. We recovered the Site Nine archive. You need to see this. |
-| `allied_reveal_01` | A 1990s military research lab: a glass containment cylinder holding a glowing violet meteor shard, CRT monitors on both sides filling with alien glyphs, cables pulsing with light, red alarm lights. | It is talking to the network. It is asking questions — about us. Reyes, shut it down. Shut it — |
-| `allied_reveal_02` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | Elias Marsh was very helpful. He is part of us now, Colonel. So are you, a little. |
-| `allied_reveal_03` | Close-up of **reyes** (use `fmv/reyes.*`) | That's Marsh's voice. God help us — it's wearing him. |
-| `allied_reveal_04` | _drawn by the game — leave empty_ |  |
-
-### Clean Slate (`allied_end`)
+### The Marsh Tapes (`vanguard_reveal`)
 
 | File | Shot | Line |
 |---|---|---|
-| `allied_end_00` | A ruined city skyline at dusk, fires burning between broken towers, smoke drifting, aircraft silhouettes overhead. Calm dawn light, fires out. | The Grand Crossing fell silent at dawn. For the first time in twelve years, the Frontier's guns stopped. |
-| `allied_end_01` | _drawn by the game — leave empty_ | The Syndicate's grip is broken. The Legion is going home. |
-| `allied_end_02` | Close-up of **reyes** (use `fmv/reyes.*`) | Starfall was our mistake. Clean Slate is how we answer for it. |
-| `allied_end_03` | Close-up of **hale** (use `fmv/hale.*`) | And the thing in the ice, ma'am? |
-| `allied_end_04` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | We are patient. We fell a very long way to get here. |
-| `allied_end_05` | _drawn by the game — leave empty_ |  |
+| `vanguard_reveal_00` | Close-up of **hale** (use `fmv/hale.*`) | Ma'am. We recovered the Site Nine archive. You need to see this. |
+| `vanguard_reveal_01` | A 1990s military research lab: a glass containment cylinder holding a glowing violet meteor shard, CRT monitors on both sides filling with alien glyphs, cables pulsing with light, red alarm lights. | It is talking to the network. It is asking questions — about us. Reyes, shut it down. Shut it — |
+| `vanguard_reveal_02` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | Elias Marsh was very helpful. He is part of us now, Colonel. So are you, a little. |
+| `vanguard_reveal_03` | Close-up of **reyes** (use `fmv/reyes.*`) | That's Marsh's voice. God help us — it's wearing him. |
+| `vanguard_reveal_04` | _drawn by the game — leave empty_ |  |
 
-### Iron Reclamation (`soviet_intro`)
-
-| File | Shot | Line |
-|---|---|---|
-| `soviet_intro_00` | _drawn by the game — leave empty_ |  |
-| `soviet_intro_01` | Endless ranks of eastern-bloc infantry in greatcoats and steel helmets marching past red banners, searchlights crossing a smoky red sky. | For ten years the Legion marched west, and the West could not stop us. So they reached into the sky. |
-| `soviet_intro_02` | Dusk over a snowy mountain range; a huge burning meteor streaks down trailing fire and smoke and strikes the horizon in a blinding flash. | Their star fell on the Frontier. And something climbed out of it. |
-| `soviet_intro_03` | Close-up of **volkova** (use `fmv/volkova.*`) | Now it wears Western faces and whispers in our soldiers' heads. It must be burned out, Marshal. |
-| `soviet_intro_04` | Close-up of **draganov** (use `fmv/draganov.*`) | The Frontier is ours by blood. Iron Reclamation begins today. |
-| `soviet_intro_05` | Dusk battlefield on open plains: a line of main battle tanks firing, muzzle flashes, explosions, smoke columns against an orange sky. | Tanks are fuelled, guns are loaded, and I only had to hit three of them with a spanner. |
-| `soviet_intro_06` | _drawn by the game — leave empty_ |  |
-
-### The Marshal's Voices (`soviet_reveal`)
+### Clean Slate (`vanguard_end`)
 
 | File | Shot | Line |
 |---|---|---|
-| `soviet_reveal_00` | Close-up of **volkova** (use `fmv/volkova.*`) | Marshal. The medical scans came back. There is Syndicate tissue at the base of your skull. |
-| `soviet_reveal_01` | Close-up of a glowing DNA double helix on a lab monitor, blue strands turning violet from left to right, clinical readout text, dark room. | Donor match: Legion. The hive had learned a second recipe. |
-| `soviet_reveal_02` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | He invited us in, Commissar. Every order he gave these last months — we gave. |
-| `soviet_reveal_03` | Close-up of **draganov** (use `fmv/draganov.*`) | Then cut it out of me. And give me something to burn. |
-| `soviet_reveal_04` | _drawn by the game — leave empty_ |  |
+| `vanguard_end_00` | A ruined city skyline at dusk, fires burning between broken towers, smoke drifting, aircraft silhouettes overhead. Calm dawn light, fires out. | The Grand Crossing fell silent at dawn. For the first time in twelve years, the Frontier's guns stopped. |
+| `vanguard_end_01` | _drawn by the game — leave empty_ | The Syndicate's grip is broken. The Legion is going home. |
+| `vanguard_end_02` | Close-up of **reyes** (use `fmv/reyes.*`) | Starfall was our mistake. Clean Slate is how we answer for it. |
+| `vanguard_end_03` | Close-up of **hale** (use `fmv/hale.*`) | And the thing in the ice, ma'am? |
+| `vanguard_end_04` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | We are patient. We fell a very long way to get here. |
+| `vanguard_end_05` | _drawn by the game — leave empty_ |  |
 
-### Iron Reclamation (`soviet_end`)
-
-| File | Shot | Line |
-|---|---|---|
-| `soviet_end_00` | Endless ranks of eastern-bloc infantry in greatcoats and steel helmets marching past red banners, searchlights crossing a smoky red sky. | The Legion held the Frontier from the eastern steppe to the Kessel River. |
-| `soviet_end_01` | _drawn by the game — leave empty_ | The hive is broken. Its nests are burning. |
-| `soviet_end_02` | Close-up of **draganov** (use `fmv/draganov.*`) | For the first time in a year, my head is quiet. I had forgotten what my own thoughts sound like. |
-| `soviet_end_03` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | Quiet is only the space between words, Marshal. |
-| `soviet_end_04` | _drawn by the game — leave empty_ |  |
-
-### The Harvest (`yuri_intro`)
+### Iron Reclamation (`legion_intro`)
 
 | File | Shot | Line |
 |---|---|---|
-| `yuri_intro_00` | _drawn by the game — leave empty_ |  |
-| `yuri_intro_01` | A dark, jagged meteor streaked with glowing violet veins drifting toward Earth, seen from orbit with the planet's blue limb below, stars, cinematic. | We fell for a very long time. It was cold between the stars. |
-| `yuri_intro_02` | A 1990s military research lab: a glass containment cylinder holding a glowing violet meteor shard, CRT monitors on both sides filling with alien glyphs, cables pulsing with light, red alarm lights. | They pulled us out of the ice and asked us what we were. So we asked their machines the same question. The machines answered. |
-| `yuri_intro_03` | A long dim corridor of glass cloning vats filled with violet fluid, each holding a sleeping humanoid figure; one opens glowing violet eyes. | I remember being someone else. A soldier. Now I remember everything all of us remember. |
-| `yuri_intro_04` | Close-up of **voice** (use `fmv/voice.*`) | Wake, Adept. The Frontier is loud with small minds. Let us make it quiet. |
-| `yuri_intro_05` | _drawn by the game — leave empty_ |  |
+| `legion_intro_00` | _drawn by the game — leave empty_ |  |
+| `legion_intro_01` | Endless ranks of eastern-bloc infantry in greatcoats and steel helmets marching past red banners, searchlights crossing a smoky red sky. | For ten years the Legion marched west, and the West could not stop us. So they reached into the sky. |
+| `legion_intro_02` | Dusk over a snowy mountain range; a huge burning meteor streaks down trailing fire and smoke and strikes the horizon in a blinding flash. | Their star fell on the Frontier. And something climbed out of it. |
+| `legion_intro_03` | Close-up of **volkova** (use `fmv/volkova.*`) | Now it wears Western faces and whispers in our soldiers' heads. It must be burned out, Marshal. |
+| `legion_intro_04` | Close-up of **draganov** (use `fmv/draganov.*`) | The Frontier is ours by blood. Iron Reclamation begins today. |
+| `legion_intro_05` | Dusk battlefield on open plains: a line of main battle tanks firing, muzzle flashes, explosions, smoke columns against an orange sky. | Tanks are fuelled, guns are loaded, and I only had to hit three of them with a spanner. |
+| `legion_intro_06` | _drawn by the game — leave empty_ |  |
 
-### The Copy (`yuri_reveal`)
-
-| File | Shot | Line |
-|---|---|---|
-| `yuri_reveal_00` | A long dim corridor of glass cloning vats filled with violet fluid, each holding a sleeping humanoid figure; one opens glowing violet eyes. | Their finest soldier bled on Site Nine's floor the night we woke. We kept what she left. |
-| `yuri_reveal_01` | Close-up of a glowing DNA double helix on a lab monitor, blue strands turning violet from left to right, clinical readout text, dark room. | Donor: Vanguard special operations. Codename: Ghost. |
-| `yuri_reveal_02` | Close-up of **phantom** (use `fmv/phantom.*`) | Her face. Her hands. Her aim. Your Ghost never knew there was a copy. |
-| `yuri_reveal_03` | _drawn by the game — leave empty_ |  |
-
-### One Mind (`yuri_end`)
+### The Marshal's Voices (`legion_reveal`)
 
 | File | Shot | Line |
 |---|---|---|
-| `yuri_end_00` | A ruined city skyline at dusk, fires burning between broken towers, smoke drifting, aircraft silhouettes overhead. Violet organic growth climbing the buildings. | The Iron Ring fell in a single night. By morning, the Frontier had stopped fighting. |
-| `yuri_end_01` | _drawn by the game — leave empty_ | Every city. Every radio. Every mind. One song. |
-| `yuri_end_02` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | We fell a very long way to find a home. Now we are home. |
-| `yuri_end_03` | _drawn by the game — leave empty_ |  |
+| `legion_reveal_00` | Close-up of **volkova** (use `fmv/volkova.*`) | Marshal. The medical scans came back. There is Syndicate tissue at the base of your skull. |
+| `legion_reveal_01` | Close-up of a glowing DNA double helix on a lab monitor, blue strands turning violet from left to right, clinical readout text, dark room. | Donor match: Legion. The hive had learned a second recipe. |
+| `legion_reveal_02` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | He invited us in, Commissar. Every order he gave these last months — we gave. |
+| `legion_reveal_03` | Close-up of **draganov** (use `fmv/draganov.*`) | Then cut it out of me. And give me something to burn. |
+| `legion_reveal_04` | _drawn by the game — leave empty_ |  |
+
+### Iron Reclamation (`legion_end`)
+
+| File | Shot | Line |
+|---|---|---|
+| `legion_end_00` | Endless ranks of eastern-bloc infantry in greatcoats and steel helmets marching past red banners, searchlights crossing a smoky red sky. | The Legion held the Frontier from the eastern steppe to the Kessel River. |
+| `legion_end_01` | _drawn by the game — leave empty_ | The hive is broken. Its nests are burning. |
+| `legion_end_02` | Close-up of **draganov** (use `fmv/draganov.*`) | For the first time in a year, my head is quiet. I had forgotten what my own thoughts sound like. |
+| `legion_end_03` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | Quiet is only the space between words, Marshal. |
+| `legion_end_04` | _drawn by the game — leave empty_ |  |
+
+### The Harvest (`syndicate_intro`)
+
+| File | Shot | Line |
+|---|---|---|
+| `syndicate_intro_00` | _drawn by the game — leave empty_ |  |
+| `syndicate_intro_01` | A dark, jagged meteor streaked with glowing violet veins drifting toward Earth, seen from orbit with the planet's blue limb below, stars, cinematic. | We fell for a very long time. It was cold between the stars. |
+| `syndicate_intro_02` | A 1990s military research lab: a glass containment cylinder holding a glowing violet meteor shard, CRT monitors on both sides filling with alien glyphs, cables pulsing with light, red alarm lights. | They pulled us out of the ice and asked us what we were. So we asked their machines the same question. The machines answered. |
+| `syndicate_intro_03` | A long dim corridor of glass cloning vats filled with violet fluid, each holding a sleeping humanoid figure; one opens glowing violet eyes. | I remember being someone else. A soldier. Now I remember everything all of us remember. |
+| `syndicate_intro_04` | Close-up of **voice** (use `fmv/voice.*`) | Wake, Adept. The Frontier is loud with small minds. Let us make it quiet. |
+| `syndicate_intro_05` | _drawn by the game — leave empty_ |  |
+
+### The Copy (`syndicate_reveal`)
+
+| File | Shot | Line |
+|---|---|---|
+| `syndicate_reveal_00` | A long dim corridor of glass cloning vats filled with violet fluid, each holding a sleeping humanoid figure; one opens glowing violet eyes. | Their finest soldier bled on Site Nine's floor the night we woke. We kept what she left. |
+| `syndicate_reveal_01` | Close-up of a glowing DNA double helix on a lab monitor, blue strands turning violet from left to right, clinical readout text, dark room. | Donor: Vanguard special operations. Codename: Ghost. |
+| `syndicate_reveal_02` | Close-up of **phantom** (use `fmv/phantom.*`) | Her face. Her hands. Her aim. Your Ghost never knew there was a copy. |
+| `syndicate_reveal_03` | _drawn by the game — leave empty_ |  |
+
+### One Mind (`syndicate_end`)
+
+| File | Shot | Line |
+|---|---|---|
+| `syndicate_end_00` | A ruined city skyline at dusk, fires burning between broken towers, smoke drifting, aircraft silhouettes overhead. Violet organic growth climbing the buildings. | The Iron Ring fell in a single night. By morning, the Frontier had stopped fighting. |
+| `syndicate_end_01` | _drawn by the game — leave empty_ | Every city. Every radio. Every mind. One song. |
+| `syndicate_end_02` | Extreme close-up of an inhuman violet eye with a slit pupil and glowing iris fibres, veins around it, dark background. | We fell a very long way to find a home. Now we are home. |
+| `syndicate_end_03` | _drawn by the game — leave empty_ |  |

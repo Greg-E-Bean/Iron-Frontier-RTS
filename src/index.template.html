@@ -220,8 +220,8 @@ body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 190px)}
 .campCard .ccBar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);margin-top:9px;overflow:hidden}
 .campCard .ccBar i{display:block;height:100%;background:var(--fc,var(--amber))}
 .campCard .ccStars{font-size:10px;color:var(--amber2);margin-top:5px;letter-spacing:1px}
-.f-allied{--fc:#6fb8e0}.f-soviet{--fc:#e0674a}.f-yuri{--fc:#b27ae0}
-.campCard .ccIcon,.campCard .ccFac,h1.f-allied,h1.f-soviet,h1.f-yuri{color:var(--fc)!important}
+.f-vanguard{--fc:#6fb8e0}.f-legion{--fc:#e0674a}.f-syndicate{--fc:#b27ae0}
+.campCard .ccIcon,.campCard .ccFac,h1.f-vanguard,h1.f-legion,h1.f-syndicate{color:var(--fc)!important}
 .mRow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin-top:6px;padding:9px 12px;border-radius:10px;cursor:pointer;
   border:1px solid rgba(170,200,220,.14);background:rgba(255,255,255,.03);color:#cfe0f5}
 .mRow:hover:not([disabled]){border-color:rgba(240,167,44,.6)}
@@ -780,19 +780,19 @@ body.sidebar .cbtn.icon[data-l]:after{font-size:8px}
 }
 
 /* ---- faction UI themes ---- */
-body[data-fac=allied]{--amber:#4fb3ff;--amber2:#a6ddff;--accrgb:79 179 255;--edge:#2b4459;--dim:#7f97aa;
+body[data-fac=vanguard]{--amber:#4fb3ff;--amber2:#a6ddff;--accrgb:79 179 255;--edge:#2b4459;--dim:#7f97aa;
   --pan1:#13212d;--pan2:#0a121a;--pan3:#070c12;--card1:#1d2d3b;--card2:#142230}
-body[data-fac=soviet]{--amber:#e5533b;--amber2:#ff9f80;--accrgb:229 83 59;--edge:#50302a;--dim:#9a8580;
+body[data-fac=legion]{--amber:#e5533b;--amber2:#ff9f80;--accrgb:229 83 59;--edge:#50302a;--dim:#9a8580;
   --pan1:#24160f;--pan2:#140c08;--pan3:#0d0806;--card1:#33211a;--card2:#241712}
-body[data-fac=yuri]{--amber:#b57bff;--amber2:#ddb9ff;--accrgb:181 123 255;--edge:#40305a;--dim:#9486a8;
+body[data-fac=syndicate]{--amber:#b57bff;--amber2:#ddb9ff;--accrgb:181 123 255;--edge:#40305a;--dim:#9486a8;
   --pan1:#1d1428;--pan2:#100b18;--pan3:#0a0710;--card1:#2a1f3a;--card2:#1d152b}
-body[data-fac=soviet] #top .lab,body[data-fac=soviet] .tab span{letter-spacing:2px;font-weight:bold}
-body[data-fac=soviet] .card{clip-path:polygon(11px 0,100% 0,100% calc(100% - 11px),calc(100% - 11px) 100%,0 100%,0 11px)}
-body[data-fac=yuri] .card,body[data-fac=yuri] .cbtn,body[data-fac=yuri] #prodstrip .pc{clip-path:none;border-radius:9px}
-body[data-fac=yuri] .tab,body[data-fac=yuri] #more{clip-path:none;border-radius:10px 10px 0 0}
-body[data-fac=yuri] #mmWrap{clip-path:none;border-radius:14px}
-body[data-fac=allied] .card{clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
-body[data-fac=allied] .card.head,body[data-fac=allied] .tab.on{box-shadow:inset 0 -2px 0 var(--amber),0 0 12px rgb(var(--accrgb) / 30%)}
+body[data-fac=legion] #top .lab,body[data-fac=legion] .tab span{letter-spacing:2px;font-weight:bold}
+body[data-fac=legion] .card{clip-path:polygon(11px 0,100% 0,100% calc(100% - 11px),calc(100% - 11px) 100%,0 100%,0 11px)}
+body[data-fac=syndicate] .card,body[data-fac=syndicate] .cbtn,body[data-fac=syndicate] #prodstrip .pc{clip-path:none;border-radius:9px}
+body[data-fac=syndicate] .tab,body[data-fac=syndicate] #more{clip-path:none;border-radius:10px 10px 0 0}
+body[data-fac=syndicate] #mmWrap{clip-path:none;border-radius:14px}
+body[data-fac=vanguard] .card{clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+body[data-fac=vanguard] .card.head,body[data-fac=vanguard] .tab.on{box-shadow:inset 0 -2px 0 var(--amber),0 0 12px rgb(var(--accrgb) / 30%)}
 body[data-fac] #top .stat #credits{color:var(--amber2)}
 </style>
 </head>

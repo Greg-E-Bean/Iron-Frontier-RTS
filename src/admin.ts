@@ -27,9 +27,9 @@ const MINIBTN = 'class="gBtn"';
 const MINIBTN_DANGER = 'class="gBtn danger"';
 const FACTION_LIST = [
   { k: "", n: "All factions" },
-  { k: "allied", n: "Vanguard" },
-  { k: "soviet", n: "Legion" },
-  { k: "yuri", n: "Syndicate" },
+  { k: "vanguard", n: "Vanguard" },
+  { k: "legion", n: "Legion" },
+  { k: "syndicate", n: "Syndicate" },
 ];
 
 function loadAdminAssets() {
@@ -316,7 +316,7 @@ let assetSearchFilter = "";
 
 function assetDisplayName(key, kind) {
   if (kind === "unit") return (UNITS[key] && UNITS[key].name) || key;
-  return (BLD[key] && BLD[key].names && (BLD[key].names.neutral || BLD[key].names.allied)) || key;
+  return (BLD[key] && BLD[key].names && (BLD[key].names.neutral || BLD[key].names.vanguard)) || key;
 }
 function assetCategory(key, kind) {
   const d = kind === "unit" ? UNITS[key] : BLD[key];
@@ -333,7 +333,7 @@ function assetCategory(key, kind) {
 }
 function assetFactionMembership(key, kind) {
   if (kind === "unit") {
-    const facs = ["allied", "soviet", "yuri"].filter(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
+    const facs = ["vanguard", "legion", "syndicate"].filter(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
     if (!facs.length) return "None";
     return facs.map(f => FACTIONS[f].name).join(", ");
   }
@@ -341,10 +341,10 @@ function assetFactionMembership(key, kind) {
 }
 function assetPrimaryFaction(key, kind) {
   if (kind === "unit") {
-    const f = ["allied", "soviet", "yuri"].find(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
-    return f || "allied";
+    const f = ["vanguard", "legion", "syndicate"].find(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
+    return f || "vanguard";
   }
-  return (BLD[key] && BLD[key].civ) ? "neutral" : "allied";
+  return (BLD[key] && BLD[key].civ) ? "neutral" : "vanguard";
 }
 function statTargetBlock(entry, stat) {
   const s = (stat.t && stat.t[entry.id]) || {};
@@ -978,7 +978,7 @@ function renderEditorPaletteGrid() {
   ).join("") || '<div class="small">No buildings match.</div>';
   grid.querySelectorAll(".assetThumb").forEach((img: HTMLImageElement) => {
     const key = img.dataset.thumbKey;
-    renderThumbInto(img, key, "b", (BLD[key] && BLD[key].civ) ? "neutral" : "allied", 36);
+    renderThumbInto(img, key, "b", (BLD[key] && BLD[key].civ) ? "neutral" : "vanguard", 36);
   });
   grid.querySelectorAll("[data-bkey]").forEach(card => card.addEventListener("click", () => {
     editorBuildingKey = (card as HTMLElement).dataset.bkey;

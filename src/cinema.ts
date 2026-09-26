@@ -279,7 +279,7 @@ prologue:{title:"The Iron Frontier",mood:"tense",shots:[
  {s:"warmap",say:[N,"Three powers now fight over what is left. The Legion. The Vanguard. And the hive the Vanguard made."],p:{l0:.45,l1:.5,h0:.02,h1:.2,hs:[[.5,.42],[.3,.7],[.72,.3]],site:[.5,.42],date:"2031"}},
  {s:"title",p:{text:"IRON FRONTIER",sub:"CHOOSE YOUR SIDE",big:.11},d:5,fx:"boom"}]},
 
-allied_intro:{title:"Operation Clean Slate",mood:"tense",shots:[
+vanguard_intro:{title:"Operation Clean Slate",mood:"tense",shots:[
  {s:"title",p:{text:"VANGUARD",sub:"OPERATION CLEAN SLATE",c:"#6fb8e0"},d:4,fx:"sting"},
  {s:"portrait",say:["reyes","I was at Site Nine the night it broke out. I signed the order that brought that rock down."],p:{who:"reyes"}},
  {s:"site",say:["reyes","We wanted a weapon to stop the Legion. We opened a door instead."],p:{alarm:1},rec:"ARCHIVE — SITE NINE"},
@@ -287,13 +287,13 @@ allied_intro:{title:"Operation Clean Slate",mood:"tense",shots:[
  {s:"portrait",say:["hale","Battlegroup's fuelled and ready, Colonel. Say the word."],p:{who:"hale",side:"r"}},
  {s:"battle",say:["reyes","First we take our land back from the Legion. Then we clean up our own mess."],p:{sky:"dusk",dir:1,color:"#6fb8e0"},mood:"war"},
  {s:"title",p:{text:"CLEAN SLATE",sub:"RECLAIM THE FRONTIER",c:"#6fb8e0"},d:4,fx:"boom"}]},
-allied_reveal:{title:"The Marsh Tapes",mood:"dread",shots:[
+vanguard_reveal:{title:"The Marsh Tapes",mood:"dread",shots:[
  {s:"portrait",say:["hale","Ma'am. We recovered the Site Nine archive. You need to see this."],p:{who:"hale",side:"r"}},
  {s:"lab",say:["marsh","It is talking to the network. It is asking questions — about us. Reyes, shut it down. Shut it —"],p:{hack:1,breach:1},rec:"SITE NINE — 04.17 — 23:51",fx:"static",fxAt:[[6,"glitch"]],d:8},
  {s:"eye",say:["voice","Elias Marsh was very helpful. He is part of us now, Colonel. So are you, a little."],fx:"sting",mood:"hive"},
  {s:"portrait",say:["reyes","That's Marsh's voice. God help us — it's using him."],p:{who:"reyes"}},
  {s:"title",p:{text:"THE HIVE BELOW",c:"#b27ae0"},d:3.5,fx:"boom"}]},
-allied_end:{title:"Clean Slate",mood:"hope",shots:[
+vanguard_end:{title:"Clean Slate",mood:"hope",shots:[
  {s:"city",say:[N,"The Grand Crossing fell silent at dawn. For the first time in twelve years, the Frontier's guns stopped."],p:{dawn:1}},
  {s:"warmap",say:["reyes","The Syndicate's grip is broken. The Legion is going home."],p:{l0:.5,l1:.9,v0:.2,v1:.85,h0:.14,h1:0,hs:[[.5,.42]],date:"CEASEFIRE"}},
  {s:"portrait",say:["reyes","Starfall was our mistake. Clean Slate is how we answer for it."],p:{who:"reyes"}},
@@ -301,7 +301,7 @@ allied_end:{title:"Clean Slate",mood:"hope",shots:[
  {s:"eye",say:["voice","We are patient. We fell a very long way to get here."],d:5,mood:"hive",fx:"sting"},
  {s:"title",p:{text:"OPERATION CLEAN SLATE",sub:"COMPLETE",c:"#6fb8e0"},d:5}]},
 
-soviet_intro:{title:"Iron Reclamation",mood:"war",shots:[
+legion_intro:{title:"Iron Reclamation",mood:"war",shots:[
  {s:"title",p:{text:"LEGION",sub:"IRON RECLAMATION",c:"#e0674a"},d:4,fx:"sting"},
  {s:"march",say:["draganov","For ten years the Legion marched west, and the West could not stop us. So they reached into the sky."]},
  {s:"entry",say:["draganov","Their star fell on the Frontier. And something climbed out of it."],d:7,fx:"riser",fxAt:[[5.4,"boom"]]},
@@ -309,32 +309,32 @@ soviet_intro:{title:"Iron Reclamation",mood:"war",shots:[
  {s:"portrait",say:["draganov","The Frontier is ours by blood. Iron Reclamation begins today."],p:{who:"draganov"}},
  {s:"battle",say:["bogdan","Tanks are fuelled, guns are loaded, and I only had to hit three of them with a spanner."],p:{sky:"night",dir:-1,color:"#e0674a",n:9}},
  {s:"title",p:{text:"IRON RECLAMATION",c:"#e0674a"},d:4,fx:"boom"}]},
-soviet_reveal:{title:"The Marshal's Voices",mood:"dread",shots:[
+legion_reveal:{title:"The Marshal's Voices",mood:"dread",shots:[
  {s:"portrait",say:["volkova","Marshal. The medical scans came back. There is Syndicate tissue at the base of your skull."],p:{who:"volkova",side:"r"}},
  {s:"dna",say:[N,"Donor match: Legion. The hive had learned a second recipe."],p:{from:"#e0674a",to:"#b27ae0",label:"TISSUE SAMPLE — MARSHAL V. DRAGANOV"},mood:"hive"},
  {s:"eye",say:["voice","He invited us in, Commissar. Every order he gave these last months — we gave."],fx:"sting"},
  {s:"portrait",say:["draganov","Then cut it out of me. And give me something to burn."],p:{who:"draganov"}},
  {s:"title",p:{text:"RED TIDE",c:"#e0674a"},d:3.5,fx:"boom"}]},
-soviet_end:{title:"Iron Reclamation",mood:"hope",shots:[
+legion_end:{title:"Iron Reclamation",mood:"hope",shots:[
  {s:"march",say:[N,"The Legion held the Frontier from the eastern steppe to the Kessel River."]},
  {s:"warmap",say:["volkova","The hive is broken. Its nests are burning."],p:{l0:.5,l1:.1,h0:.14,h1:0,hs:[[.5,.42]],date:"VICTORY"}},
  {s:"portrait",say:["draganov","For the first time in a year, my head is quiet. I had forgotten what my own thoughts sound like."],p:{who:"draganov"}},
  {s:"eye",say:["voice","Quiet is only the space between words, Marshal."],d:5,mood:"hive",fx:"sting"},
  {s:"title",p:{text:"IRON RECLAMATION",sub:"COMPLETE",c:"#e0674a"},d:5}]},
 
-yuri_intro:{title:"The Harvest",mood:"hive",shots:[
+syndicate_intro:{title:"The Harvest",mood:"hive",shots:[
  {s:"title",p:{text:"SYNDICATE",sub:"THE HARVEST",c:"#b27ae0"},d:4,fx:"sting"},
  {s:"space",say:["voice","We fell for a very long time. It was cold between the stars."],p:{from:[.1,.2],to:[.7,.6],size:.04,grow:2.2,earth:1}},
  {s:"lab",say:["voice","They pulled us out of the ice and asked us what we were. So we asked their machines the same question. The machines answered."],p:{hack:1,breach:1},d:9,fxAt:[[6.5,"alarm"]]},
  {s:"vats",say:["senna","I remember being someone else. A soldier. Now I remember everything all of us remember."],p:{wake:1}},
  {s:"portrait",say:["voice","Wake, Adept. The Frontier is loud with small minds. Let us make it quiet."],p:{who:"voice"}},
  {s:"title",p:{text:"THE HARVEST",c:"#b27ae0"},d:4,fx:"boom"}]},
-yuri_reveal:{title:"The Copy",mood:"hive",shots:[
+syndicate_reveal:{title:"The Copy",mood:"hive",shots:[
  {s:"vats",say:["voice","Their finest soldier bled on Site Nine's floor the night we woke. We kept what she left."],p:{wake:1}},
  {s:"dna",say:[N,"Donor: Vanguard special operations. Codename: Ghost."],p:{label:"GENOME SPLICE — DONOR 0001 'GHOST'"}},
  {s:"portrait",say:["phantom","Her reflexes. Her hands. Her aim. Your Ghost never knew there was a copy."],p:{who:"phantom"},fx:"sting"},
  {s:"title",p:{text:"SILENT HAND",c:"#b27ae0"},d:3.5,fx:"boom"}]},
-yuri_end:{title:"One Mind",mood:"hive",shots:[
+syndicate_end:{title:"One Mind",mood:"hive",shots:[
  {s:"city",say:[N,"The Iron Ring fell in a single night. By morning, the Frontier had stopped fighting."],p:{hive:1,h0:.2,h1:.9,air:1}},
  {s:"warmap",say:["senna","Every city. Every radio. Every mind. One song."],p:{l0:.5,l1:.5,v0:.2,v1:.2,h0:.1,h1:1.2,hs:[[.5,.42]],site:[.5,.42],date:"ASCENDANCE"}},
  {s:"eye",say:["voice","We fell a very long way to find a home. Now we are home."],fx:"sting"},

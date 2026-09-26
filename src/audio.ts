@@ -81,7 +81,7 @@ function setRainAmbience(on){const ac=audio();if(!ac)return;if(on&&!rainSrc){con
 let sfxBudget = 0;
 type Line = string | [string, string];
 const VOICE_LINES: any = {
-  allied: {
+  vanguard: {
     inf: { sel: ["Squad ready.", "Go ahead, Commander.", "Vanguard infantry, standing by.", "What's the plan?", "Ready when you are.", "Eyes open, Commander."], go: ["Moving.", "Copy that, moving out.", "On my way.", "Heading there now.", "Understood.", "Relocating."] },
     veh: { sel: ["Armour online.", "Crew ready, Commander.", "Systems green.", "Engines warm.", "Vanguard armour, standing by."], go: ["Rolling out.", "Advancing.", "Moving to position.", "Copy, on the move.", "Tracks turning."] },
     air: { sel: ["Flight ready.", "Wings up, awaiting vector.", "Pilot here.", "Airspace looks clear."], go: ["Vector received.", "Inbound.", "On approach.", "Banking now."] },
@@ -90,9 +90,9 @@ const VOICE_LINES: any = {
     hero: { sel: ["You called?", "Let's make this quick.", "Ready for anything."], go: ["I'm on it.", "Leave it to me.", "Watch this."] },
     unit: ["Unit ready.", "Reinforcements have arrived.", "New unit reporting in."],
     ready: ["Construction complete.", "Structure ready.", "Building ready for placement."],
-    ann: { underAttack: "Warning. Our base is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Construction yard deployed.", captured: "Building captured." },
+    ann: { underAttack: "Warning. Our base is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." },
   },
-  soviet: {
+  legion: {
     inf: { sel: [["Da, komandir?", "Да, командир?"], ["Ready for orders.", "Рэди фор ордерс."], ["Comrade, I listen.", "Камрад, ай лисэн."], ["Legion stands ready.", "Лиджэн стэндс рэди."], ["Speak, commander.", "Спик, коммандэр."]], go: [["Moving out.", "Мувинг аут."], ["For the Motherland!", "Фор зэ мазэрлэнд!"], ["As ordered.", "Эз ордэрд."], ["Davai, davai!", "Давай, давай!"], ["We march.", "Ви марч."]] },
     veh: { sel: [["Tank is ready, comrade.", "Тэнк из рэди, камрад."], ["Engine is warm.", "Энджин из ворм."], ["Armour of the Legion.", "Армор оф зэ лиджэн."], ["Da, komandir.", "Да, командир."]], go: [["Rolling forward.", "Роллинг форвэрд."], ["Crushing through.", "Крашинг сру."], ["Vperyod!", "Вперёд!"], ["Advancing, comrade.", "Эдвансинг, камрад."]] },
     air: { sel: [["Pilot ready.", "Пайлот рэди."], ["Wings of the Legion.", "Вингз оф зэ лиджэн."]], go: [["Flying now.", "Флайинг нау."], ["On course.", "Он корс."]] },
@@ -101,9 +101,9 @@ const VOICE_LINES: any = {
     hero: { sel: [["You need me, comrade?", "Ю нид ми, камрад?"], ["I am here.", "Ай эм хиа."]], go: [["They will not stop me.", "Зэй вил нот стоп ми."], ["Leave it to me.", "Лив ит ту ми."]] },
     unit: [["Unit ready, comrade.", "Юнит рэди, камрад."], ["New recruit reporting.", "Нью рэкрут рипортинг."]],
     ready: [["Construction complete, comrade.", "Констракшн комплит, камрад."], ["Structure is ready.", "Стракчер из рэди."]],
-    ann: { underAttack: ["Our base is under attack!", "Ауэр бэйс из андэр эттак!"], unitLost: ["Unit lost.", "Юнит лост."], funds: ["Not enough funds, comrade.", "Нот инаф фандз, камрад."], radarOn: ["Radar online.", "Рэйдар онлайн."], radarOff: ["Radar offline.", "Рэйдар офлайн."], strike: ["Strike incoming.", "Страйк инкаминг."], deployed: ["Construction yard deployed.", "Констракшн ярд диплойд."], captured: ["Building captured.", "Билдинг кэпчерд."] },
+    ann: { underAttack: ["Our base is under attack!", "Ауэр бэйс из андэр эттак!"], unitLost: ["Unit lost.", "Юнит лост."], funds: ["Not enough funds, comrade.", "Нот инаф фандз, камрад."], radarOn: ["Radar online.", "Рэйдар онлайн."], radarOff: ["Radar offline.", "Рэйдар офлайн."], strike: ["Strike incoming.", "Страйк инкаминг."], deployed: ["Headquarters deployed.", "Констракшн ярд диплойд."], captured: ["Building captured.", "Билдинг кэпчерд."] },
   },
-  yuri: {
+  syndicate: {
     inf: { sel: ["We are listening.", "Speak, and we obey.", "Our minds are yours.", "The Syndicate hears you."], go: ["It will be done.", "Moving, unseen.", "As the Syndicate wills.", "Silently."] },
     veh: { sel: ["The beast stirs.", "It hungers for orders.", "Flesh and steel, awaiting."], go: ["It crawls forward.", "The swarm moves.", "Hunting."] },
     air: { sel: ["We watch from above.", "The sky is ours."], go: ["Descending.", "Gliding into place."] },
@@ -118,8 +118,8 @@ const VOICE_LINES: any = {
 function voiceRoleFor(u: any) {
   if (!u || !u.d) return "inf";
   const d = u.d, role = d.role;
-  if ("mcv" === u.key || "hivetrans" === u.key || "mcv" === role || "hivetrans" === role || "miner" === role || "engineer" === u.key) return "sup";
-  if (d.hero || /tanya|reaper|phantom|titan/.test(u.key)) return "hero";
+  if ("mhq" === u.key || "hivetrans" === u.key || "mhq" === role || "hivetrans" === role || "miner" === role || "engineer" === u.key) return "sup";
+  if (d.hero || /operative|reaper|phantom|titan/.test(u.key)) return "hero";
   return d.fly ? "air" : d.naval ? "sea" : "inf" === d.kind ? "inf" : "veh";
 }
 // ---- unit personas: every unit type has its own voice — accent, gender and
@@ -129,13 +129,13 @@ function voiceRoleFor(u: any) {
 // European voices; the Syndicate stays low and gravelly.
 type Persona = { acc: string; g: "f" | "m"; p: number; r: number };
 const P_ = (acc: string, g: "f" | "m", p = 1, r = 1): Persona => ({ acc, g, p, r });
-const PERSONA_ALLIED: Record<string, Persona> = {
-  gi: P_("us", "m"), engineer: P_("ie", "m", 1.02), guardian: P_("za", "m", .97), marksman: P_("us", "f"), vindicator: P_("rp", "m"),
-  tanya: P_("rp", "f", 1.04, 1.02), chrono: P_("rp", "f", .98), grizzly: P_("us", "m", .95), ifv: P_("au", "m"), hover: P_("us", "f", 1.02, 1.04),
-  prism: P_("rp", "m", .96), bulwark: P_("north", "m", .93, .97), titan_allied: P_("scot", "m", .9, .95), longbow: P_("rp", "m", .94),
-  rocketeer: P_("us", "f", 1.03, 1.05), harrier: P_("us", "m", .97, 1.05), kestrel: P_("us", "f", 1.02, 1.05), chinook: P_("au", "m"),
+const PERSONA_VANGUARD: Record<string, Persona> = {
+  rifleman: P_("us", "m"), engineer: P_("ie", "m", 1.02), lancer: P_("za", "m", .97), marksman: P_("us", "f"), vindicator: P_("rp", "m"),
+  operative: P_("rp", "f", 1.04, 1.02), phaser: P_("rp", "f", .98), warden: P_("us", "m", .95), skirmisher: P_("au", "m"), hover: P_("us", "f", 1.02, 1.04),
+  photon: P_("rp", "m", .96), bulwark: P_("north", "m", .93, .97), titan_vanguard: P_("scot", "m", .9, .95), longbow: P_("rp", "m", .94),
+  skyjack: P_("us", "f", 1.03, 1.05), hornet: P_("us", "m", .97, 1.05), kestrel: P_("us", "f", 1.02, 1.05), chinook: P_("au", "m"),
   interceptor: P_("us", "m", 1, 1.06), frigate: P_("rp", "m", .95, .97), barracuda: P_("au", "m", .97), lst: P_("au", "f"),
-  mcv: P_("north", "m", .92, .97), bastion: P_("scot", "m", .93, .96), restorer: P_("ie", "f"), miner_allied: P_("north", "m", .96),
+  mhq: P_("north", "m", .92, .97), bastion: P_("scot", "m", .93, .96), restorer: P_("ie", "f"), miner_vanguard: P_("north", "m", .96),
 };
 const ACCENT_LANG: Record<string, RegExp> = { us: /^en[-_]US/i, rp: /^en[-_]GB/i, north: /^en[-_]GB/i, scot: /^en[-_]GB/i, au: /^en[-_](AU|NZ)/i, ie: /^en[-_]IE/i, za: /^en[-_]ZA/i, ru: /^ru/i, slav: /^(uk|be|bg|sr|pl|cs|sk)/i };
 // Dialect lines per accent (sel = selected, go = ordered). Roles fall back to
@@ -161,21 +161,21 @@ const ACCENT_LINES: any = {
   za: { inf: { sel: ["Ja, Commander?", "Ready, boss.", "Shot, what's the plan?"], go: ["Ja, moving now.", "Lekker, on our way.", "Sharp sharp."] } },
 };
 const HERO_LINES: any = {
-  tanya: { sel: ["Ghost here. Do try to keep up.", "You rang?", "Let's make this quick, shall we?", "Right, who needs sorting out?"], go: ["Leave it with me.", "On my way, darling.", "Quietly does it.", "Consider it handled."] },
+  operative: { sel: ["Ghost here. Do try to keep up.", "You rang?", "Let's make this quick, shall we?", "Right, who needs sorting out?"], go: ["Leave it with me.", "On my way, darling.", "Quietly does it.", "Consider it handled."] },
 };
 function hashKey(k: string) { let h = 7; for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0; return h; }
 function personaFor(fac: string, key?: string | null, role?: string | null): Persona {
   const h = hashKey(key || role || "x"), j = (a: number, b: number) => a + (h % 97) / 96 * (b - a);
-  if ("soviet" === fac) return P_("ru", /reaper|desolator|flak|jackal/.test(key || "") ? "f" : "m", j(.92, 1.04), j(.95, 1.03));
-  if ("yuri" === fac) return "phantom" === key ? P_("en", "f", .98, .86) : P_(["rp", "us", "ie", "au"][h % 4], "m", j(.8, .9), j(.86, .93));
-  return (key && PERSONA_ALLIED[key]) || P_("rp", "f", 1.03, 1.02);
+  if ("legion" === fac) return P_("ru", /reaper|caustic|flak|jackal/.test(key || "") ? "f" : "m", j(.92, 1.04), j(.95, 1.03));
+  if ("syndicate" === fac) return "phantom" === key ? P_("en", "f", .98, .86) : P_(["rp", "us", "ie", "au"][h % 4], "m", j(.8, .9), j(.86, .93));
+  return (key && PERSONA_VANGUARD[key]) || P_("rp", "f", 1.03, 1.02);
 }
 let VOICE_LIST: any[] = [];
 function refreshVoiceList() { try { VOICE_LIST = speechSynthesis.getVoices() || []; VOICE_CACHE = {}; } catch (e) { } }
 let VOICE_CACHE: Record<string, any> = {};
 try { "undefined" != typeof speechSynthesis && (refreshVoiceList(), speechSynthesis.onvoiceschanged = refreshVoiceList); } catch (e) { }
 const FEM = /female|woman|samantha|victoria|karen|moira|tessa|fiona|zira|aria|jenny|libby|sonia|maisie|serena|kate|susan|hazel|emma|natasha|clara|emily|leah|neerja|michelle|ava|allison|nicole|catherine|svetlana|dariya|milena|katya|polina|zosia|google uk english female|google us english/i;
-const MALE = /\bmale|daniel|david|george|fred|alex|guy|ryan|james|thomas|mark|arthur|oliver|william|connor|luke|davis|tony|jason|christopher|eric|brian|andrew|lee|dmitry|dmitri|yuri|pavel|ostap|google uk english male/i;
+const MALE = /\bmale|daniel|david|george|fred|alex|guy|ryan|james|thomas|mark|arthur|oliver|william|connor|luke|davis|tony|jason|christopher|eric|brian|andrew|lee|dmitry|dmitri|syndicate|pavel|ostap|google uk english male/i;
 // Natural / neural / premium voices sound human; eSpeak-style ones don't.
 function voiceQuality(v: any) { const n = v.name || ""; return (/natural|neural/i.test(n) ? 60 : 0) + (/online/i.test(n) ? 25 : 0) + (/premium|enhanced|siri/i.test(n) ? 40 : 0) + (/google/i.test(n) ? 20 : 0) - (/espeak|robot|compact/i.test(n) ? 80 : 0); }
 function pickVoiceFor(per: Persona, seed: number) {
@@ -193,14 +193,14 @@ function pickVoiceFor(per: Persona, seed: number) {
   const v = top.length ? top[(seed + ("scot" === per.acc ? 1 : 0)) % top.length] : null;
   return VOICE_CACHE[ck] = v;
 }
-const ANNOUNCER: Record<string, Persona> = { allied: P_("rp", "f", 1.02, 1.02), soviet: P_("ru", "f", .98, .98), yuri: P_("rp", "m", .84, .9) };
+const ANNOUNCER: Record<string, Persona> = { vanguard: P_("rp", "f", 1.02, 1.02), legion: P_("ru", "f", .98, .98), syndicate: P_("rp", "m", .84, .9) };
 let lastVoiceT = 0, lastAnnT: any = {}, voicesEnabled = (() => { try { return "0" !== localStorage.getItem("ifr_voices"); } catch (e) { return !0; } })();
 function setVoicesEnabled(v: boolean) { voicesEnabled = v; try { localStorage.setItem("ifr_voices", v ? "1" : "0"); } catch (e) { } }
 // Short radio squelch so voices sound like they come over comms.
 function radioClick(fac: string) {
   if (!sOK()) return;
   const t = AC.currentTime + .005;
-  sNoise(t, { type: "bandpass", f: "yuri" === fac ? 900 : 2400, q: 2.5, g: .05, a: .002, d: .07 }), sOsc(t, { w: "sine", f: "yuri" === fac ? 420 : 1350, g: .025, d: .045 });
+  sNoise(t, { type: "bandpass", f: "syndicate" === fac ? 900 : 2400, q: 2.5, g: .05, a: .002, d: .07 }), sOsc(t, { w: "sine", f: "syndicate" === fac ? 420 : 1350, g: .025, d: .045 });
 }
 // ---- recorded voice bank -------------------------------------------------------
 // Every scripted line is pre-rendered with a neural voice (see scripts/voices)
@@ -212,9 +212,9 @@ try { fetch("voice/manifest.json").then(r => r.ok ? r.json() : null).then(m => {
 const voxBufs: any = {};
 let voxSrc: any = null, voxEnd = 0, _radioCurve: any = null;
 function voxFor(fac: string, per?: Persona) {
-  if (!per) return "soviet" === fac ? "ru_f" : "yuri" === fac ? "hive_m" : "gb_f";
-  if ("soviet" === fac) return "f" === per.g ? "ru_f" : "ru_m";
-  if ("yuri" === fac) return "f" === per.g ? "hive_f" : "hive_m";
+  if (!per) return "legion" === fac ? "ru_f" : "syndicate" === fac ? "hive_m" : "gb_f";
+  if ("legion" === fac) return "f" === per.g ? "ru_f" : "ru_m";
+  if ("syndicate" === fac) return "f" === per.g ? "hive_f" : "hive_m";
   return ("us" === per.acc ? "us_" : "rp" === per.acc || "en" === per.acc ? "gb_" : "gb2_") + per.g;
 }
 function voxEntry(vx: string, t: string) { return VOX && VOX[vx + "|" + t]; }
@@ -236,7 +236,7 @@ function playVox(vx: string, t: string, radio: boolean) {
       const pk = AC.createBiquadFilter(); pk.type = "peaking", pk.frequency.value = 1800, pk.Q.value = .9, pk.gain.value = 5;
       const lp = AC.createBiquadFilter(); lp.type = "lowpass", lp.frequency.value = 3600;
       const ws = AC.createWaveShaper(); if (!_radioCurve) { _radioCurve = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; _radioCurve[i] = Math.tanh(1.8 * x) / Math.tanh(1.8); } } ws.curve = _radioCurve;
-      n.connect(hp), hp.connect(pk), pk.connect(ws), ws.connect(lp), n = lp, radioClick("allied");
+      n.connect(hp), hp.connect(pk), pk.connect(ws), ws.connect(lp), n = lp, radioClick("vanguard");
     }
     const g = AC.createGain(); g.gain.value = radio ? 1.15 : 1; n.connect(g), g.connect(sfxBus);
     s.start(AC.currentTime + (radio ? .06 : 0)), voxSrc = s, voxEnd = AC.currentTime + buf.duration + .1;
@@ -252,7 +252,7 @@ function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, see
   if (playVox(vox || voxFor(fac, per), Array.isArray(line) ? line[0] : line, !noClick)) return;
   if ("undefined" == typeof speechSynthesis) return;
   try {
-    per = per || ANNOUNCER[fac] || ANNOUNCER.allied;
+    per = per || ANNOUNCER[fac] || ANNOUNCER.vanguard;
     const v = pickVoiceFor(per, seed || 0), ru = !!v && /^(ru|uk|be|bg|sr)/i.test(v.lang), text = Array.isArray(line) ? (ru ? line[1] : line[0]) : line;
     urgent ? speechSynthesis.cancel() : speechSynthesis.speaking && speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text), gMiss = v && ("f" === per.g ? !FEM.test(v.name) : FEM.test(v.name));
@@ -264,8 +264,8 @@ function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, see
 }
 function unitLines(fac: string, category: string, role: string, key?: string | null, per?: Persona) {
   if (key && HERO_LINES[key]) return HERO_LINES[key][category];
-  if ("allied" === fac && per) { const A = ACCENT_LINES[per.acc] || ACCENT_LINES.rp, b = A[role] || ("sup" === role || "hero" === role ? A.veh || A.inf : A.inf) || A.inf; if (b && b[category]) return b[category]; }
-  const F = VOICE_LINES[fac] || VOICE_LINES.allied;
+  if ("vanguard" === fac && per) { const A = ACCENT_LINES[per.acc] || ACCENT_LINES.rp, b = A[role] || ("sup" === role || "hero" === role ? A.veh || A.inf : A.inf) || A.inf; if (b && b[category]) return b[category]; }
+  const F = VOICE_LINES[fac] || VOICE_LINES.vanguard;
   return (F[role || "inf"] || F.inf)[category];
 }
 function playVoiceLine(fac: string, category: string, role?: string | null, key?: string | null) {
@@ -273,13 +273,13 @@ function playVoiceLine(fac: string, category: string, role?: string | null, key?
   if (now - lastVoiceT < 900) return;
   const unitCat = "sel" === category || "go" === category;
   const per = unitCat || ("unit" === category && key) ? personaFor(fac, key, role) : undefined;
-  const set = unitCat ? unitLines(fac, category, role || "inf", key, per) : "unit" === category && key && per ? unitLines(fac, "sel", role || "inf", key, per) : (VOICE_LINES[fac] || VOICE_LINES.allied)[category];
+  const set = unitCat ? unitLines(fac, category, role || "inf", key, per) : "unit" === category && key && per ? unitLines(fac, "sel", role || "inf", key, per) : (VOICE_LINES[fac] || VOICE_LINES.vanguard)[category];
   if (!set || !set.length) return;
   lastVoiceT = now, speakLine(fac, set[Math.floor(Math.random() * set.length)], !1, per, hashKey(key || role || ""));
 }
 // Faction announcer for important events.
 function announce(ev: string) {
-  const fac = S.players && S.players[0] && S.players[0].fac || "allied", F = VOICE_LINES[fac] || VOICE_LINES.allied, line = F.ann && F.ann[ev];
+  const fac = S.players && S.players[0] && S.players[0].fac || "vanguard", F = VOICE_LINES[fac] || VOICE_LINES.vanguard, line = F.ann && F.ann[ev];
   if (!line) return;
   const now = performance.now(), gap = "underAttack" === ev ? 12e3 : "funds" === ev ? 6e3 : 3e3;
   if (now - (lastAnnT[ev] || 0) < gap) return;
@@ -288,7 +288,7 @@ function announce(ev: string) {
 function announceHint(msg: string) {
   if (!msg || "string" != typeof msg) return;
   const m = msg.toLowerCase();
-  m.includes("under attack") ? announce("underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("construction yard deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
+  m.includes("under attack") ? announce("underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
 }
 
 // ------------------------------------------------------------------ effects
@@ -310,7 +310,7 @@ function sfx(e: string, u?: any) {
     case "flame":
       sNoise(t, { f: 700, f2: 1100, g: .09, a: .04, d: .32, brown: 1, verb: .08 }), sNoise(t + .03, { type: "highpass", f: 3000, g: .025, d: .12 });
       break;
-    case "tesla":
+    case "arcbolt":
       sOsc(t, { w: "sawtooth", f: 58, f2: 90, g: .07, d: .22, dist: 1, lp: 2400 }), sNoise(t, { type: "highpass", f: 3500, g: .07, d: .18, pan: pn }), sNoise(t + .06, { type: "bandpass", f: 5000, q: 3, g: .05, d: .06 });
       break;
     case "beam":
@@ -621,7 +621,7 @@ function musicDSP() {
   }
   // ---- gang chant: formant-synthesised male voices (some an octave down),
   // each with its own pitch/timing jitter and vibrato, through vowel formants.
-  // Syllables like "ha", "hey", "ra", "gi", "on": the vowel picks the
+  // Syllables like "ha", "hey", "ra", "rifleman", "on": the vowel picks the
   // formants, the first letter adds a consonant (h breath, plosive burst,
   // rolled r, s/f hiss, soft onset for voiced letters).
   const VOW: Record<string, number[][]> = { a: [[730, 1, 6], [1090, .5, 8], [2440, .22, 9]], o: [[570, 1, 6], [840, .6, 7], [2410, .18, 9]], u: [[330, 1, 5], [870, .4, 7], [2240, .12, 9]], e: [[530, 1, 6], [1840, .42, 9], [2480, .25, 9]], i: [[300, 1, 5], [2290, .32, 10], [3010, .2, 10]] };
@@ -858,9 +858,9 @@ function musicMood() {
 const MUSIC_STYLE_NAMES: Record<string, string> = { rock: "Rock", synthrock: "Synth Rock", edm: "EDM", synthpop: "Synthpop" };
 const MUSIC_STYLE_KEYS = Object.keys(MUSIC_STYLE_NAMES);
 const FACTION_STYLE_W: Record<string, Record<string, number>> = {
-  allied: { synthrock: 3, edm: 2.2, rock: 1, synthpop: .5 },
-  soviet: { rock: 4, synthrock: .8, edm: .3, synthpop: .2 },
-  yuri: { synthpop: 3, edm: 3, synthrock: .6, rock: .4 },
+  vanguard: { synthrock: 3, edm: 2.2, rock: 1, synthpop: .5 },
+  legion: { rock: 4, synthrock: .8, edm: .3, synthpop: .2 },
+  syndicate: { synthpop: 3, edm: 3, synthrock: .6, rock: .4 },
 };
 const musicStyleOf = (i: number) => (MUSIC_TRACKS[i] && MUSIC_TRACKS[i].style) || "rock";
 function musicPlayerFac() { try { return S.players[0].fac; } catch (e) { return null; } }
@@ -974,7 +974,7 @@ function castDur(who: string, text: string) { return voxDur("c_" + who, text); }
 // Every (voice, line) pair units and announcers can say, for the recording script.
 function voiceBankList() {
   const out: any[] = [], seen: any = {}, add = (vx: string, t: any) => { const s = Array.isArray(t) ? t[0] : t; if (!s) return; const k = vx + "|" + s; seen[k] || (seen[k] = 1, out.push({ vox: vx, text: s })); };
-  for (const fac of ["allied", "soviet", "yuri"]) {
+  for (const fac of ["vanguard", "legion", "syndicate"]) {
     const F = VOICE_LINES[fac], units = (FACTIONS[fac] && FACTIONS[fac].units) || [];
     for (const key of units) { const u: any = { key, d: UNITS[key] }; if (!u.d) continue; const role = voiceRoleFor(u), per = personaFor(fac, key, role), vx = voxFor(fac, per); for (const cat of ["sel", "go"]) (unitLines(fac, cat, role, key, per) || []).forEach((t: any) => add(vx, t)); }
     const vxA = voxFor(fac, ANNOUNCER[fac]);

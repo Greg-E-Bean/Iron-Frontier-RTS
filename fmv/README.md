@@ -19,5 +19,5 @@ replace a portrait with a video clip of the same name. A missing file falls back
 Character ids: `reyes`, `hale`, `ghost`, `marsh`, `draganov`, `volkova`, `bogdan`,
 `reaper`, `voice`, `senna`, `phantom`.
 
-See `PROMPTS.md` for ready-made prompts that produce a consistent, Red Alert 2–style cast
+See `PROMPTS.md` for ready-made prompts that produce a consistent, late-1990s live-action FMV cast
 with an AI image or video generator.

@@ -267,7 +267,7 @@ const MUSIC_SONGS = [
   },
   // ======================================================= Vanguard: synth rock / EDM
   {
-    name: "Blue Protocol", mood: "battle", style: "edm", fac: "allied", bpm: 128, riffOct: -2, bassKind: "saw", lk: "saw",
+    name: "Blue Protocol", mood: "battle", style: "edm", fac: "vanguard", bpm: 128, riffOct: -2, bassKind: "saw", lk: "saw",
     parts: {
       riffs: { R: ".A.A.A.A.A.A.A.A | .F.F.F.F.F.F.F.F | .C.C.C.C.C.C.C.C | .G.G.G.G.G.G.G.G |" },
       bass: { A: "z2A2z2A2z2A2z2A2 | z2F2z2F2z2F2z2F2 | z2c2z2c2z2c2z2c2 | z2G2z2G2z2G2z2G2 |" },
@@ -288,7 +288,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Chrono Shift", mood: "battle", style: "synthrock", fac: "allied", bpm: 140, riffOct: -2, gtone: "crunch",
+    name: "Phase Shift", mood: "battle", style: "synthrock", fac: "vanguard", bpm: 140, riffOct: -2, gtone: "crunch",
     parts: {
       riffs: {
         A: "A3A3A2 A3A3G2 | F3F3F2 F3F3E2 | D3D3D2 D3D3E2 | E3E3E2 E3E3B,2 |",
@@ -311,7 +311,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Skyline Intercept", mood: "battle", style: "synthrock", fac: "allied", bpm: 156, riffOct: -2,
+    name: "Skyline Intercept", mood: "battle", style: "synthrock", fac: "vanguard", bpm: 156, riffOct: -2,
     parts: {
       riffs: {
         A: "D2D2D2D2 D2D2C2C2 | _B,2_B,2_B,2_B,2 _B,2_B,2C2C2 | F2F2F2F2 F2F2G2G2 | C2C2C2C2 C2C2D2E2 |",
@@ -335,7 +335,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Overclock", mood: "battle", style: "edm", fac: "allied", bpm: 132, bassOct: -2, bassKind: "saw", lk: "saw",
+    name: "Overclock", mood: "battle", style: "edm", fac: "vanguard", bpm: 132, bassOct: -2, bassKind: "saw", lk: "saw",
     parts: {
       bass: {
         A: "z2C2z2C2z2C2z2C2 | z2_A,2z2_A,2z2_A,2z2_A,2 | z2_E2z2_E2z2_E2z2_E2 | z2_B,2z2_B,2z2_B,2z2_B,2 |",
@@ -358,7 +358,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Clear Skies", mood: "calm", style: "synthrock", fac: "allied", bpm: 100, riffOct: -2, bassOct: -2, bassKind: "saw",
+    name: "Clear Skies", mood: "calm", style: "synthrock", fac: "vanguard", bpm: 100, riffOct: -2, bassOct: -2, bassKind: "saw",
     parts: {
       riffs: { A: "[GBdg]3[GBdg]3[GBdg]2 [GBdg]3[GBdg]3[GBdg]2 | [D^FAd]3[D^FAd]3[D^FAd]2 [D^FAd]3[D^FAd]3[D^FAd]2 | [EGBe]3[EGBe]3[EGBe]2 [EGBe]3[EGBe]3[EGBe]2 | [CEGc]3[CEGc]3[CEGc]2 [CEGc]3[CEGc]3[CEGc]2 |" },
       bass: { A: "G4z2G2G4D4 | D4z2D2D4A,4 | E4z2E2E4B,4 | C4z2C2C4G,4 |" },
@@ -378,7 +378,7 @@ const MUSIC_SONGS = [
   },
   // ======================================================= Syndicate: synthpop / EDM
   {
-    name: "Hive Mind", mood: "battle", style: "edm", fac: "yuri", bpm: 126, bassOct: -2, bassKind: "reese", stabKind: "choir",
+    name: "Hive Mind", mood: "battle", style: "edm", fac: "syndicate", bpm: 126, bassOct: -2, bassKind: "reese", stabKind: "choir",
     parts: {
       bass: {
         A: "F6 F2 F4 F4 | _D6 _D2 _D4 _D4 | _E6 _E2 _E4 _E4 | C6 C2 C4 C4 |",
@@ -402,7 +402,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Neon Cult", mood: "battle", style: "synthpop", fac: "yuri", bpm: 118, bassOct: -2, bassKind: "saw", lk: "square",
+    name: "Neon Cult", mood: "battle", style: "synthpop", fac: "syndicate", bpm: 118, bassOct: -2, bassKind: "saw", lk: "square",
     parts: {
       bass: { A: "A,2A2A,2A2A,2A2A,2A2 | F,2F2F,2F2F,2F2F,2F2 | G,2G2G,2G2G,2G2G,2G2 | E,2E2E,2E2E,2E2E,2E2 |" },
       arps: { A: "a e c e a e c e a e c e a e c e | a f c f a f c f a f c f a f c f | b g d g b g d g b g d g b g d g | b g e g b g e g b g e g b g e g |" },
@@ -421,7 +421,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Psychic Dominion", mood: "battle", style: "edm", fac: "yuri", bpm: 140, bassOct: -2, bassKind: "saw", stabKind: "hit", lk: "saw",
+    name: "Psychic Dominion", mood: "battle", style: "edm", fac: "syndicate", bpm: 140, bassOct: -2, bassKind: "saw", stabKind: "hit", lk: "saw",
     parts: {
       bass: { A: "EEeE EEeE EEeE EEeE | FFfF FFfF FFfF FFfF | EEeE EEeE EEeE EEeE | DDdD DDdD DDdD DDdD |" },
       arps: { A: "e b g e b g e b g e b g e b g e | f c' a f c' a f c' a f c' a f c' a f | e b g e b g e b g e b g e b g e | d a ^f d a ^f d a ^f d a ^f d a ^f d |" },
@@ -443,7 +443,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Glass Garden", mood: "calm", style: "synthpop", fac: "yuri", bpm: 96, bassOct: -2, bassKind: "saw", lk: "square", padOct: 0,
+    name: "Glass Garden", mood: "calm", style: "synthpop", fac: "syndicate", bpm: 96, bassOct: -2, bassKind: "saw", lk: "square", padOct: 0,
     parts: {
       bass: { A: "B,4z4B,4z2B,2 | G,4z4G,4z2G,2 | D4z4D4z2D2 | A,4z4A,4z2A,2 |" },
       arps: { A: "B2^f2d'2^f2b2^f2d'2^f2 | G2d2b2d2g2d2b2d2 | D2A2^f2A2d2A2^f2A2 | A,2E2^c2E2A2E2^c2E2 |" },
@@ -460,7 +460,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Velvet Signal", mood: "calm", style: "synthpop", fac: "yuri", bpm: 108, bassOct: -2, bassKind: "saw", lk: "square",
+    name: "Velvet Signal", mood: "calm", style: "synthpop", fac: "syndicate", bpm: 108, bassOct: -2, bassKind: "saw", lk: "square",
     parts: {
       bass: { A: "F2f2z2f2F2f2z2f2 | C2c2z2c2C2c2z2c2 | D2d2z2d2D2d2z2d2 | _B,2_B2z2_B2_B,2_B2z2_B2 |" },
       arps: { A: "zczazczfzczazczf | zGzezGzczGzezGzc | zAzfzAzdzAzfzAzd | zFzdzFz_BzFzdzFz_B |" },
@@ -481,7 +481,7 @@ const MUSIC_SONGS = [
   // ======================================================= Legion: march / chant rock
   //  chants: 1/8 units at sung pitch, n = notes, v = one syllable per note.
   {
-    name: "Iron Legion", mood: "battle", style: "rock", fac: "soviet", bpm: 112, riffOct: -2,
+    name: "Iron Legion", mood: "battle", style: "rock", fac: "legion", bpm: 112, riffOct: -2,
     parts: {
       riffs: {
         A: "D4 D2D2 D4 D2D2 | _B,4 _B,2_B,2 C4 C2C2 | D4 D2D2 F4 F2F2 | A,4 A,2A,2 A,8 |",
@@ -509,7 +509,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Red Anthem", mood: "battle", style: "rock", fac: "soviet", bpm: 88, riffOct: -2, stabKind: "choir",
+    name: "Red Anthem", mood: "battle", style: "rock", fac: "legion", bpm: 88, riffOct: -2, stabKind: "choir",
     parts: {
       riffs: {
         A: "A8 .A.A.A.A G4 | F8 .F.F.F.F E4 | D8 .D.D.D.D E4 | A8 A8 |",
@@ -535,7 +535,7 @@ const MUSIC_SONGS = [
     ],
   },
   {
-    name: "Forward March", mood: "battle", style: "rock", fac: "soviet", bpm: 150, riffOct: -2,
+    name: "Forward March", mood: "battle", style: "rock", fac: "legion", bpm: 150, riffOct: -2,
     parts: {
       riffs: {
         A: "E2E2E2G2 A2A2A2G2 | E2E2E2G2 B2B2A2G2 |",

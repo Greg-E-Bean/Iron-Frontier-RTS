@@ -383,8 +383,8 @@ function fgFx(on: boolean) {
       default:
         if (void 0 !== e.x2) {
           const z1 = g, x2 = e.x2, y2 = e.y2, z2 = gz(x2, y2) + (e.z2 || 6) * (FPS_INF_SC + .1), op = 1 - .8 * r, col = e.c || "#fff";
-          const w = "prism" === e.kind ? 2.2 : "tesla" === e.kind ? 1.3 : "psi" === e.kind ? 1.6 : 1.1;
-          if ("tesla" === e.kind) {
+          const w = "photon" === e.kind ? 2.2 : "arcbolt" === e.kind ? 1.3 : "psi" === e.kind ? 1.6 : 1.1;
+          if ("arcbolt" === e.kind) {
             let px = e.x, py = e.y, pz = z1;
             for (let k = 1; k <= 5; k++) { const t = k / 5, j = k < 5 ? 6 : 0, nx = e.x + (x2 - e.x) * t + rnd(-j, j), ny = e.y + (y2 - e.y) * t + rnd(-j, j), nz = z1 + (z2 - z1) * t + rnd(-j, j) * .6; beam(px, py, pz, nx, ny, nz, w, col, op), beam(px, py, pz, nx, ny, nz, w * 3, col, .3 * op), px = nx, py = ny, pz = nz; }
           } else if ("psi" === e.kind) {
@@ -458,22 +458,22 @@ function fx3dActive() { return !!(FPS.on && FPS.u && FG.fx); }
 // joint so it can be aimed bone-to-bone by the IK below.
 const BK = ["metal", "matte", "glass", "emis", "concrete", "organic", "rubber", "foliage"];
 const HD_LOOK: Record<string, any> = {
-  gi: { helmet: "body", pack: "armor3", visor: "glass" }, guardian: { helmet: "body", pack: "armor3" },
-  conscript: { hat: "bark", beret: "bark2", pack: "dark", visor: "glow" }, flak: { helmet: "armor3", pack: "steel", visor: "glow" },
-  initiate: { hood: "carapace2", tank: "psi", visor: "psi" }, virus: { cloth: "carapace2", hood: "body", pack: "carapace", visor: "psi" },
+  rifleman: { helmet: "body", pack: "armor3", visor: "glass" }, lancer: { helmet: "body", pack: "armor3" },
+  militia: { hat: "bark", beret: "bark2", pack: "dark", visor: "glow" }, flak: { helmet: "armor3", pack: "steel", visor: "glow" },
+  acolyte: { hood: "carapace2", tank: "psi", visor: "psi" }, vector_inf: { cloth: "carapace2", hood: "body", pack: "carapace", visor: "psi" },
   engineer: { cloth: "gold", helmet: "white", pack: "steel", visor: "glass" }, rogue: { cloth: "olive", beret: "olive" },
-  desolator: { cloth: "green", helmet: "green", tank: "green", visor: "glow", mask: 1 }, chrono: { cloth: "armor", helmet: "steel", pack: "crystal", visor: "crystal" },
-  tanya: { cloth: "armor2", beret: "red", visor: "red", hair: 1 }, reaper: { cloth: "rust", beret: "dark2", visor: "red" },
+  caustic: { cloth: "green", helmet: "green", tank: "green", visor: "glow", mask: 1 }, phaser: { cloth: "armor", helmet: "steel", pack: "crystal", visor: "crystal" },
+  operative: { cloth: "armor2", beret: "red", visor: "red", hair: 1 }, reaper: { cloth: "rust", beret: "dark2", visor: "red" },
   phantom: { cloth: "carapace2", hood: "carapace", visor: "crystal" }, marksman: { cloth: "armor3", helmet: "olive", pack: "olive", visor: "glass" },
-  vindicator: { cloth: "tesla", helmet: "steel", pack: "crystal", visor: "tesla" }, bombard: { cloth: "armor3", helmet: "armor3", pack: "red", visor: "glow" },
-  leech: { cloth: "carapace2", hood: "carapace", tank: "crystal", visor: "crystal" }, brute: { cloth: "carapace", hood: "body", visor: "psi", scale: 1.3 },
+  vindicator: { cloth: "arcbolt", helmet: "steel", pack: "crystal", visor: "arcbolt" }, bombard: { cloth: "armor3", helmet: "armor3", pack: "red", visor: "glow" },
+  leech: { cloth: "carapace2", hood: "carapace", tank: "crystal", visor: "crystal" }, brood: { cloth: "carapace", hood: "body", visor: "psi", scale: 1.3 },
   piercer: { cloth: "carapace2", hood: "carapace", visor: "psi" },
 };
-const GLOWS: Record<string, 1> = { glow: 1, psi: 1, crystal: 1, tesla: 1, red: 1, lightY: 1 };
-function hdFac(u: any) { return (S.players[u.owner] && S.players[u.owner].fac) || INF_FAC[u.key] || "allied"; }
+const GLOWS: Record<string, 1> = { glow: 1, psi: 1, crystal: 1, arcbolt: 1, red: 1, lightY: 1 };
+function hdFac(u: any) { return (S.players[u.owner] && S.players[u.owner].fac) || INF_FAC[u.key] || "vanguard"; }
 function hdLook(u: any) {
   const fac = hdFac(u), L = Object.assign({ cloth: "body", gear: "dark" }, HD_LOOK[u.key] || { helmet: "armor3", pack: "dark" });
-  L.fac = "neutral" === fac ? "allied" : fac, L.vest = L.vest || ("soviet" === L.fac ? "olive" : "yuri" === L.fac ? "carapace2" : "armor3");
+  L.fac = "neutral" === fac ? "vanguard" : fac, L.vest = L.vest || ("legion" === L.fac ? "olive" : "syndicate" === L.fac ? "carapace2" : "armor3");
   L.pants = L.pants || L.gear;
   return L;
 }
@@ -481,9 +481,9 @@ function hdLook(u: any) {
 function hdWeaponType(kind: string) {
   return "sniper" === kind ? "long" : "flak" === kind ? "flak" : "flame" === kind ? "flamer" : "rocket" === kind ? "rocket" : "missile" === kind ? "launcher"
     : "tool" === kind ? "tool" : "melee" === kind ? "none" : "pistol" === kind ? "pistol"
-    : /^beam|prism|tesla|psi/.test(kind) ? "beam" : "rifle";
+    : /^beam|photon|arcbolt|psi/.test(kind) ? "beam" : "rifle";
 }
-function hdBeamCol(kind: string) { return "beam_temporal" === kind || "tesla" === kind ? "tesla" : "beam_drain" === kind || "psi" === kind ? "psi" : "crystal"; }
+function hdBeamCol(kind: string) { return "beam_temporal" === kind || "arcbolt" === kind ? "arcbolt" : "beam_drain" === kind || "psi" === kind ? "psi" : "crystal"; }
 
 // Plain 12-triangle box (base-anchored like BOXM) for the low-detail figures.
 function fgPlainBox(w: number, d: number, h: number) {
@@ -509,11 +509,11 @@ function hdPelvis(a: any[], L: any) {
   for (const y of [-1.15, 1.15]) B_(a, 1.28, y, -.35, .62, .72, .85, L.gear);
   for (const y of [-1.72, 1.72]) B_(a, .1, y, -.6, .9, .34, 1.1, L.gear);
   B_(a, -1.45, 0, -.35, .7, 1.7, .95, L.gear);
-  "soviet" === L.fac && a.push(P_(CONE(1.95, 1.62, 2.4, 20), 0, 0, -2.3, L.cloth));
+  "legion" === L.fac && a.push(P_(CONE(1.95, 1.62, 2.4, 20), 0, 0, -2.3, L.cloth));
 }
 function hdTorso(a: any[], L: any) {
   ell(a, 0, 0, 1.7, 1.22, 1.58, 1.9, L.cloth), ell(a, 0, 0, 4.1, 1.5, 2.15, 2.35, L.cloth), ell(a, -.1, 0, 5.6, 1.12, 2.42, 1.0, L.cloth);
-  if ("yuri" === L.fac) {
+  if ("syndicate" === L.fac) {
     for (let k = 0; k < 4; k++) ell(a, .75, 0, 2.1 + k * .95, .6, 1.5 - .12 * Math.abs(k - 1.5), .42, "carapace2");
     for (const y of [-.7, .7]) B_(a, 1.28, y, 1.8, .12, .12, 3.6, "psi", { e: 1 });
     for (let k = 0; k < 5; k++) a.push(P_(CONE(.28, .05, .9, 8), -1.3, 0, 2 + k * .85, "bone", { ty: -1.2 }));
@@ -524,13 +524,13 @@ function hdTorso(a: any[], L: any) {
     for (const y of [-1.2, 1.2]) B_(a, -.05, y, 5.75, 2.55, .52, .34, L.vest);
     for (let k = -1; k <= 1; k++) B_(a, 1.5, .78 * k, 2.35, .52, .72, 1.2, L.gear), B_(a, 1.52, .78 * k, 3.5, .56, .76, .18, L.gear);
     B_(a, 1.48, -1.3, 4.1, .38, .55, 1.0, "dark2"), a.push(P_(CYL(.05, 2.6, 6), -1.6, -1.1, 5.4, "dark2"));
-    "soviet" === L.fac ? (() => { for (let k = -3; k <= 3; k++) B_(a, 1.6, .5 * k, 3.4 - .38 * k, .3, .28, .5, "gold", { r: .6 }); })()
-      : (B_(a, 1.4, .95, 4.35, .08, .7, .45, "trim", { e: 1 }), B_(a, 1.4, -.35, 4.5, .08, .5, .3, "tesla", { e: 1 }));
+    "legion" === L.fac ? (() => { for (let k = -3; k <= 3; k++) B_(a, 1.6, .5 * k, 3.4 - .38 * k, .3, .28, .5, "gold", { r: .6 }); })()
+      : (B_(a, 1.4, .95, 4.35, .08, .7, .45, "trim", { e: 1 }), B_(a, 1.4, -.35, 4.5, .08, .5, .3, "arcbolt", { e: 1 }));
   }
   a.push(P_(CYL(.92, .7, 18), 0, 0, 6.0, L.cloth));
   if (L.pack) {
     B_(a, -2.05, 0, 2.0, 1.45, 2.85, 3.3, L.pack), B_(a, -2.85, 0, 2.3, .3, 2.2, 2.4, L.gear);
-    a.push(P_(CYL(.55, 2.8, 14), -2.1, -1.4, 5.55, "yuri" === L.fac ? "carapace" : "olive", { tx: PI2 }));
+    a.push(P_(CYL(.55, 2.8, 14), -2.1, -1.4, 5.55, "syndicate" === L.fac ? "carapace" : "olive", { tx: PI2 }));
     for (const y of [-1.6, 1.6]) B_(a, -1.9, y, 2.2, 1.0, .5, 1.8, L.gear);
   }
   if (L.tank) for (const y of [-.95, .95]) a.push(P_(CYL(.82, 4.1, 18), -2.25, y, 1.2, L.tank)), a.push(P_(DOME(.82, .6, 18), -2.25, y, 5.3, "steel")), a.push(P_(CYL(.3, .35, 10), -2.25, y, 5.85, "darkmetal"));
@@ -551,7 +551,7 @@ function hdHead(a: any[], L: any) {
     B_(a, 1.24, 0, 2.5, .12, .5, .5, "red", { e: 1 });
   } else if (L.helmet) {
     a.push(P_(DOME(1.33, 1.2, 22), -.05, 0, 2.05, L.helmet));
-    if ("soviet" === L.fac) a.push(P_(CONE(1.55, 1.33, .28, 22), -.05, 0, 1.85, L.helmet)), B_(a, 1.25, 0, 2.6, .1, .45, .45, "red", { e: 1 });
+    if ("legion" === L.fac) a.push(P_(CONE(1.55, 1.33, .28, 22), -.05, 0, 1.85, L.helmet)), B_(a, 1.25, 0, 2.6, .1, .45, .45, "red", { e: 1 });
     else {
       for (const y of [-1.27, 1.27]) B_(a, -.1, y, 2.15, 1.3, .12, .32, "dark2");
       B_(a, 1.15, 0, 2.85, .4, .55, .45, "dark2");
@@ -564,11 +564,11 @@ function hdHead(a: any[], L: any) {
 }
 function hdUpperArm(a: any[], L: any) {
   ellF(a, 0, 0, .25, .95, .95, .95, L.cloth), a.push(P_(CONE(.8, .64, 3.0, 16), 0, 0, .25, L.cloth));
-  "yuri" !== L.fac && ell(a, 0, 0, .3, 1.02, 1.05, .8, L.vest);
+  "syndicate" !== L.fac && ell(a, 0, 0, .3, 1.02, 1.05, .8, L.vest);
   ellF(a, 0, 0, 3.2, .62, .62, .55, L.cloth);
 }
 function hdForeArm(a: any[], L: any) {
-  a.push(P_(CONE(.64, .5, 2.45, 16), 0, 0, 0, "soviet" === L.fac ? L.cloth : L.cloth)), a.push(P_(CYL(.56, .5, 14), 0, 0, 2.3, L.gear));
+  a.push(P_(CONE(.64, .5, 2.45, 16), 0, 0, 0, "legion" === L.fac ? L.cloth : L.cloth)), a.push(P_(CYL(.56, .5, 14), 0, 0, 2.3, L.gear));
   ellF(a, .02, 0, 3.1, .44, .52, .5, "dark2"), ellF(a, .3, 0, 3.45, .36, .46, .38, "dark2"), ellF(a, -.15, .34, 3.0, .17, .17, .36, "dark2");
   B_(a, .38, 0, 3.12, .14, .62, .3, "rubber");
 }
@@ -589,11 +589,11 @@ function hdFist(a: any[]) { ell(a, 0, 0, 0, .55, .55, .6, "dark2"), ell(a, .3, 0
 // Weapons, x forward from the pistol grip. rg/lg are the hand points.
 function hdWeapon(type: string, fac: string, beamCol?: string) {
   const W: any = { body: [], mag: [], bolt: [], muzzle: [6.5, 0, .25], eject: [.9, .35, .45], rg: [-.25, 0, -.55], lg: [3.6, 0, -.15], sight: 1.05, butt: [-3.6, 0, .1] };
-  const a = W.body, m = W.mag, bo = W.bolt, F = "soviet" === fac ? "wood" : "yuri" === fac ? "carapace2" : "armor3", M = "gunmetal", D = "darkmetal", G = "yuri" === fac ? "psi" : "soviet" === fac ? "red" : "tesla";
+  const a = W.body, m = W.mag, bo = W.bolt, F = "legion" === fac ? "wood" : "syndicate" === fac ? "carapace2" : "armor3", M = "gunmetal", D = "darkmetal", G = "syndicate" === fac ? "psi" : "legion" === fac ? "red" : "arcbolt";
   const grip = (x: number) => B_(a, x, 0, -1.45, .52, .5, 1.25, F, { ty: .28 });
   const stock = () => {
-    if ("soviet" === fac) B_(a, -2.3, 0, -.75, 2.5, .5, 1.1, "wood", { ty: -.14 }), B_(a, -3.55, 0, -1.0, .15, .55, 1.35, "rubber", { ty: -.14 });
-    else if ("yuri" === fac) ellF(a, -1.9, 0, .05, 1.45, .34, .5, "bone"), ell(a, -1.8, 0, .3, .9, .2, .3, "carapace");
+    if ("legion" === fac) B_(a, -2.3, 0, -.75, 2.5, .5, 1.1, "wood", { ty: -.14 }), B_(a, -3.55, 0, -1.0, .15, .55, 1.35, "rubber", { ty: -.14 });
+    else if ("syndicate" === fac) ellF(a, -1.9, 0, .05, 1.45, .34, .5, "bone"), ell(a, -1.8, 0, .3, .9, .2, .3, "carapace");
     else XC(a, -.4, 0, .25, .22, 2.9, M, 10, { ty: -PI2 }), B_(a, -3.0, 0, -.5, 1.2, .52, 1.3, F), B_(a, -3.65, 0, -.55, .15, .56, 1.42, "rubber"), B_(a, -2.6, 0, .55, 1.1, .4, .28, F);
   };
   const trig = () => { B_(a, .25, 0, -.66, .9, .12, .1, M), B_(a, .3, 0, -.58, .08, .08, .3, M); };
@@ -608,8 +608,8 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
     XC(a, bx + bl, 0, .25, .21, .75, D, 12), B_(a, bx + bl + .3, 0, .38, .1, .44, .08, "black");
     W.muzzle = [bx + bl + .8, 0, .25], W.lg = [lg ? 4.0 : 3.6, 0, -.15];
     B_(a, 1.25, 0, -.55, .85, .66, .3, M), grip(-.35), trig(), stock();
-    if ("soviet" === fac && !lg) B_(m, 1.25, 0, -1.3, .72, .5, 1.0, D, { ty: .1 }), B_(m, 1.5, 0, -2.2, .72, .5, 1.0, D, { ty: .38 });
-    else if ("yuri" === fac) ell(m, 1.2, 0, -1.3, .5, .4, .95, "carapace"), B_(m, 1.2, 0, -2.0, .1, .42, 1.2, "psi", { e: 1 });
+    if ("legion" === fac && !lg) B_(m, 1.25, 0, -1.3, .72, .5, 1.0, D, { ty: .1 }), B_(m, 1.5, 0, -2.2, .72, .5, 1.0, D, { ty: .38 });
+    else if ("syndicate" === fac) ell(m, 1.2, 0, -1.3, .5, .4, .95, "carapace"), B_(m, 1.2, 0, -2.0, .1, .42, 1.2, "psi", { e: 1 });
     else B_(m, 1.25, 0, lg ? -1.4 : -1.9, .72, .5, lg ? 1.1 : 1.6, D, { ty: -.12 });
     if (lg) {
       XC(a, -.9, 0, 1.35, .36, 3.2, D, 16), XC(a, 2.1, 0, 1.35, .48, .7, D, 16), XC(a, -1.5, 0, 1.35, .42, .6, D, 16);
@@ -618,13 +618,13 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
       for (const y of [-.2, .2]) XC(a, 4.0, y, -.15, .07, 2.2, D, 6);
       XC(bo, .15, .2, .45, .09, .7, M, 8, { ty: 0, tx: -PI2 }), bo.push(P_(DOME(.22, .22, 10), .15, .95, .35, M));
       W.sight = 1.35;
-    } else if ("allied" === fac) {
-      B_(a, .6, 0, .91, .9, .5, .2, D), XC(a, .2, 0, 1.3, .34, .9, D, 16), a.push(P_(CYL(.28, .05, 14), 1.12, 0, 1.3, "tesla", { ty: PI2, e: 1 }));
+    } else if ("vanguard" === fac) {
+      B_(a, .6, 0, .91, .9, .5, .2, D), XC(a, .2, 0, 1.3, .34, .9, D, 16), a.push(P_(CYL(.28, .05, 14), 1.12, 0, 1.3, "arcbolt", { ty: PI2, e: 1 }));
       W.sight = 1.3;
-    } else if ("yuri" === fac) { ell(a, .5, 0, .95, .55, .18, .3, "psi", { e: 1 }), W.sight = 1.15; }
+    } else if ("syndicate" === fac) { ell(a, .5, 0, .95, .55, .18, .3, "psi", { e: 1 }), W.sight = 1.15; }
     else { B_(a, -.6, 0, .91, .3, .34, .32, M), W.sight = 1.1; }
     lg || B_(bo, .7, .36, .45, .55, .2, .2, M);
-    "yuri" === fac && (B_(a, 2.0, .41, .3, 2.2, .04, .1, "psi", { e: 1 }), B_(a, 2.0, -.41, .3, 2.2, .04, .1, "psi", { e: 1 }));
+    "syndicate" === fac && (B_(a, 2.0, .41, .3, 2.2, .04, .1, "psi", { e: 1 }), B_(a, 2.0, -.41, .3, 2.2, .04, .1, "psi", { e: 1 }));
   } else if ("flak" === type) {
     B_(a, .9, 0, -.45, 4.6, 1.25, 1.25, D), B_(a, .9, 0, .8, 3.8, .9, .2, M);
     for (const y of [-.33, .33]) XC(a, 3.2, y, .35, .28, 4.6, M, 12), XC(a, 7.6, y, .35, .36, .6, D, 12);
@@ -634,23 +634,23 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
     W.muzzle = [8.3, 0, .35], W.lg = [3.4, 0, -1.0], W.sight = 1.5, W.eject = [1.2, .6, .2];
   } else if ("rocket" === type || "launcher" === type) {
     const big = "rocket" === type, R = big ? .62 : .5, Lt = big ? 7.4 : 6.0;
-    XC(a, -2.4, 0, 0, R, Lt, "yuri" === fac ? "carapace2" : "soviet" === fac ? "olive" : "armor3", 18);
+    XC(a, -2.4, 0, 0, R, Lt, "syndicate" === fac ? "carapace2" : "legion" === fac ? "olive" : "armor3", 18);
     a.push(P_(CONE(R, R * 1.3, .7, 18), Lt - 2.4, 0, 0, D, { ty: PI2 })), a.push(P_(CONE(R * 1.35, R, .9, 18), -3.3, 0, 0, D, { ty: PI2 }));
     for (const x of [-1.2, 1.4, 3.6]) XC(a, x, 0, 0, R + .06, .22, D, 18);
     B_(a, .9, -R - .35, -.1, 1.0, .35, .9, D), a.push(P_(CYL(.2, .12, 10), 1.45, -R - .35, .35, G, { ty: PI2, e: 1 }));
     B_(a, -.2, 0, -1.95, .5, .5, 1.35, F, { ty: .2 }), B_(a, 2.0, 0, -1.7, .45, .45, 1.1, F), trig();
-    a.push(P_(CONE(R * .88, .14, 1.5, 16), Lt - 2.2, 0, 0, "yuri" === fac ? "psi" : "olive", { ty: PI2 })), m.push(P_(CYL(R * .85, .6, 16), Lt - 2.8, 0, 0, "armor", { ty: PI2 }));
+    a.push(P_(CONE(R * .88, .14, 1.5, 16), Lt - 2.2, 0, 0, "syndicate" === fac ? "psi" : "olive", { ty: PI2 })), m.push(P_(CYL(R * .85, .6, 16), Lt - 2.8, 0, 0, "armor", { ty: PI2 }));
     W.muzzle = [Lt - .6, 0, 0], W.rg = [-.1, 0, -1.2], W.lg = [2.0, 0, -1.0], W.sight = .45, W.sightY = -R - .35, W.butt = [-.8, 0, 0];
   } else if ("flamer" === type) {
     XC(a, -.6, 0, .2, .45, 3.8, M, 16), a.push(P_(CONE(.42, .22, 1.4, 16), 3.2, 0, .2, D, { ty: PI2 })), XC(a, 4.6, 0, .2, .2, .3, "black", 12);
     for (let k = 0; k < 4; k++) XC(a, .2 + .7 * k, 0, .2, .5, .12, D, 16);
-    a.push(P_(DOME(.14, .14, 10), 4.6, 0, -.15, "tesla", { e: 1 })), B_(a, 4.4, 0, -.25, .3, .2, .2, M);
-    m.push(P_(CYL(.55, 1.9, 16), -.1, 0, -1.25, "yuri" === fac ? "psi" : "soviet" === fac ? "green" : "rust", { ty: PI2 }));
+    a.push(P_(DOME(.14, .14, 10), 4.6, 0, -.15, "arcbolt", { e: 1 })), B_(a, 4.4, 0, -.25, .3, .2, .2, M);
+    m.push(P_(CYL(.55, 1.9, 16), -.1, 0, -1.25, "syndicate" === fac ? "psi" : "legion" === fac ? "green" : "rust", { ty: PI2 }));
     XC(a, -1.2, 0, -.6, .18, 2.6, "rubber", 10, { ty: PI2 + .9 });
     grip(-.3), trig(), B_(a, 2.4, 0, -1.2, .42, .42, 1.1, F), stock();
     W.muzzle = [4.9, 0, .2], W.lg = [2.4, 0, -.9], W.sight = .95;
   } else if ("beam" === type) {
-    const C = beamCol || "tesla";
+    const C = beamCol || "arcbolt";
     B_(a, .9, 0, -.35, 3.6, .8, .95, D), B_(a, .9, 0, .6, 3.2, .5, .25, M);
     XC(a, 2.4, 0, .15, .2, 2.8, M, 12);
     for (let k = 0; k < 4; k++) XC(a, 2.6 + .55 * k, 0, .15, .55 - .06 * k, .22, k % 2 ? D : C, 18, k % 2 ? {} : { e: 1 });
@@ -659,7 +659,7 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
     W.muzzle = [5.6, 0, .15], W.lg = [2.8, 0, -.3], W.sight = 1.0;
   } else if ("tool" === type) {
     B_(a, -.1, 0, -1.3, .5, .5, 1.4, "wood"), XC(a, -.3, 0, .1, .38, 2.6, "gold", 14), a.push(P_(CONE(.38, .12, .9, 14), 2.3, 0, .1, D, { ty: PI2 }));
-    a.push(P_(DOME(.18, .18, 12), 3.2, 0, .02, "tesla", { e: 1 })), B_(a, .6, 0, .5, 1.2, .3, .3, "darkmetal");
+    a.push(P_(DOME(.18, .18, 12), 3.2, 0, .02, "arcbolt", { e: 1 })), B_(a, .6, 0, .5, 1.2, .3, .3, "darkmetal");
     W.muzzle = [3.4, 0, .1], W.lg = null, W.sight = .9;
   } else if ("pistol" === type) {
     B_(a, .9, 0, -.1, 2.4, .42, .5, M), B_(bo, .9, 0, .35, 2.5, .44, .35, D), grip(-.1), trig(), B_(m, -.1, 0, -1.9, .4, .38, .4, D);
@@ -889,10 +889,10 @@ function hdPartLists(key: string, fac: string) {
   const L = hdLook({ key, owner: 0, d: UNITS[key] }), out: any = {}; L.fac = fac;
   const mk = (f: (a: any[]) => void) => { const a: any[] = []; f(a); return a; };
   out.pelvis = mk(a => hdPelvis(a, L)), out.torso = mk(a => hdTorso(a, L)), out.head = mk(a => hdHead(a, L)), out.ua = mk(a => hdUpperArm(a, L)), out.fa = mk(a => hdForeArm(a, L)), out.th = mk(a => hdThigh(a, L)), out.sh = mk(a => hdShin(a, L)), out.ft = mk(hdFoot);
-  for (const wt of ["rifle", "long", "flak", "rocket", "launcher", "flamer", "beam", "tool", "pistol"]) { const W = hdWeapon(wt, fac, "tesla"); out["gun_" + wt] = W.body.concat(W.mag, W.bolt); }
+  for (const wt of ["rifle", "long", "flak", "rocket", "launcher", "flamer", "beam", "tool", "pistol"]) { const W = hdWeapon(wt, fac, "arcbolt"); out["gun_" + wt] = W.body.concat(W.mag, W.bolt); }
   return out;
 }
-function hdBakeOk(u: any) { return !!GL && QUALITY >= 1 && "inf" === u.d.kind && !u.d.fly && "rocketeer" !== u.key; }
+function hdBakeOk(u: any) { return !!GL && QUALITY >= 1 && "inf" === u.d.kind && !u.d.fly && "skyjack" !== u.key; }
 
 // Garrison interiors reuse the same figures, parented to the room.
 function fpsInteriorFig(u: any, parent: any) { const F = hdBuildFigure(u, parent); F.root.userData.F = F; return F.root; }
@@ -1076,12 +1076,12 @@ function fgPruneGroups() {
 
 // ============================================================ COCKPITS
 function fpsBuildCockpit(e: any) {
-  const V = fgVM(), root = new THREE.Group(), fac = hdFac(e), pal = palette(e.owner), fly = !!e.d.fly, naval = !!e.d.naval, walker = /titan_allied|titan_yuri|bastion/.test(e.key);
+  const V = fgVM(), root = new THREE.Group(), fac = hdFac(e), pal = palette(e.owner), fly = !!e.d.fly, naval = !!e.d.naval, walker = /titan_vanguard|titan_syndicate|bastion/.test(e.key);
   const key = "ck|" + e.key + "|" + e.owner;
   const G = (n: string, f: (a: any[]) => void) => hdObj(hdGeo(key + n, pal, f), V.mats, !1);
   const s = .05, frame = new THREE.Group();
   frame.rotation.y = PI2, frame.scale.setScalar(s), root.add(frame);
-  const body = "yuri" === fac ? "carapace2" : "armor3", trim = "yuri" === fac ? "psi" : "soviet" === fac ? "glow" : "tesla";
+  const body = "syndicate" === fac ? "carapace2" : "armor3", trim = "syndicate" === fac ? "psi" : "legion" === fac ? "glow" : "arcbolt";
   const screens: any[] = [], needles: any[] = [];
   if (fly || walker) {
     // canopy frame and instrument panel
@@ -1118,7 +1118,7 @@ function fpsCockpitAnimate(ck: any, e: any) {
 }
 // Gunner's sight overlay drawn on the 2D canvas while aiming in a vehicle.
 function fpsSightOverlay(c: CanvasRenderingContext2D, e: any) {
-  const w = CW, h = CH, r = Math.min(w, h) * .42, cx = w / 2, cy = h / 2, fac = hdFac(e), col = "yuri" === fac ? "#d9a8ff" : "soviet" === fac ? "#ffb35a" : "#9fe8ff";
+  const w = CW, h = CH, r = Math.min(w, h) * .42, cx = w / 2, cy = h / 2, fac = hdFac(e), col = "syndicate" === fac ? "#d9a8ff" : "legion" === fac ? "#ffb35a" : "#9fe8ff";
   c.save();
   c.fillStyle = "rgba(4,8,10,.94)", c.beginPath(), c.moveTo(0, 0), c.lineTo(w, 0), c.lineTo(w, h), c.lineTo(0, h), c.closePath(), c.moveTo(cx + r, cy), c.arc(cx, cy, r, 0, 2 * Math.PI, !0), c.closePath(), c.fill();
   const g = c.createRadialGradient(cx, cy, r * .82, cx, cy, r); g.addColorStop(0, "rgba(0,0,0,0)"), g.addColorStop(1, "rgba(0,0,0,.45)");

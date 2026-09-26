@@ -9,24 +9,24 @@ test("campaign mission launch, tick, and unlock flow works end-to-end", async ({
   const sanity = await page.evaluate(() => {
     const w = window as any;
     return {
-      facNameAllied: w.FAC_NAME.allied,
+      facNameVanguard: w.FAC_NAME.vanguard,
       campaignFacs: Object.keys(w.CAMPAIGNS),
-      alliedMissionCount: w.CAMPAIGNS.allied.missions.length,
-      campaignUnlockedAllied: w.campaignUnlocked("allied"),
+      vanguardMissionCount: w.CAMPAIGNS.vanguard.missions.length,
+      campaignUnlockedVanguard: w.campaignUnlocked("vanguard"),
     };
   });
-  expect(sanity.facNameAllied).toBeTruthy();
+  expect(sanity.facNameVanguard).toBeTruthy();
   expect(sanity.campaignFacs.length).toBeGreaterThan(0);
-  expect(sanity.alliedMissionCount).toBeGreaterThan(0);
-  expect(sanity.campaignUnlockedAllied).toBeGreaterThanOrEqual(0);
+  expect(sanity.vanguardMissionCount).toBeGreaterThan(0);
+  expect(sanity.campaignUnlockedVanguard).toBeGreaterThanOrEqual(0);
 
   // launchMission() calls startGame() internally (sets pendingMission then
   // starts the match, consumed via applyPendingMission()) - don't call
   // startGame() again here.
   const launch = await page.evaluate(() => {
     const w = window as any;
-    w.launchMission("allied", 0);
-    const mission = w.CAMPAIGNS.allied.missions[0];
+    w.launchMission("vanguard", 0);
+    const mission = w.CAMPAIGNS.vanguard.missions[0];
     const cfgSnapshot = { fac: w.cfg.fac, map: w.cfg.map, fog: w.cfg.fog, slotCount: w.cfg.slots.length };
     w.S.running = false;
     return {
@@ -46,15 +46,15 @@ test("campaign mission launch, tick, and unlock flow works end-to-end", async ({
     try {
       for (let i = 0; i < 20; i++) w.step(0.5);
       const outcome = w.checkMissionOutcome();
-      w.unlockNext("allied", 0);
-      const newUnlock = w.campaignUnlocked("allied");
+      w.unlockNext("vanguard", 0);
+      const newUnlock = w.campaignUnlocked("vanguard");
       return { ok: true, outcome, newUnlock };
     } catch (e: any) {
       return { ok: false, error: e.message };
     }
   });
   expect(tick.ok, `mission tick threw: ${(tick as any).error}`).toBe(true);
-  expect(tick.newUnlock).toBeGreaterThanOrEqual(sanity.campaignUnlockedAllied);
+  expect(tick.newUnlock).toBeGreaterThanOrEqual(sanity.campaignUnlockedVanguard);
 
   const data = await page.evaluate(() => {
     const w = window as any, bad: string[] = [];
