@@ -9,7 +9,7 @@ test("serializeGame -> localStorage -> loadSlot round-trips real game state", as
   await startSkirmish(page);
   const before = await page.evaluate(() => {
     const w = window as any;
-    w.addUnit(0, "grizzly", 500, 500);
+    w.addUnit(0, "warden", 500, 500);
     for (let i = 0; i < 40; i++) w.step(0.5);
     return {
       time: w.S.time,

@@ -84,6 +84,9 @@ export type EntityKind = "u" | "b" | "p";
 
 /** A live unit instance, as created by addUnit() in src/sim.js. */
 export interface Unit {
+  patrol?: { ax: number; ay: number; bx: number; by: number; leg: boolean };
+  hold?: boolean;
+  ironUntil?: number;
   id: number;
   e: "u";
   key: string;
@@ -205,11 +208,13 @@ export interface Building {
   tang?: number;
   deployed?: boolean;
   blackoutT?: number;
+  ironUntil?: number;
   capturedFac?: string;
   charge?: number;
   garrison?: Unit[];
   pairId?: number | null;
   gateT?: number;
+  doorT?: number;
   open?: boolean;
   furnCols?: unknown[];
   interior?: unknown;
@@ -266,11 +271,22 @@ export interface Player {
   spyCD?: number;
   paradropCD?: number;
   empCD?: number;
+  curtainCD?: number;
   [field: string]: unknown;
 }
 
 /** The map/terrain data, one flat Uint8Array/Float32Array per channel over 92x72 tiles. */
 export interface MapData {
+  pendingBridges?: any[];
+  strategic?: any[];
+  townHints?: any[];
+  towns?: any[];
+  roadLines?: number[][][];
+  snow?: number;
+  expansions?: any[];
+  plateaus?: any[];
+  stratSpecial?: any[];
+  skirtProps?: any[];
   terr: Uint8Array;
   ore: Float32Array;
   tib: Uint8Array;
@@ -298,6 +314,11 @@ export interface MapData {
   bridgeHp: Float32Array;
   bridgeSite: Uint8Array;
   bridgeHoriz: Uint8Array;
+  over: Uint8Array;
+  overZ: Float32Array;
+  hasOver?: boolean;
+  calm?: number;
+  mapKind?: string;
   // Per-map decoration/spawn records (props, trees, ore-drill spots, ...)
   // are built as ad-hoc object literals by genMap(), not through a shared
   // constructor - `any[]` here for the same reason as GameState's
@@ -344,11 +365,22 @@ export interface GameState {
   deployUnit?: Unit | null;
   mission?: any;
   weather?: string;
+  wxAmt?: number;
+  wxGoal?: string;
+  wxT?: number;
+  wxRainSnd?: boolean;
+  needMusic?: boolean;
+  quitting?: boolean;
+  pausedByHide?: boolean;
   rads?: any[];
   aiVis?: Map<number, Uint8Array>;
   knownEnemy?: Map<number, Set<number>>;
   selMode?: boolean;
   spyReveals?: { t: number; [k: string]: unknown }[];
+  crates?: { x: number; y: number; k: string; r: number }[];
+  crateT?: number;
+  cratesOn?: boolean;
+  lastAlert?: { x: number; y: number } | null;
   thunderT?: number;
   traffic?: any[];
   history?: { t: number; p: { kills: number; lost: number; units: number; value: number }[] }[];

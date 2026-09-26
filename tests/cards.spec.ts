@@ -8,10 +8,10 @@ test("build-menu cards render, switch tabs, tick, and deploy the MCV", async ({ 
 
   const initial = await page.evaluate(() => {
     const w = window as any;
-    w.cfg.fac = "soviet";
+    w.cfg.fac = "legion";
     w.cfg.map = "basin";
     w.cfg.fog = "off";
-    w.cfg.slots = [{ fac: "allied", team: 2, color: "def", spawn: 1, diff: "normal" }];
+    w.cfg.slots = [{ fac: "vanguard", team: 2, color: "def", spawn: 1, diff: "normal" }];
     w.S.running = false;
     w.startGame();
     return {
@@ -51,7 +51,7 @@ test("build-menu cards render, switch tabs, tick, and deploy the MCV", async ({ 
 
   const deploy = await page.evaluate(() => {
     const w = window as any;
-    const mcv = w.S.units.find((u: any) => u.d.role === "mcv" && u.owner === 0);
+    const mcv = w.S.units.find((u: any) => u.d.role === "mhq" && u.owner === 0);
     if (!mcv) return { found: false };
     w.S.sel = [mcv];
     try {

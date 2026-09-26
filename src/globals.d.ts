@@ -71,6 +71,8 @@ declare global {
   function bname(key: string, fac: string): string;
   function unitRoleTag(key: string): { short: string; label: string; desc: string; color: string } | null;
   function bweapon(key: string, fac: string): EntityDef | null;
+  const UNIT_DESC: Record<string, string>;
+  const BLD_DESC: Record<string, string>;
 
   // === sim.js (core simulation) ===
   var S: GameState;
@@ -85,7 +87,7 @@ declare global {
 
   function setGameSpeed(v: number): void;
   function walkable(tx: number, ty: number): boolean;
-  function hasLineOfFire(x0: number, y0: number, x1: number, y1: number, h0?: number, h1?: number): boolean;
+  function hasLineOfFire(x0: number, y0: number, x1: number, y1: number, h0?: number, h1?: number, ignoreId?: number): boolean;
   function losEyeH(e: Unit | Building): number;
   function walkableW(tx: number, ty: number): boolean;
   function walkableTeam(team: number): AnyFn;
@@ -139,6 +141,8 @@ declare global {
   function unstick(u: Unit): void;
   function nearWater(tx: number, ty: number, size: number, margin: number): boolean;
   function canPlace(key: string, tx: number, ty: number, owner: number): boolean;
+  function inBuildZone(owner: number, tx: number, ty: number, naval?: boolean): boolean;
+  function zoneAnchor(b: any): boolean;
   function canDeploy(key: string, tx: number, ty: number, unit: Unit): boolean;
   const DEPLOY_RANGE: number;
   function addUnit(owner: number, key: string, x: number, y: number): Unit | null;
@@ -166,6 +170,15 @@ declare global {
   const spawnUnit: AnyFn;
   const placeReady: AnyFn;
   function cmdMove(units: Unit[], x: number, y: number, amove?: boolean, queue?: boolean): void;
+  function cmdPatrol(units: Unit[], x: number, y: number): void;
+  function veiled(a: any, t: any): boolean;
+  function ironCurtain(owner: number, x: number, y: number): void;
+  function tickIronFx(): void;
+  function aiCurtain(p: any): void;
+  function spawnCrate(): boolean;
+  function collectCrate(c: any, u: any): void;
+  function tickCrates(dt: number): void;
+  function crateModel(): any[];
   function nextWaypoint(u: Unit): boolean;
   function cmdAttack(units: Unit[], target: GameEntity): void;
   function cmdHarvest(units: Unit[], tx: number, ty: number): void;
@@ -315,9 +328,9 @@ declare global {
   const tankHull: AnyFn;
   const turretProfile: AnyFn;
   const tankTurret: AnyFn;
-  const harvesterSoviet: AnyFn;
-  const harvesterAllied: AnyFn;
-  const harvesterYuri: AnyFn;
+  const harvesterLegion: AnyFn;
+  const harvesterVanguard: AnyFn;
+  const harvesterSyndicate: AnyFn;
   const harvesterModel: AnyFn;
   const harvesterAugerModel: AnyFn;
   const harvesterDrumModel: AnyFn;
@@ -340,6 +353,7 @@ declare global {
   const fallModel: AnyFn;
   const lampModel: AnyFn;
   const towerModel: AnyFn;
+  const churchModel: AnyFn;
   const carModel: AnyFn;
   const PROPMODEL: AnyFn;
   const craterModel: AnyFn;
@@ -391,11 +405,12 @@ declare global {
   const triAAHead: AnyFn;
   const heliRotor: AnyFn;
   const heliTailRotor: AnyFn;
+  const heliTailRotorV: AnyFn;
   const BMODEL_: AnyFn;
   const BTURRET_: AnyFn;
   function UMODEL(key: string, frame?: number, extra?: any): any;
   const UTURRET: AnyFn;
-  function BMODEL(key: string, fac: string, deployed?: number | boolean, colorName?: string, rot?: number): any;
+  function BMODEL(key: string, fac: string, deployed?: number | boolean, cn?: number, rot?: number, prod?: string | null, doorT?: number): any;
   const BTURRET: AnyFn;
   function faceIdx(ang: number): number;
   const SPRITES: Map<string, any>;
@@ -451,6 +466,7 @@ declare global {
   function drawMarker(): void;
   function buildMMCache(): void;
   function drawMM(): void;
+  function radarOnline(): boolean;
   function viewInsets(): { l: number; r: number; t: number; b: number };
   function fc(owner: number): string;
   const iconFor: AnyFn;
@@ -471,34 +487,51 @@ declare global {
   const garrisonCap: AnyFn;
   function garrisonable(b: Building): boolean;
   function fpsEnterable(b: Building): boolean;
-  function enterGarrison(u: Unit, b: Building): void;
+  function enterGarrison(u: Unit, b: Building): boolean;
   function evacuate(b: Building): void;
   function tickGarrison(b: Building, dt: number): void;
   function tickRogueDen(b: Building, dt: number): void;
   function captureBld(u: Unit, b: Building): void;
   function tickRads(dt: number): void;
   function tickEngineer(u: Unit, dt: number): void;
+  function tickInfiltrate(u: any, dt: number): void;
+  function trackPair(u: any): void;
+  function snowTrails(): void;
+  const MAPDEFS: any;
+  function buildAuthoredMap(key: string, seed: number): void;
+  function unitGroundH(u: any): number;
+  function lvlOff(u: any): number;
+  function levelStep(fi: number, lv: number, ti: number): number;
+  function syncLevel(u: any, fi: number): void;
+  function tileOfU(u: any): number;
+  function isHighTile(i: number): boolean;
+  const PLAT_MIN: number;
+  function footStep(u: any): void;
+  const NO_TREAD: RegExp;
+  function trackMark(x: number, y: number, ang: number, w: number, l: number, life: number): void;
+  function canInfiltrate(u: any, b: any): boolean;
   function killUnitSilent(u: Unit): void;
-  function deployMCV(u: Unit): void;
+  function deployMHQ(u: Unit): void;
   function packUpBld(b: Building): void;
   function deployHive(u: Unit): void;
   function deployBastion(u: Unit): void;
   function undeployHive(b: Building): void;
   function startDeployPlacement(u: Unit, key: string): void;
   function finishDeploy(u: Unit, key: string, tx: number, ty: number): void;
-  function tickTerror(u: Unit, dt: number): void;
-  function tickChrono(u: Unit, dt: number): void;
+  function tickTickdrone(u: Unit, dt: number): void;
+  function tickPhaser(u: Unit, dt: number): void;
   const acquireFor: AnyFn;
   function toggleDeploy(u: Unit): void;
+  function tickTitanGarrison(u: Unit, dt: number): void;
   function homePad(u: Unit): Building | null;
   function tickAir(u: Unit, dt: number): void;
   const flyTo: AnyFn;
   const cargoUsed: AnyFn;
   function canLoad(transport: Unit, cargo: Unit): boolean;
-  function canCrewIfv(vehicle: Unit, inf: Unit): boolean;
-  function crewIfv(vehicle: Unit, inf: Unit): void;
+  function canCrewSkirmisher(vehicle: Unit, inf: Unit): boolean;
+  function crewSkirmisher(vehicle: Unit, inf: Unit): void;
   function ejectGunner(vehicle: Unit): void;
-  function ifvGunnerD(baseKey: string, gunnerKey: string | null | undefined): EntityDef;
+  function skirmisherGunnerD(baseKey: string, gunnerKey: string | null | undefined): EntityDef;
   function smartOrder(units: Unit[], target: GameEntity): boolean;
   function tickLoadMove(u: Unit, dt: number): void;
   function unloadCargo(u: Unit): void;
@@ -516,6 +549,7 @@ declare global {
   var tileSprites: any;
   var mmCache: HTMLCanvasElement | null;
   var NEUTRAL: number;
+  const BRIDGE_MAX_HP: number;
 
   // === render.js (Three.js engine bootstrap) ===
   const initGL: AnyFn;
@@ -531,6 +565,8 @@ declare global {
   // === fps.js (first-person mode) ===
   const projModel: AnyFn;
   function fpsEyeH(u: Unit): number;
+  const FPS_INF_SC: number;
+  function fpsUnitScale(u: any): number;
   function enterFPS(u: Unit): boolean;
   function exitFPS(): void;
   function fpsTick(dt: number): void;
@@ -548,11 +584,11 @@ declare global {
   function fpsAbilityUp(): void;
   function fpsToggleWeapon(): void;
   function fpsJump(): void;
+  function fpsReload(): void;
+  function fpsLookBy(dx: number, dy: number): void;
   function fpsPassable(x: number, y: number, self: Unit): boolean;
   function fpsDeathTick(dt: number): void;
-  const buildViewmodel: AnyFn;
   const ensureViewmodel: AnyFn;
-  const buildVehicleViewmodel: AnyFn;
   const ensureVehicleViewmodel: AnyFn;
   const unitViewmodelKind: AnyFn;
   function interiorHalf(b: Building): number;
@@ -609,6 +645,8 @@ declare global {
     shakeMag: number;
     shakeX: number;
     shakeY: number;
+    exitCD: number;
+    sprintLock: boolean;
     [k: string]: unknown;
   };
   const FLOOR_Z: number;
@@ -617,7 +655,7 @@ declare global {
 
   // === audio.js ===
   function audio(): void;
-  function sfx(name: string): void;
+  function sfx(name: string, unit?: GameEntity | null): void;
   function sfxHit(kind?: string): void;
   function setMuted(v: boolean): void;
   function setMasterVol(v: number): void;
@@ -627,14 +665,31 @@ declare global {
   function setRainAmbience(on: boolean): void;
   function startFpsAmbience(): void;
   function stopFpsAmbience(): void;
-  function startMusic(): void;
-  const MUSIC_TRACKS: { name: string; step: number; [k: string]: unknown }[];
+  function startMusic(first?: number): void;
+  function musicPlay(i: number): void;
+  function musicStop(): void;
+  function musicIsOn(): boolean;
+  function musicNowIdx(): number;
+  function musicTrackInfo(i: number): { name: string; style: string; mood: string; fac: string; secs: number } | null;
+  function mapTileRGB(i: number): number[];
+  function showMusicMenu(): void;
+  function menuBgStart(): void;
+  function menuBgStop(): void;
+  function menuBgSetMap(key: string): void;
+  function menuBgFrame(dt: number): void;
+  function menuBgActive(): boolean;
+  function setMenuCam(c: any): void;
+  function showMainSettings(): void;
+  const MUSIC_TRACKS: { name: string; [k: string]: any }[];
+  function musicModeOptions(): string[];
+  function musicTrackLabel(i: number): string;
+  function musicNowPlaying(): string;
   function loadAdminMusic(): { id?: string; name: string; dataUrl: string; mime?: string }[];
   function saveAdminMusic(list: { id?: string; name: string; dataUrl: string; mime?: string }[]): boolean;
   function refreshCustomMusic(): void;
   function totalTrackCount(): number;
   function trackName(i: number): string;
-  function playVoiceLine(fac: string, category: string): void;
+  function playVoiceLine(fac: string, category: string, role?: string | null, key?: string | null): void;
   function setVoicesEnabled(v: boolean): void;
   var voicesEnabled: boolean;
   var lightningT: number;
@@ -733,6 +788,10 @@ declare global {
   function tickGates(dt: number): void;
   function quietKillBld(b: Building): void;
   function placeGatePair(g: Building): void;
+  function unitBob(u: Unit): number;
+  function dockNew(u: Unit, b: Building): void;
+  function airOrdered(u: Unit): void;
+  function gateNeighborBits(tx: number, ty: number, owner: number): number;
   function relinkGatePair(g: Building): void;
   function wallTileOk(tx: number, ty: number): boolean;
   const autoLinkWall: AnyFn;
@@ -742,6 +801,28 @@ declare global {
   function beginFpsEntry(u: Unit): void;
   function step(dt: number): void;
   const SECBTN: string;
+  function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number, noClick?: boolean, who?: string): void;
+  function castDur(who: string, text: string): number;
+  function voxBusy(): boolean;
+  function voiceBankList(): any[];
+  function speakStop(): void;
+  function cineMood(m: string): void;
+  function cineStop(): void;
+  function cineHit(k: string): void;
+  function playFilm(key: string, done?: () => void): void;
+  function missionDebrief(win: boolean): string;
+  function stealthBlock(e: any, t: any): boolean;
+  function techAllowed(k: string, isBld: boolean, abil?: boolean): boolean;
+  function tickWeather(dt: number): void;
+  function autoSave(): void;
+  function clearResume(): void;
+  function tryResume(): boolean;
+  function gameActive(): boolean;
+  function setWeatherPref(v: string): void;
+  function probeMedia(key: string): any;
+  function fmvSrc(key: string): string | null;
+  function mapPreviewImg(key: string): string;
+  function radioStop(): void;
   const RDT: number;
 
   // === abilities.js ===
@@ -755,6 +836,12 @@ declare global {
   var spyAim: boolean;
   var paradropAim: boolean;
   var empAim: boolean;
+  var curtainAim: boolean;
+  // fpsgfx.ts / cross-module render helpers
+  const DOME: AnyFn; const BOXM: AnyFn; const ell: AnyFn; const taper3: AnyFn; const lowPoly: AnyFn; const SLAB: AnyFn; const TSLAB: AnyFn; const INF_FAC: any;
+  const glMerge: AnyFn; const fogPatch: AnyFn; const glPixelRatioCap: AnyFn; const GLGEO: Map<string, any>;
+  const tickSeparation: AnyFn; const fpsGfxPre: AnyFn; const fpsGfxShadow: AnyFn; const fgWindMat: AnyFn; const WIND_KEYS: RegExp; const fx3dActive: AnyFn; const FG: any;
+  const fpsHDSet: AnyFn; const fpsViewmodelAnimate: AnyFn; const fpsBuildViewmodel: AnyFn; const fpsBuildCockpit: AnyFn; const fpsCockpitAnimate: AnyFn; const fpsSightOverlay: AnyFn; const fpsViewmodelThrow: AnyFn; const hdBakeGeo: AnyFn; const hdBakeOk: AnyFn; const fgDisposeRig: AnyFn; const fpsInteriorFig: AnyFn; const fpsPoseFig: AnyFn; const fpsGfxPost: AnyFn;
 }
 
 export {};
