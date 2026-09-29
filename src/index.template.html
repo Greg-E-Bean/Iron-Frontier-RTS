@@ -513,6 +513,9 @@ body.fpsOnly #fpsexit{display:none!important}
 #scope{position:absolute;inset:0;pointer-events:none;display:none;background:
   radial-gradient(circle at center,transparent 0 19%,#000 30%);}
 #scope.on{display:block}
+#fpsnav{position:absolute;left:50%;top:calc(50% - 88px);transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:5px 12px 5px 8px;border-radius:18px;background:rgba(5,10,12,.62);border:1px solid var(--nc,#7dff8a);color:var(--nc,#7dff8a);font:700 12px Tahoma,sans-serif;letter-spacing:1px;pointer-events:none;white-space:nowrap;text-shadow:0 1px 2px #000}
+#fpsnav i{display:inline-block;font-style:normal;font-size:16px;line-height:1;transition:transform .08s linear}
+#fpsnav.hidden{display:none}
 #scope:before,#scope:after{content:"";position:absolute;left:50%;top:50%;background:rgba(10,14,10,.85)}
 #scope:before{width:1px;height:100%;transform:translate(-50%,-50%)}
 #scope:after{width:100%;height:1px;transform:translate(-50%,-50%)}
@@ -904,7 +907,7 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
   <div id="fpslock">⇑ SPRINT LOCK</div>
   <div id="fpsfireL">FIRE</div>
   <div id="fpsreload">RELOAD</div>
-  <div id="fpskeys">WASD move · Mouse look · LMB fire · RMB aim · SPACE jump · C crouch · SHIFT sprint · R reload · Q ability · E enter · V view</div>
+  <div id="fpskeys">WASD move · Mouse look · LMB fire · RMB aim · SPACE jump · C crouch · SHIFT sprint · R reload · Q ability · E enter/leave · B plant C4 · V view</div>
   <div id="fpsstamina" class="hidden"><i></i></div>
   <div id="fpscrouch" class="hidden">CROUCH</div>
   <div id="fpssprint" class="hidden">SPRINT</div>
@@ -915,7 +918,8 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
   <div id="fpsability" class="hidden">ABILITY</div>
   <div id="fpsfire">FIRE</div>
   <div id="fpsenter" class="hidden">ENTER</div>
-  <div id="fpsbomb" class="hidden">PLANT BOMB</div>
+  <div id="fpsbomb" class="hidden">PLANT C4</div>
+  <div id="fpsnav" class="hidden"><i>▲</i><span></span></div>
 </div>
 
 <div id="hint"></div>

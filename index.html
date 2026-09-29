@@ -513,6 +513,9 @@ body.fpsOnly #fpsexit{display:none!important}
 #scope{position:absolute;inset:0;pointer-events:none;display:none;background:
   radial-gradient(circle at center,transparent 0 19%,#000 30%);}
 #scope.on{display:block}
+#fpsnav{position:absolute;left:50%;top:calc(50% - 88px);transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:5px 12px 5px 8px;border-radius:18px;background:rgba(5,10,12,.62);border:1px solid var(--nc,#7dff8a);color:var(--nc,#7dff8a);font:700 12px Tahoma,sans-serif;letter-spacing:1px;pointer-events:none;white-space:nowrap;text-shadow:0 1px 2px #000}
+#fpsnav i{display:inline-block;font-style:normal;font-size:16px;line-height:1;transition:transform .08s linear}
+#fpsnav.hidden{display:none}
 #scope:before,#scope:after{content:"";position:absolute;left:50%;top:50%;background:rgba(10,14,10,.85)}
 #scope:before{width:1px;height:100%;transform:translate(-50%,-50%)}
 #scope:after{width:100%;height:1px;transform:translate(-50%,-50%)}
@@ -904,7 +907,7 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
   <div id="fpslock">⇑ SPRINT LOCK</div>
   <div id="fpsfireL">FIRE</div>
   <div id="fpsreload">RELOAD</div>
-  <div id="fpskeys">WASD move · Mouse look · LMB fire · RMB aim · SPACE jump · C crouch · SHIFT sprint · R reload · Q ability · E enter · V view</div>
+  <div id="fpskeys">WASD move · Mouse look · LMB fire · RMB aim · SPACE jump · C crouch · SHIFT sprint · R reload · Q ability · E enter/leave · B plant C4 · V view</div>
   <div id="fpsstamina" class="hidden"><i></i></div>
   <div id="fpscrouch" class="hidden">CROUCH</div>
   <div id="fpssprint" class="hidden">SPRINT</div>
@@ -915,7 +918,8 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
   <div id="fpsability" class="hidden">ABILITY</div>
   <div id="fpsfire">FIRE</div>
   <div id="fpsenter" class="hidden">ENTER</div>
-  <div id="fpsbomb" class="hidden">PLANT BOMB</div>
+  <div id="fpsbomb" class="hidden">PLANT C4</div>
+  <div id="fpsnav" class="hidden"><i>▲</i><span></span></div>
 </div>
 
 <div id="hint"></div>
@@ -10655,13 +10659,24 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     ds && ds.classList.add("hidden");
     const en = document.getElementById("fpsenter");
-    if (en) if (e.inside) en.classList.remove("hidden"), en.classList.add("on"), en.textContent = "LEAVE";
-    else if (FPS.interact) en.classList.remove("hidden"), en.classList.remove("on"), en.textContent = "ENTER";
+    if (en) if (e.inside) en.classList.remove("hidden"), en.classList.add("on"), en.textContent = "LEAVE " + fpsBldName(e.inside);
+    else if (FPS.interact) en.classList.remove("hidden"), en.classList.remove("on"), en.textContent = "ENTER " + fpsBldName(FPS.interact) + fpsBldSide(FPS.interact, e);
     else en.classList.add("hidden");
     const bmb = document.getElementById("fpsbomb");
     if (bmb) {
       const b = e.inside;
-      b && b.bombT > 0 ? (bmb.classList.remove("hidden"), bmb.textContent = "ARMED \u2014 " + Math.ceil(b.bombT) + "s") : fpsCanPlantBomb() ? (bmb.classList.remove("hidden"), bmb.textContent = "PLANT BOMB") : bmb.classList.add("hidden");
+      b && b.bombT > 0 ? (bmb.classList.remove("hidden"), bmb.textContent = "ARMED \u2014 " + Math.ceil(b.bombT) + "s") : fpsCanPlantBomb() ? (bmb.classList.remove("hidden"), bmb.textContent = "PLANT C4 \u2014 " + fpsBldName(b)) : bmb.classList.add("hidden");
+    }
+    const nav = document.getElementById("fpsnav");
+    if (nav) {
+      const t2 = fpsNavTarget(e);
+      if (!t2) nav.classList.add("hidden");
+      else {
+        nav.classList.remove("hidden");
+        const rel = angDiff(FPS.yaw, Math.atan2(t2.y - e.y, t2.x - e.x)), d = Math.hypot(t2.x - e.x, t2.y - e.y);
+        nav.querySelector("i").style.transform = "rotate(" + rel + "rad)", nav.querySelector("span").textContent = t2.label + (d > 28 ? " \xB7 " + Math.round(d / 8) + " m" : ""), nav.style.setProperty("--nc", t2.col);
+        S.time - (FPS.navFxT || 0) > 0.7 && (FPS.navFxT = S.time, S.fx.push({ kind: "ring", x: t2.x, y: t2.y, z: 2, s: 0.55, c: t2.col, t: 0, life: 0.9 }));
+      }
     }
     const am = document.getElementById("fpsammo");
     if (am) {
@@ -10896,6 +10911,39 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return e && !e.dead && e.d.civ && (e.owner === NEUTRAL || e.owner === t) && (e.garrison || []).length < garrisonCap(e);
   }
   var FPS_ROOMY = { paradropHangar: 1, empTower: 1, rogueDen: 1, bridgehut: 1, oilDerek: 1, airfield: 1, barracks: 1, conyard: 1, factory: 1, hive: 1, lab: 1, navalyard: 1, power: 1, refinery: 1, repair: 1, silo: 1, super: 1 };
+  function fpsBldName(b) {
+    if (!b) return "";
+    const f = b.owner >= 0 && S.players[b.owner] && !S.players[b.owner].neutral ? b.capturedFac || S.players[b.owner].fac : "neutral", n = BLD[b.key] && BLD[b.key].names;
+    return (n && (n[f] || n.neutral) || b.key).toUpperCase();
+  }
+  function fpsBldSide(b, e) {
+    return b.owner === e.owner ? "" : b.owner === NEUTRAL || !S.players[b.owner] || S.players[b.owner].neutral ? "" : teamOf(b.owner) === teamOf(e.owner) ? " (ALLY)" : " (ENEMY)";
+  }
+  function fpsNavTarget(e) {
+    if (!e || e.dead || "inf" !== e.d.kind) return null;
+    const b = e.inside;
+    if (b) return { x: b.x, y: b.y + 20 * b.size - 4, label: b.bombT > 0 ? "GET OUT \u2014 EXIT" : "EXIT", col: b.bombT > 0 ? "#ff5a4a" : "#7dff8a" };
+    let t = FPS.interact;
+    if (!t && S.mission && "function" == typeof objMarkers) {
+      let q = null, qd = 1e12;
+      for (const o of objMarkers()) {
+        const d = dist2(o.x, o.y, e.x, e.y);
+        o.prim && d < qd && (qd = d, q = o);
+      }
+      if (q) return { x: q.x, y: q.y, label: "OBJECTIVE", col: "#46e06a" };
+    }
+    if (e.d.c4 && (!t || t.owner === e.owner || teamOf(t.owner) === teamOf(e.owner) || t.owner === NEUTRAL)) {
+      let bd = 1e12;
+      for (const o of S.blds) {
+        if (o.dead || !fpsEnterable(o) || o.owner === NEUTRAL || !S.players[o.owner] || teamOf(o.owner) === teamOf(e.owner)) continue;
+        const d = dist2(o.x, o.y, e.x, e.y);
+        d < bd && (bd = d, t = o);
+      }
+    }
+    if (!t) return null;
+    const foe = t.owner !== NEUTRAL && S.players[t.owner] && teamOf(t.owner) !== teamOf(e.owner);
+    return { x: t.x, y: t.y + 16 * t.size + 8, label: (foe && e.d.c4 ? "INFILTRATE " : "ENTER ") + fpsBldName(t), col: foe ? "#ff9a2c" : "#7dff8a" };
+  }
   function fpsEnterable(e) {
     return !(!e || e.dead) && (!!e.d.civ || !!FPS_ROOMY[e.key]);
   }
@@ -11397,6 +11445,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   Object.assign(window, {
     veiled,
+    fpsBldName,
+    fpsBldSide,
+    fpsNavTarget,
     drawObjMarkers,
     mapTileRGB,
     airOrdered,
@@ -14606,6 +14657,7 @@ varying vec3 vFgWN;
     Math.max(w, d, h) >= 0.5 && a.push(P_(fgPlainBox(w, d, h), x, y, z, c, o));
   };
   var XC = (a, x, y, z, r, l, c, n, o) => a.push(P_(CYL(r, l, n || 16), x, y, z, c, Object.assign({ ty: PI2 }, o || {})));
+  var XO = (a, x, y, z, r, l, c, n) => a.push(P_(CYL(r, l, n || 16, false), x, y, z, c, { ty: PI2 }));
   function ellF(a, x, y, z, rx, ry, rz, c, o) {
     ell(a, x, y, z, rx, ry, rz, c, o), ell(a, x, y, z, rx, ry, rz, c, Object.assign({ tx: Math.PI }, o || {}));
   }
@@ -14723,14 +14775,14 @@ varying vec3 vFgWN;
       else if ("syndicate" === fac) ell(m, 1.2, 0, -1.3, 0.5, 0.4, 0.95, "carapace"), B_(m, 1.2, 0, -2, 0.1, 0.42, 1.2, "psi", { e: 1 });
       else B_(m, 1.25, 0, lg ? -1.4 : -1.9, 0.72, 0.5, lg ? 1.1 : 1.6, D, { ty: -0.12 });
       if (lg) {
-        XC(a, -0.9, 0, 1.35, 0.36, 3.2, D, 16), XC(a, 2.1, 0, 1.35, 0.48, 0.7, D, 16), XC(a, -1.5, 0, 1.35, 0.42, 0.6, D, 16);
-        a.push(P_(CYL(0.4, 0.06, 16), 2.8, 0, 1.35, "glassdark", { ty: PI2, e: 1 })), a.push(P_(CYL(0.3, 0.25, 10), 0.4, 0, 1.7, D)), a.push(P_(CYL(0.3, 0.25, 10), 0.4, 0.38, 1.35, D, { tx: PI2 }));
+        XO(a, -0.9, 0, 1.35, 0.36, 3.2, D, 16), XO(a, 2.1, 0, 1.35, 0.48, 0.7, D, 16), XO(a, -1.5, 0, 1.35, 0.42, 0.6, D, 16);
+        a.push(P_(CYL(0.46, 0.08, 16, false), 2.8, 0, 1.35, "glassdark", { ty: PI2, e: 1 })), a.push(P_(CYL(0.3, 0.25, 10), 0.4, 0, 1.7, D)), a.push(P_(CYL(0.3, 0.25, 10), 0.4, 0.38, 1.35, D, { tx: PI2 }));
         B_(a, 0.4, 0, 0.9, 0.9, 0.4, 0.3, M);
         for (const y of [-0.2, 0.2]) XC(a, 4, y, -0.15, 0.07, 2.2, D, 6);
         XC(bo, 0.15, 0.2, 0.45, 0.09, 0.7, M, 8, { ty: 0, tx: -PI2 }), bo.push(P_(DOME(0.22, 0.22, 10), 0.15, 0.95, 0.35, M));
         W.sight = 1.35;
       } else if ("vanguard" === fac) {
-        B_(a, 0.6, 0, 0.91, 0.9, 0.5, 0.2, D), XC(a, 0.2, 0, 1.3, 0.34, 0.9, D, 16), a.push(P_(CYL(0.28, 0.05, 14), 1.12, 0, 1.3, "arcbolt", { ty: PI2, e: 1 }));
+        B_(a, 0.6, 0, 0.91, 0.9, 0.5, 0.2, D), XO(a, 0.2, 0, 1.3, 0.34, 0.9, D, 16), a.push(P_(CYL(0.34, 0.06, 16, false), 1.12, 0, 1.3, "arcbolt", { ty: PI2, e: 1 }), P_(CYL(0.035, 0.02, 8), 1.1, 0, 1.3, "red", { ty: PI2, e: 1 }));
         W.sight = 1.3;
       } else if ("syndicate" === fac) {
         ell(a, 0.5, 0, 0.95, 0.55, 0.18, 0.3, "psi", { e: 1 }), W.sight = 1.15;
@@ -15188,6 +15240,7 @@ varying vec3 vFgWN;
     st.swX += (Math.max(-0.08, Math.min(0.08, dy)) * 1.4 - st.swX) * Math.min(1, 10 * dt), st.swY += (Math.max(-0.08, Math.min(0.08, dp)) * 1.4 - st.swY) * Math.min(1, 10 * dt);
     const air = FPS.jumpZ > 0.5 ? 1 : 0;
     st.lastJ && !air && (st.land = 1), st.lastJ = air, st.land = Math.max(0, st.land - dt * 3);
+    vm.visible = !("long" === ud.wt && st.aim > 0.85);
     const s = ud.s, sightY = (ud.W.sight || 1) * s, sightX = (ud.W.sightY || 0) * s;
     const hip = [0.17, -0.18, -0.34], ads = [-sightX, -sightY, -0.3], am = st.aim * ({ flamer: 0.5, tool: 0.35, none: 0, rocket: 0.9, launcher: 0.9 }[ud.wt] ?? 1);
     let px = hip[0] + (ads[0] - hip[0]) * am, py = hip[1] + (ads[1] - hip[1]) * am, pz = hip[2] + (ads[2] - hip[2]) * am, rx = 0, ry = 0, rz = 0;

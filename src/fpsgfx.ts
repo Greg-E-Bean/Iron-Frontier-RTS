@@ -500,6 +500,8 @@ const B_ = (a: any[], x: number, y: number, z: number, w: number, d: number, h: 
   Math.max(w, d, h) >= .5 && a.push(P_(fgPlainBox(w, d, h), x, y, z, c, o));
 };
 const XC = (a: any[], x: number, y: number, z: number, r: number, l: number, c: string, n?: number, o?: any) => a.push(P_(CYL(r, l, n || 16), x, y, z, c, Object.assign({ ty: PI2 }, o || {})));
+// Open-ended tube (no caps): optics you can actually look through when aiming.
+const XO = (a: any[], x: number, y: number, z: number, r: number, l: number, c: string, n?: number) => a.push(P_(CYL(r, l, n || 16, !1), x, y, z, c, { ty: PI2 }));
 
 // Full ellipsoid (ell() alone is the upper half-dome).
 function ellF(a: any[], x: number, y: number, z: number, rx: number, ry: number, rz: number, c: string, o?: any) { ell(a, x, y, z, rx, ry, rz, c, o), ell(a, x, y, z, rx, ry, rz, c, Object.assign({ tx: Math.PI }, o || {})); }
@@ -612,14 +614,14 @@ function hdWeapon(type: string, fac: string, beamCol?: string) {
     else if ("syndicate" === fac) ell(m, 1.2, 0, -1.3, .5, .4, .95, "carapace"), B_(m, 1.2, 0, -2.0, .1, .42, 1.2, "psi", { e: 1 });
     else B_(m, 1.25, 0, lg ? -1.4 : -1.9, .72, .5, lg ? 1.1 : 1.6, D, { ty: -.12 });
     if (lg) {
-      XC(a, -.9, 0, 1.35, .36, 3.2, D, 16), XC(a, 2.1, 0, 1.35, .48, .7, D, 16), XC(a, -1.5, 0, 1.35, .42, .6, D, 16);
-      a.push(P_(CYL(.4, .06, 16), 2.8, 0, 1.35, "glassdark", { ty: PI2, e: 1 })), a.push(P_(CYL(.3, .25, 10), .4, 0, 1.7, D)), a.push(P_(CYL(.3, .25, 10), .4, .38, 1.35, D, { tx: PI2 }));
+      XO(a, -.9, 0, 1.35, .36, 3.2, D, 16), XO(a, 2.1, 0, 1.35, .48, .7, D, 16), XO(a, -1.5, 0, 1.35, .42, .6, D, 16);
+      a.push(P_(CYL(.46, .08, 16, !1), 2.8, 0, 1.35, "glassdark", { ty: PI2, e: 1 })), a.push(P_(CYL(.3, .25, 10), .4, 0, 1.7, D)), a.push(P_(CYL(.3, .25, 10), .4, .38, 1.35, D, { tx: PI2 }));
       B_(a, .4, 0, .9, .9, .4, .3, M);
       for (const y of [-.2, .2]) XC(a, 4.0, y, -.15, .07, 2.2, D, 6);
       XC(bo, .15, .2, .45, .09, .7, M, 8, { ty: 0, tx: -PI2 }), bo.push(P_(DOME(.22, .22, 10), .15, .95, .35, M));
       W.sight = 1.35;
     } else if ("vanguard" === fac) {
-      B_(a, .6, 0, .91, .9, .5, .2, D), XC(a, .2, 0, 1.3, .34, .9, D, 16), a.push(P_(CYL(.28, .05, 14), 1.12, 0, 1.3, "arcbolt", { ty: PI2, e: 1 }));
+      B_(a, .6, 0, .91, .9, .5, .2, D), XO(a, .2, 0, 1.3, .34, .9, D, 16), a.push(P_(CYL(.34, .06, 16, !1), 1.12, 0, 1.3, "arcbolt", { ty: PI2, e: 1 }), P_(CYL(.035, .02, 8), 1.1, 0, 1.3, "red", { ty: PI2, e: 1 }));
       W.sight = 1.3;
     } else if ("syndicate" === fac) { ell(a, .5, 0, .95, .55, .18, .3, "psi", { e: 1 }), W.sight = 1.15; }
     else { B_(a, -.6, 0, .91, .3, .34, .32, M), W.sight = 1.1; }
@@ -968,6 +970,7 @@ function fpsViewmodelAnimate(vm: any, e: any) {
   const air = FPS.jumpZ > .5 ? 1 : 0;
   st.lastJ && !air && (st.land = 1), st.lastJ = air, st.land = Math.max(0, st.land - dt * 3);
   // pose
+  vm.visible = !("long" === ud.wt && st.aim > .85);
   const s = ud.s, sightY = (ud.W.sight || 1) * s, sightX = (ud.W.sightY || 0) * s;
   const hip = [.17, -.18, -.34], ads = [-sightX, -sightY, -.3], am = st.aim * (({ flamer: .5, tool: .35, none: 0, rocket: .9, launcher: .9 } as any)[ud.wt] ?? 1);
   let px = hip[0] + (ads[0] - hip[0]) * am, py = hip[1] + (ads[1] - hip[1]) * am, pz = hip[2] + (ads[2] - hip[2]) * am, rx = 0, ry = 0, rz = 0;
