@@ -468,6 +468,7 @@ const HD_LOOK: Record<string, any> = {
   vindicator: { cloth: "arcbolt", helmet: "steel", pack: "crystal", visor: "arcbolt" }, bombard: { cloth: "armor3", helmet: "armor3", pack: "red", visor: "glow" },
   leech: { cloth: "carapace2", hood: "carapace", tank: "crystal", visor: "crystal" }, brood: { cloth: "carapace", hood: "body", visor: "psi", scale: 1.3 },
   piercer: { cloth: "carapace2", hood: "carapace", visor: "psi" },
+  arctrooper: { cloth: "rust", helmet: "steel", pack: "steel", visor: "arcbolt" }, blighter: { cloth: "carapace2", hood: "carapace", tank: "green", visor: "glow" },
 };
 const GLOWS: Record<string, 1> = { glow: 1, psi: 1, crystal: 1, arcbolt: 1, red: 1, lightY: 1 };
 function hdFac(u: any) { return (S.players[u.owner] && S.players[u.owner].fac) || INF_FAC[u.key] || "vanguard"; }
