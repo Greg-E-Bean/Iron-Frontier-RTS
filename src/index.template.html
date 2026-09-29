@@ -216,12 +216,15 @@ body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 8px);width:min(
 body.fps #radioBox .rbPort,body.fps #radioBox .rbPort.img{flex-basis:32px;height:32px;font-size:11px}
 body.fps #radioBox .rbText{font-size:11px;line-height:1.3}
 body.fps #tutorialPanel{max-width:min(250px,34vw);font-size:10.5px;padding:6px 9px}
-body.fps #tutorialPanel .ts.done,body.fps #tutorialPanel .ts.fail{display:none}
+body.fps #tutorialPanel .ts.done,body.fps #tutorialPanel .ts.fail,body.fps #tutorialPanel .ts.sec,body.fps #tutorialPanel .ts.cur~.ts.cur{display:none}
 body.fps #tutorialPanel.obj .ts{font-size:10.5px;line-height:1.3}
-body.fps #tutorialPanel .th{margin-bottom:3px;font-size:10px}
+body.fps #tutorialPanel .th{display:none}
+body.fps #tutorialPanel{top:calc(env(safe-area-inset-top,0px) + 100px)}
 @media (orientation:portrait) and (max-width:560px){
   body.fps #radioBox{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 46px);width:calc(100vw - 20px)}
-  body.fps #tutorialPanel{top:calc(env(safe-area-inset-top,0px) + 262px)!important;max-width:200px}
+  /* portrait first person: current objective only, as a slim strip under the EXIT/VIEW row */
+  body.fps #tutorialPanel{top:calc(env(safe-area-inset-top,0px) + 48px)!important;left:10px!important;right:auto;max-width:calc(100% - 128px);padding:4px 8px}
+  body.fps #tutorialPanel .th{display:none}
 }
 .campCard{display:block;width:100%;text-align:left;margin-top:10px;padding:12px 14px;border-radius:12px;cursor:pointer;color:#cfe0f5;
   border:1px solid rgba(170,200,220,.16);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));transition:border-color .2s,transform .2s}
@@ -726,7 +729,7 @@ body.finepointer #fpskeys{display:block}
   #fpsui #fpsbar{left:146px;transform:none;top:calc(env(safe-area-inset-top,0px) + 10px);min-width:0;width:100px;padding:3px 6px;font-size:10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   #fpsui #fpsenter{top:calc(env(safe-area-inset-top,0px) + 168px);max-width:calc(100% - 40px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #fpsui #fpsbomb{top:calc(env(safe-area-inset-top,0px) + 218px);max-width:calc(100% - 40px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  body.fps #hint{top:calc(env(safe-area-inset-top,0px) + 104px);left:10px;transform:none;max-width:calc(100% - 160px);text-align:left;font-size:11px}
+  body.fps #hint{top:calc(env(safe-area-inset-top,0px) + 132px);left:10px;transform:none;max-width:calc(100% - 160px);text-align:left;font-size:11px}
   #fpsui #fpsstick{left:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);width:112px;height:112px}
   #fpsui #fpsfire{right:16px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 28px)!important;width:92px;height:92px}
   #fpsui #fpsaim{right:122px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 34px)!important;width:58px;height:58px}
@@ -776,6 +779,13 @@ body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:a
   body.sidebar .cbtn{padding:4px 1px;font-size:8px}
   body.sidebar .cbtn .ico{width:14px;height:14px}
   body.sidebar #prodstrip .pc,body.sidebar #qstrip .qi,body.sidebar #selbar .si{font-size:9px;padding:2px 6px}
+  /* short landscape: unit prompts stack at the bottom of the play area, clear of the objectives */
+  body.sidebar #fpsPrompt,body.sidebar #deployPrompt,body.sidebar #weaponPrompt,body.sidebar #rotatePrompt{top:auto;transform:none;padding:6px 10px;font-size:11px}
+  body.sidebar #fpsPrompt{bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
+  body.sidebar #deployPrompt,body.sidebar #rotatePrompt{bottom:calc(env(safe-area-inset-bottom,0px) + 48px)}
+  body.sidebar #weaponPrompt{bottom:calc(env(safe-area-inset-bottom,0px) + 86px)}
+  body.sidebar #fpsPrompt:active,body.sidebar #deployPrompt:active{transform:scale(.93)}
+  body.sidebar #tutorialPanel.obj{max-width:min(260px,40vw)}
 }
 
 /* ---- training coach pointer ---- */
@@ -1033,7 +1043,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
 <script>
 "use strict";
 (()=>{const mf=matchMedia("(pointer:fine)"),mc=matchMedia("(pointer:coarse)"),f=()=>document.body.classList.toggle("finepointer",mf.matches&&!mc.matches);f(),mf.addEventListener&&mf.addEventListener("change",f),window.addEventListener("touchstart",()=>document.body.classList.remove("finepointer"),{passive:!0,capture:!0})})();
-const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),elPwr=$("#power"),elPwrBar=$("#pwrBar");let hintT=0;function hint(e){const t=$("#hint");t.textContent=e,t.classList.add("show"),hintT=2.4;try{window.announceHint&&window.announceHint(e)}catch(_){}}
+const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),elPwr=$("#power"),elPwrBar=$("#pwrBar");let hintT=0;function hint(e){const t=$("#hint");t.textContent=e,t.style.top="",t.classList.add("show"),hintT=2.4;try{const p=$("#tutorialPanel");if(p&&!document.body.classList.contains("fps")&&!p.classList.contains("hidden")&&p.getClientRects().length){const a=p.getBoundingClientRect(),b=t.getBoundingClientRect();a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom&&(t.style.top=Math.round(a.bottom+6)+"px")}}catch(_){}try{window.announceHint&&window.announceHint(e)}catch(_){}}
 </script>
 <script>/* BUNDLE:cards */</script>
 <script>/* BUNDLE:ui */</script>
