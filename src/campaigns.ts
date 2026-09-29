@@ -37,7 +37,7 @@ vanguard:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Leg
  brief:[["reyes","Commander, this is where we start. Our advance team found an old Vanguard outpost in the Dustbowl, abandoned when the Legion swept through twelve years ago."],["hale","Half of it is rubble, ma'am. But the Training Hall, a Solar Array and an Ore Processor are still standing. There's no Command Spire, so we can't build anything new."],["reyes","Then we use what is there. Send your Technicians to capture the old buildings, get the Training Hall producing Riflemen, and push the Legion scouts out of this valley."],["hale","Riflemen for their infantry, Lancers for anything with armour or wings. Technicians don't fight — keep them back until they have a building to take."]],
  foes:[{fac:"legion",diff:"easy",spawn:3,base:["power","barracks","def1"]}],
  start:{credits:2500,noMcv:1,units:[["base",5],["anti",4],["engineer",4]],ruins:[["barracks",.45],["power",.35],["refinery",.4]]},
- obj:[{id:"bar",t:"own",key:"barracks",text:"Capture the old Training Hall with a Technician"},{id:"pow",t:"own",key:"power",text:"Capture the Solar Array to restore power"},{id:"train",t:"train",n:6,hide:1,text:"Train 6 infantry at the Training Hall"},{id:"kill",t:"elim",hide:1,text:"Drive the Legion out of the valley"},
+ obj:[{id:"bar",t:"own",key:"barracks",text:"Capture the old Training Hall with a Technician"},{id:"pow",t:"own",key:"power",text:"Capture the Solar Array to restore power"},{coach:["#tabs .tab[data-t=inf]:not(.on)","#cards .card"],id:"train",t:"train",n:6,hide:1,text:"Train 6 infantry at the Training Hall"},{id:"kill",t:"elim",hide:1,text:"Drive the Legion out of the valley"},
       {id:"ref",t:"own",key:"refinery",sec:1,text:"Capture the Ore Processor for income"},{id:"loss",t:"lossMax",n:12,sec:1,text:"Lose no more than 12 units"}],
  ev:[{at:4,do:[say("hale","Technicians carry the tool kits. Select one, then tap a building to capture it. A Technician sent into your own building repairs it."),["pingRuin","barracks"]]},
      {done:"bar",do:[say("reyes","The Training Hall is ours. Select it and train Riflemen. Credits are tight, so spend them well."),["show","train"],["hint","Select the Training Hall, then tap a unit card to train it"]]},
@@ -392,15 +392,15 @@ rts:{name:"Basic Training",map:"octagon",loc:"Training Grounds",spawn:0,tier:0,
  foes:[{diff:"easy",spawn:2,base:["power","barracks"],idle:1}],
  start:{credits:6000},
  obj:[{id:"sel",t:"flag",flag:"select",text:"Select your Mobile HQ — tap it"},
-  {id:"hq",t:"build",key:"conyard",n:1,hide:1,text:"Deploy it — tap DEPLOY, then tap open ground"},
-  {id:"pow",t:"build",key:"power",n:1,hide:1,text:"Build a power plant — open the build tab and tap its card, then place it"},
-  {id:"ref",t:"build",key:"refinery",n:1,hide:1,text:"Build a refinery — it comes with a harvester"},
-  {id:"bar",t:"build",key:"barracks",n:1,hide:1,text:"Build a barracks"},
+  {coach:"#deployPrompt",id:"hq",t:"build",key:"conyard",n:1,hide:1,text:"Deploy it — tap DEPLOY, then tap open ground"},
+  {coach:["#cards .card[data-key=power]","#tabs .tab[data-t=bld]"],id:"pow",t:"build",key:"power",n:1,hide:1,text:"Build a power plant — open the build tab and tap its card, then place it"},
+  {coach:["#cards .card[data-key=refinery]","#cards .card[data-key=hive]","#tabs .tab[data-t=bld]"],id:"ref",t:"build",key:"refinery",n:1,hide:1,text:"Build a refinery — it comes with a harvester"},
+  {coach:["#cards .card[data-key=barracks]","#tabs .tab[data-t=bld]"],id:"bar",t:"build",key:"barracks",n:1,hide:1,text:"Build a barracks"},
   {id:"train",t:"train",n:4,hide:1,text:"Train 4 infantry — select the barracks and tap a unit card"},
-  {id:"move",t:"flag",flag:"move",hide:1,text:"Select your squad and tap the ground to move it"},
+  {coach:"#bAll",id:"move",t:"flag",flag:"move",hide:1,text:"Select your squad and tap the ground to move it"},
   {id:"raid",t:"kills",n:3,hide:1,text:"Raiders! Select your squad and tap an enemy to attack"},
-  {id:"fix",t:"flag",flag:"repair",hide:1,text:"Repair the damaged building — tap REPAIR, then tap the building"},
-  {id:"amove",t:"flag",flag:"amove",hide:1,text:"Attack-move — tap A-MOVE (or press Q), then tap toward the enemy outpost"},
+  {coach:"#bRepair:not(.on)",id:"fix",t:"flag",flag:"repair",hide:1,text:"Repair the damaged building — tap REPAIR, then tap the building"},
+  {coach:"#bAmove",id:"amove",t:"flag",flag:"amove",hide:1,text:"Attack-move — tap A-MOVE (or press Q), then tap toward the enemy outpost"},
   {id:"win",t:"elim",hide:1,text:"Destroy the enemy outpost"}],
  ev:[{at:2,do:[TI("First, tap your Mobile HQ to select it. That big truck is your base on wheels.")]},
   {done:"sel",do:[["show","hq"],TI("Good. Now tap DEPLOY and put it down on open ground. That's your headquarters.")]},
@@ -417,14 +417,15 @@ rts:{name:"Basic Training",map:"octagon",loc:"Training Grounds",spawn:0,tier:0,
 fps:{name:"Infiltration Training",map:"octagon",loc:"Training Grounds",spawn:0,tier:0,hero:1,fpsOnly:1,
  brief:[["instructor","This one's first person, Commander. You're a single commando."],["instructor","Move, shoot, get inside an enemy building and blow it up from the inside."]],
  foes:[{diff:"easy",spawn:1,base:["power","barracks"],idle:1}],
- start:{},
- obj:[{id:"walk",t:"reach",x:75,y:44,r:3,text:"Walk to the green marker — WASD or the left stick; look with the mouse or by dragging"},
-  {id:"shoot",t:"kills",n:3,hide:1,text:"Enemy soldiers! Aim (right mouse or AIM) and fire (left mouse or FIRE)"},
-  {id:"inside",t:"inside",key:"power",hide:1,text:"Get inside the enemy power plant — follow the arrow above your crosshair and walk in"},
-  {id:"c4",t:"flag",flag:"c4",hide:1,text:"Plant C4 — press B or tap PLANT C4"},
+ // Only the scripted targets: the enemy's starting squad is cleared, the sky is clear and the commando is tough.
+ start:{clearFoes:1,tough:1},
+ obj:[{id:"walk",t:"reach",x:70,y:44,r:3,text:"Walk to the green marker — WASD or the left stick; look with the mouse or by dragging"},
+  {coach:["#fpsaim","#fpsfire"],id:"shoot",t:"kills",n:2,tag:"tgt",hide:1,text:"Shoot the two practice targets marked in red — aim (right mouse or AIM), then fire (left mouse or FIRE)"},
+  {coach:"#fpsenter",id:"inside",t:"inside",key:"power",hide:1,text:"Get inside the enemy power plant — follow the arrow above your crosshair and walk in"},
+  {coach:"#fpsbomb",id:"c4",t:"flag",flag:"c4",hide:1,text:"Plant C4 — press B or tap PLANT C4"},
   {id:"boom",t:"destroy",keys:["power"],slot:0,hide:1,text:"Get out before it blows — follow the arrow to the door"}],
  ev:[{at:2,do:[TI("Look around, then walk to the green marker. The arrow above your crosshair always shows where to go.")]},
-  {done:"walk",do:[["show","shoot"],TI("Three soldiers heading your way. Aim down your sights, then fire."),["wave",0,[["base",3]],{to:"hero"}]]},
+  {done:"walk",do:[["show","shoot"],["targets",2],TI("Two practice targets just ahead, marked in red. They barely shoot back. Aim down your sights, then fire.")]},
   {done:"shoot",do:[["show","inside"],TI("Nice shooting. Now the power plant. Just walk into the building to go inside.")]},
   {done:"inside",do:[["show","c4"],TI("You're in. Press B, or tap PLANT C4, to set the charge.")]},
   {done:"c4",do:[["show","boom"],TI("Charge is ticking. Get out, now! Follow the arrow to the door.")]}],
@@ -473,13 +474,14 @@ def.foes.forEach((f,i)=>{f.base&&preBuild(i+1,f.base),f.idle&&S.players[i+1]&&(S
 st.base&&preBuild(0,st.base);
 // An abandoned outpost: no Mobile HQ, a squad on foot, and half-ruined neutral buildings to capture.
 st.noMcv&&S.units.filter(u=>0===u.owner).forEach(u=>killUnitSilent(u));
+st.clearFoes&&S.units.filter(u=>u.owner>0&&u.owner<NEUTRAL&&!u.dead&&"miner"!==u.d.role).forEach(u=>killUnitSilent(u));
 st.ruins&&placeRuins(st.ruins);
 const sp=[S.players[0].spawnX/32,S.players[0].spawnY/32];
 st.units&&spawnGroup(0,st.units,sp[0]+2,sp[1]+3);
 if(st.convoy){const c=st.convoy,at=c.at||sp;spawnGroup(0,[[c.key,c.n]],at[0],at[1],c.tag)}
 if(def.stealth){S.mission.st={sus:0,alarm:0,alarms:0};const hu=playerHero();hu&&(hu.cloakM=1);def.foes.forEach((f,i)=>{S.blds.filter(b=>b.owner===i+1&&"power"===b.key).forEach(b=>b.mtag="pp")})}
 document.body.classList.toggle("fpsOnly",!!def.fpsOnly);
-if(S.mission.hero){const hu=playerHero();hu&&enterFPS(hu)}
+if(S.mission.hero){const hu=playerHero();hu&&(st.tough&&(hu.maxhp*=3,hu.hp=hu.maxhp),enterFPS(hu))}
 if("function"==typeof probeMedia){const who=new Set(def.brief.map(b=>b[0]));def.ev.forEach(e=>e.do.forEach(a=>"say"===a[0]&&who.add(a[1])));(def.alarm||[]).forEach(a=>who.add(a[0]));(def.win||[]).concat(def.lose||[]).forEach(a=>who.add(a[0]));who.forEach(w=>probeMedia(w))}
 S.mission.intro=!0}
 function placeRuins(list){const p=S.players[0],sx=p.spawnX/32,sy=p.spawnY/32,ang=Math.atan2(36-sy,46-sx);S.mission.ruinB={};
@@ -488,7 +490,7 @@ for(let r=0;r<10&&!spot;r++)for(let dy=-r;dy<=r&&!spot;dy++)for(let dx=-r;dx<=r;
 if(!spot)return;const b=addBuilding(NEUTRAL,key,spot[0],spot[1],!0);b.hp=Math.round(b.maxhp*frac),b.ruin=1,S.mission.ruinB[key]=b.id;
 for(const u of S.units)u.owner===NEUTRAL&&"miner"===u.d.role&&dist2(u.x,u.y,b.x,b.y)<200*200&&killUnitSilent(u);})}
 // Runs once the world has fully started (startGame resets credits after us).
-function missionStart(m){const st=m.def.start||{};m.started=!0;null!=st.credits?S.players[0].credits=Math.round(st.credits*m.D.cash/100)*100:(m.noBuild||m.hero)&&(S.players[0].credits=0);m.lost0=S.players[0].lost||0,m.kills0=S.players[0].kills||0,m.id0=S.nextId,m.trained={};
+function missionStart(m){const st=m.def.start||{};m.started=!0;m.training&&(S.weather=S.wxGoal="clear",S.wxT=1e9,S.wxAmt=1);null!=st.credits?S.players[0].credits=Math.round(st.credits*m.D.cash/100)*100:(m.noBuild||m.hero)&&(S.players[0].credits=0);m.lost0=S.players[0].lost||0,m.kills0=S.players[0].kills||0,m.id0=S.nextId,m.trained={};
 for(const o of m.objs)"kills"===o.t&&(o.k0=m.kills0);
 setTimeout(()=>{S.mission===m&&S.running&&(hint("OBJECTIVES — "+m.objs.filter(o=>o.shown&&!o.sec).map(o=>o.text).join(" · ")))},1500)}
 
@@ -502,6 +504,7 @@ for(const o of m.objs){if(!o.shown||0!==o.state)continue;const prim=!o.sec,add=q
 if(null!=o.x&&null!=o.y){add({x:T(o.x),y:T(o.y)});continue}
 if("destroy"===o.t){const ow=null!=o.slot?[o.slot+1]:enemyOwners(),l=S.blds.filter(b=>!b.dead&&(o.tag?b.mtag===o.tag:ow.includes(b.owner)&&(o.keys||[]).includes(b.key)));near(l,2).forEach(add)}
 else if("elim"===o.t){const ow=null!=o.slot?[o.slot+1]:enemyOwners();for(const id of ow){const l=S.blds.filter(b=>!b.dead&&b.owner===id);l.length&&add(cen(l))}}
+else if("kills"===o.t&&o.tag){S.units.filter(u=>!u.dead&&u.mtag===o.tag).forEach(u=>out.push({x:u.x,y:u.y,prim,foe:1}))}
 else if("own"===o.t){const l=S.blds.filter(b=>!b.dead&&b.key===o.key&&0!==b.owner);near(l,2).forEach(add)}
 else if("capture"===o.t){const l=S.blds.filter(b=>!b.dead&&0!==b.owner&&(b.d.civ||SPECIALS.includes(b.key)));near(l,2).forEach(add)}}
 return _omCache=out}
@@ -520,7 +523,7 @@ case"flag":return"select"===o.flag&&S.sel.some(u=>0===u.owner&&!u.dead)||S.flags
 case"inside":{const u=playerHero();return u&&u.inside&&!u.inside.dead&&u.inside.key===o.key&&0!==u.inside.owner?1:0}
 case"own":return ownedCount(b=>b.key===o.key)?1:0;
 case"build":{const n=S.blds.filter(b=>0===b.owner&&!b.dead&&!b.building&&(b.key===o.key||"refinery"===o.key&&"hive"===b.key)).length;o.cur=n;return n>=o.n?1:0}
-case"kills":{const n=(S.players[0].kills||0)-(o.k0||0);o.cur=n;return n>=o.n?1:0}
+case"kills":{const n=o.tag?(m.tagged&&m.tagged[o.tag]||0)-S.units.filter(u=>!u.dead&&u.mtag===o.tag).length:(S.players[0].kills||0)-(o.k0||0);o.cur=n;return n>=o.n?1:0}
 case"hold":{let mine=!1,foe=!1;for(const u of S.units){if(u.dead||u.d.fly||!inZone(u,o.x,o.y,o.r))continue;0===u.owner?mine=!0:u.owner!==NEUTRAL&&teamOf(u.owner)!==teamOf(0)&&(foe=!0)}o.contest=mine&&foe;mine&&!foe&&(o.prog=(o.prog||0)+dt);return(o.prog||0)>=o.time?1:0}
 case"escort":{const us=S.units.filter(u=>u.mtag===o.tag&&0===u.owner);let arrived=0,alive=0;for(const u of us){if(!u.dead&&inZone(u,o.x,o.y,o.r))u.arrived=!0;u.arrived&&arrived++,u.dead||alive++}o.cur=arrived;if(arrived>=o.need)return 1;return us.length&&alive<o.need?-1:0}
 case"lossMax":return(S.players[0].lost||0)-m.lost0>o.n?-1:0;
@@ -541,6 +544,11 @@ case"ping":S.marker={x:T2P(a[1]),y:T2P(a[2]),t:0,c:"#ffd75e"};break;
 case"show":{const o=m.objs.find(o=>o.id===a[1]);o&&!o.shown&&(o.flag&&S.flags&&(S.flags[o.flag]=0),o.shown=!0,sfx("ready"),hint("NEW OBJECTIVE: "+o.text));break}
 case"go":{m.escorts[a[1]]=[a[2],a[3]];const us=S.units.filter(u=>!u.dead&&u.mtag===a[1]&&!u.arrived);us.length&&cmdMove(us,T2P(a[2]),T2P(a[3]));break}
 case"reinf":{const[spec,from,to]=[a[1],a[2],a[3]],us=spawnGroup(0,spec,from[0],from[1]);to&&us.length&&cmdMove(us,T2P(to[0]),T2P(to[1]),!0);S.marker={x:T2P(from[0]),y:T2P(from[1]),t:0,c:"#7dff8a"},hint("Reinforcements have arrived"),sfx("ready");break}
+// Practice targets for training: a few weak, slow-firing soldiers standing a
+// short way ahead of the player, tagged so the HUD can mark them.
+case"targets":{const h=playerHero(),p=S.players[1];if(!h||!p)break;const ang=Math.atan2(p.spawnY-h.y,p.spawnX-h.x),hx=h.x/32,hy=h.y/32;(m.tagged=m.tagged||{}).tgt=(m.tagged.tgt||0);
+for(let i=0;i<a[1];i++){const side=(i-(a[1]-1)/2)*3.2,[x,y]=freeTileNear(hx+Math.cos(ang)*7-Math.sin(ang)*side,hy+Math.sin(ang)*7+Math.cos(ang)*side),u=addUnit(1,roleKey(p.fac,"base"),T2P(x),T2P(y));if(!u)continue;u.mtag="tgt",u.hp=u.maxhp=Math.round(.4*u.maxhp),u.dmgMul=.15,u.rofMul=3,u.hold=!0,u.ang=Math.atan2(h.y-u.y,h.x-u.x),m.tagged.tgt++}
+S.marker={x:h.x+Math.cos(ang)*224,y:h.y+Math.sin(ang)*224,t:0,c:"#ff5a4a"};break}
 case"wave":{const owner=a[1]+1,p=S.players[owner];if(!p||p.defeated)break;const opt=a[3]||{},k=evs.n-1,grow=opt.grow||0,spec=a[2].map(([key,n])=>[key,Math.max(1,Math.round((n+Math.floor(k*grow))*m.D.wave))]);
 const from=opt.from?opt.from:[p.spawnX/32,p.spawnY/32];let tgt;const to=opt.to||"base";
 if("hero"===to){const h=playerHero();tgt=h&&{x:h.x,y:h.y}}else if("army"===to)tgt=playerArmyPos();else if(Array.isArray(to))tgt={x:T2P(to[0]),y:T2P(to[1])};else tgt=playerBase();if(!tgt)break;
@@ -560,13 +568,24 @@ m.def.ev.forEach((e,i)=>{const s=m.evs[i];evTriggered(e,s,m)&&(s.n++,e.do.forEac
 if((m.escT=(m.escT||0)-dt)<=0){m.escT=3;for(const tag in m.escorts){const[x,y]=m.escorts[tag],us=S.units.filter(u=>!u.dead&&u.mtag===tag&&!u.arrived&&"idle"===u.order);us.length&&cmdMove(us,T2P(x),T2P(y))}}
 // objectives
 for(const o of m.objs){if(!o.shown||0!==o.state)continue;const r=evalObj(o,m,dt);r&&(o.state=r,r>0?(o.sec||END_OK[o.t]||(sfx("ready"),hint("OBJECTIVE COMPLETE: "+o.text)),o.sec&&!END_OK[o.t]&&hint("BONUS COMPLETE: "+o.text)):o.sec?hint("BONUS FAILED: "+o.text):hint("OBJECTIVE FAILED: "+o.text))}
-updateObjPanel(m);
+updateObjPanel(m),coachTick(m);
 if(S.players[0].defeated)return"lose";
 if(m.objs.some(o=>!o.sec&&-1===o.state))return"lose";
 const prim=m.objs.filter(o=>!o.sec&&!END_OK[o.t]);
 if(prim.every(o=>o.shown&&1===o.state)){for(const o of m.objs)0===o.state&&(o.state=END_OK[o.t]?1:-1);m.stars=1+m.objs.filter(o=>o.sec&&1===o.state).length;m.training||saveStars(m.fac,m.idx,m.stars);return"win"}
 return null}
 
+// Training: a pulsing "TAP HERE" pointer over the button the current step needs.
+function coachTick(m){let tip=$("#coachTip");if(!m||!m.training){tip&&tip.classList.add("hidden");return}
+const o=m.objs.find(o=>o.shown&&0===o.state&&!o.sec),sels=o&&o.coach?[].concat(o.coach):[];let el=null;
+for(const q of sels){const c=document.querySelector(q) as HTMLElement;if(c&&c.getClientRects().length&&"hidden"!==getComputedStyle(c).visibility){el=c;break}}
+document.querySelectorAll(".coach").forEach(x=>x!==el&&x.classList.remove("coach"));
+const cp=$("#cancelPlace");cp&&!cp.classList.contains("hidden")&&(el=null);
+if(!el){tip&&tip.classList.add("hidden");return}
+tip||(tip=document.createElement("div"),tip.id="coachTip",document.body.appendChild(tip));
+el.classList.add("coach");const r=el.getBoundingClientRect(),up=r.top>70,nm=el.querySelector(".nm"),lbl=el.dataset.l||(nm?nm.textContent:el.textContent||"").trim().split("\n")[0].slice(0,18)||"HERE";
+tip.textContent=up?"TAP "+lbl+" ▼":"▲ TAP "+lbl,tip.classList.remove("hidden"),tip.classList.toggle("dn",!up);
+const w=tip.offsetWidth;tip.style.left=Math.max(4,Math.min(innerWidth-w-4,r.left+r.width/2-w/2))+"px",tip.style.top=(up?r.top-tip.offsetHeight-6:r.bottom+6)+"px"}
 // ---- stealth: enemies cannot target the cloaked hero until the alarm is raised;
 // staying near an enemy (or a live defence) fills the detection meter.
 function stealthBlock(e,t){const m=S.mission;return!!(m&&m.st&&!(m.st.alarm>0)&&0===t.owner)}
@@ -587,10 +606,13 @@ const starStr=(n,max)=>{let s="";for(let i=0;i<(max||3);i++)s+='<i class="'+(i<n
 // ---- radio ------------------------------------------------------------------------
 let radioQ=[],radioCur=null;
 function radioSay(who,text){radioQ.push({who,text})}
-function radioStop(){radioQ=[],radioCur=null;const el=$("#radioBox");el&&el.classList.add("hidden")}
+function radioStop(){radioQ=[],radioCur=null;coachTick(null);const el=$("#radioBox");el&&el.classList.add("hidden")}
 function radioTick(dt){if(radioCur&&(radioCur.t-=dt)>0)return;radioCur=null;const el=$("#radioBox");if(!radioQ.length)return void(el&&el.classList.add("hidden"));radioCur=radioQ.shift();radioCur.t=lineT(radioCur.who,radioCur.text,clamp(1.4+.062*radioCur.text.length,3.2,11));const c=castOf(radioCur.who);
-const fs="function"==typeof fmvSrc&&fmvSrc(radioCur.who);if(el){el.innerHTML='<div class="rbPort'+(fs?" img":"")+'" style="--rc:'+c.c+(fs?";background-image:url("+fs+")":"")+'">'+(fs?"":c.n.split(" ").map(w=>w[0]).join("").slice(-2))+'</div><div class="rbBody"><div class="rbName" style="color:'+c.c+'">'+c.n.toUpperCase()+'</div><div class="rbText">'+radioCur.text+"</div></div>",el.classList.remove("hidden"),el.style.animation="none",el.offsetWidth,el.style.animation=""}
+const fs="function"==typeof fmvSrc&&fmvSrc(radioCur.who);if(el){el.innerHTML='<div class="rbPort'+(fs?" img":"")+'" style="--rc:'+c.c+(fs?";background-image:url("+fs+")":"")+'">'+(fs?"":c.n.split(" ").map(w=>w[0]).join("").slice(-2))+'</div><div class="rbBody"><div class="rbName" style="color:'+c.c+'">'+c.n.toUpperCase()+'</div><div class="rbText">'+radioCur.text+"</div></div>",el.classList.remove("hidden"),placeRadio(el),el.style.animation="none",el.offsetWidth,el.style.animation=""}
 try{speakAs(c.fac,radioCur.text,c.acc,c.g,c.p,c.r,!1,radioCur.who)}catch(e){}}
+// Keep the radio box clear of the build panel, wherever the layout puts it.
+function placeRadio(el){el.style.bottom=el.style.left=el.style.width="";const sd=$("#side"),r=sd&&!document.body.classList.contains("fps")&&sd.getClientRects().length?sd.getBoundingClientRect():null;if(!r)return;
+if(r.left>innerWidth/2){const w=Math.min(460,r.left-24);el.style.left=(r.left/2)+"px",el.style.width=w+"px"}else if(r.top>innerHeight/3)el.style.bottom=(innerHeight-r.top+8)+"px"}
 $("#radioBox")&&$("#radioBox").addEventListener("click",()=>{radioCur&&(radioCur.t=0)});
 
 // ---- objectives panel -------------------------------------------------------------

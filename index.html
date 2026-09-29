@@ -210,7 +210,19 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #radioBox .rbPort.img{flex-basis:52px;height:52px}
 #radioBox .rbName{font-size:10px;font-weight:700;letter-spacing:1.5px;margin-bottom:2px}
 #radioBox .rbText{font-size:12.5px;line-height:1.4;color:#dfe8ee}
-body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 190px)}
+/* First person: radio sits low between the thumb controls, objectives shrink to the current step,
+   so neither covers the crosshair or the left-hand buttons. */
+body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 8px);width:min(330px,40vw);padding:6px 9px;gap:7px}
+body.fps #radioBox .rbPort,body.fps #radioBox .rbPort.img{flex-basis:32px;height:32px;font-size:11px}
+body.fps #radioBox .rbText{font-size:11px;line-height:1.3}
+body.fps #tutorialPanel{max-width:min(250px,34vw);font-size:10.5px;padding:6px 9px}
+body.fps #tutorialPanel .ts.done,body.fps #tutorialPanel .ts.fail{display:none}
+body.fps #tutorialPanel.obj .ts{font-size:10.5px;line-height:1.3}
+body.fps #tutorialPanel .th{margin-bottom:3px;font-size:10px}
+@media (orientation:portrait) and (max-width:560px){
+  body.fps #radioBox{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 46px);width:calc(100vw - 20px)}
+  body.fps #tutorialPanel{top:calc(env(safe-area-inset-top,0px) + 262px)!important;max-width:200px}
+}
 .campCard{display:block;width:100%;text-align:left;margin-top:10px;padding:12px 14px;border-radius:12px;cursor:pointer;color:#cfe0f5;
   border:1px solid rgba(170,200,220,.16);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));transition:border-color .2s,transform .2s}
 .campCard:hover{border-color:rgba(240,167,44,.6);transform:translateY(-1px)}
@@ -765,6 +777,13 @@ body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:a
   body.sidebar #prodstrip .pc,body.sidebar #qstrip .qi,body.sidebar #selbar .si{font-size:9px;padding:2px 6px}
 }
 
+/* ---- training coach pointer ---- */
+#coachTip{position:fixed;z-index:60;pointer-events:none;padding:4px 9px;border-radius:6px;background:#ffd75e;color:#1a1204;font:700 11px/1.2 system-ui,sans-serif;letter-spacing:.6px;white-space:nowrap;box-shadow:0 2px 10px #000a;animation:coachBob 1s ease-in-out infinite}
+#coachTip.dn{animation-name:coachBobDn}
+@keyframes coachBob{50%{transform:translateY(-5px)}}
+@keyframes coachBobDn{50%{transform:translateY(5px)}}
+.coach{outline:2px solid #ffd75e!important;outline-offset:1px;animation:coachGlow 1s ease-in-out infinite}
+@keyframes coachGlow{50%{box-shadow:0 0 14px 3px #ffd75ecc}}
 /* ---- command icon buttons ---- */
 .cbtn.icon{display:flex;align-items:center;justify-content:center;gap:5px}
 .cbtn.icon .ico{width:19px;height:19px}
@@ -10551,7 +10570,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function drawObjMarkers(r, n) {
     const pl = 0.5 + 0.5 * Math.sin(6 * S.time);
     for (const q of objMarkers()) {
-      const x = q.x / 32 * r, y = q.y / 32 * n, s = q.prim ? 4.5 : 3.6, c = q.prim ? "#46e06a" : "#ff9a2c";
+      const x = q.x / 32 * r, y = q.y / 32 * n, s = q.prim ? 4.5 : 3.6, c = q.foe ? "#ff5a4a" : q.prim ? "#46e06a" : "#ff9a2c";
       mctx.strokeStyle = c, mctx.globalAlpha = 0.35 + 0.4 * pl, mctx.lineWidth = 1.5, mctx.beginPath(), mctx.arc(x, y, s + 2 + 3 * pl, 0, 6.283), mctx.stroke(), mctx.globalAlpha = 1, mctx.fillStyle = c, mctx.strokeStyle = "#000", mctx.lineWidth = 1, mctx.beginPath(), mctx.moveTo(x, y - s), mctx.lineTo(x + s, y), mctx.lineTo(x, y + s), mctx.lineTo(x - s, y), mctx.closePath(), mctx.fill(), mctx.stroke();
     }
   }
@@ -10701,6 +10720,17 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         nav.querySelector("i").style.transform = "rotate(" + rel + "rad)", nav.querySelector("span").textContent = t2.label + (d > 28 ? " \xB7 " + Math.round(d / 8) + " m" : ""), nav.style.setProperty("--nc", t2.col);
         S.time - (FPS.navFxT || 0) > 0.7 && (FPS.navFxT = S.time, S.fx.push({ kind: "ring", x: t2.x, y: t2.y, z: 2, s: 0.55, c: t2.col, t: 0, life: 0.9 }));
       }
+    }
+    if (S.mission && S.mission.training && !e.inside && "function" == typeof objMarkers) {
+      ctx.save(), ctx.textAlign = "center", ctx.font = "bold 11px monospace";
+      for (const q of objMarkers()) {
+        if (!q.foe) continue;
+        const x = w2sx(q.x, q.y, 9), y = w2sy(q.x, q.y, 9) - 8;
+        if (x < -20 || x > CW + 20 || y < -20 || y > CH + 20) continue;
+        const b = 3 * Math.sin(6 * S.time);
+        ctx.fillStyle = "#ff5a4a", ctx.strokeStyle = "#000", ctx.lineWidth = 2, ctx.beginPath(), ctx.moveTo(x - 9, y - 16 + b), ctx.lineTo(x + 9, y - 16 + b), ctx.lineTo(x, y - 4 + b), ctx.closePath(), ctx.stroke(), ctx.fill(), ctx.strokeText("TARGET " + Math.round(Math.hypot(q.x - e.x, q.y - e.y) / 8) + " m", x, y - 22 + b), ctx.fillText("TARGET " + Math.round(Math.hypot(q.x - e.x, q.y - e.y) / 8) + " m", x, y - 22 + b);
+      }
+      ctx.restore();
     }
     const am = document.getElementById("fpsammo");
     if (am) {
@@ -10881,8 +10911,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       e.vet = n, e.maxhp = e.d.hp * VET[n].hp * (e.deployHpMul || 1), e.hp = Math.min(e.maxhp, e.hp * VET[n].hp / t2 + 0.15 * e.d.hp), S.fx.push({ kind: "ring", x: e.x, y: e.y, z: 6, s: 0.5, c: n > 1 ? "#ffd75e" : "#d8dee6", t: 0, life: 0.6 }), 0 === e.owner && (textFx(e.x, e.y - 14, VET[n].name, n > 1 ? "#ffd75e" : "#d8dee6"), sfx("ready"));
     }
   }
-  var vDmg = (e) => "u" === e.e ? VET[e.vet || 0].dmg : 1;
-  var vRof = (e) => "u" === e.e ? VET[e.vet || 0].rof : 1;
+  var vDmg = (e) => "u" === e.e ? VET[e.vet || 0].dmg * (e.dmgMul || 1) : 1;
+  var vRof = (e) => "u" === e.e ? VET[e.vet || 0].rof * (e.rofMul || 1) : 1;
   var _veilT = -1;
   var _veils = [];
   function veiled(e, t) {
@@ -10954,7 +10984,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         const d = dist2(o.x, o.y, e.x, e.y);
         o.prim && d < qd && (qd = d, q = o);
       }
-      if (q) return { x: q.x, y: q.y, label: "OBJECTIVE", col: "#46e06a" };
+      if (q) return { x: q.x, y: q.y, label: q.foe ? "TARGET" : "OBJECTIVE", col: q.foe ? "#ff5a4a" : "#46e06a" };
     }
     if (e.d.c4 && (!t || t.owner === e.owner || teamOf(t.owner) === teamOf(e.owner) || t.owner === NEUTRAL)) {
       let bd = 1e12;
@@ -16223,6 +16253,22 @@ varying vec3 vFgWN;
   })();
   var musicBus = null;
   var playTrackRef = null;
+  var wxBus = null;
+  var wxVol = (() => {
+    try {
+      const e = localStorage.getItem("ifr_wxVol");
+      return null === e ? 0.5 : +e;
+    } catch (e) {
+      return 0.5;
+    }
+  })();
+  function setWxVol(e) {
+    wxVol = e, wxBus && (wxBus.gain.value = e);
+    try {
+      localStorage.setItem("ifr_wxVol", "" + e);
+    } catch (t) {
+    }
+  }
   function setMasterVol(e) {
     masterVol = e, masterGain && !muted && (masterGain.gain.value = e), customTrackEl && (customTrackEl.volume = muted ? 0 : e * musicVol);
     try {
@@ -16277,6 +16323,7 @@ varying vec3 vFgWN;
       limiter = AC.createDynamicsCompressor(), limiter.threshold.value = -9, limiter.knee.value = 8, limiter.ratio.value = 10, limiter.attack.value = 3e-3, limiter.release.value = 0.22;
       masterGain.connect(limiter), limiter.connect(AC.destination);
       sfxBus = AC.createGain(), sfxBus.gain.value = sfxVol, sfxBus.connect(masterGain);
+      wxBus = AC.createGain(), wxBus.gain.value = wxVol, wxBus.connect(masterGain);
       verbIn = AC.createConvolver(), verbIn.buffer = makeImpulse(AC, 1.6, 3, 0.01);
       const vg = AC.createGain();
       vg.gain.value = 0.8, verbIn.connect(vg), vg.connect(sfxBus);
@@ -16395,7 +16442,7 @@ varying vec3 vFgWN;
       const lp = ac.createBiquadFilter();
       lp.type = "lowpass", lp.frequency.value = 3800;
       const g = ac.createGain();
-      g.gain.value = 0, src.connect(hp), hp.connect(lp), lp.connect(g), g.connect(sfxBus), src.start(), g.gain.setTargetAtTime(0.28, ac.currentTime, 1.4), rainSrc = src, rainGain = g;
+      g.gain.value = 0, src.connect(hp), hp.connect(lp), lp.connect(g), g.connect(wxBus), src.start(), g.gain.setTargetAtTime(0.12, ac.currentTime, 1.4), rainSrc = src, rainGain = g;
     } else if (!on && rainSrc) {
       const t0 = ac.currentTime;
       rainGain.gain.cancelScheduledValues(t0), rainGain.gain.setTargetAtTime(0, t0, 0.6);
@@ -16670,8 +16717,10 @@ varying vec3 vFgWN;
     });
     return true;
   }
-  function speakLine(fac, line, urgent, per, seed, noClick, vox) {
+  var castUntil = 0;
+  function speakLine(fac, line, urgent, per, seed, noClick, vox, cast) {
     if (!voicesEnabled || muted || sfxVol <= 0 || !line) return;
+    if (!cast && performance.now() < castUntil) return;
     if (!urgent && voxBusy()) return;
     if (playVox(vox || voxFor(fac, per), Array.isArray(line) ? line[0] : line, !noClick)) return;
     if ("undefined" == typeof speechSynthesis) return;
@@ -16725,7 +16774,7 @@ varying vec3 vFgWN;
   function announce(ev) {
     const fac = S.players && S.players[0] && S.players[0].fac || "vanguard", F = VOICE_LINES[fac] || VOICE_LINES.vanguard, line = F.ann && F.ann[ev];
     if (!line) return;
-    const now = performance.now(), gap = "underAttack" === ev ? 12e3 : "funds" === ev ? 6e3 : 3e3;
+    const now = performance.now(), gap = "underAttack" === ev || "unitAttack" === ev || "harvAttack" === ev ? 12e3 : "funds" === ev ? 6e3 : 3e3;
     if (now - (lastAnnT[ev] || 0) < gap) return;
     lastAnnT[ev] = now, lastVoiceT = now, speakLine(fac, line, true);
   }
@@ -16847,7 +16896,8 @@ varying vec3 vFgWN;
         sOsc(t + 0.56, { w: "triangle", f: 1046.5, g: 0.05, a: 0.02, d: 1.4, verb: 0.5 });
         break;
       case "thunder":
-        sNoise(t, { f: 900, f2: 70, g: 0.3, a: 0.02, d: 2.2, brown: 1, verb: 0.5 }), sOsc(t, { f: 44, f2: 22, g: 0.2, a: 0.05, d: 1.8, dist: 1 }), sNoise(t + 0.25, { f: 400, f2: 90, g: 0.14, a: 0.1, d: 1.2, brown: 1, verb: 0.5 });
+        if (wxVol <= 0) break;
+        sNoise(t, { f: 900, f2: 70, g: 0.22, a: 0.02, d: 2.2, brown: 1, dest: wxBus }), sOsc(t, { f: 44, f2: 22, g: 0.14, a: 0.05, d: 1.8, dist: 1, dest: wxBus }), sNoise(t + 0.25, { f: 400, f2: 90, g: 0.1, a: 0.1, d: 1.2, brown: 1, dest: wxBus });
         break;
     }
   }
@@ -17647,10 +17697,12 @@ varying vec3 vFgWN;
   }
   var lightningT = 0;
   function speakAs(fac, text, acc, g, p, r, noClick, who) {
-    speakLine(fac, text, true, P_(acc, g, p || 1, r || 1), 0, noClick, who ? "c_" + who : null);
+    const d = who ? voxDur("c_" + who, text) : 0;
+    castUntil = performance.now() + 1e3 * (d ? d + 0.4 : Math.min(11, 1.2 + 0.065 * text.length));
+    speakLine(fac, text, true, P_(acc, g, p || 1, r || 1), 0, noClick, who ? "c_" + who : null, true);
   }
   function speakStop() {
-    stopVox();
+    castUntil = 0, stopVox();
     try {
       "undefined" != typeof speechSynthesis && speechSynthesis.cancel();
     } catch (e) {
@@ -17828,6 +17880,7 @@ varying vec3 vFgWN;
     setMasterVol,
     setSfxVol,
     setMusicVol,
+    setWxVol,
     setTrackSel,
     setRainAmbience,
     startFpsAmbience,
@@ -17867,6 +17920,7 @@ varying vec3 vFgWN;
     muted: { get: () => muted, configurable: true },
     masterVol: { get: () => masterVol, configurable: true },
     sfxVol: { get: () => sfxVol, configurable: true },
+    wxVol: { get: () => wxVol, configurable: true },
     musicVol: { get: () => musicVol, configurable: true },
     trackSel: { get: () => trackSel, configurable: true },
     CUSTOM_MUSIC: { get: () => CUSTOM_MUSIC, configurable: true },
@@ -18021,6 +18075,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     for (const t of tabList(S.tab)) {
       const r = document.createElement("div");
       r.className = "card";
+      r.dataset.key = t.key;
       const n = ("bld" === t.kind || "def" === t.kind ? bname(t.key, e.fac) : "ability" === t.kind ? ABILITIES[t.key].name : uname(t.key, e.fac)) + (t.foreign ? " (Captured)" : ""), a = "bld" === t.kind || "def" === t.kind ? BLD[t.key].cost : "ability" === t.kind ? ABILITIES[t.key].cost || 0 : UNITS[t.key].cost;
       r.appendChild(iconCanvas(t.kind, t.key));
       const o = document.createElement("div");
@@ -18747,7 +18802,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const gfxOpts = [["auto", "Auto (recommended)"], ["low", "Low"], ["med", "Medium"], ["high", "High"]].map(([k, label]) => '<option value="' + k + '"' + (graphicsPref === k ? " selected" : "") + ">" + label + "</option>").join("");
         const kbRow = (action) => '<div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>' + KEYBIND_LABEL[action] + '</label><button class="kbBtn" data-a="' + action + '" style="min-width:64px;padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:12px">' + keyLabel(KEYBINDS[action]) + "</button></div>";
         const kbRows = Object.keys(KEYBINDS).filter((a) => !BUILD_HOTKEY_ACTIONS.includes(a)).map(kbRow).join(""), buildKbRows = BUILD_HOTKEY_ACTIONS.map(kbRow).join("");
-        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("musicVolOpt", "Music", musicVol) + vol("sfxVolOpt", "Sound Effects &amp; Voices", sfxVol) + '<div class="sub" style="margin-top:14px">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="fld"><label>Weather</label><select id="weatherOpt"><option value="dynamic">Dynamic \u2014 rain and snow come and go</option><option value="fixed">Fixed \u2014 set at the start of each game</option><option value="off">Off \u2014 always clear</option></select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div><div class="fld"><label>Music' + (musicNowPlaying() ? ' <span style="color:#9db4cc">\xB7 now playing: ' + musicNowPlaying() + "</span>" : "") + '</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#weatherOpt").value = weatherPref, $("#weatherOpt").addEventListener("change", (e2) => setWeatherPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
+        $("#panelMain").innerHTML = '<h1>SETTINGS</h1><div class="sub">AUDIO</div>' + vol("masterVolOpt", "Master Volume", masterVol) + vol("musicVolOpt", "Music", musicVol) + vol("sfxVolOpt", "Sound Effects &amp; Voices", sfxVol) + vol("wxVolOpt", "Weather (rain &amp; thunder)", wxVol) + '<div class="sub" style="margin-top:14px">GAMEPLAY</div><div class="fld"><label>Game Speed (economy &amp; build rate)</label><select id="speedOpt">' + speedOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Edge-of-screen scrolling</label><input type="checkbox" id="edgePanOpt"' + (edgePanEnabled ? " checked" : "") + '></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Base auto-pilot in first-person</label><input type="checkbox" id="autopilotOpt"' + (autopilotEnabled ? " checked" : "") + '></div><div class="sub">GRAPHICS</div><div class="fld"><label>Quality</label><select id="gfxOpt">' + gfxOpts + '</select></div><div class="fld"><label>Weather</label><select id="weatherOpt"><option value="dynamic">Dynamic \u2014 rain and snow come and go</option><option value="fixed">Fixed \u2014 set at the start of each game</option><option value="off">Off \u2014 always clear</option></select></div><div class="sub">KEYBINDS</div>' + kbRows + '<div class="sub">BUILD HOTKEYS</div>' + buildKbRows + '<button id="kbReset" style="width:100%;margin-top:4px;padding:9px;border-radius:8px;border:1px solid #5b74a0;background:#1a2536;color:#9db4cc;font-size:12px">RESET TO DEFAULTS</button><div class="sub">AUDIO</div><div class="fld"><label>Music' + (musicNowPlaying() ? ' <span style="color:#9db4cc">\xB7 now playing: ' + musicNowPlaying() + "</span>" : "") + '</label><select id="trackSelOpt">' + trackOpts + '</select></div><div class="fld" style="display:flex;justify-content:space-between;align-items:center"><label>Voice acknowledgements</label><input type="checkbox" id="voicesOpt"' + (voicesEnabled ? " checked" : "") + '></div><button id="settingsClose" style="width:100%;margin-top:16px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">CLOSE</button>', $("#trackSelOpt").value = "" + trackSel, $("#speedOpt").addEventListener("change", (e2) => setGameSpeed(+e2.target.value)), $("#gfxOpt").addEventListener("change", (e2) => setGraphicsPref(e2.target.value)), $("#weatherOpt").value = weatherPref, $("#weatherOpt").addEventListener("change", (e2) => setWeatherPref(e2.target.value)), $("#edgePanOpt").addEventListener("change", (e2) => setEdgePan(e2.target.checked)), $("#autopilotOpt").addEventListener("change", (e2) => setAutopilot(e2.target.checked));
         const wireVol = (id, setter) => {
           const el = $("#" + id), lbl = $("#" + id + "Val");
           el.addEventListener("input", () => {
@@ -18757,7 +18812,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         };
         wireVol("masterVolOpt", setMasterVol), wireVol("sfxVolOpt", (e2) => {
           setSfxVol(e2), sfx("sel");
-        }), wireVol("musicVolOpt", setMusicVol), $("#trackSelOpt").addEventListener("change", (e2) => setTrackSel(+e2.target.value)), $("#voicesOpt").addEventListener("change", (e2) => setVoicesEnabled(e2.target.checked)), $("#settingsClose").addEventListener("click", () => {
+        }), wireVol("musicVolOpt", setMusicVol), wireVol("wxVolOpt", setWxVol), $("#trackSelOpt").addEventListener("change", (e2) => setTrackSel(+e2.target.value)), $("#voicesOpt").addEventListener("change", (e2) => setVoicesEnabled(e2.target.checked)), $("#settingsClose").addEventListener("click", () => {
           if (settingsBack) {
             const b = settingsBack;
             settingsBack = null, b();
@@ -18903,13 +18958,13 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         for (let e = 0; e < 3; e++) addUnit(t, o.base, 32 * (r + 3.5) + rnd(-40, 40), 32 * (n + 5) + rnd(-20, 30));
       }
     }), spawnCivs(), spawnSpecials(), applyPendingMission(), S.players[0].credits = 1e4, S.running = true, $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), openMenu(null), S.mission && (S.mission.hero || S.mission.noBuild || S.mission.ruins) || hint("COMMAND: select your Mobile HQ and tap DEPLOY"), setTimeout(() => {
-      S.running && S.players.some((p) => p.isAI) && hint("Intel: " + rivalNames(S.players[0]));
+      S.running && !S.mission && S.players.some((p) => p.isAI) && hint("Intel: " + rivalNames(S.players[0]));
     }, 5e3), setTimeout(() => {
-      S.running && hint("COMMAND: tap a card again to queue more");
+      S.running && !S.mission && hint("COMMAND: tap a card again to queue more");
     }, 12e3), setTimeout(() => {
-      S.running && hint("COMMAND: gem veins pay far more than plain ore");
+      S.running && !S.mission && hint("COMMAND: gem veins pay far more than plain ore");
     }, 26e3), setTimeout(() => {
-      S.running && hint("COMMAND: garrison the outposts with infantry");
+      S.running && !S.mission && hint("COMMAND: garrison the outposts with infantry");
     }, 4e4);
   }
   Object.assign(window, {
@@ -20658,7 +20713,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         obj: [
           { id: "bar", t: "own", key: "barracks", text: "Capture the old Training Hall with a Technician" },
           { id: "pow", t: "own", key: "power", text: "Capture the Solar Array to restore power" },
-          { id: "train", t: "train", n: 6, hide: 1, text: "Train 6 infantry at the Training Hall" },
+          { coach: ["#tabs .tab[data-t=inf]:not(.on)", "#cards .card"], id: "train", t: "train", n: 6, hide: 1, text: "Train 6 infantry at the Training Hall" },
           { id: "kill", t: "elim", hide: 1, text: "Drive the Legion out of the valley" },
           { id: "ref", t: "own", key: "refinery", sec: 1, text: "Capture the Ore Processor for income" },
           { id: "loss", t: "lossMax", n: 12, sec: 1, text: "Lose no more than 12 units" }
@@ -21331,15 +21386,15 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       start: { credits: 6e3 },
       obj: [
         { id: "sel", t: "flag", flag: "select", text: "Select your Mobile HQ \u2014 tap it" },
-        { id: "hq", t: "build", key: "conyard", n: 1, hide: 1, text: "Deploy it \u2014 tap DEPLOY, then tap open ground" },
-        { id: "pow", t: "build", key: "power", n: 1, hide: 1, text: "Build a power plant \u2014 open the build tab and tap its card, then place it" },
-        { id: "ref", t: "build", key: "refinery", n: 1, hide: 1, text: "Build a refinery \u2014 it comes with a harvester" },
-        { id: "bar", t: "build", key: "barracks", n: 1, hide: 1, text: "Build a barracks" },
+        { coach: "#deployPrompt", id: "hq", t: "build", key: "conyard", n: 1, hide: 1, text: "Deploy it \u2014 tap DEPLOY, then tap open ground" },
+        { coach: ["#cards .card[data-key=power]", "#tabs .tab[data-t=bld]"], id: "pow", t: "build", key: "power", n: 1, hide: 1, text: "Build a power plant \u2014 open the build tab and tap its card, then place it" },
+        { coach: ["#cards .card[data-key=refinery]", "#cards .card[data-key=hive]", "#tabs .tab[data-t=bld]"], id: "ref", t: "build", key: "refinery", n: 1, hide: 1, text: "Build a refinery \u2014 it comes with a harvester" },
+        { coach: ["#cards .card[data-key=barracks]", "#tabs .tab[data-t=bld]"], id: "bar", t: "build", key: "barracks", n: 1, hide: 1, text: "Build a barracks" },
         { id: "train", t: "train", n: 4, hide: 1, text: "Train 4 infantry \u2014 select the barracks and tap a unit card" },
-        { id: "move", t: "flag", flag: "move", hide: 1, text: "Select your squad and tap the ground to move it" },
+        { coach: "#bAll", id: "move", t: "flag", flag: "move", hide: 1, text: "Select your squad and tap the ground to move it" },
         { id: "raid", t: "kills", n: 3, hide: 1, text: "Raiders! Select your squad and tap an enemy to attack" },
-        { id: "fix", t: "flag", flag: "repair", hide: 1, text: "Repair the damaged building \u2014 tap REPAIR, then tap the building" },
-        { id: "amove", t: "flag", flag: "amove", hide: 1, text: "Attack-move \u2014 tap A-MOVE (or press Q), then tap toward the enemy outpost" },
+        { coach: "#bRepair:not(.on)", id: "fix", t: "flag", flag: "repair", hide: 1, text: "Repair the damaged building \u2014 tap REPAIR, then tap the building" },
+        { coach: "#bAmove", id: "amove", t: "flag", flag: "amove", hide: 1, text: "Attack-move \u2014 tap A-MOVE (or press Q), then tap toward the enemy outpost" },
         { id: "win", t: "elim", hide: 1, text: "Destroy the enemy outpost" }
       ],
       ev: [
@@ -21368,17 +21423,18 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       fpsOnly: 1,
       brief: [["instructor", "This one's first person, Commander. You're a single commando."], ["instructor", "Move, shoot, get inside an enemy building and blow it up from the inside."]],
       foes: [{ diff: "easy", spawn: 1, base: ["power", "barracks"], idle: 1 }],
-      start: {},
+      // Only the scripted targets: the enemy's starting squad is cleared, the sky is clear and the commando is tough.
+      start: { clearFoes: 1, tough: 1 },
       obj: [
-        { id: "walk", t: "reach", x: 75, y: 44, r: 3, text: "Walk to the green marker \u2014 WASD or the left stick; look with the mouse or by dragging" },
-        { id: "shoot", t: "kills", n: 3, hide: 1, text: "Enemy soldiers! Aim (right mouse or AIM) and fire (left mouse or FIRE)" },
-        { id: "inside", t: "inside", key: "power", hide: 1, text: "Get inside the enemy power plant \u2014 follow the arrow above your crosshair and walk in" },
-        { id: "c4", t: "flag", flag: "c4", hide: 1, text: "Plant C4 \u2014 press B or tap PLANT C4" },
+        { id: "walk", t: "reach", x: 70, y: 44, r: 3, text: "Walk to the green marker \u2014 WASD or the left stick; look with the mouse or by dragging" },
+        { coach: ["#fpsaim", "#fpsfire"], id: "shoot", t: "kills", n: 2, tag: "tgt", hide: 1, text: "Shoot the two practice targets marked in red \u2014 aim (right mouse or AIM), then fire (left mouse or FIRE)" },
+        { coach: "#fpsenter", id: "inside", t: "inside", key: "power", hide: 1, text: "Get inside the enemy power plant \u2014 follow the arrow above your crosshair and walk in" },
+        { coach: "#fpsbomb", id: "c4", t: "flag", flag: "c4", hide: 1, text: "Plant C4 \u2014 press B or tap PLANT C4" },
         { id: "boom", t: "destroy", keys: ["power"], slot: 0, hide: 1, text: "Get out before it blows \u2014 follow the arrow to the door" }
       ],
       ev: [
         { at: 2, do: [TI("Look around, then walk to the green marker. The arrow above your crosshair always shows where to go.")] },
-        { done: "walk", do: [["show", "shoot"], TI("Three soldiers heading your way. Aim down your sights, then fire."), ["wave", 0, [["base", 3]], { to: "hero" }]] },
+        { done: "walk", do: [["show", "shoot"], ["targets", 2], TI("Two practice targets just ahead, marked in red. They barely shoot back. Aim down your sights, then fire.")] },
         { done: "shoot", do: [["show", "inside"], TI("Nice shooting. Now the power plant. Just walk into the building to go inside.")] },
         { done: "inside", do: [["show", "c4"], TI("You're in. Press B, or tap PLANT C4, to set the charge.")] },
         { done: "c4", do: [["show", "boom"], TI("Charge is ticking. Get out, now! Follow the arrow to the door.")] }
@@ -21503,6 +21559,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     });
     st.base && preBuild(0, st.base);
     st.noMcv && S.units.filter((u) => 0 === u.owner).forEach((u) => killUnitSilent(u));
+    st.clearFoes && S.units.filter((u) => u.owner > 0 && u.owner < NEUTRAL && !u.dead && "miner" !== u.d.role).forEach((u) => killUnitSilent(u));
     st.ruins && placeRuins(st.ruins);
     const sp = [S.players[0].spawnX / 32, S.players[0].spawnY / 32];
     st.units && spawnGroup(0, st.units, sp[0] + 2, sp[1] + 3);
@@ -21521,7 +21578,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     document.body.classList.toggle("fpsOnly", !!def.fpsOnly);
     if (S.mission.hero) {
       const hu = playerHero();
-      hu && enterFPS(hu);
+      hu && (st.tough && (hu.maxhp *= 3, hu.hp = hu.maxhp), enterFPS(hu));
     }
     if ("function" == typeof probeMedia) {
       const who = new Set(def.brief.map((b) => b[0]));
@@ -21555,6 +21612,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function missionStart(m) {
     const st = m.def.start || {};
     m.started = true;
+    m.training && (S.weather = S.wxGoal = "clear", S.wxT = 1e9, S.wxAmt = 1);
     null != st.credits ? S.players[0].credits = Math.round(st.credits * m.D.cash / 100) * 100 : (m.noBuild || m.hero) && (S.players[0].credits = 0);
     m.lost0 = S.players[0].lost || 0, m.kills0 = S.players[0].kills || 0, m.id0 = S.nextId, m.trained = {};
     for (const o of m.objs) "kills" === o.t && (o.k0 = m.kills0);
@@ -21588,6 +21646,8 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           const l = S.blds.filter((b) => !b.dead && b.owner === id);
           l.length && add(cen(l));
         }
+      } else if ("kills" === o.t && o.tag) {
+        S.units.filter((u) => !u.dead && u.mtag === o.tag).forEach((u) => out.push({ x: u.x, y: u.y, prim, foe: 1 }));
       } else if ("own" === o.t) {
         const l = S.blds.filter((b) => !b.dead && b.key === o.key && 0 !== b.owner);
         near(l, 2).forEach(add);
@@ -21647,7 +21707,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         return n >= o.n ? 1 : 0;
       }
       case "kills": {
-        const n = (S.players[0].kills || 0) - (o.k0 || 0);
+        const n = o.tag ? (m.tagged && m.tagged[o.tag] || 0) - S.units.filter((u) => !u.dead && u.mtag === o.tag).length : (S.players[0].kills || 0) - (o.k0 || 0);
         o.cur = n;
         return n >= o.n ? 1 : 0;
       }
@@ -21740,6 +21800,21 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         S.marker = { x: T2P(from[0]), y: T2P(from[1]), t: 0, c: "#7dff8a" }, hint("Reinforcements have arrived"), sfx("ready");
         break;
       }
+      // Practice targets for training: a few weak, slow-firing soldiers standing a
+      // short way ahead of the player, tagged so the HUD can mark them.
+      case "targets": {
+        const h = playerHero(), p = S.players[1];
+        if (!h || !p) break;
+        const ang = Math.atan2(p.spawnY - h.y, p.spawnX - h.x), hx = h.x / 32, hy = h.y / 32;
+        (m.tagged = m.tagged || {}).tgt = m.tagged.tgt || 0;
+        for (let i = 0; i < a[1]; i++) {
+          const side = (i - (a[1] - 1) / 2) * 3.2, [x, y] = freeTileNear(hx + Math.cos(ang) * 7 - Math.sin(ang) * side, hy + Math.sin(ang) * 7 + Math.cos(ang) * side), u = addUnit(1, roleKey(p.fac, "base"), T2P(x), T2P(y));
+          if (!u) continue;
+          u.mtag = "tgt", u.hp = u.maxhp = Math.round(0.4 * u.maxhp), u.dmgMul = 0.15, u.rofMul = 3, u.hold = true, u.ang = Math.atan2(h.y - u.y, h.x - u.x), m.tagged.tgt++;
+        }
+        S.marker = { x: h.x + Math.cos(ang) * 224, y: h.y + Math.sin(ang) * 224, t: 0, c: "#ff5a4a" };
+        break;
+      }
       case "wave": {
         const owner = a[1] + 1, p = S.players[owner];
         if (!p || p.defeated) break;
@@ -21803,7 +21878,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const r = evalObj(o, m, dt);
       r && (o.state = r, r > 0 ? (o.sec || END_OK[o.t] || (sfx("ready"), hint("OBJECTIVE COMPLETE: " + o.text)), o.sec && !END_OK[o.t] && hint("BONUS COMPLETE: " + o.text)) : o.sec ? hint("BONUS FAILED: " + o.text) : hint("OBJECTIVE FAILED: " + o.text));
     }
-    updateObjPanel(m);
+    updateObjPanel(m), coachTick(m);
     if (S.players[0].defeated) return "lose";
     if (m.objs.some((o) => !o.sec && -1 === o.state)) return "lose";
     const prim = m.objs.filter((o) => !o.sec && !END_OK[o.t]);
@@ -21814,6 +21889,35 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       return "win";
     }
     return null;
+  }
+  function coachTick(m) {
+    let tip = $("#coachTip");
+    if (!m || !m.training) {
+      tip && tip.classList.add("hidden");
+      return;
+    }
+    const o = m.objs.find((o2) => o2.shown && 0 === o2.state && !o2.sec), sels = o && o.coach ? [].concat(o.coach) : [];
+    let el = null;
+    for (const q of sels) {
+      const c = document.querySelector(q);
+      if (c && c.getClientRects().length && "hidden" !== getComputedStyle(c).visibility) {
+        el = c;
+        break;
+      }
+    }
+    document.querySelectorAll(".coach").forEach((x) => x !== el && x.classList.remove("coach"));
+    const cp = $("#cancelPlace");
+    cp && !cp.classList.contains("hidden") && (el = null);
+    if (!el) {
+      tip && tip.classList.add("hidden");
+      return;
+    }
+    tip || (tip = document.createElement("div"), tip.id = "coachTip", document.body.appendChild(tip));
+    el.classList.add("coach");
+    const r = el.getBoundingClientRect(), up = r.top > 70, nm = el.querySelector(".nm"), lbl = el.dataset.l || (nm ? nm.textContent : el.textContent || "").trim().split("\n")[0].slice(0, 18) || "HERE";
+    tip.textContent = up ? "TAP " + lbl + " \u25BC" : "\u25B2 TAP " + lbl, tip.classList.remove("hidden"), tip.classList.toggle("dn", !up);
+    const w = tip.offsetWidth;
+    tip.style.left = Math.max(4, Math.min(innerWidth - w - 4, r.left + r.width / 2 - w / 2)) + "px", tip.style.top = (up ? r.top - tip.offsetHeight - 6 : r.bottom + 6) + "px";
   }
   function stealthBlock(e, t) {
     const m = S.mission;
@@ -21895,6 +21999,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   function radioStop() {
     radioQ = [], radioCur = null;
+    coachTick(null);
     const el = $("#radioBox");
     el && el.classList.add("hidden");
   }
@@ -21908,12 +22013,21 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const c = castOf(radioCur.who);
     const fs = "function" == typeof fmvSrc && fmvSrc(radioCur.who);
     if (el) {
-      el.innerHTML = '<div class="rbPort' + (fs ? " img" : "") + '" style="--rc:' + c.c + (fs ? ";background-image:url(" + fs + ")" : "") + '">' + (fs ? "" : c.n.split(" ").map((w) => w[0]).join("").slice(-2)) + '</div><div class="rbBody"><div class="rbName" style="color:' + c.c + '">' + c.n.toUpperCase() + '</div><div class="rbText">' + radioCur.text + "</div></div>", el.classList.remove("hidden"), el.style.animation = "none", el.offsetWidth, el.style.animation = "";
+      el.innerHTML = '<div class="rbPort' + (fs ? " img" : "") + '" style="--rc:' + c.c + (fs ? ";background-image:url(" + fs + ")" : "") + '">' + (fs ? "" : c.n.split(" ").map((w) => w[0]).join("").slice(-2)) + '</div><div class="rbBody"><div class="rbName" style="color:' + c.c + '">' + c.n.toUpperCase() + '</div><div class="rbText">' + radioCur.text + "</div></div>", el.classList.remove("hidden"), placeRadio(el), el.style.animation = "none", el.offsetWidth, el.style.animation = "";
     }
     try {
       speakAs(c.fac, radioCur.text, c.acc, c.g, c.p, c.r, false, radioCur.who);
     } catch (e) {
     }
+  }
+  function placeRadio(el) {
+    el.style.bottom = el.style.left = el.style.width = "";
+    const sd = $("#side"), r = sd && !document.body.classList.contains("fps") && sd.getClientRects().length ? sd.getBoundingClientRect() : null;
+    if (!r) return;
+    if (r.left > innerWidth / 2) {
+      const w = Math.min(460, r.left - 24);
+      el.style.left = r.left / 2 + "px", el.style.width = w + "px";
+    } else if (r.top > innerHeight / 3) el.style.bottom = innerHeight - r.top + 8 + "px";
   }
   $("#radioBox") && $("#radioBox").addEventListener("click", () => {
     radioCur && (radioCur.t = 0);

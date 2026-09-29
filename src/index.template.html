@@ -210,7 +210,19 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #radioBox .rbPort.img{flex-basis:52px;height:52px}
 #radioBox .rbName{font-size:10px;font-weight:700;letter-spacing:1.5px;margin-bottom:2px}
 #radioBox .rbText{font-size:12.5px;line-height:1.4;color:#dfe8ee}
-body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 190px)}
+/* First person: radio sits low between the thumb controls, objectives shrink to the current step,
+   so neither covers the crosshair or the left-hand buttons. */
+body.fps #radioBox{bottom:calc(env(safe-area-inset-bottom,0px) + 8px);width:min(330px,40vw);padding:6px 9px;gap:7px}
+body.fps #radioBox .rbPort,body.fps #radioBox .rbPort.img{flex-basis:32px;height:32px;font-size:11px}
+body.fps #radioBox .rbText{font-size:11px;line-height:1.3}
+body.fps #tutorialPanel{max-width:min(250px,34vw);font-size:10.5px;padding:6px 9px}
+body.fps #tutorialPanel .ts.done,body.fps #tutorialPanel .ts.fail{display:none}
+body.fps #tutorialPanel.obj .ts{font-size:10.5px;line-height:1.3}
+body.fps #tutorialPanel .th{margin-bottom:3px;font-size:10px}
+@media (orientation:portrait) and (max-width:560px){
+  body.fps #radioBox{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 46px);width:calc(100vw - 20px)}
+  body.fps #tutorialPanel{top:calc(env(safe-area-inset-top,0px) + 262px)!important;max-width:200px}
+}
 .campCard{display:block;width:100%;text-align:left;margin-top:10px;padding:12px 14px;border-radius:12px;cursor:pointer;color:#cfe0f5;
   border:1px solid rgba(170,200,220,.16);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));transition:border-color .2s,transform .2s}
 .campCard:hover{border-color:rgba(240,167,44,.6);transform:translateY(-1px)}
@@ -765,6 +777,13 @@ body.fps.sidebar #mmWrap{transform:scale(.62);transform-origin:top right;width:a
   body.sidebar #prodstrip .pc,body.sidebar #qstrip .qi,body.sidebar #selbar .si{font-size:9px;padding:2px 6px}
 }
 
+/* ---- training coach pointer ---- */
+#coachTip{position:fixed;z-index:60;pointer-events:none;padding:4px 9px;border-radius:6px;background:#ffd75e;color:#1a1204;font:700 11px/1.2 system-ui,sans-serif;letter-spacing:.6px;white-space:nowrap;box-shadow:0 2px 10px #000a;animation:coachBob 1s ease-in-out infinite}
+#coachTip.dn{animation-name:coachBobDn}
+@keyframes coachBob{50%{transform:translateY(-5px)}}
+@keyframes coachBobDn{50%{transform:translateY(5px)}}
+.coach{outline:2px solid #ffd75e!important;outline-offset:1px;animation:coachGlow 1s ease-in-out infinite}
+@keyframes coachGlow{50%{box-shadow:0 0 14px 3px #ffd75ecc}}
 /* ---- command icon buttons ---- */
 .cbtn.icon{display:flex;align-items:center;justify-content:center;gap:5px}
 .cbtn.icon .ico{width:19px;height:19px}

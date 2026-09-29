@@ -1,5 +1,5 @@
 export {};
-let AC=null,masterGain=null,sfxBus=null,muted=(()=>{try{return"1"===localStorage.getItem("ifr_muted")}catch(e){return!1}})(),masterVol=(()=>{try{const e=localStorage.getItem("ifr_masterVol");return null===e?1:+e}catch(e){return 1}})(),sfxVol=(()=>{try{const e=localStorage.getItem("ifr_sfxVol");return null===e?1:+e}catch(e){return 1}})(),musicVol=(()=>{try{const e=localStorage.getItem("ifr_musicVol");return null===e?1:+e}catch(e){return 1}})(),trackSel=(()=>{try{const e=localStorage.getItem("ifr_track");return null===e?-1:+e}catch(e){return-1}})(),musicBus=null,playTrackRef=null;function setMasterVol(e){masterVol=e,masterGain&&!muted&&(masterGain.gain.value=e),customTrackEl&&(customTrackEl.volume=muted?0:e*musicVol);try{localStorage.setItem("ifr_masterVol",""+e)}catch(t){}}function setSfxVol(e){sfxVol=e,sfxBus&&(sfxBus.gain.value=e);try{localStorage.setItem("ifr_sfxVol",""+e)}catch(t){}}function setMusicVol(e){musicVol=e,musicBus&&(musicBus.gain.value=MUSIC_BASE*e),customTrackEl&&(customTrackEl.volume=muted?0:masterVol*e);try{localStorage.setItem("ifr_musicVol",""+e)}catch(t){}}function setTrackSel(e){trackSel=e;try{localStorage.setItem("ifr_track",""+e)}catch(t){}musicOn&&(e>=0?playAnyTrack(e):e<=-3&&musicStyleSwitch())}
+let AC=null,masterGain=null,sfxBus=null,muted=(()=>{try{return"1"===localStorage.getItem("ifr_muted")}catch(e){return!1}})(),masterVol=(()=>{try{const e=localStorage.getItem("ifr_masterVol");return null===e?1:+e}catch(e){return 1}})(),sfxVol=(()=>{try{const e=localStorage.getItem("ifr_sfxVol");return null===e?1:+e}catch(e){return 1}})(),musicVol=(()=>{try{const e=localStorage.getItem("ifr_musicVol");return null===e?1:+e}catch(e){return 1}})(),trackSel=(()=>{try{const e=localStorage.getItem("ifr_track");return null===e?-1:+e}catch(e){return-1}})(),musicBus=null,playTrackRef=null,wxBus=null,wxVol=(()=>{try{const e=localStorage.getItem("ifr_wxVol");return null===e?.5:+e}catch(e){return .5}})();function setWxVol(e){wxVol=e,wxBus&&(wxBus.gain.value=e);try{localStorage.setItem("ifr_wxVol",""+e)}catch(t){}}function setMasterVol(e){masterVol=e,masterGain&&!muted&&(masterGain.gain.value=e),customTrackEl&&(customTrackEl.volume=muted?0:e*musicVol);try{localStorage.setItem("ifr_masterVol",""+e)}catch(t){}}function setSfxVol(e){sfxVol=e,sfxBus&&(sfxBus.gain.value=e);try{localStorage.setItem("ifr_sfxVol",""+e)}catch(t){}}function setMusicVol(e){musicVol=e,musicBus&&(musicBus.gain.value=MUSIC_BASE*e),customTrackEl&&(customTrackEl.volume=muted?0:masterVol*e);try{localStorage.setItem("ifr_musicVol",""+e)}catch(t){}}function setTrackSel(e){trackSel=e;try{localStorage.setItem("ifr_track",""+e)}catch(t){}musicOn&&(e>=0?playAnyTrack(e):e<=-3&&musicStyleSwitch())}
 
 // ------------------------------------------------------------------ engine
 // Everything plays through: sources -> sfxBus/musicBus -> master -> limiter.
@@ -22,6 +22,8 @@ function audio() {
     limiter = AC.createDynamicsCompressor(), limiter.threshold.value = -9, limiter.knee.value = 8, limiter.ratio.value = 10, limiter.attack.value = .003, limiter.release.value = .22;
     masterGain.connect(limiter), limiter.connect(AC.destination);
     sfxBus = AC.createGain(), sfxBus.gain.value = sfxVol, sfxBus.connect(masterGain);
+    // Weather (rain, thunder) has its own bus and slider, independent of SFX.
+    wxBus = AC.createGain(), wxBus.gain.value = wxVol, wxBus.connect(masterGain);
     verbIn = AC.createConvolver(), verbIn.buffer = makeImpulse(AC, 1.6, 3, .01);
     const vg = AC.createGain(); vg.gain.value = .8, verbIn.connect(vg), vg.connect(sfxBus);
     const sr = AC.sampleRate;
@@ -70,7 +72,7 @@ function tone(e: number, t: number, r?: any, n?: number, a?: number) { if (!sOK(
 function noise(e: number, t?: number, r?: number) { if (!sOK()) return; sNoise(AC.currentTime + .002, { f: r || 900, g: t || .08, d: e }); }
 
 let rainSrc=null,rainGain=null,windSrc=null,windGain=null;function startFpsAmbience(){const ac=audio();if(!ac||windSrc)return;const len=2*ac.sampleRate,buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=2*Math.random()-1;const src=ac.createBufferSource();src.buffer=buf,src.loop=!0;const lp=ac.createBiquadFilter();lp.type="lowpass",lp.frequency.value=340;const g=ac.createGain();g.gain.value=0,src.connect(lp),lp.connect(g),g.connect(sfxBus),src.start(),g.gain.setTargetAtTime(.1,ac.currentTime,2),windSrc=src,windGain=g}function stopFpsAmbience(){if(!windSrc)return;const ac=audio();if(ac){const t0=ac.currentTime;windGain.gain.cancelScheduledValues(t0),windGain.gain.setTargetAtTime(0,t0,.8)}const s=windSrc;setTimeout(()=>{try{s.stop()}catch(e){}},1500),windSrc=null,windGain=null}
-function setRainAmbience(on){const ac=audio();if(!ac)return;if(on&&!rainSrc){const len=2*ac.sampleRate,buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=2*Math.random()-1;const src=ac.createBufferSource();src.buffer=buf,src.loop=!0;const hp=ac.createBiquadFilter();hp.type="highpass",hp.frequency.value=650;const lp=ac.createBiquadFilter();lp.type="lowpass",lp.frequency.value=3800;const g=ac.createGain();g.gain.value=0,src.connect(hp),hp.connect(lp),lp.connect(g),g.connect(sfxBus),src.start(),g.gain.setTargetAtTime(.28,ac.currentTime,1.4),rainSrc=src,rainGain=g}else if(!on&&rainSrc){const t0=ac.currentTime;rainGain.gain.cancelScheduledValues(t0),rainGain.gain.setTargetAtTime(0,t0,.6);const s=rainSrc;setTimeout(()=>{try{s.stop()}catch(e){}},1200),rainSrc=null,rainGain=null}}
+function setRainAmbience(on){const ac=audio();if(!ac)return;if(on&&!rainSrc){const len=2*ac.sampleRate,buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=2*Math.random()-1;const src=ac.createBufferSource();src.buffer=buf,src.loop=!0;const hp=ac.createBiquadFilter();hp.type="highpass",hp.frequency.value=650;const lp=ac.createBiquadFilter();lp.type="lowpass",lp.frequency.value=3800;const g=ac.createGain();g.gain.value=0,src.connect(hp),hp.connect(lp),lp.connect(g),g.connect(wxBus),src.start(),g.gain.setTargetAtTime(.12,ac.currentTime,1.4),rainSrc=src,rainGain=g}else if(!on&&rainSrc){const t0=ac.currentTime;rainGain.gain.cancelScheduledValues(t0),rainGain.gain.setTargetAtTime(0,t0,.6);const s=rainSrc;setTimeout(()=>{try{s.stop()}catch(e){}},1200),rainSrc=null,rainGain=null}}
 
 
 // ------------------------------------------------------------------ voices
@@ -258,8 +260,13 @@ function playVox(vx: string, t: string, radio: boolean) {
   else voxBufs[e[0]] = fetch("voice/" + e[0]).then(r => r.arrayBuffer()).then(a => AC.decodeAudioData(a)).then((b: any) => (voxBufs[e[0]] = b, go(b), b)).catch(() => { delete voxBufs[e[0]]; });
   return !0;
 }
-function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, seed?: number, noClick?: boolean, vox?: string | null) {
+// Story/radio lines (speakAs) hold the voice channel for their full length:
+// announcer calls and unit acknowledgements wait instead of cutting them off,
+// including while the clip is still being fetched.
+let castUntil = 0;
+function speakLine(fac: string, line: Line, urgent?: boolean, per?: Persona, seed?: number, noClick?: boolean, vox?: string | null, cast?: boolean) {
   if (!voicesEnabled || muted || sfxVol <= 0 || !line) return;
+  if (!cast && performance.now() < castUntil) return;
   if (!urgent && voxBusy()) return;
   if (playVox(vox || voxFor(fac, per), Array.isArray(line) ? line[0] : line, !noClick)) return;
   if ("undefined" == typeof speechSynthesis) return;
@@ -306,7 +313,7 @@ function playVoiceLine(fac: string, category: string, role?: string | null, key?
 function announce(ev: string) {
   const fac = S.players && S.players[0] && S.players[0].fac || "vanguard", F = VOICE_LINES[fac] || VOICE_LINES.vanguard, line = F.ann && F.ann[ev];
   if (!line) return;
-  const now = performance.now(), gap = "underAttack" === ev ? 12e3 : "funds" === ev ? 6e3 : 3e3;
+  const now = performance.now(), gap = "underAttack" === ev || "unitAttack" === ev || "harvAttack" === ev ? 12e3 : "funds" === ev ? 6e3 : 3e3;
   if (now - (lastAnnT[ev] || 0) < gap) return;
   lastAnnT[ev] = now, lastVoiceT = now, speakLine(fac, line, !0);
 }
@@ -430,7 +437,8 @@ function sfx(e: string, u?: any) {
       sOsc(t + .56, { w: "triangle", f: 1046.5, g: .05, a: .02, d: 1.4, verb: .5 });
       break;
     case "thunder":
-      sNoise(t, { f: 900, f2: 70, g: .3, a: .02, d: 2.2, brown: 1, verb: .5 }), sOsc(t, { f: 44, f2: 22, g: .2, a: .05, d: 1.8, dist: 1 }), sNoise(t + .25, { f: 400, f2: 90, g: .14, a: .1, d: 1.2, brown: 1, verb: .5 });
+      if (wxVol <= 0) break;
+      sNoise(t, { f: 900, f2: 70, g: .22, a: .02, d: 2.2, brown: 1, dest: wxBus }), sOsc(t, { f: 44, f2: 22, g: .14, a: .05, d: 1.8, dist: 1, dest: wxBus }), sNoise(t + .25, { f: 400, f2: 90, g: .1, a: .1, d: 1.2, brown: 1, dest: wxBus });
       break;
   }
 }
@@ -992,8 +1000,12 @@ const ADMIN_MUSIC_KEY="ifr_admin_music";function loadAdminMusic(){try{return JSO
 let lightningT = 0;
 
 // Campaign characters speak over the radio in their own voice persona.
-function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number, noClick?: boolean, who?: string) { speakLine(fac, text, !0, P_(acc, g, p || 1, r || 1), 0, noClick, who ? "c_" + who : null); }
-function speakStop() { stopVox(); try { "undefined" != typeof speechSynthesis && speechSynthesis.cancel(); } catch (e) { } }
+function speakAs(fac: string, text: string, acc: string, g: "f" | "m", p?: number, r?: number, noClick?: boolean, who?: string) {
+  const d = who ? voxDur("c_" + who, text) : 0;
+  castUntil = performance.now() + 1e3 * (d ? d + .4 : Math.min(11, 1.2 + .065 * text.length));
+  speakLine(fac, text, !0, P_(acc, g, p || 1, r || 1), 0, noClick, who ? "c_" + who : null, !0);
+}
+function speakStop() { castUntil = 0, stopVox(); try { "undefined" != typeof speechSynthesis && speechSynthesis.cancel(); } catch (e) { } }
 // Recorded length of a cast line in seconds (0 if not recorded).
 function castDur(who: string, text: string) { return voxDur("c_" + who, text); }
 // Every (voice, line) pair units and announcers can say, for the recording script.
@@ -1085,7 +1097,7 @@ function cineHit(kind: string) {
   }
 }
 Object.assign(window, {
-  speakAs, speakStop, castDur, voxBusy, voiceBankList, cineMood, cineStop, cineHit, audio, sfx, sfxHit, setMuted, setMasterVol, setSfxVol, setMusicVol,
+  speakAs, speakStop, castDur, voxBusy, voiceBankList, cineMood, cineStop, cineHit, audio, sfx, sfxHit, setMuted, setMasterVol, setSfxVol, setMusicVol, setWxVol,
   setTrackSel, setRainAmbience, startFpsAmbience, stopFpsAmbience, startMusic, MUSIC_TRACKS,
   loadAdminMusic, saveAdminMusic, refreshCustomMusic, totalTrackCount, trackName,
   playVoiceLine, setVoicesEnabled, announce, announceHint, audioTap, musicRenderSection: renderSection, musicStems: musicSynth, musicSongABC,
@@ -1098,6 +1110,7 @@ Object.defineProperties(window, {
   muted: { get: () => muted, configurable: true },
   masterVol: { get: () => masterVol, configurable: true },
   sfxVol: { get: () => sfxVol, configurable: true },
+  wxVol: { get: () => wxVol, configurable: true },
   musicVol: { get: () => musicVol, configurable: true },
   trackSel: { get: () => trackSel, configurable: true },
   CUSTOM_MUSIC: { get: () => CUSTOM_MUSIC, configurable: true },

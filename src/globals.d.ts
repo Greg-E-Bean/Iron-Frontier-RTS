@@ -670,6 +670,8 @@ declare global {
   function setMuted(v: boolean): void;
   function setMasterVol(v: number): void;
   function setSfxVol(v: number): void;
+  function setWxVol(v: number): void;
+  var wxVol: number;
   function setMusicVol(v: number): void;
   function setTrackSel(v: number): void;
   function setRainAmbience(on: boolean): void;
