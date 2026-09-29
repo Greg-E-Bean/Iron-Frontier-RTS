@@ -369,6 +369,7 @@ function fgFx(on: boolean) {
         break;
       }
       case "spark": spr(e.x + 2 * Math.sin(e.t * 40 + e.x), e.y, g + 8 + 6 * r, 3.2 * (1 - .5 * r), T.glow, e.c || "#ffd", 1 - r, !0); break;
+      case "toxic": { const sz = (6 + 10 * r) * (e.s || 1) * 2.2; spr(e.x + (e.vx || 0) * r, e.y + (e.vy || 0) * r, g + 3 + 10 * r, sz, T.smoke, e.c || "#7ce06a", .42 * Math.sin(3.1416 * r), !1, e.x * .05 + r); break; }
       case "smoke": { const sz = (3 + 8 * r) * (e.s || 1) * 2.2; spr(e.x, e.y, g + 4 + 20 * r, sz, T.smoke, e.c || "#888", .5 * (1 - r), !1, e.x * .07 + r); break; }
       case "ring": decal(e.x, e.y, gz(e.x, e.y) + .6, 2 * (10 + r * (e.s || 1) * 60), 2 * (10 + r * (e.s || 1) * 60), 0, T.ring, e.c || "#fff", 1 - r, !0); break;
       case "wake": { const k = 2 * (3 + (e.s || 1) * 1.3 * r); decal(e.x, e.y, 1.2, k * 2, k * 2, 0, T.ring, "#e8f6fa", .45 * (1 - r), !1); break; }
