@@ -264,7 +264,11 @@ g.restore()}
 // Stills get a slow push-in; clips loop muted under the voiced line.
 // FMV_MEDIA can also map a key to any URL explicitly.
 const FMV_MEDIA={},_media={},FMV_EXT=["mp4","webm","webp","jpg","png"];
-function probeMedia(key){if(_media[key])return _media[key];const rec=_media[key]={el:null};const list=FMV_MEDIA[key]?[FMV_MEDIA[key]]:FMV_EXT.map(e=>"fmv/"+key+"."+e);let i=0;
+// fmv/index.json (written by the build) lists what is actually there; until it
+// arrives, probes wait, and without it every extension is tried as before.
+let _fmvIndex=null,_fmvWait=[];try{fetch("fmv/index.json").then(r=>r.ok?r.json():null).catch(()=>null).then(l=>{_fmvIndex=Array.isArray(l)?new Set(l):"none";const w=_fmvWait;_fmvWait=null,w.forEach(f=>f())})}catch(e){_fmvIndex="none",_fmvWait=null}
+function probeMedia(key){if(_media[key])return _media[key];const rec=_media[key]={el:null};if(_fmvWait){_fmvWait.push(()=>{delete _media[key];const r=probeMedia(key);Object.defineProperties(rec,{el:{get:()=>r.el},src:{get:()=>r.src},cut:{get:()=>r.cut}})});return rec}
+const list=FMV_MEDIA[key]?[FMV_MEDIA[key]]:FMV_EXT.map(e=>"fmv/"+key+"."+e).filter(p=>!(_fmvIndex instanceof Set)||_fmvIndex.has(p.slice(4)));let i=0;
 const next=()=>{if(i>=list.length)return;const src=list[i++];if(/\.(mp4|webm|mov)$/i.test(src)){const v=document.createElement("video");v.muted=!0,v.loop=!0,v.playsInline=!0,v.preload="auto",v.oncanplay=()=>{rec.el||(rec.el=v,v.play().catch(()=>{}))},v.onerror=next,v.src=src}else{const im=new Image;im.onload=()=>{rec.el=im,rec.src=src;try{const c=document.createElement("canvas");c.width=c.height=4;const x=c.getContext("2d");x.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,4,4);rec.cut=x.getImageData(0,0,1,1).data[3]<40}catch(e){rec.cut=/\.(png|webp)$/i.test(src)}},im.onerror=next,im.src=src}};next();return rec}
 function fmvCut(key){const r=_media[key];return!!(r&&r.cut)}
 function fmvSrc(key){const r=_media[key];return r&&r.el&&r.src||null}
