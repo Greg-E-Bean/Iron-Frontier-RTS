@@ -172,6 +172,9 @@ declare global {
   function cmdMove(units: Unit[], x: number, y: number, amove?: boolean, queue?: boolean): void;
   function creditCap(id: number): number;
   function objMarkers(): any[];
+  function showTraining(): void;
+  function launchTraining(kind: string): void;
+  const TRAINING: any;
   function fpsBldName(b: any): string;
   function fpsBldSide(b: any, e: any): string;
   function fpsNavTarget(e: any): any;

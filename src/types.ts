@@ -380,6 +380,7 @@ export interface GameState {
   crates?: { x: number; y: number; k: string; r: number }[];
   crateT?: number;
   cratesOn?: boolean;
+  flags?: Record<string, any>;
   lastAlert?: { x: number; y: number } | null;
   thunderT?: number;
   traffic?: any[];

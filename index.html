@@ -937,7 +937,7 @@ body[data-fac] #top .stat #credits{color:var(--amber2)}
       <div class="fld"><label>Fog</label><select id="fogSel"></select></div>
       <div class="fld"><label>Crates</label><select id="crateSel"></select></div>
     </div>
-    <button id="play">START SKIRMISH</button><div class="mGrid"><button id="campaignBtn" class="mBtn"><span class="ic">★</span>CAMPAIGN</button><button id="tutorialBtn" class="mBtn"><span class="ic">◎</span>TUTORIAL</button><button id="loadBtn" class="mBtn"><span class="ic">⤓</span>LOAD GAME</button><button id="musicBtn" class="mBtn"><span class="ic">♪</span>MUSIC</button><button id="setBtn" class="mBtn"><span class="ic">⚙</span>SETTINGS</button><button id="accountBtn" class="mBtn"><span class="ic">◉</span>ACCOUNT</button></div><button id="adminBtn" class="mLink">+ IMPORT / CREATE</button>
+    <button id="play">START SKIRMISH</button><div class="mGrid"><button id="campaignBtn" class="mBtn"><span class="ic">★</span>CAMPAIGN</button><button id="tutorialBtn" class="mBtn"><span class="ic">◎</span>TRAINING</button><button id="loadBtn" class="mBtn"><span class="ic">⤓</span>LOAD GAME</button><button id="musicBtn" class="mBtn"><span class="ic">♪</span>MUSIC</button><button id="setBtn" class="mBtn"><span class="ic">⚙</span>SETTINGS</button><button id="accountBtn" class="mBtn"><span class="ic">◉</span>ACCOUNT</button></div><button id="adminBtn" class="mLink">+ IMPORT / CREATE</button>
     <div class="small">Drag to pan · pinch to zoom · tap to select · tap the ground to move · tap an enemy to attack.<br>
       Tap a build card again to queue more · ▾ expands the build panel.<br>
       <b style="color:#e0b050">Ore:</b> amber ore feeds your economy, pale gem veins pay far more,
@@ -2781,7 +2781,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return o && (o.list[0] === n && o.list.shift(), o.prog = 0, o.paid = 0, o.list.length || (e.queues[kind] = null)), sfx("place"), true;
   }
   function cmdMove(e, t, r, n, queue) {
-    S.mission && S.mission.tutorial && e.some((u) => 0 === u.owner) && (n ? S.tutorialAmoved = true : S.tutorialMoved = true);
+    S.mission && e.some((u) => 0 === u.owner && "mhq" !== u.key) && (S.mission.tutorial && (n ? S.tutorialAmoved = true : S.tutorialMoved = true), S.flags && (S.flags[n ? "amove" : "move"] = 1));
     const cnt = e.length, o = Math.ceil(Math.sqrt(cnt)), s = Math.max(34, 3.6 * e.reduce((e2, t2) => Math.max(e2, t2.d.radius), 8));
     let fx = 0, fy = -1, rx = 1, ry = 0, l = e;
     if (cnt > 1) {
@@ -2809,6 +2809,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return e.order = t.amove ? "amove" : "move", e.target = null, e.ore = null, e.tx = t.x, e.ty = t.y, e.d.fly ? (e.path = null, airOrdered(e)) : repath(e), true;
   }
   function cmdAttack(e, t) {
+    S.flags && e.some((u) => 0 === u.owner) && (S.flags.attack = 1);
     smartOrder(e, t) && (e = e.filter((e2) => "capture" !== e2.order && "garrison" !== e2.order && "load" !== e2.order));
     for (const r of e) r.d.dmg <= 0 && "mind" !== r.d.role ? cmdMove([r], t.x, t.y) : (r.order = "attack", r.target = t, r.path = null, r.ore = null);
   }
@@ -12753,7 +12754,8 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     _usc = 1;
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
     if (S.crates) for (const e2 of S.crates) (!FOG_ON || G.vis[idx(e2.x / 32 | 0, e2.y / 32 | 0)] > 0) && c("XCRATE", crateModel, TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y) + 1.2 + 1.2 * Math.sin(3 * S.time + e2.x), e2.r + 0.6 * S.time);
-    if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, null != e2.z ? e2.z : heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind || "grass" === e2.kind || "flower" === e2.kind);
+    const _fu = FPS.on && FPS.u && !FPS.thirdPerson ? FPS.u : null;
+    if (G.props) for (const e2 of G.props) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || _fu && ("grass" === e2.kind || "scrub" === e2.kind || "flower" === e2.kind) && Math.abs(e2.x - _fu.x) < 26 && Math.abs(e2.y - _fu.y) < 26 || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, null != e2.z ? e2.z : heightAt(e2.x, e2.y), e2.r, "scrub" === e2.kind || "stone" === e2.kind || "crater" === e2.kind || "grass" === e2.kind || "flower" === e2.kind);
     if (G.skirtProps) for (const e2 of G.skirtProps) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.4 * h || c("X" + e2.kind + e2.v, () => PROPMODEL(e2.kind, e2.v), TIBPAL, e2.x, e2.y, e2.z, e2.r, true);
     if (S.traffic) for (const e2 of S.traffic) Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > 1.25 * h || c("CAR" + e2.v, () => carModel(e2.v), TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y), e2.ang, false);
     if (G.trees) for (const e2 of G.trees) e2.px || (e2.px = 32 * e2.tx + 16, e2.py = 32 * e2.ty + 16), Math.abs(e2.px - cam.x) + Math.abs(e2.py - cam.y) > 1.4 * h || c("P" + e2.type, () => blossomModel(e2.type), TIBPAL, e2.px, e2.py, heightAt(e2.px, e2.py), (7 * e2.tx + 3 * e2.ty) % 8 / 8 * 6.283, 1);
@@ -13027,7 +13029,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     const e = FPS.u, b = e.inside, fuse = 8;
     b.bombT = fuse, b.bombFuse = fuse, b.bombOwner = e.owner;
     const floorZ = b.d.roof ? FLOOR_Z : 0, mesh = bombProp();
-    mesh.position.set(e.x - b.x, floorZ, e.y - b.y), ensureInterior(b).add(mesh), b.bombMesh = mesh, sfx("place"), hint("Charge set \u2014 " + fuse + "s! Get clear!");
+    mesh.position.set(e.x - b.x, floorZ, e.y - b.y), ensureInterior(b).add(mesh), b.bombMesh = mesh, S.flags && (S.flags.c4 = 1), sfx("place"), hint("Charge set \u2014 " + fuse + "s! Get clear!");
   }
   function syncBombProp(bld) {
     const mesh = bld.bombMesh;
@@ -18399,7 +18401,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (curtainAim) return curtainAim = false, void ironCurtain(0, n, a);
     const o = entAt(n, a, e, t);
     if (sellMode) return void (o && "b" === o.e && 0 === o.owner && "conyard" !== o.key ? (P().credits += 0.5 * o.d.cost, textFx(o.x, o.y, "+$" + Math.round(0.5 * o.d.cost)), killBld(o), sellMode = false, $("#bSell").classList.remove("on")) : hint("Select one of your structures"));
-    if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, hint(o.repair ? "Repairing" : "Repair off"))));
+    if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, o.repair && S.flags && (S.flags.repair = 1), hint(o.repair ? "Repairing" : "Repair off"))));
     if (o) {
       if (0 === o.owner) {
         if ("u" === o.e && (o.d.transport || o.d.gunnerSlot)) {
@@ -18455,7 +18457,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (curtainAim) return curtainAim = false, void ironCurtain(0, n, a);
     const o = entAt(n, a, e, t);
     if (sellMode) return void (o && "b" === o.e && 0 === o.owner && "conyard" !== o.key ? (P().credits += 0.5 * o.d.cost, textFx(o.x, o.y, "+$" + Math.round(0.5 * o.d.cost)), killBld(o), sellMode = false, $("#bSell").classList.remove("on")) : hint("Select one of your structures"));
-    if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, hint(o.repair ? "Repairing" : "Repair off"))));
+    if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, o.repair && S.flags && (S.flags.repair = 1), hint(o.repair ? "Repairing" : "Repair off"))));
     if (o && 0 === o.owner) {
       const e2 = performance.now();
       "u" === o.e ? (e2 - lastTap < 330 && S.sel.includes(o) ? (S.sel = S.units.filter((e3) => 0 === e3.owner && !e3.dead && e3.key === o.key), hint("Selected all " + o.d.name)) : S.sel.includes(o) && S.sel.length > 1 ? (S.sel = S.sel.filter((e3) => e3 !== o), hint("Dropped " + o.d.name)) : S.sel.includes(o) && 1 === S.sel.length ? (S.sel = [], hint("Deselected")) : S.sel = [o], lastTap = e2) : S.sel = S.sel.includes(o) ? [] : [o], sfx("sel");
@@ -18702,7 +18704,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const e2 = P();
         $("#panelMain").innerHTML = '<h1>PAUSED</h1><div class="sub">' + e2.f.name.toUpperCase() + " COMMAND vs " + rivalNames(e2) + '</div><div class="small" style="margin:0 0 6px">$' + Math.floor(e2.credits) + " &nbsp;\xB7&nbsp; power " + e2.power + "/" + e2.drain + " &nbsp;\xB7&nbsp; " + S.units.filter((e3) => 0 === e3.owner).length + " units &nbsp;\xB7&nbsp; " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + "s<br>Killed " + e2.kills + " \xB7 lost " + e2.lost + '</div><button id="play">RESUME</button><button id="openSettings" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SETTINGS</button><button id="openSaveG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">SAVE GAME</button><button id="openLoadG" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">LOAD GAME</button><button id="restart" style="width:100%;margin-top:8px;padding:11px;border-radius:8px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:13px">RESTART</button><div class="small">Tap a card repeatedly to queue it \xB7 long-press a card (or tap a chip in the queue bar) to remove one \xB7 \u25BE expands the build panel \xB7 DEPLOY toggles Caustic Troopers, evacuates a garrison, sends aircraft home.</div>', $("#play").addEventListener("click", () => {
           S.needMusic && (S.needMusic = false, audio(), startMusic()), S.running = true, openMenu(null);
-        }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => (clearResume(), S.mission) ? S.mission.tutorial ? launchTutorial() : launchMission(S.mission.fac, S.mission.idx) : location.reload());
+        }), $("#openSettings").addEventListener("click", () => openMenu("settings")), $("#openSaveG").addEventListener("click", () => showSaveLoad("save")), $("#openLoadG").addEventListener("click", () => showSaveLoad("load")), $("#restart").addEventListener("click", () => (clearResume(), S.mission) ? S.mission.training ? launchTraining(S.mission.training) : S.mission.tutorial ? launchTutorial() : launchMission(S.mission.fac, S.mission.idx) : location.reload());
       } else if ("settings" === e) {
         const trackOpts = musicModeOptions().concat(MUSIC_TRACKS.map((e2, t2) => '<option value="' + t2 + '">' + musicTrackLabel(t2) + "</option>")).concat(CUSTOM_MUSIC.map((e2, t2) => '<option value="' + (MUSIC_TRACKS.length + t2) + '">' + e2.name + " (custom)</option>")).join(""), vol = (id, label, val) => '<div class="fld"><label>' + label + '</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="' + id + '" min="0" max="100" value="' + Math.round(100 * val) + '" style="flex:1"><span id="' + id + 'Val" style="width:32px;text-align:right;font-size:12px;color:#9db4cc">' + Math.round(100 * val) + "%</span></div></div>";
         const speedOpts = [0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => '<option value="' + v + '"' + (S.speed === v ? " selected" : "") + ">" + v + "x</option>").join("");
@@ -18769,12 +18771,13 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function gameOver(win) {
     clearResume(), S.over = true, S.running = false, setRainAmbience(false), sfx(win ? "win" : "lose");
     $("#menu").classList.remove("hidden");
-    const t = P(), mission = S.mission, tut = !!(mission && mission.tutorial);
+    const t = P(), mission = S.mission, tut = !!(mission && (mission.tutorial || mission.training)), trn = mission && mission.training;
     mission && !tut && win && unlockNext(mission.fac, mission.idx);
     const hasNext = !!mission && !tut && mission.idx + 1 < CAMPAIGNS[mission.fac].missions.length;
-    const label = tut ? win ? "NEW SKIRMISH" : "RETRY TUTORIAL" : mission ? win ? hasNext ? "NEXT MISSION" : "BACK TO MENU" : "RETRY MISSION" : "NEW SKIRMISH";
-    const resultTxt = tut ? win ? "TUTORIAL COMPLETE" : "TUTORIAL FAILED" : win ? "MISSION ACCOMPLISHED" : "MISSION FAILED";
+    const label = trn ? win ? "BACK TO TRAINING" : "RETRY" : tut ? win ? "NEW SKIRMISH" : "RETRY TUTORIAL" : mission ? win ? hasNext ? "NEXT MISSION" : "BACK TO MENU" : "RETRY MISSION" : "NEW SKIRMISH";
+    const resultTxt = tut ? win ? "TRAINING COMPLETE" : "TRAINING FAILED" : win ? "MISSION ACCOMPLISHED" : "MISSION FAILED";
     $("#panelMain").innerHTML = '<div id="result" style="color:' + (win ? "#6fe36f" : "#e0473a") + '">' + resultTxt + '</div><div class="sub">' + t.f.name.toUpperCase() + " vs " + rivalNames(t) + "</div>" + (mission && !tut && "function" == typeof missionDebrief ? missionDebrief(win) : "") + '<div class="small">Units killed: ' + t.kills + " &nbsp;\xB7&nbsp; Units lost: " + t.lost + "<br>Time: " + Math.floor(S.time / 60) + "m " + Math.floor(S.time % 60) + "s</div>" + buildResultsTable() + buildHistoryChart() + '<button id="play">' + label + "</button>" + (mission && !tut ? '<button id="backCamp2" ' + SECBTN + ">MISSION SELECT</button>" : ""), $("#play").addEventListener("click", () => {
+      if (trn) return void (win ? (S.mission = null, showTraining()) : launchTraining(trn));
       if (tut) return void (win ? location.reload() : launchTutorial());
       if (!mission) return void location.reload();
       win ? hasNext ? showBriefing(mission.fac, mission.idx + 1) : (S.mission = null, showCampaign()) : launchMission(mission.fac, mission.idx);
@@ -20590,6 +20593,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var CAST = {
     narr: { n: "Narrator", fac: "vanguard", acc: "rp", g: "m", p: 0.82, r: 0.9, c: "#d8dde2" },
+    instructor: { n: "Drill Instructor", fac: "vanguard", acc: "us", g: "m", p: 0.95, r: 1.02, c: "#e8d27a", hat: "cap", role: "Training Command" },
     marsh: { n: "Dr. Elias Marsh", fac: "vanguard", acc: "rp", g: "m", p: 1.02, r: 1.08, c: "#9fe8d0", hat: "glasses", role: "Project Starfall \u2014 lead scientist" },
     reyes: { n: "Col. Ada Reyes", fac: "vanguard", acc: "rp", g: "f", p: 1, r: 1, c: "#8fd0ff", hat: "beret", role: "Vanguard Command" },
     hale: { n: "Lt. Marcus Hale", fac: "vanguard", acc: "us", g: "m", p: 1, r: 1.06, c: "#a8e0ff", hat: "helmet", role: "Vanguard 3rd Battlegroup" },
@@ -21249,7 +21253,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   function techAllowed(k, isBld, abil) {
     const m = S.mission, T = m && m.tier;
-    if (!T || m.tutorial) return true;
+    if (!T || m.tutorial || m.training) return true;
     if (abil) return "super" === k ? T >= 7 : "curtain" === k ? T >= 5 : "spy" === k ? T >= 4 : true;
     return (isBld ? TIER_BLD[k] || 2 : unitTier(k)) <= T;
   }
@@ -21278,6 +21282,89 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var DORDER = ["easy", "normal", "hard"];
   var shiftDiff = (d, k) => DORDER[clamp(DORDER.indexOf(d) + k, 0, 2)];
+  var TI = (t) => ["say", "instructor", t];
+  var TRAINING = {
+    rts: {
+      name: "Basic Training",
+      map: "octagon",
+      loc: "Training Grounds",
+      spawn: 0,
+      tier: 0,
+      brief: [["instructor", "Welcome to training, Commander. Everything here is safe to get wrong."], ["instructor", "We'll set up a base, train a squad, fight off a raid, repair the damage, and take out an enemy outpost."]],
+      foes: [{ diff: "easy", spawn: 2, base: ["power", "barracks"], idle: 1 }],
+      start: { credits: 6e3 },
+      obj: [
+        { id: "sel", t: "flag", flag: "select", text: "Select your Mobile HQ \u2014 tap it" },
+        { id: "hq", t: "build", key: "conyard", n: 1, hide: 1, text: "Deploy it \u2014 tap DEPLOY, then tap open ground" },
+        { id: "pow", t: "build", key: "power", n: 1, hide: 1, text: "Build a power plant \u2014 open the build tab and tap its card, then place it" },
+        { id: "ref", t: "build", key: "refinery", n: 1, hide: 1, text: "Build a refinery \u2014 it comes with a harvester" },
+        { id: "bar", t: "build", key: "barracks", n: 1, hide: 1, text: "Build a barracks" },
+        { id: "train", t: "train", n: 4, hide: 1, text: "Train 4 infantry \u2014 select the barracks and tap a unit card" },
+        { id: "move", t: "flag", flag: "move", hide: 1, text: "Select your squad and tap the ground to move it" },
+        { id: "raid", t: "kills", n: 3, hide: 1, text: "Raiders! Select your squad and tap an enemy to attack" },
+        { id: "fix", t: "flag", flag: "repair", hide: 1, text: "Repair the damaged building \u2014 tap REPAIR, then tap the building" },
+        { id: "amove", t: "flag", flag: "amove", hide: 1, text: "Attack-move \u2014 tap A-MOVE (or press Q), then tap toward the enemy outpost" },
+        { id: "win", t: "elim", hide: 1, text: "Destroy the enemy outpost" }
+      ],
+      ev: [
+        { at: 2, do: [TI("First, tap your Mobile HQ to select it. That big truck is your base on wheels.")] },
+        { done: "sel", do: [["show", "hq"], TI("Good. Now tap DEPLOY and put it down on open ground. That's your headquarters.")] },
+        { done: "hq", do: [["show", "pow"], TI("Every base needs power. Open the build tab, tap the power plant card, then tap a spot inside the glowing zone.")] },
+        { done: "pow", do: [["show", "ref"], TI("Now a refinery. It comes with a harvester that fetches ore for credits on its own.")] },
+        { done: "ref", do: [["show", "bar"], TI("Next, a barracks, so we can train soldiers.")] },
+        { done: "bar", do: [["show", "train"], TI("Select the barracks and tap an infantry card. Tap a card again to queue more.")] },
+        { done: "train", do: [["show", "move"], TI("A squad! Drag a box around them, or tap ALL UNITS, then tap the ground to move them.")] },
+        { done: "move", do: [["show", "raid"], TI("Contact! Raiders coming for the base. Tap an enemy to order an attack."), ["wave", 0, [["base", 3]], { to: "base" }]] },
+        { done: "raid", do: [["damage", "power", 0.4], ["show", "fix"], TI("Raid's over, but your power plant took a beating. Tap REPAIR, then tap the building. It costs a little, but it's worth it.")] },
+        { done: "fix", do: [["show", "amove"], ["credits", 2e3], TI("Now go on the offensive. Attack-move makes units fight anything they meet on the way. Tap A-MOVE, then tap toward the enemy.")] },
+        { done: "amove", do: [["show", "win"], TI("Take out every enemy building. Train more troops if you need them.")] }
+      ],
+      win: [["instructor", "Outstanding. You're ready for the real thing, Commander."]],
+      lose: [["instructor", "Everyone loses one in training. Try it again."]]
+    },
+    fps: {
+      name: "Infiltration Training",
+      map: "octagon",
+      loc: "Training Grounds",
+      spawn: 0,
+      tier: 0,
+      hero: 1,
+      fpsOnly: 1,
+      brief: [["instructor", "This one's first person, Commander. You're a single commando."], ["instructor", "Move, shoot, get inside an enemy building and blow it up from the inside."]],
+      foes: [{ diff: "easy", spawn: 1, base: ["power", "barracks"], idle: 1 }],
+      start: {},
+      obj: [
+        { id: "walk", t: "reach", x: 75, y: 44, r: 3, text: "Walk to the green marker \u2014 WASD or the left stick; look with the mouse or by dragging" },
+        { id: "shoot", t: "kills", n: 3, hide: 1, text: "Enemy soldiers! Aim (right mouse or AIM) and fire (left mouse or FIRE)" },
+        { id: "inside", t: "inside", key: "power", hide: 1, text: "Get inside the enemy power plant \u2014 follow the arrow above your crosshair and walk in" },
+        { id: "c4", t: "flag", flag: "c4", hide: 1, text: "Plant C4 \u2014 press B or tap PLANT C4" },
+        { id: "boom", t: "destroy", keys: ["power"], slot: 0, hide: 1, text: "Get out before it blows \u2014 follow the arrow to the door" }
+      ],
+      ev: [
+        { at: 2, do: [TI("Look around, then walk to the green marker. The arrow above your crosshair always shows where to go.")] },
+        { done: "walk", do: [["show", "shoot"], TI("Three soldiers heading your way. Aim down your sights, then fire."), ["wave", 0, [["base", 3]], { to: "hero" }]] },
+        { done: "shoot", do: [["show", "inside"], TI("Nice shooting. Now the power plant. Just walk into the building to go inside.")] },
+        { done: "inside", do: [["show", "c4"], TI("You're in. Press B, or tap PLANT C4, to set the charge.")] },
+        { done: "c4", do: [["show", "boom"], TI("Charge is ticking. Get out, now! Follow the arrow to the door.")] }
+      ],
+      win: [["instructor", "Textbook. That's how the professionals do it."]],
+      lose: [["instructor", "Keep your head down next time. Try again."]]
+    }
+  };
+  function showTraining() {
+    radioStop(), hideLoading(), $("#menu").classList.remove("hidden");
+    const card = (k, ic, t, d) => '<button class="campCard" data-k="' + k + '"><div class="ccTop"><span class="ccIcon">' + ic + '</span><span class="ccFac">' + t + '</span></div><div class="ccTag">' + d + "</div></button>";
+    $("#panelMain").innerHTML = '<h1>TRAINING</h1><div class="sub">Learn the controls \u2014 nothing here counts against you</div><div id="campList">' + card("rts", "\u2691", "BASE & ARMY", "Build a base, train a squad, repel a scripted raid, repair, attack-move and destroy an outpost.") + card("fps", "\u25CE", "FIRST PERSON & INFILTRATION", "Move and shoot as a commando, get inside an enemy building, plant C4 and get out.") + card("tut", "\u25B8", "QUICK SKIRMISH TUTORIAL", "The original short checklist against an easy opponent.") + '</div><button id="backSetup" ' + SECBTN + ">BACK</button>";
+    $("#panelMain").querySelectorAll(".campCard").forEach((b) => b.onclick = () => "tut" === b.dataset.k ? launchTutorial() : launchTraining(b.dataset.k)), $("#backSetup").onclick = showSetup;
+  }
+  function launchTraining(kind) {
+    const m = TRAINING[kind];
+    if (!m) return;
+    radioStop();
+    const fac = cfg.fac || "vanguard", foe = otherFacs(fac)[0];
+    cfg.map = m.map, cfg.fog = "off", cfg.team = 1, cfg.spawn = m.spawn || 0, cfg.slots = m.foes.map((f) => ({ fac: foe, team: 2, color: "def", spawn: f.spawn, diff: "easy" }));
+    pendingMission = { fac, idx: -1, training: kind, noBuild: false, hero: !!m.hero, diff: "easy" }, startGame(), showLoading(fac, -1, m);
+  }
   var pendingMission = null;
   function launchMission(fac, idx2) {
     const camp = CAMPAIGNS[fac], m = camp && camp.missions[idx2];
@@ -21370,12 +21457,13 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function applyPendingMission() {
     if (!pendingMission) return void (S.mission = null);
     if (pendingMission.tutorial) return S.mission = { tutorial: true, curStep: 0, doneSteps: [] }, S.tutorialMoved = false, S.tutorialAmoved = false, void (pendingMission = null);
-    const pm = pendingMission, def = CAMPAIGNS[pm.fac].missions[pm.idx], st = def.start || {};
+    const pm = pendingMission, def = pm.training ? TRAINING[pm.training] : CAMPAIGNS[pm.fac].missions[pm.idx], st = def.start || {};
     pendingMission = null;
+    S.flags = {};
     const D = CDIFF[pm.diff || "normal"];
-    S.mission = { tier: def.tier, ruins: !!st.ruins, fac: pm.fac, idx: pm.idx, def, diff: pm.diff || "normal", D, fpsOnly: !!def.fpsOnly, noBuild: pm.noBuild, hero: pm.hero, objs: def.obj.map((o) => Object.assign({}, o, { state: 0, shown: !o.hide }, "stealth" === o.t ? { sec: "hard" !== pm.diff } : {})), evs: def.ev.map(() => ({ n: 0, next: 0 })), escorts: {}, started: false, lastT: 0, lost0: 0, kills0: 0, stars: 0 };
+    S.mission = { training: pm.training || null, tier: def.tier, ruins: !!st.ruins, fac: pm.fac, idx: pm.idx, def, diff: pm.diff || "normal", D, fpsOnly: !!def.fpsOnly, noBuild: pm.noBuild, hero: pm.hero, objs: def.obj.map((o) => Object.assign({}, o, { state: 0, shown: !o.hide }, "stealth" === o.t ? { sec: "hard" !== pm.diff } : {})), evs: def.ev.map(() => ({ n: 0, next: 0 })), escorts: {}, started: false, lastT: 0, lost0: 0, kills0: 0, stars: 0 };
     def.foes.forEach((f, i) => {
-      f.base && preBuild(i + 1, f.base);
+      f.base && preBuild(i + 1, f.base), f.idle && S.players[i + 1] && (S.players[i + 1].ai.idle = true);
     });
     st.base && preBuild(0, st.base);
     st.noMcv && S.units.filter((u) => 0 === u.owner).forEach((u) => killUnitSilent(u));
@@ -21509,6 +21597,12 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       }
       case "stealth":
         return m.st && m.st.alarms > 0 ? -1 : 0;
+      case "flag":
+        return "select" === o.flag && S.sel.some((u) => 0 === u.owner && !u.dead) || S.flags && S.flags[o.flag] ? 1 : 0;
+      case "inside": {
+        const u = playerHero();
+        return u && u.inside && !u.inside.dead && u.inside.key === o.key && 0 !== u.inside.owner ? 1 : 0;
+      }
       case "own":
         return ownedCount((b) => b.key === o.key) ? 1 : 0;
       case "build": {
@@ -21579,6 +21673,11 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         }
         break;
       }
+      case "damage": {
+        const b = S.blds.find((b2) => 0 === b2.owner && !b2.dead && b2.key === a[1]) || S.blds.find((b2) => 0 === b2.owner && !b2.dead && "conyard" !== b2.key);
+        b && (b.hp = Math.min(b.hp, b.maxhp * a[2]), S.marker = { x: b.x, y: b.y, t: 0, c: "#ff5a4a" }, boom(b.x, b.y, 1.4));
+        break;
+      }
       case "credits":
         S.players[0].credits += a[1], hint("+" + a[1] + " credits"), sfx("sel");
         break;
@@ -21590,7 +21689,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         break;
       case "show": {
         const o = m.objs.find((o2) => o2.id === a[1]);
-        o && !o.shown && (o.shown = true, sfx("ready"), hint("NEW OBJECTIVE: " + o.text));
+        o && !o.shown && (o.flag && S.flags && (S.flags[o.flag] = 0), o.shown = true, sfx("ready"), hint("NEW OBJECTIVE: " + o.text));
         break;
       }
       case "go": {
@@ -21675,7 +21774,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (prim.every((o) => o.shown && 1 === o.state)) {
       for (const o of m.objs) 0 === o.state && (o.state = END_OK[o.t] ? 1 : -1);
       m.stars = 1 + m.objs.filter((o) => o.sec && 1 === o.state).length;
-      saveStars(m.fac, m.idx, m.stars);
+      m.training || saveStars(m.fac, m.idx, m.stars);
       return "win";
     }
     return null;
@@ -21805,7 +21904,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }).join(""), st = m.st, meter = st ? st.alarm > 0 ? '<div class="stl alarm">\u26A0 ALARM \u2014 ' + Math.ceil(st.alarm) + "s</div>" : '<div class="stl' + (st.seeing ? " warn" : "") + '">' + (st.seeing ? "BEING SPOTTED" : "HIDDEN") + '<i style="width:' + Math.round(10 * st.sus / m.D.detT) * 10 + '%"></i></div>' : "", sig = rows + meter + (el._min ? "m" : "");
     if (el._sig === sig) return;
     el._sig = sig;
-    el.innerHTML = '<div class="th">' + (m.idx + 1) + ". " + m.def.name.toUpperCase() + '<button class="tMin">' + (el._min ? "+" : "\u2013") + "</button></div>" + (el._min ? "" : meter + rows);
+    el.innerHTML = '<div class="th">' + (m.training ? "TRAINING \xB7 " : m.idx + 1 + ". ") + m.def.name.toUpperCase() + '<button class="tMin">' + (el._min ? "+" : "\u2013") + "</button></div>" + (el._min ? "" : meter + rows);
   }
   function skipTutorial() {
     S.mission = null, hint("Tutorial skipped \u2014 good luck!");
@@ -21843,7 +21942,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const k = w + "|" + t;
       t && !seen[k] && (seen[k] = 1, out.push({ who: w, text: t }));
     };
-    for (const fac in CAMPAIGNS) for (const m of CAMPAIGNS[fac].missions) {
+    for (const m of Object.values(CAMPAIGNS).flatMap((c) => c.missions).concat(Object.values(TRAINING))) {
       m.brief.forEach(([w, t]) => add(w, t));
       m.ev.forEach((e) => e.do.forEach((a) => "say" === a[0] && add(a[1], a[2])));
       (m.alarm || []).concat(m.win || [], m.lose || []).forEach(([w, t]) => add(w, t));
@@ -21943,14 +22042,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMidYMid meet"><image href="' + img + '" width="' + W + '" height="' + H + '" preserveAspectRatio="none"/>' + c.join("") + "</svg>";
   }
   var LOAD_TIPS = ["Bonus objectives earn stars \u2014 replay missions to collect them all.", "High ground gives your units 30% more sight range.", "Units on an overpass can't be hit by units passing underneath.", "Garrison town buildings with infantry to hold them.", "Power down a base and its defences stop firing."];
-  function showLoading(fac, idx2) {
-    const m = CAMPAIGNS[fac].missions[idx2], cd = campDiff();
+  function showLoading(fac, idx2, defOv) {
+    const m = defOv || CAMPAIGNS[fac].missions[idx2], cd = defOv ? "easy" : campDiff();
     let el = $("#loadScreen");
     el || (el = document.createElement("div"), el.id = "loadScreen", document.body.appendChild(el));
     "function" == typeof probeMedia && probeMedia(m.brief[0][0]);
     const lsImg = "function" == typeof fmvSrc && fmvSrc(m.brief[0][0]), prim = m.obj.filter((o) => !o.sec && !o.hide), sec = m.obj.filter((o) => o.sec && !o.hide && !("stealth" === o.t && "hard" === cd)), speaker = m.brief[0][0], c = castOf(speaker);
     let k = 0;
-    el.innerHTML = '<div class="lsMap">' + missionMapSVG(m) + '</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-' + fac + '">' + CAMPAIGNS[fac].title.toUpperCase() + " \xB7 MISSION " + (idx2 + 1) + " \xB7 " + CDIFF[cd].n + "</div><h1>" + m.name.toUpperCase() + '</h1><div class="lsLoc">' + m.loc + " \xB7 " + mapName(m.map) + "</div>" + (m.hero || m.noBuild ? "" : '<div class="lsSec">NEW TECHNOLOGY</div><div class="bTech">' + tierNews(fac, m.tier) + "</div>") + '<div class="lsSec">PRIMARY OBJECTIVES</div>' + prim.map((o) => '<div class="bObj"><b style="color:#46e06a">\u25C6</b>' + o.text + "</div>").join("") + (sec.length ? '<div class="lsSec">BONUS</div>' + sec.map((o) => '<div class="bObj sec"><b style="color:#ff9a2c">\u25C6</b>' + o.text + "</div>").join("") : "") + '<div class="lsVo"><span class="rbPort' + (lsImg ? " img" : "") + '" style="--rc:' + c.c + (lsImg ? ";background-image:url(" + lsImg + ")" : "") + '">' + (lsImg ? "" : c.n.split(" ").map((w) => w[0]).join("").slice(-2)) + '</span><span><b style="color:' + c.c + '">' + c.n.toUpperCase() + '</b><i class="lsWave"></i></span></div><div class="lsTip">TIP \u2014 ' + pick(LOAD_TIPS) + '</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING\u2026</button></div>';
+    el.innerHTML = '<div class="lsMap">' + missionMapSVG(m) + '</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-' + fac + '">' + (defOv ? "TRAINING" : CAMPAIGNS[fac].title.toUpperCase() + " \xB7 MISSION " + (idx2 + 1) + " \xB7 " + CDIFF[cd].n) + "</div><h1>" + m.name.toUpperCase() + '</h1><div class="lsLoc">' + m.loc + " \xB7 " + mapName(m.map) + "</div>" + (m.hero || m.noBuild || defOv ? "" : '<div class="lsSec">NEW TECHNOLOGY</div><div class="bTech">' + tierNews(fac, m.tier) + "</div>") + '<div class="lsSec">PRIMARY OBJECTIVES</div>' + prim.map((o) => '<div class="bObj"><b style="color:#46e06a">\u25C6</b>' + o.text + "</div>").join("") + (sec.length ? '<div class="lsSec">BONUS</div>' + sec.map((o) => '<div class="bObj sec"><b style="color:#ff9a2c">\u25C6</b>' + o.text + "</div>").join("") : "") + '<div class="lsVo"><span class="rbPort' + (lsImg ? " img" : "") + '" style="--rc:' + c.c + (lsImg ? ";background-image:url(" + lsImg + ")" : "") + '">' + (lsImg ? "" : c.n.split(" ").map((w) => w[0]).join("").slice(-2)) + '</span><span><b style="color:' + c.c + '">' + c.n.toUpperCase() + '</b><i class="lsWave"></i></span></div><div class="lsTip">TIP \u2014 ' + pick(LOAD_TIPS) + '</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING\u2026</button></div>';
     el.classList.remove("hidden"), S.running = false;
     const bar = el.querySelector(".lsBar i"), go = el.querySelector(".lsGo");
     bar.style.width = "0%", requestAnimationFrame(() => {
@@ -21990,7 +22089,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const m = S.mission;
     if (!m || !m.def) return "";
     radioStop();
-    const lines = (win ? m.def.win : m.def.lose) || [], last = win && m.idx === CAMPAIGNS[m.fac].missions.length - 1, endKey = m.fac + "_end", autoEnd = last && !filmSeen(endKey);
+    const lines = (win ? m.def.win : m.def.lose) || [], last = !m.training && win && m.idx === CAMPAIGNS[m.fac].missions.length - 1, endKey = m.fac + "_end", autoEnd = last && !filmSeen(endKey);
     last && setTimeout(() => {
       const b = $("#dEnd");
       b && (b.onclick = () => playFilm(endKey));
@@ -22023,6 +22122,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     applyPendingMission,
     otherFacs,
     launchTutorial,
+    showTraining,
+    launchTraining,
+    TRAINING,
     updateTutorial,
     updateTutorialPanel,
     skipTutorial,
@@ -23201,7 +23303,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const lb = $("#loadBtn");
     lb && (lb.onclick = () => showSaveLoad("load"));
     const tb = $("#tutorialBtn");
-    tb && (tb.onclick = launchTutorial);
+    tb && (tb.onclick = showTraining);
     const ab = $("#adminBtn");
     ab && (ab.onclick = showAdmin);
     const acb = $("#accountBtn");
@@ -23390,7 +23492,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
     S.spyReveals && S.spyReveals.length && (S.spyReveals.forEach((r) => r.t -= e), S.spyReveals = S.spyReveals.filter((r) => r.t > 0));
     tickCrates(e), tickIronFx();
-    for (const t of S.players) t.neutral || (capCredits(t), t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), t.curtainCD > 0 && (t.curtainCD -= e), tickProduction(t, e), t.isAI ? (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e), aiCurtain(t)) : 0 === t.id && S.autopilot && (tickAI(t, e), aiMicro(t, e)));
+    for (const t of S.players) t.neutral || (capCredits(t), t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), t.curtainCD > 0 && (t.curtainCD -= e), tickProduction(t, e), t.isAI ? (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), t.ai.idle || tickAI(t, e), aiMicro(t, e), t.ai.idle || aiCurtain(t)) : 0 === t.id && S.autopilot && (tickAI(t, e), aiMicro(t, e)));
     for (const t of S.units) tickUnit(t, e);
     snowTrails();
     tickSeparation(e);

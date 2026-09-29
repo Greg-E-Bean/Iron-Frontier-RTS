@@ -21,6 +21,7 @@ const FFMPEG = process.env.FFMPEG || cp.execSync(`python3 -c "import imageio_ffm
 const VOX = {
   c_narr: [9, -1.5, .92], c_reyes: [7, 0, .97], c_hale: [6, 0, 1.02], c_ghost: [2, 0, 1], c_marsh: [10, .5, 1.02],
   c_draganov: [5, -3, .9], c_volkova: [8, -1, .95], c_bogdan: [10, -2.5, 1], c_reaper: [5, -5, .88],
+  c_instructor: [6, -1.5, 1.0],
   c_voice: [9, -4.5, .86, "hive"], c_senna: [4, .5, .95, "hivelight"], c_phantom: [1, -1.5, .95, "hivelight"],
   us_m: [6, -.5, 1.05], us_f: [3, 0, 1.05], gb_m: [9, 0, 1.03], gb_f: [7, .5, 1.02], gb2_m: [10, 0, 1.05], gb2_f: [8, .5, 1.03],
   ru_m: [5, -1.5, .95], ru_f: [8, -1.5, .98], hive_m: [9, -3.5, .9, "hivelight"], hive_f: [1, -1, .95, "hivelight"],

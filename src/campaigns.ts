@@ -11,7 +11,7 @@ function otherFacs(fac){return["vanguard","legion","syndicate"].filter(f=>f!==fa
 
 // Characters speak over the radio in their own voice.
 const CAST={
-  narr:{n:"Narrator",fac:"vanguard",acc:"rp",g:"m",p:.82,r:.9,c:"#d8dde2"},
+  narr:{n:"Narrator",fac:"vanguard",acc:"rp",g:"m",p:.82,r:.9,c:"#d8dde2"},instructor:{n:"Drill Instructor",fac:"vanguard",acc:"us",g:"m",p:.95,r:1.02,c:"#e8d27a",hat:"cap",role:"Training Command"},
   marsh:{n:"Dr. Elias Marsh",fac:"vanguard",acc:"rp",g:"m",p:1.02,r:1.08,c:"#9fe8d0",hat:"glasses",role:"Project Starfall — lead scientist"},
   reyes:{n:"Col. Ada Reyes",fac:"vanguard",acc:"rp",g:"f",p:1,r:1,c:"#8fd0ff",hat:"beret",role:"Vanguard Command"},
   hale:{n:"Lt. Marcus Hale",fac:"vanguard",acc:"us",g:"m",p:1,r:1.06,c:"#a8e0ff",hat:"helmet",role:"Vanguard 3rd Battlegroup"},
@@ -371,7 +371,7 @@ syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard bl
 for(const fac in CAMPAIGNS)CAMPAIGNS[fac].missions.forEach((m,i)=>{m.tier=m.tier||i+1;m.unlock&&!m._u&&(m.brief.push(m.unlock),m._u=1)});
 const TIER_BLD={power:2,refinery:2,hive:2,barracks:2,wall:2,gate:2,def1:2,orerig:3,factory:3,silo:3,repair:3,lab:4,airfield:4,aa:4,def2:4,triturret:4,bastion:5,support:5,navalyard:6,super:7};
 function unitTier(k){const u=UNITS[k];if(!u)return 9;if(/^titan_/.test(k)||"bastion"===k)return 5;if("sea"===u.tab||"navalyard"===u.from)return 6;if("airfield"===u.from||"skyjack"===k)return 4;if("lab"===u.req)return 4;if("inf"===u.tab)return 1;if("miner"===u.role||"hivetrans"===k||"drone"===k)return 2;return 3}
-function techAllowed(k,isBld,abil){const m=S.mission,T=m&&m.tier;if(!T||m.tutorial)return!0;if(abil)return"super"===k?T>=7:"curtain"===k?T>=5:"spy"===k?T>=4:!0;return(isBld?TIER_BLD[k]||2:unitTier(k))<=T}
+function techAllowed(k,isBld,abil){const m=S.mission,T=m&&m.tier;if(!T||m.tutorial||m.training)return!0;if(abil)return"super"===k?T>=7:"curtain"===k?T>=5:"spy"===k?T>=4:!0;return(isBld?TIER_BLD[k]||2:unitTier(k))<=T}
 function tierNews(fac,t){const b=k=>bname(k,fac),u=k=>uname(k,fac),F=FACTIONS[fac];return{1:"Infantry only. Capture buildings with Technicians; no construction.",2:b("conyard")+": "+b("power")+", "+b("refinery")+", "+b("barracks")+" and "+b("def1")+".",3:b("factory")+": "+u(F.main)+", support vehicles and the "+b("repair")+".",4:b("lab")+", "+b("airfield")+", aircraft, advanced defences and elite infantry.",5:"Titan walker: the "+u("titan_"+("vanguard"===fac?"vanguard":"legion"===fac?"legion":"syndicate"))+", and the "+b("support")+" support structure.",6:"Naval yard and the full conventional arsenal.",7:"Superweapon: the "+b("super")+".",8:"Everything is authorised."}[t]||""}
 // ---- difficulty ----------------------------------------------------------------
 const CDIFF={easy:{n:"RECRUIT",d:"Weaker enemies, smaller attacks, more credits. Stealth: short sight range, slow to spot you.",shift:-1,wave:.6,cash:1.4,det:80,detT:2.8,emp:100,alarmT:15},
@@ -381,6 +381,60 @@ function campDiff(){try{const d=localStorage.getItem("ifr_campdiff");return CDIF
 function setCampDiff(d){try{localStorage.setItem("ifr_campdiff",d)}catch(e){}}
 const DORDER=["easy","normal","hard"],shiftDiff=(d,k)=>DORDER[clamp(DORDER.indexOf(d)+k,0,2)];
 // ---- launching ---------------------------------------------------------------
+// ---- training ------------------------------------------------------------------
+// Two short, forgiving exercises on the campaign engine. The enemy is idle (it
+// builds nothing, no defences); every attack is scripted. Say/Obj helpers keep
+// the definitions readable.
+const TI=(t:string)=>["say","instructor",t];
+const TRAINING:any={
+rts:{name:"Basic Training",map:"octagon",loc:"Training Grounds",spawn:0,tier:0,
+ brief:[["instructor","Welcome to training, Commander. Everything here is safe to get wrong."],["instructor","We'll set up a base, train a squad, fight off a raid, repair the damage, and take out an enemy outpost."]],
+ foes:[{diff:"easy",spawn:2,base:["power","barracks"],idle:1}],
+ start:{credits:6000},
+ obj:[{id:"sel",t:"flag",flag:"select",text:"Select your Mobile HQ — tap it"},
+  {id:"hq",t:"build",key:"conyard",n:1,hide:1,text:"Deploy it — tap DEPLOY, then tap open ground"},
+  {id:"pow",t:"build",key:"power",n:1,hide:1,text:"Build a power plant — open the build tab and tap its card, then place it"},
+  {id:"ref",t:"build",key:"refinery",n:1,hide:1,text:"Build a refinery — it comes with a harvester"},
+  {id:"bar",t:"build",key:"barracks",n:1,hide:1,text:"Build a barracks"},
+  {id:"train",t:"train",n:4,hide:1,text:"Train 4 infantry — select the barracks and tap a unit card"},
+  {id:"move",t:"flag",flag:"move",hide:1,text:"Select your squad and tap the ground to move it"},
+  {id:"raid",t:"kills",n:3,hide:1,text:"Raiders! Select your squad and tap an enemy to attack"},
+  {id:"fix",t:"flag",flag:"repair",hide:1,text:"Repair the damaged building — tap REPAIR, then tap the building"},
+  {id:"amove",t:"flag",flag:"amove",hide:1,text:"Attack-move — tap A-MOVE (or press Q), then tap toward the enemy outpost"},
+  {id:"win",t:"elim",hide:1,text:"Destroy the enemy outpost"}],
+ ev:[{at:2,do:[TI("First, tap your Mobile HQ to select it. That big truck is your base on wheels.")]},
+  {done:"sel",do:[["show","hq"],TI("Good. Now tap DEPLOY and put it down on open ground. That's your headquarters.")]},
+  {done:"hq",do:[["show","pow"],TI("Every base needs power. Open the build tab, tap the power plant card, then tap a spot inside the glowing zone.")]},
+  {done:"pow",do:[["show","ref"],TI("Now a refinery. It comes with a harvester that fetches ore for credits on its own.")]},
+  {done:"ref",do:[["show","bar"],TI("Next, a barracks, so we can train soldiers.")]},
+  {done:"bar",do:[["show","train"],TI("Select the barracks and tap an infantry card. Tap a card again to queue more.")]},
+  {done:"train",do:[["show","move"],TI("A squad! Drag a box around them, or tap ALL UNITS, then tap the ground to move them.")]},
+  {done:"move",do:[["show","raid"],TI("Contact! Raiders coming for the base. Tap an enemy to order an attack."),["wave",0,[["base",3]],{to:"base"}]]},
+  {done:"raid",do:[["damage","power",.4],["show","fix"],TI("Raid's over, but your power plant took a beating. Tap REPAIR, then tap the building. It costs a little, but it's worth it.")]},
+  {done:"fix",do:[["show","amove"],["credits",2000],TI("Now go on the offensive. Attack-move makes units fight anything they meet on the way. Tap A-MOVE, then tap toward the enemy.")]},
+  {done:"amove",do:[["show","win"],TI("Take out every enemy building. Train more troops if you need them.")]}],
+ win:[["instructor","Outstanding. You're ready for the real thing, Commander."]],lose:[["instructor","Everyone loses one in training. Try it again."]]},
+fps:{name:"Infiltration Training",map:"octagon",loc:"Training Grounds",spawn:0,tier:0,hero:1,fpsOnly:1,
+ brief:[["instructor","This one's first person, Commander. You're a single commando."],["instructor","Move, shoot, get inside an enemy building and blow it up from the inside."]],
+ foes:[{diff:"easy",spawn:1,base:["power","barracks"],idle:1}],
+ start:{},
+ obj:[{id:"walk",t:"reach",x:75,y:44,r:3,text:"Walk to the green marker — WASD or the left stick; look with the mouse or by dragging"},
+  {id:"shoot",t:"kills",n:3,hide:1,text:"Enemy soldiers! Aim (right mouse or AIM) and fire (left mouse or FIRE)"},
+  {id:"inside",t:"inside",key:"power",hide:1,text:"Get inside the enemy power plant — follow the arrow above your crosshair and walk in"},
+  {id:"c4",t:"flag",flag:"c4",hide:1,text:"Plant C4 — press B or tap PLANT C4"},
+  {id:"boom",t:"destroy",keys:["power"],slot:0,hide:1,text:"Get out before it blows — follow the arrow to the door"}],
+ ev:[{at:2,do:[TI("Look around, then walk to the green marker. The arrow above your crosshair always shows where to go.")]},
+  {done:"walk",do:[["show","shoot"],TI("Three soldiers heading your way. Aim down your sights, then fire."),["wave",0,[["base",3]],{to:"hero"}]]},
+  {done:"shoot",do:[["show","inside"],TI("Nice shooting. Now the power plant. Just walk into the building to go inside.")]},
+  {done:"inside",do:[["show","c4"],TI("You're in. Press B, or tap PLANT C4, to set the charge.")]},
+  {done:"c4",do:[["show","boom"],TI("Charge is ticking. Get out, now! Follow the arrow to the door.")]}],
+ win:[["instructor","Textbook. That's how the professionals do it."]],lose:[["instructor","Keep your head down next time. Try again."]]}};
+function showTraining(){radioStop(),hideLoading(),$("#menu").classList.remove("hidden");const card=(k,ic,t,d)=>'<button class="campCard" data-k="'+k+'"><div class="ccTop"><span class="ccIcon">'+ic+'</span><span class="ccFac">'+t+'</span></div><div class="ccTag">'+d+"</div></button>";
+$("#panelMain").innerHTML='<h1>TRAINING</h1><div class="sub">Learn the controls — nothing here counts against you</div><div id="campList">'+card("rts","⚑","BASE & ARMY","Build a base, train a squad, repel a scripted raid, repair, attack-move and destroy an outpost.")+card("fps","◎","FIRST PERSON & INFILTRATION","Move and shoot as a commando, get inside an enemy building, plant C4 and get out.")+card("tut","▸","QUICK SKIRMISH TUTORIAL","The original short checklist against an easy opponent.")+'</div><button id="backSetup" '+SECBTN+">BACK</button>";
+$("#panelMain").querySelectorAll(".campCard").forEach(b=>b.onclick=()=>"tut"===b.dataset.k?launchTutorial():launchTraining(b.dataset.k)),$("#backSetup").onclick=showSetup}
+function launchTraining(kind){const m=TRAINING[kind];if(!m)return;radioStop();const fac=cfg.fac||"vanguard",foe=otherFacs(fac)[0];
+cfg.map=m.map,cfg.fog="off",cfg.team=1,cfg.spawn=m.spawn||0,cfg.slots=m.foes.map(f=>({fac:foe,team:2,color:"def",spawn:f.spawn,diff:"easy"}));
+pendingMission={fac,idx:-1,training:kind,noBuild:!1,hero:!!m.hero,diff:"easy"},startGame(),showLoading(fac,-1,m)}
 let pendingMission=null;
 function launchMission(fac,idx){const camp=CAMPAIGNS[fac],m=camp&&camp.missions[idx];if(!m)return;radioStop();
 cfg.fac=fac,cfg.map=m.map,cfg.fog="on",cfg.team=1,cfg.spawn=m.spawn||0;
@@ -413,9 +467,9 @@ function preBuild(owner,list){const p=S.players[owner],hq=S.units.find(u=>u.owne
 
 // ---- mission state ---------------------------------------------------------------
 function applyPendingMission(){if(!pendingMission)return void(S.mission=null);if(pendingMission.tutorial)return S.mission={tutorial:!0,curStep:0,doneSteps:[]},S.tutorialMoved=!1,S.tutorialAmoved=!1,void(pendingMission=null);
-const pm=pendingMission,def=CAMPAIGNS[pm.fac].missions[pm.idx],st=def.start||{};pendingMission=null;
-const D=CDIFF[pm.diff||"normal"];S.mission={tier:def.tier,ruins:!!st.ruins,fac:pm.fac,idx:pm.idx,def,diff:pm.diff||"normal",D,fpsOnly:!!def.fpsOnly,noBuild:pm.noBuild,hero:pm.hero,objs:def.obj.map(o=>Object.assign({},o,{state:0,shown:!o.hide},"stealth"===o.t?{sec:"hard"!==pm.diff}:{})),evs:def.ev.map(()=>({n:0,next:0})),escorts:{},started:!1,lastT:0,lost0:0,kills0:0,stars:0};
-def.foes.forEach((f,i)=>{f.base&&preBuild(i+1,f.base)});
+const pm=pendingMission,def=pm.training?TRAINING[pm.training]:CAMPAIGNS[pm.fac].missions[pm.idx],st=def.start||{};pendingMission=null;S.flags={};
+const D=CDIFF[pm.diff||"normal"];S.mission={training:pm.training||null,tier:def.tier,ruins:!!st.ruins,fac:pm.fac,idx:pm.idx,def,diff:pm.diff||"normal",D,fpsOnly:!!def.fpsOnly,noBuild:pm.noBuild,hero:pm.hero,objs:def.obj.map(o=>Object.assign({},o,{state:0,shown:!o.hide},"stealth"===o.t?{sec:"hard"!==pm.diff}:{})),evs:def.ev.map(()=>({n:0,next:0})),escorts:{},started:!1,lastT:0,lost0:0,kills0:0,stars:0};
+def.foes.forEach((f,i)=>{f.base&&preBuild(i+1,f.base),f.idle&&S.players[i+1]&&(S.players[i+1].ai.idle=!0)});
 st.base&&preBuild(0,st.base);
 // An abandoned outpost: no Mobile HQ, a squad on foot, and half-ruined neutral buildings to capture.
 st.noMcv&&S.units.filter(u=>0===u.owner).forEach(u=>killUnitSilent(u));
@@ -462,6 +516,8 @@ case"capture":{const n=ownedCount(b=>b.d.civ||SPECIALS.includes(b.key));o.cur=n;
 case"reach":return S.units.some(u=>0===u.owner&&!u.dead&&inZone(u,o.x,o.y,o.r))?1:0;
 case"train":{for(const u of S.units)0===u.owner&&!u.dead&&u.id>=m.id0&&"inf"===u.d.kind&&(m.trained[u.id]=1);const n=Object.keys(m.trained).length;o.cur=n;return n>=o.n?1:0}
 case"stealth":return m.st&&m.st.alarms>0?-1:0;
+case"flag":return"select"===o.flag&&S.sel.some(u=>0===u.owner&&!u.dead)||S.flags&&S.flags[o.flag]?1:0;
+case"inside":{const u=playerHero();return u&&u.inside&&!u.inside.dead&&u.inside.key===o.key&&0!==u.inside.owner?1:0}
 case"own":return ownedCount(b=>b.key===o.key)?1:0;
 case"build":{const n=S.blds.filter(b=>0===b.owner&&!b.dead&&!b.building&&(b.key===o.key||"refinery"===o.key&&"hive"===b.key)).length;o.cur=n;return n>=o.n?1:0}
 case"kills":{const n=(S.players[0].kills||0)-(o.k0||0);o.cur=n;return n>=o.n?1:0}
@@ -478,10 +534,11 @@ case"emp":{const ow=a[1]+1,T=m.D.emp;for(const b of S.blds)!b.dead&&b.owner===ow
 case"hint":hint(a[1]);break;
 case"pingRuin":{const id=m.ruinB&&m.ruinB[a[1]],b=id&&S.blds.find(b=>b.id===id);b&&(S.marker={x:b.x,y:b.y,t:0,c:"#ffd75e"});break}
 case"miner":{const b=S.blds.find(b=>0===b.owner&&!b.dead&&"refinery"===b.key);if(b){const f=S.players[0].f,k="syndicate"===S.players[0].fac?"miner_vanguard":f.miner,u=addUnit(0,k,b.x,b.y+70);u&&(u.order="harvest")}break}
+case"damage":{const b=S.blds.find(b=>0===b.owner&&!b.dead&&b.key===a[1])||S.blds.find(b=>0===b.owner&&!b.dead&&"conyard"!==b.key);b&&(b.hp=Math.min(b.hp,b.maxhp*a[2]),S.marker={x:b.x,y:b.y,t:0,c:"#ff5a4a"},boom(b.x,b.y,1.4));break}
 case"credits":S.players[0].credits+=a[1],hint("+"+a[1]+" credits"),sfx("sel");break;
 case"reveal":S.spyReveals.push({x:T2P(a[1]),y:T2P(a[2]),r:32*a[3],t:a[4]||20});break;
 case"ping":S.marker={x:T2P(a[1]),y:T2P(a[2]),t:0,c:"#ffd75e"};break;
-case"show":{const o=m.objs.find(o=>o.id===a[1]);o&&!o.shown&&(o.shown=!0,sfx("ready"),hint("NEW OBJECTIVE: "+o.text));break}
+case"show":{const o=m.objs.find(o=>o.id===a[1]);o&&!o.shown&&(o.flag&&S.flags&&(S.flags[o.flag]=0),o.shown=!0,sfx("ready"),hint("NEW OBJECTIVE: "+o.text));break}
 case"go":{m.escorts[a[1]]=[a[2],a[3]];const us=S.units.filter(u=>!u.dead&&u.mtag===a[1]&&!u.arrived);us.length&&cmdMove(us,T2P(a[2]),T2P(a[3]));break}
 case"reinf":{const[spec,from,to]=[a[1],a[2],a[3]],us=spawnGroup(0,spec,from[0],from[1]);to&&us.length&&cmdMove(us,T2P(to[0]),T2P(to[1]),!0);S.marker={x:T2P(from[0]),y:T2P(from[1]),t:0,c:"#7dff8a"},hint("Reinforcements have arrived"),sfx("ready");break}
 case"wave":{const owner=a[1]+1,p=S.players[owner];if(!p||p.defeated)break;const opt=a[3]||{},k=evs.n-1,grow=opt.grow||0,spec=a[2].map(([key,n])=>[key,Math.max(1,Math.round((n+Math.floor(k*grow))*m.D.wave))]);
@@ -507,7 +564,7 @@ updateObjPanel(m);
 if(S.players[0].defeated)return"lose";
 if(m.objs.some(o=>!o.sec&&-1===o.state))return"lose";
 const prim=m.objs.filter(o=>!o.sec&&!END_OK[o.t]);
-if(prim.every(o=>o.shown&&1===o.state)){for(const o of m.objs)0===o.state&&(o.state=END_OK[o.t]?1:-1);m.stars=1+m.objs.filter(o=>o.sec&&1===o.state).length;saveStars(m.fac,m.idx,m.stars);return"win"}
+if(prim.every(o=>o.shown&&1===o.state)){for(const o of m.objs)0===o.state&&(o.state=END_OK[o.t]?1:-1);m.stars=1+m.objs.filter(o=>o.sec&&1===o.state).length;m.training||saveStars(m.fac,m.idx,m.stars);return"win"}
 return null}
 
 // ---- stealth: enemies cannot target the cloaked hero until the alarm is raised;
@@ -542,7 +599,7 @@ function objLabel(o){let t=o.text;"survive"===o.t&&0===o.state&&(t+=" — "+fmtT
 ("capture"===o.t||"build"===o.t||"kills"===o.t||"train"===o.t)&&0===o.state&&null!=o.cur&&(t+=" ("+Math.min(o.cur,o.n)+"/"+o.n+")");"escort"===o.t&&0===o.state&&(t+=" ("+(o.cur||0)+"/"+o.need+")");"timeMax"===o.t&&0===o.state&&(t+=" — "+fmtT(Math.max(0,o.time-S.time)));
 "lossMax"===o.t&&(t+=" ("+((S.players[0].lost||0)-S.mission.lost0)+"/"+o.n+")");return t}
 function updateObjPanel(m){const el=$("#tutorialPanel");if(!el)return;el.classList.remove("hidden");el.classList.add("obj");const rows=m.objs.filter(o=>o.shown).map(o=>{const cls=1===o.state?" done":-1===o.state?" fail":" cur";return'<div class="ts'+cls+(o.sec?" sec":"")+'"><b>'+(1===o.state?"✓":-1===o.state?"✗":o.sec?"★":"◆")+"</b><span>"+objLabel(o)+"</span></div>"}).join(""),st=m.st,meter=st?st.alarm>0?'<div class="stl alarm">⚠ ALARM — '+Math.ceil(st.alarm)+"s</div>":'<div class="stl'+(st.seeing?" warn":"")+'">'+(st.seeing?"BEING SPOTTED":"HIDDEN")+'<i style="width:'+Math.round(10*st.sus/m.D.detT)*10+'%"></i></div>':"",sig=rows+meter+(el._min?"m":"");if(el._sig===sig)return;el._sig=sig;
-el.innerHTML='<div class="th">'+(m.idx+1)+". "+m.def.name.toUpperCase()+'<button class="tMin">'+(el._min?"+":"–")+"</button></div>"+(el._min?"":meter+rows)}
+el.innerHTML='<div class="th">'+(m.training?"TRAINING · ":m.idx+1+". ")+m.def.name.toUpperCase()+'<button class="tMin">'+(el._min?"+":"–")+"</button></div>"+(el._min?"":meter+rows)}
 function skipTutorial(){S.mission=null,hint("Tutorial skipped — good luck!")}
 function updateTutorialPanel(){const m=S.mission,el=$("#tutorialPanel");if(m&&m.def)return;el.classList.remove("obj");if(!m||!m.tutorial)return void el.classList.add("hidden");el.classList.remove("hidden");const sig=(m.doneSteps||[]).join(",")+"|"+m.curStep;if(el._sig===sig)return;el._sig=sig;const rows=TUTORIAL_STEPS.map((s,i)=>{const done=m.doneSteps&&m.doneSteps[i],cur=i===m.curStep;return'<div class="ts'+(done?" done":cur?" cur":"")+'"><b>'+(done?"✓":i+1+".")+"</b><span>"+s.text+"</span></div>"}).join("");el.innerHTML='<div class="th">TUTORIAL<button class="tSkip">SKIP</button></div>'+rows}
 $("#tutorialPanel").addEventListener("click",e=>{if(e.target.closest(".tSkip"))return skipTutorial();const el=$("#tutorialPanel");e.target.closest(".tMin")&&(el._min=!el._min,el._sig=null)});
@@ -552,7 +609,7 @@ const lineT=(w,t,est)=>{const d="function"==typeof castDur?castDur(w,t):0;return
 function loadingVO(m){const prim=m.obj.filter(o=>!o.sec&&!o.hide);return[m.name+". Primary objectives."].concat(prim.map((o,i)=>(prim.length>1?["First","Then","And finally"][Math.min(i,2)]+": ":"")+o.text+"."),m.fpsOnly?["You are on your own out there. Stay out of sight."]:[])}
 // Every (character, line) the campaigns and films can speak, for the recording script.
 function castLineList(){const out=[],seen={},add=(w,t)=>{const k=w+"|"+t;t&&!seen[k]&&(seen[k]=1,out.push({who:w,text:t}))};
-for(const fac in CAMPAIGNS)for(const m of CAMPAIGNS[fac].missions){m.brief.forEach(([w,t])=>add(w,t));m.ev.forEach(e=>e.do.forEach(a=>"say"===a[0]&&add(a[1],a[2])));(m.alarm||[]).concat(m.win||[],m.lose||[]).forEach(([w,t])=>add(w,t));loadingVO(m).forEach(t=>add(m.brief[0][0],t))}
+for(const m of Object.values(CAMPAIGNS).flatMap((c:any)=>c.missions).concat(Object.values(TRAINING))){m.brief.forEach(([w,t])=>add(w,t));m.ev.forEach(e=>e.do.forEach(a=>"say"===a[0]&&add(a[1],a[2])));(m.alarm||[]).concat(m.win||[],m.lose||[]).forEach(([w,t])=>add(w,t));loadingVO(m).forEach(t=>add(m.brief[0][0],t))}
 if("undefined"!=typeof FILMS)for(const k in FILMS)FILMS[k].shots.forEach(sh=>sh.say&&add(sh.say[0],sh.say[1]));return out}
 // ---- menus ---------------------------------------------------------------------------
 const FAC_ICON={vanguard:"✦",legion:"✪",syndicate:"◉"};
@@ -580,9 +637,9 @@ const mk=S.mission&&S.mission.def===m?objMarkers():[];for(const q of mk.slice().
 c.push('<g font-family="monospace" font-size="26" font-weight="700" transform="translate('+(W-270)+' 0)"><rect x="14" y="'+(H-86)+'" width="250" height="72" rx="8" fill="#000a"/><path d="M34 '+(H-66)+'l12 12-12 12-12-12z" fill="#46e06a"/><text x="56" y="'+(H-45)+'" fill="#bff5c8">PRIMARY</text><path d="M34 '+(H-36)+'l10 10-10 10-10-10z" fill="#ff9a2c"/><text x="56" y="'+(H-17)+'" fill="#ffd2a0">BONUS</text></g>');
 return'<svg viewBox="0 0 '+W+" "+H+'" preserveAspectRatio="xMidYMid meet"><image href="'+img+'" width="'+W+'" height="'+H+'" preserveAspectRatio="none"/>'+c.join("")+"</svg>"}
 const LOAD_TIPS=["Bonus objectives earn stars — replay missions to collect them all.","High ground gives your units 30% more sight range.","Units on an overpass can't be hit by units passing underneath.","Garrison town buildings with infantry to hold them.","Power down a base and its defences stop firing."];
-function showLoading(fac,idx){const m=CAMPAIGNS[fac].missions[idx],cd=campDiff();let el=$("#loadScreen");el||(el=document.createElement("div"),el.id="loadScreen",document.body.appendChild(el));
+function showLoading(fac,idx,defOv?){const m=defOv||CAMPAIGNS[fac].missions[idx],cd=defOv?"easy":campDiff();let el=$("#loadScreen");el||(el=document.createElement("div"),el.id="loadScreen",document.body.appendChild(el));
 "function"==typeof probeMedia&&probeMedia(m.brief[0][0]);const lsImg="function"==typeof fmvSrc&&fmvSrc(m.brief[0][0]),prim=m.obj.filter(o=>!o.sec&&!o.hide),sec=m.obj.filter(o=>o.sec&&!o.hide&&!("stealth"===o.t&&"hard"===cd)),speaker=m.brief[0][0],c=castOf(speaker);let k=0;
-el.innerHTML='<div class="lsMap">'+missionMapSVG(m)+'</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-'+fac+'">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+" · "+CDIFF[cd].n+'</div><h1>'+m.name.toUpperCase()+'</h1><div class="lsLoc">'+m.loc+" · "+mapName(m.map)+'</div>'+(m.hero||m.noBuild?"":'<div class="lsSec">NEW TECHNOLOGY</div><div class="bTech">'+tierNews(fac,m.tier)+"</div>")+'<div class="lsSec">PRIMARY OBJECTIVES</div>'+prim.map(o=>'<div class="bObj"><b style="color:#46e06a">◆</b>'+o.text+"</div>").join("")+(sec.length?'<div class="lsSec">BONUS</div>'+sec.map(o=>'<div class="bObj sec"><b style="color:#ff9a2c">◆</b>'+o.text+"</div>").join(""):"")+'<div class="lsVo"><span class="rbPort'+(lsImg?" img":"")+'" style="--rc:'+c.c+(lsImg?";background-image:url("+lsImg+")":"")+'">'+(lsImg?"":c.n.split(" ").map(w=>w[0]).join("").slice(-2))+'</span><span><b style="color:'+c.c+'">'+c.n.toUpperCase()+'</b><i class="lsWave"></i></span></div><div class="lsTip">TIP — '+pick(LOAD_TIPS)+'</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING…</button></div>';
+el.innerHTML='<div class="lsMap">'+missionMapSVG(m)+'</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-'+fac+'">'+(defOv?"TRAINING":CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+" · "+CDIFF[cd].n)+'</div><h1>'+m.name.toUpperCase()+'</h1><div class="lsLoc">'+m.loc+" · "+mapName(m.map)+'</div>'+(m.hero||m.noBuild||defOv?"":'<div class="lsSec">NEW TECHNOLOGY</div><div class="bTech">'+tierNews(fac,m.tier)+"</div>")+'<div class="lsSec">PRIMARY OBJECTIVES</div>'+prim.map(o=>'<div class="bObj"><b style="color:#46e06a">◆</b>'+o.text+"</div>").join("")+(sec.length?'<div class="lsSec">BONUS</div>'+sec.map(o=>'<div class="bObj sec"><b style="color:#ff9a2c">◆</b>'+o.text+"</div>").join(""):"")+'<div class="lsVo"><span class="rbPort'+(lsImg?" img":"")+'" style="--rc:'+c.c+(lsImg?";background-image:url("+lsImg+")":"")+'">'+(lsImg?"":c.n.split(" ").map(w=>w[0]).join("").slice(-2))+'</span><span><b style="color:'+c.c+'">'+c.n.toUpperCase()+'</b><i class="lsWave"></i></span></div><div class="lsTip">TIP — '+pick(LOAD_TIPS)+'</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING…</button></div>';
 el.classList.remove("hidden"),S.running=!1;const bar=el.querySelector(".lsBar i"),go=el.querySelector(".lsGo");bar.style.width="0%",requestAnimationFrame(()=>{bar.style.transition="width 1.6s ease-out",bar.style.width="100%"});
 try{cineMood("tense")}catch(e){}
 const vo=loadingVO(m);let vi=0;const tok=el._tok=(el._tok||0)+1;
@@ -591,7 +648,7 @@ setTimeout(()=>{if(el._tok!==tok)return;go.disabled=!1,go.textContent="BEGIN MIS
 go.onclick=()=>{el._tok++,el.classList.add("hidden");try{speakStop(),cineStop()}catch(e){}S.running=!0}}
 
 // Debrief block for the results screen.
-function missionDebrief(win){const m=S.mission;if(!m||!m.def)return"";radioStop();const lines=(win?m.def.win:m.def.lose)||[],last=win&&m.idx===CAMPAIGNS[m.fac].missions.length-1,endKey=m.fac+"_end",autoEnd=last&&!filmSeen(endKey);
+function missionDebrief(win){const m=S.mission;if(!m||!m.def)return"";radioStop();const lines=(win?m.def.win:m.def.lose)||[],last=!m.training&&win&&m.idx===CAMPAIGNS[m.fac].missions.length-1,endKey=m.fac+"_end",autoEnd=last&&!filmSeen(endKey);
 last&&setTimeout(()=>{const b=$("#dEnd");b&&(b.onclick=()=>playFilm(endKey));autoEnd&&playFilm(endKey)},autoEnd?2500:0);
 let tk=0;const speak=()=>{if(!lines[tk])return;const[w,t]=lines[tk++],c=castOf(w);try{speakAs(c.fac,t,c.acc,c.g,c.p,c.r,!1,w)}catch(e){}setTimeout(speak,1e3*lineT(w,t,clamp(1.2+.062*t.length,3,11)))};autoEnd||setTimeout(speak,600);
 const objs=m.objs.filter(o=>o.shown).map(o=>'<div class="bObj'+(o.sec?" sec":"")+(1===o.state?" ok":-1===o.state?" bad":"")+'"><b>'+(1===o.state?"✓":-1===o.state?"✗":"–")+"</b>"+o.text+"</div>").join("");
@@ -599,7 +656,7 @@ return'<div class="dBrief">'+(last?'<button class="bPlay" id="dEnd">▶ WATCH TH
 
 Object.assign(window, {
   FAC_NAME, CAMPAIGNS, launchMission, checkMissionOutcome, campaignUnlocked, unlockNext, applyPendingMission,
-  otherFacs, launchTutorial, updateTutorial, updateTutorialPanel, skipTutorial,
+  otherFacs, launchTutorial, showTraining, launchTraining, TRAINING, updateTutorial, updateTutorialPanel, skipTutorial,
   techAllowed, tierNews, objMarkers, castLineList, showCampaign, showMissionList, showBriefing, missionDebrief, stealthBlock, showLoading, campDiff, CDIFF, missionStars, radioStop, CAST, castOf,
 });
 
