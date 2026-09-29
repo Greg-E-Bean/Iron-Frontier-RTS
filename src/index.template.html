@@ -706,6 +706,29 @@ body.finepointer #fpskeys{display:block}
   #fpslock{bottom:calc(env(safe-area-inset-bottom,0px) + 144px)}
 }
 
+/* ---- first person on a portrait phone: every control on its own spot, nothing touching ---- */
+@media (orientation:portrait) and (max-width:560px){
+  #fpsui #fpsexit{left:10px;top:calc(env(safe-area-inset-top,0px) + 10px);padding:7px 11px;font-size:11px}
+  #fpsui #fpsview{left:78px!important;top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding:7px 11px!important;font-size:11px!important}
+  #fpsui #fpsbar{left:146px;transform:none;top:calc(env(safe-area-inset-top,0px) + 10px);min-width:0;width:100px;padding:3px 6px;font-size:10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  #fpsui #fpsenter{top:calc(env(safe-area-inset-top,0px) + 168px);max-width:calc(100% - 40px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #fpsui #fpsbomb{top:calc(env(safe-area-inset-top,0px) + 218px);max-width:calc(100% - 40px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.fps #hint{top:calc(env(safe-area-inset-top,0px) + 104px);left:10px;transform:none;max-width:calc(100% - 160px);text-align:left;font-size:11px}
+  #fpsui #fpsstick{left:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);width:112px;height:112px}
+  #fpsui #fpsfire{right:16px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 28px)!important;width:92px;height:92px}
+  #fpsui #fpsaim{right:122px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 34px)!important;width:58px;height:58px}
+  #fpsui #fpsreload{right:124px;bottom:calc(env(safe-area-inset-bottom,0px) + 106px)!important;width:54px;height:54px}
+  #fpsui #fpscrouch{right:192px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 36px)!important;width:54px;height:54px}
+  #fpsui #fpsjump{right:22px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 134px)!important;width:56px;height:56px}
+  #fpsui #fpsability{right:22px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 204px)!important;width:56px;height:56px}
+  #fpsui #fpsweapon{left:auto!important;right:92px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 176px)!important;width:54px!important;height:54px!important}
+  #fpsui #fpssprint{left:18px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 156px)!important;width:54px!important;height:54px!important}
+  #fpsui #fpslock{left:82px;bottom:calc(env(safe-area-inset-bottom,0px) + 170px)}
+  #fpsui #fpsstamina{left:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 222px);width:112px}
+  #fpsui #fpsammo{bottom:calc(env(safe-area-inset-bottom,0px) + 262px)}
+  #fpsui #fpsfireL{display:none!important}
+}
+
 /* ---- Tab icons + responsive sidebar ---- */
 .tab{display:flex;align-items:center;justify-content:center;gap:5px}
 .tab .ico{width:15px;height:15px;flex:0 0 auto}

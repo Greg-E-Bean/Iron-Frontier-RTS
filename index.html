@@ -706,6 +706,29 @@ body.finepointer #fpskeys{display:block}
   #fpslock{bottom:calc(env(safe-area-inset-bottom,0px) + 144px)}
 }
 
+/* ---- first person on a portrait phone: every control on its own spot, nothing touching ---- */
+@media (orientation:portrait) and (max-width:560px){
+  #fpsui #fpsexit{left:10px;top:calc(env(safe-area-inset-top,0px) + 10px);padding:7px 11px;font-size:11px}
+  #fpsui #fpsview{left:78px!important;top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding:7px 11px!important;font-size:11px!important}
+  #fpsui #fpsbar{left:146px;transform:none;top:calc(env(safe-area-inset-top,0px) + 10px);min-width:0;width:100px;padding:3px 6px;font-size:10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  #fpsui #fpsenter{top:calc(env(safe-area-inset-top,0px) + 168px);max-width:calc(100% - 40px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #fpsui #fpsbomb{top:calc(env(safe-area-inset-top,0px) + 218px);max-width:calc(100% - 40px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.fps #hint{top:calc(env(safe-area-inset-top,0px) + 104px);left:10px;transform:none;max-width:calc(100% - 160px);text-align:left;font-size:11px}
+  #fpsui #fpsstick{left:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);width:112px;height:112px}
+  #fpsui #fpsfire{right:16px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 28px)!important;width:92px;height:92px}
+  #fpsui #fpsaim{right:122px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 34px)!important;width:58px;height:58px}
+  #fpsui #fpsreload{right:124px;bottom:calc(env(safe-area-inset-bottom,0px) + 106px)!important;width:54px;height:54px}
+  #fpsui #fpscrouch{right:192px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 36px)!important;width:54px;height:54px}
+  #fpsui #fpsjump{right:22px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 134px)!important;width:56px;height:56px}
+  #fpsui #fpsability{right:22px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 204px)!important;width:56px;height:56px}
+  #fpsui #fpsweapon{left:auto!important;right:92px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 176px)!important;width:54px!important;height:54px!important}
+  #fpsui #fpssprint{left:18px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 156px)!important;width:54px!important;height:54px!important}
+  #fpsui #fpslock{left:82px;bottom:calc(env(safe-area-inset-bottom,0px) + 170px)}
+  #fpsui #fpsstamina{left:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 222px);width:112px}
+  #fpsui #fpsammo{bottom:calc(env(safe-area-inset-bottom,0px) + 262px)}
+  #fpsui #fpsfireL{display:none!important}
+}
+
 /* ---- Tab icons + responsive sidebar ---- */
 .tab{display:flex;align-items:center;justify-content:center;gap:5px}
 .tab .ico{width:15px;height:15px;flex:0 0 auto}
@@ -12841,7 +12864,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
   var FPS_INF_SC = 0.22;
   var FPS_VEH_SC = 0.34;
   function fpsUnitScale(e) {
-    return FPS.on && e && e.d ? "inf" === e.d.kind ? FPS_INF_SC : FPS_VEH_SC : 1;
+    return FPS.on && e && e.d ? "inf" === e.d.kind ? e.inside ? 1 : FPS_INF_SC : FPS_VEH_SC : 1;
   }
   function fpsEyeH(e) {
     return fpsUnitScale(e) * ("inf" === e.d.kind ? 19 : "leviathan" === e.key ? 44 : e.d.fly ? 22 : 34) - (FPS.crouching && "inf" === e.d.kind ? 6 : 0);
@@ -13189,7 +13212,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
       floor: new THREE.MeshStandardMaterial({ color: 7040600, map: floorTex, normalMap: GL.surfaces.sRough.normal, roughness: 0.95, metalness: 0 }),
       ceil: new THREE.MeshStandardMaterial({ color: 5658199, map: ceilTex, normalMap: GL.surfaces.sConcrete.normal, roughness: 0.97, metalness: 0, side: THREE.DoubleSide }),
       trim: new THREE.MeshStandardMaterial({ color: 3881787, map: trimTex, normalMap: GL.surfaces.sMetal.normal, roughness: 0.5, metalness: 0.65 }),
-      glass: new THREE.MeshStandardMaterial({ color: 9420504, roughness: 0.12, metalness: 0.15, transparent: true, opacity: 0.32, side: THREE.DoubleSide })
+      glass: new THREE.MeshStandardMaterial({ color: 6384520, roughness: 0.08, metalness: 0.35, transparent: true, opacity: 0.58, side: THREE.DoubleSide })
     };
     return GL.intMats;
   }
@@ -13202,7 +13225,13 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     if (segW > 0.4) panel(segW, h, -(winW / 2 + segW / 2), h / 2), panel(segW, h, winW / 2 + segW / 2, h / 2);
     if (winZ > 0.4) {
       panel(winW, winZ, 0, winZ / 2);
-      glassMat && panel(winW - 2, winH - 2, 0, winZ + winH / 2, glassMat);
+      glassMat && (panel(winW - 2, winH - 2, 0, winZ + winH / 2, glassMat), (() => {
+        const fm = ensureInteriorMats().trim, bar = (bw, bh, bx, by) => {
+          const m = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 1.6), fm);
+          m.position.set(bx, by, 0), grp.add(m);
+        };
+        bar(winW, 1.6, 0, winZ), bar(winW, 1.6, 0, winZ + winH), bar(1.6, winH, -winW / 2, winZ + winH / 2), bar(1.6, winH, winW / 2, winZ + winH / 2), bar(1.2, winH, 0, winZ + winH / 2), bar(winW, 1.2, 0, winZ + winH / 2);
+      })());
     }
     const topH = h - winZ - winH;
     if (topH > 0.4) panel(winW, topH, 0, h - topH / 2);
@@ -13899,7 +13928,14 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
           post.position.set(rx, floorZ + t01 * (ROOF_Z - floorZ) + railH / 2, zStart + t01 * gap), post.renderOrder = ro + 1, g.add(post);
         }
       }
-      const rf = hw, roof = new THREE.Mesh(new THREE.PlaneGeometry(rf * 2, rf * 2), im.floor);
+      const upH = ROOF_Z - ceilZ;
+      if (upH > 0.5) for (const [w, ry, px, pz] of [[half * 2, 0, 0, -half], [half * 2, 0, 0, half], [half * 2, Math.PI / 2, -half, 0], [half * 2, Math.PI / 2, half, 0]]) {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, upH), im.wall);
+        m.rotation.y = ry, m.position.set(px, ceilZ + upH / 2, pz), m.renderOrder = ro, g.add(m);
+      }
+      const roofMat = im.floor.clone();
+      roofMat.side = THREE.DoubleSide;
+      const rf = hw, roof = new THREE.Mesh(new THREE.PlaneGeometry(half * 2, half * 2), roofMat);
       roof.rotation.x = -Math.PI / 2, roof.position.y = ROOF_Z, roof.renderOrder = ro + 1, g.add(roof);
       const parH = 8;
       const mkPar = (w, rotY, px, pz) => {
@@ -15140,12 +15176,12 @@ varying vec3 vFgWN;
     const hemi = new THREE.HemisphereLight(16777215, 4473924, 0.5), sun = new THREE.DirectionalLight(16777215, 1.5), ml = new THREE.PointLight(16760944, 0, 3, 2), fill = new THREE.DirectionalLight(8952234, 0.35);
     scene.add(hemi, sun, fill), cam.add(ml), ml.position.set(0.1, -0.05, -0.9), fill.position.set(-1, 0.3, 0.6);
     const T = fgTextures(), mk = (b) => {
-      const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: b.roughness, metalness: b.metalness, map: b.map, normalMap: b.normalMap, normalScale: b.normalScale });
+      const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: b.roughness, metalness: b.metalness, map: b.map, normalMap: b.normalMap, normalScale: b.normalScale, side: THREE.DoubleSide });
       m.color = b.color.clone();
       return m;
     };
     const mats = {};
-    for (const k of BK) mats[k] = "emis" === k ? new THREE.MeshBasicMaterial({ vertexColors: true }) : mk(GL.mats[k]);
+    for (const k of BK) mats[k] = "emis" === k ? new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }) : mk(GL.mats[k]);
     mats.metal.metalness = 0.75, mats.metal.roughness = 0.38, mats.metal.envMapIntensity = 1;
     return FG.vm = { renderer: GL.renderer, scene, cam, hemi, sun, fill, ml, mats, T, st: { aim: 0, sprint: 0, rp: 0, rv: 0, rx: 0, rvx: 0, swX: 0, swY: 0, ly: null, lp: null, lastM: 0, draw: 0, boltT: 9, throwT: 0, lastT: 0, land: 0, lastJ: 0 } };
   }
@@ -15244,7 +15280,7 @@ varying vec3 vFgWN;
     st.lastJ && !air && (st.land = 1), st.lastJ = air, st.land = Math.max(0, st.land - dt * 3);
     vm.visible = !("long" === ud.wt && st.aim > 0.85);
     const s = ud.s, sightY = (ud.W.sight || 1) * s, sightX = (ud.W.sightY || 0) * s;
-    const hip = [0.17, -0.18, -0.34], ads = [-sightX, -sightY, -0.3], am = st.aim * ({ flamer: 0.5, tool: 0.35, none: 0, rocket: 0.9, launcher: 0.9 }[ud.wt] ?? 1);
+    const nar = Math.max(0.5, Math.min(1, CW / CH * 1.3)), hip = [0.17 * nar, -0.18 + 0.03 * (1 - nar), -0.34 - 0.1 * (1 - nar)], ads = [-sightX, -sightY, -0.3], am = st.aim * ({ flamer: 0.5, tool: 0.35, none: 0, rocket: 0.9, launcher: 0.9 }[ud.wt] ?? 1);
     let px = hip[0] + (ads[0] - hip[0]) * am, py = hip[1] + (ads[1] - hip[1]) * am, pz = hip[2] + (ads[2] - hip[2]) * am, rx = 0, ry = 0, rz = 0;
     const idle = S.time, ph = (e.animT || 0) * 6.283 / 34, mvk = e.moving ? 1 : 0, bobA = (1 - 0.85 * st.aim) * (1 + 0.8 * st.sprint) * mvk;
     px += 0.011 * Math.sin(ph) * bobA, py += -9e-3 * Math.abs(Math.cos(ph)) * bobA, rz += 0.02 * Math.sin(ph) * bobA;

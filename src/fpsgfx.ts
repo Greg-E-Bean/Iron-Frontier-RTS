@@ -907,9 +907,9 @@ function fgVM() {
   scene.add(cam);
   const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, .5), sun = new THREE.DirectionalLight(0xffffff, 1.5), ml = new THREE.PointLight(0xffc070, 0, 3, 2), fill = new THREE.DirectionalLight(0x8899aa, .35);
   scene.add(hemi, sun, fill), cam.add(ml), ml.position.set(.1, -.05, -.9), fill.position.set(-1, .3, .6);
-  const T = fgTextures(), mk = (b: any) => { const m = new THREE.MeshStandardMaterial({ vertexColors: !0, roughness: b.roughness, metalness: b.metalness, map: b.map, normalMap: b.normalMap, normalScale: b.normalScale }); m.color = b.color.clone(); return m; };
+  const T = fgTextures(), mk = (b: any) => { const m = new THREE.MeshStandardMaterial({ vertexColors: !0, roughness: b.roughness, metalness: b.metalness, map: b.map, normalMap: b.normalMap, normalScale: b.normalScale, side: THREE.DoubleSide }); m.color = b.color.clone(); return m; };
   const mats: any = {};
-  for (const k of BK) mats[k] = "emis" === k ? new THREE.MeshBasicMaterial({ vertexColors: !0 }) : mk(GL.mats[k]);
+  for (const k of BK) mats[k] = "emis" === k ? new THREE.MeshBasicMaterial({ vertexColors: !0, side: THREE.DoubleSide }) : mk(GL.mats[k]);
   mats.metal.metalness = .75, mats.metal.roughness = .38, mats.metal.envMapIntensity = 1;
   return FG.vm = { renderer: GL.renderer, scene, cam, hemi, sun, fill, ml, mats, T, st: { aim: 0, sprint: 0, rp: 0, rv: 0, rx: 0, rvx: 0, swX: 0, swY: 0, ly: null, lp: null, lastM: 0, draw: 0, boltT: 9, throwT: 0, lastT: 0, land: 0, lastJ: 0 } };
 }
@@ -972,7 +972,7 @@ function fpsViewmodelAnimate(vm: any, e: any) {
   // pose
   vm.visible = !("long" === ud.wt && st.aim > .85);
   const s = ud.s, sightY = (ud.W.sight || 1) * s, sightX = (ud.W.sightY || 0) * s;
-  const hip = [.17, -.18, -.34], ads = [-sightX, -sightY, -.3], am = st.aim * (({ flamer: .5, tool: .35, none: 0, rocket: .9, launcher: .9 } as any)[ud.wt] ?? 1);
+  const nar = Math.max(.5, Math.min(1, CW / CH * 1.3)), hip = [.17 * nar, -.18 + .03 * (1 - nar), -.34 - .1 * (1 - nar)], ads = [-sightX, -sightY, -.3], am = st.aim * (({ flamer: .5, tool: .35, none: 0, rocket: .9, launcher: .9 } as any)[ud.wt] ?? 1);
   let px = hip[0] + (ads[0] - hip[0]) * am, py = hip[1] + (ads[1] - hip[1]) * am, pz = hip[2] + (ads[2] - hip[2]) * am, rx = 0, ry = 0, rz = 0;
   const idle = S.time, ph = (e.animT || 0) * 6.283 / 34, mvk = e.moving ? 1 : 0, bobA = (1 - .85 * st.aim) * (1 + .8 * st.sprint) * mvk;
   px += .011 * Math.sin(ph) * bobA, py += -.009 * Math.abs(Math.cos(ph)) * bobA, rz += .02 * Math.sin(ph) * bobA;
