@@ -132,7 +132,7 @@ const BLD_DESC = {
   navalyard: "Builds your naval vessels — an offshore yard that must be placed out on open water, close to shore.",
   aa: "Dedicated anti-air defense — devastating against aircraft, useless against ground targets.",
   triturret: "Heavy defensive turret with both a ground cannon and a separate anti-air gun — what the Bastion Rig deploys into.",
-  silo: "Stores extra credits beyond what your refineries alone can hold.",
+  silo: "Credit storage. Without silos you can hold $15,000; each one adds $10,000 (up to three). Income past the limit is lost.",
   repair: "Repairs damaged vehicles and aircraft that return to it.",
   support: {vanguard:"Projects a light-bending veil: your units and structures within 8 cells can't be targeted from beyond close range. Needs power.",legion:"Unlocks the Aegis Field power — everything of yours in the target area becomes invulnerable for 12 seconds.",syndicate:"Every infantry trained at your Spawning Pit steps out with a free clone. Needs power."},
   oilDerek: "Neutral oil derrick. Capture it with a Technician for a steady trickle of extra credits.",

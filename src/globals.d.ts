@@ -170,6 +170,10 @@ declare global {
   const spawnUnit: AnyFn;
   const placeReady: AnyFn;
   function cmdMove(units: Unit[], x: number, y: number, amove?: boolean, queue?: boolean): void;
+  function creditCap(id: number): number;
+  function objMarkers(): any[];
+  function drawObjMarkers(r: number, n: number): void;
+  function capCredits(p: any): void;
   function cmdPatrol(units: Unit[], x: number, y: number): void;
   function veiled(a: any, t: any): boolean;
   function ironCurtain(owner: number, x: number, y: number): void;

@@ -42,6 +42,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#07090b;colo
 #credits{color:var(--amber2);font-weight:bold;font-variant-numeric:tabular-nums;
   font-family:"Courier New",monospace;letter-spacing:1px;text-shadow:0 0 8px rgb(var(--accrgb) / 40%)}
 #power{font-weight:bold}
+#credits.full{color:#ff7a5a;text-shadow:0 0 8px #ff3a2a88}
 .pbar{width:56px;height:8px;background:#070b0e;border:1px solid var(--edge);overflow:hidden;
   clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)}
 .pbar i{display:block;height:100%;background:#39d353}
@@ -1124,7 +1125,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     navalyard: "Builds your naval vessels \u2014 an offshore yard that must be placed out on open water, close to shore.",
     aa: "Dedicated anti-air defense \u2014 devastating against aircraft, useless against ground targets.",
     triturret: "Heavy defensive turret with both a ground cannon and a separate anti-air gun \u2014 what the Bastion Rig deploys into.",
-    silo: "Stores extra credits beyond what your refineries alone can hold.",
+    silo: "Credit storage. Without silos you can hold $15,000; each one adds $10,000 (up to three). Income past the limit is lost.",
     repair: "Repairs damaged vehicles and aircraft that return to it.",
     support: { vanguard: "Projects a light-bending veil: your units and structures within 8 cells can't be targeted from beyond close range. Needs power.", legion: "Unlocks the Aegis Field power \u2014 everything of yours in the target area becomes invulnerable for 12 seconds.", syndicate: "Every infantry trained at your Spawning Pit steps out with a free clone. Needs power." },
     oilDerek: "Neutral oil derrick. Capture it with a Technician for a steady trickle of extra credits.",
@@ -2652,8 +2653,10 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     return true;
   }
   function siloBonus(e) {
-    const t = S.blds.filter((t2) => t2.owner === e && !t2.dead && "silo" === t2.key).length;
-    return 1 + 0.09 * Math.min(3, t);
+    return 1;
+  }
+  function creditCap(id) {
+    return 15e3 + 1e4 * Math.min(3, S.blds.filter((b) => b.owner === id && !b.dead && "silo" === b.key).length);
   }
   function airCapacity(e) {
     return 4 * countBld(e.id, "airfield");
@@ -3917,6 +3920,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     tickProduction,
     spawnUnit,
     placeReady,
+    creditCap,
     cmdMove,
     cmdPatrol,
     cmdAttack,
@@ -10516,17 +10520,25 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     const y = S.time * 40 % (h + 20) - 10;
     mctx.fillStyle = "rgba(160,190,210,.08)", mctx.fillRect(0, y, w, 6), mctx.fillStyle = "rgba(5,8,10,.72)", mctx.fillRect(0, h / 2 - 19, w, 38), mctx.textAlign = "center", mctx.fillStyle = lowPower ? "#ff8a6a" : "#c8d6e0", mctx.font = "bold 11px Tahoma,sans-serif", mctx.fillText(lowPower ? "RADAR \u2014 LOW POWER" : "RADAR OFFLINE", w / 2, h / 2 - 3), mctx.fillStyle = "#8fa3bb", mctx.font = "9px Tahoma,sans-serif", mctx.fillText(lowPower ? "Build more power" : "Build a " + bname("lab", S.players[0].fac), w / 2, h / 2 + 11), mctx.textAlign = "left";
   }
+  function drawObjMarkers(r, n) {
+    const pl = 0.5 + 0.5 * Math.sin(6 * S.time);
+    for (const q of objMarkers()) {
+      const x = q.x / 32 * r, y = q.y / 32 * n, s = q.prim ? 4.5 : 3.6, c = q.prim ? "#46e06a" : "#ff9a2c";
+      mctx.strokeStyle = c, mctx.globalAlpha = 0.35 + 0.4 * pl, mctx.lineWidth = 1.5, mctx.beginPath(), mctx.arc(x, y, s + 2 + 3 * pl, 0, 6.283), mctx.stroke(), mctx.globalAlpha = 1, mctx.fillStyle = c, mctx.strokeStyle = "#000", mctx.lineWidth = 1, mctx.beginPath(), mctx.moveTo(x, y - s), mctx.lineTo(x + s, y), mctx.lineTo(x, y + s), mctx.lineTo(x - s, y), mctx.closePath(), mctx.fill(), mctx.stroke();
+    }
+  }
   function drawMM() {
     const e = mm.width / DPR, t = mm.height / DPR, on = radarOnline();
     if (on !== _radarWas) {
       null !== _radarWas && (on ? (hint("Radar online"), sfx("place"), _radarT = S.time) : hint("Radar offline")), _radarWas = on;
     }
-    if (!on) return void drawMMOffline(e, t, hasActiveBld(0, "lab"));
+    if (!on) return drawMMOffline(e, t, hasActiveBld(0, "lab")), void (S.mission && drawObjMarkers(e / 92, t / 72));
     mmCache || buildMMCache(), mctx.imageSmoothingEnabled = false, mctx.drawImage(mmCache, 0, 0, e, t);
     const r = e / 92, n = t / 72;
     for (let e2 = 0; e2 < 6624; e2++) G.ore[e2] > 0 && (!FOG_ON || G.vis[e2] > 0) && (mctx.fillStyle = 2 === G.tib[e2] ? "#8fd8e8" : "#d0a03a", mctx.fillRect(e2 % 92 * r, (e2 / 92 | 0) * n, Math.max(1, r), Math.max(1, n)));
     for (const e2 of S.blds) !e2.dead && seen(e2) && (mctx.fillStyle = e2.owner < 0 ? "#9c968a" : fc(e2.owner), mctx.fillRect(e2.tx * r, e2.ty * n, Math.max(2, e2.size * r), Math.max(2, e2.size * n)));
     for (const e2 of S.units) !e2.dead && seen(e2) && (mctx.fillStyle = fc(e2.owner), mctx.fillRect(e2.x / 32 * r - 1, e2.y / 32 * n - 1, 2.4, 2.4));
+    if (S.mission && "function" == typeof objMarkers) drawObjMarkers(r, n);
     if (S.crates) for (const c of S.crates) (!FOG_ON || G.vis[idx(c.x / 32 | 0, c.y / 32 | 0)] > 0) && (mctx.fillStyle = S.time % 1 < 0.5 ? "#ffd75e" : "#fff4c8", mctx.fillRect(c.x / 32 * r - 1.5, c.y / 32 * n - 1.5, 3, 3));
     if (FOG_ON) {
       mctx.save();
@@ -11385,6 +11397,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   Object.assign(window, {
     veiled,
+    drawObjMarkers,
     mapTileRGB,
     airOrdered,
     dockNew,
@@ -16318,7 +16331,7 @@ varying vec3 vFgWN;
       hero: { sel: ["You called?", "Let's make this quick.", "Ready for anything."], go: ["I'm on it.", "Leave it to me.", "Watch this."] },
       unit: ["Unit ready.", "Reinforcements have arrived.", "New unit reporting in."],
       ready: ["Construction complete.", "Structure ready.", "Building ready for placement."],
-      ann: { underAttack: "Warning. Our base is under attack.", unitAttack: "Unit under attack.", harvAttack: "Our harvester is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." }
+      ann: { underAttack: "Warning. Our base is under attack.", storage: "Silos needed.", unitAttack: "Unit under attack.", harvAttack: "Our harvester is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." }
     },
     legion: {
       inf: { sel: [["Da, komandir?", "\u0414\u0430, \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440?"], ["Ready for orders.", "\u0420\u044D\u0434\u0438 \u0444\u043E\u0440 \u043E\u0440\u0434\u0435\u0440\u0441."], ["Comrade, I listen.", "\u041A\u0430\u043C\u0440\u0430\u0434, \u0430\u0439 \u043B\u0438\u0441\u044D\u043D."], ["Legion stands ready.", "\u041B\u0438\u0434\u0436\u044D\u043D \u0441\u0442\u044D\u043D\u0434\u0441 \u0440\u044D\u0434\u0438."], ["Speak, commander.", "\u0421\u043F\u0438\u043A, \u043A\u043E\u043C\u043C\u0430\u043D\u0434\u044D\u0440."]], go: [["Moving out.", "\u041C\u0443\u0432\u0438\u043D\u0433 \u0430\u0443\u0442."], ["For the Motherland!", "\u0424\u043E\u0440 \u0437\u044D \u043C\u0430\u0437\u044D\u0440\u043B\u044D\u043D\u0434!"], ["As ordered.", "\u042D\u0437 \u043E\u0440\u0434\u044D\u0440\u0434."], ["Davai, davai!", "\u0414\u0430\u0432\u0430\u0439, \u0434\u0430\u0432\u0430\u0439!"], ["We march.", "\u0412\u0438 \u043C\u0430\u0440\u0447."]] },
@@ -16332,7 +16345,7 @@ varying vec3 vFgWN;
       hero: { sel: [["You need me, comrade?", "\u042E \u043D\u0438\u0434 \u043C\u0438, \u043A\u0430\u043C\u0440\u0430\u0434?"], ["I am here.", "\u0410\u0439 \u044D\u043C \u0445\u0438\u0430."]], go: [["They will not stop me.", "\u0417\u044D\u0439 \u0432\u0438\u043B \u043D\u043E\u0442 \u0441\u0442\u043E\u043F \u043C\u0438."], ["Leave it to me.", "\u041B\u0438\u0432 \u0438\u0442 \u0442\u0443 \u043C\u0438."]] },
       unit: [["Unit ready, comrade.", "\u042E\u043D\u0438\u0442 \u0440\u044D\u0434\u0438, \u043A\u0430\u043C\u0440\u0430\u0434."], ["New recruit reporting.", "\u041D\u044C\u044E \u0440\u044D\u043A\u0440\u0443\u0442 \u0440\u0438\u043F\u043E\u0440\u0442\u0438\u043D\u0433."]],
       ready: [["Construction complete, comrade.", "\u041A\u043E\u043D\u0441\u0442\u0440\u0430\u043A\u0448\u043D \u043A\u043E\u043C\u043F\u043B\u0438\u0442, \u043A\u0430\u043C\u0440\u0430\u0434."], ["Structure is ready.", "\u0421\u0442\u0440\u0430\u043A\u0447\u0435\u0440 \u0438\u0437 \u0440\u044D\u0434\u0438."]],
-      ann: { underAttack: ["Our base is under attack!", "\u0410\u0443\u044D\u0440 \u0431\u044D\u0439\u0441 \u0438\u0437 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], unitAttack: ["Our units are under attack!", "\u0410\u0443\u044D\u0440 \u044E\u043D\u0438\u0442\u0441 \u0430\u0440 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], harvAttack: ["Ore hauler under attack!", "\u041E\u0440 \u0445\u043E\u0443\u043B\u0435\u0440 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], unitLost: ["Unit lost.", "\u042E\u043D\u0438\u0442 \u043B\u043E\u0441\u0442."], funds: ["Not enough funds, comrade.", "\u041D\u043E\u0442 \u0438\u043D\u0430\u0444 \u0444\u0430\u043D\u0434\u0437, \u043A\u0430\u043C\u0440\u0430\u0434."], radarOn: ["Radar online.", "\u0420\u044D\u0439\u0434\u0430\u0440 \u043E\u043D\u043B\u0430\u0439\u043D."], radarOff: ["Radar offline.", "\u0420\u044D\u0439\u0434\u0430\u0440 \u043E\u0444\u043B\u0430\u0439\u043D."], strike: ["Strike incoming.", "\u0421\u0442\u0440\u0430\u0439\u043A \u0438\u043D\u043A\u0430\u043C\u0438\u043D\u0433."], deployed: ["Headquarters deployed.", "\u041A\u043E\u043D\u0441\u0442\u0440\u0430\u043A\u0448\u043D \u044F\u0440\u0434 \u0434\u0438\u043F\u043B\u043E\u0439\u0434."], captured: ["Building captured.", "\u0411\u0438\u043B\u0434\u0438\u043D\u0433 \u043A\u044D\u043F\u0447\u0435\u0440\u0434."] }
+      ann: { underAttack: ["Our base is under attack!", "\u0410\u0443\u044D\u0440 \u0431\u044D\u0439\u0441 \u0438\u0437 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], storage: ["Silos needed, comrade.", "\u0421\u0430\u0439\u043B\u043E\u0443\u0437 \u043D\u0438\u0434\u0438\u0434, \u043A\u0430\u043C\u0440\u0430\u0434."], unitAttack: ["Our units are under attack!", "\u0410\u0443\u044D\u0440 \u044E\u043D\u0438\u0442\u0441 \u0430\u0440 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], harvAttack: ["Ore hauler under attack!", "\u041E\u0440 \u0445\u043E\u0443\u043B\u0435\u0440 \u0430\u043D\u0434\u044D\u0440 \u044D\u0442\u0442\u0430\u043A!"], unitLost: ["Unit lost.", "\u042E\u043D\u0438\u0442 \u043B\u043E\u0441\u0442."], funds: ["Not enough funds, comrade.", "\u041D\u043E\u0442 \u0438\u043D\u0430\u0444 \u0444\u0430\u043D\u0434\u0437, \u043A\u0430\u043C\u0440\u0430\u0434."], radarOn: ["Radar online.", "\u0420\u044D\u0439\u0434\u0430\u0440 \u043E\u043D\u043B\u0430\u0439\u043D."], radarOff: ["Radar offline.", "\u0420\u044D\u0439\u0434\u0430\u0440 \u043E\u0444\u043B\u0430\u0439\u043D."], strike: ["Strike incoming.", "\u0421\u0442\u0440\u0430\u0439\u043A \u0438\u043D\u043A\u0430\u043C\u0438\u043D\u0433."], deployed: ["Headquarters deployed.", "\u041A\u043E\u043D\u0441\u0442\u0440\u0430\u043A\u0448\u043D \u044F\u0440\u0434 \u0434\u0438\u043F\u043B\u043E\u0439\u0434."], captured: ["Building captured.", "\u0411\u0438\u043B\u0434\u0438\u043D\u0433 \u043A\u044D\u043F\u0447\u0435\u0440\u0434."] }
     },
     syndicate: {
       inf: { sel: ["We are listening.", "Speak, and we obey.", "Our minds are yours.", "The Syndicate hears you."], go: ["It will be done.", "Moving, unseen.", "As the Syndicate wills.", "Silently."] },
@@ -16345,7 +16358,7 @@ varying vec3 vFgWN;
       hero: { sel: ["You summoned me.", "Minds bend before me."], go: ["They will not see me coming.", "Their thoughts are mine."] },
       unit: ["A new servant awakens.", "Another mind joins us."],
       ready: ["The structure has grown.", "It is complete."],
-      ann: { underAttack: "Our domain is under attack.", unitAttack: "Our servants are under attack.", harvAttack: "Our gatherers are under attack.", unitLost: "A servant has fallen.", funds: "We lack resources.", radarOn: "The eye opens.", radarOff: "The eye is blind.", strike: "Strike inbound.", deployed: "The nest takes root.", captured: "A structure bends to our will." }
+      ann: { underAttack: "Our domain is under attack.", storage: "We need more storage.", unitAttack: "Our servants are under attack.", harvAttack: "Our gatherers are under attack.", unitLost: "A servant has fallen.", funds: "We lack resources.", radarOn: "The eye opens.", radarOff: "The eye is blind.", strike: "Strike inbound.", deployed: "The nest takes root.", captured: "A structure bends to our will." }
     }
   };
   function voiceRoleFor(u) {
@@ -16429,7 +16442,7 @@ varying vec3 vFgWN;
   }
   function personaFor(fac, key, role) {
     const h = hashKey(key || role || "x"), j = (a, b) => a + h % 97 / 96 * (b - a);
-    if ("legion" === fac) return P_("ru", /reaper|caustic|flak|jackal/.test(key || "") ? "f" : "m", j(0.92, 1.04), j(0.95, 1.03));
+    if ("legion" === fac) return "reaper" === key ? P_("ru", "m", 0.8, 0.88) : P_("ru", /caustic|flak|jackal/.test(key || "") ? "f" : "m", j(0.92, 1.04), j(0.95, 1.03));
     if ("syndicate" === fac) return "phantom" === key ? P_("en", "f", 0.98, 0.86) : P_(["rp", "us", "ie", "au"][h % 4], "m", j(0.8, 0.9), j(0.86, 0.93));
     return key && PERSONA_VANGUARD[key] || P_("rp", "f", 1.03, 1.02);
   }
@@ -16599,6 +16612,7 @@ varying vec3 vFgWN;
     for (let r = role; r; r = ROLE_FALLBACK[r]) if (F[r] && F[r][category]) return F[r][category];
     return F.inf[category];
   }
+  var HERO_CAST = { operative: "ghost", reaper: "reaper", phantom: "phantom" };
   var ackMem = {};
   var lastPick = {};
   function playVoiceLine(fac, category, role, key, uid) {
@@ -16615,7 +16629,7 @@ varying vec3 vFgWN;
     if (!set || !set.length) return;
     let i = Math.floor(Math.random() * set.length);
     set.length > 1 && lastPick[category] === set[i] && (i = (i + 1) % set.length), lastPick[category] = set[i];
-    lastVoiceT = now, speakLine(fac, set[i], false, per, hashKey(key || role || ""));
+    lastVoiceT = now, speakLine(fac, set[i], false, per, hashKey(key || role || ""), false, key && HERO_CAST[key] ? "c_" + HERO_CAST[key] : null);
   }
   function announce(ev) {
     const fac = S.players && S.players[0] && S.players[0].fac || "vanguard", F = VOICE_LINES[fac] || VOICE_LINES.vanguard, line = F.ann && F.ann[ev];
@@ -16627,7 +16641,7 @@ varying vec3 vFgWN;
   function announceHint(msg) {
     if (!msg || "string" != typeof msg) return;
     const m = msg.toLowerCase();
-    m.includes("under attack") ? announce(m.includes("harvester") ? "harvAttack" : m.includes("unit") ? "unitAttack" : "underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
+    m.includes("under attack") ? announce(m.includes("harvester") ? "harvAttack" : m.includes("unit") ? "unitAttack" : "underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("silos needed") ? announce("storage") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
   }
   function sfx(e, u) {
     ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
@@ -17566,7 +17580,7 @@ varying vec3 vFgWN;
       for (const key of units) {
         const u = { key, d: UNITS[key] };
         if (!u.d) continue;
-        const role = voiceRoleFor(u), per = personaFor(fac, key, role), vx = voxFor(fac, per);
+        const role = voiceRoleFor(u), per = personaFor(fac, key, role), vx = HERO_CAST[key] ? "c_" + HERO_CAST[key] : voxFor(fac, per);
         for (const cat of ["sel", "go"]) (unitLines(fac, cat, role, key, per) || []).forEach((t) => add(vx, t));
       }
       const vxA = voxFor(fac, ANNOUNCER[fac]);
@@ -18076,7 +18090,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     updateTabCounts(), ((ps) => {
       selProducer(S.tab);
       ps._sig !== prodSig(S.tab) && buildCards();
-    })($("#prodstrip")), updateQueueStrip(), updateSelBar(), elCred.textContent = Math.floor(e.credits), elPwr.textContent = Math.round((e.power, e.drain, e.power)) + "/" + e.drain;
+    })($("#prodstrip")), updateQueueStrip(), updateSelBar(), elCred.textContent = Math.floor(e.credits), elCred.classList.toggle("full", e.credits >= creditCap(e.id) - 1), elCred.title = "Storage " + creditCap(e.id), elPwr.textContent = Math.round((e.power, e.drain, e.power)) + "/" + e.drain;
     const t = 0 === e.drain ? 1 : clamp(e.power / Math.max(1, e.drain), 0, 1);
     elPwrBar.style.width = 100 * t + "%", elPwrBar.style.background = t >= 1 ? "#39d353" : t > 0.6 ? "#e8c53a" : "#e0473a";
     const r = S.units.filter((e2) => 0 === e2.owner && !e2.dead).length;
@@ -20586,7 +20600,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         ],
         ev: [
           { at: 5, do: [say("hale", "The bridge deck is the fast way across. The road bridges north and south are slower, but they'll be watching the deck."), ["ping", 45, 35]] },
-          { at: 200, do: [say("hale", "Rhinos rolling across the north bridge!"), ["wave", 0, [["main", 2], ["base", 2]], { from: [60, 18] }]] },
+          { at: 200, do: [say("hale", "Maulers rolling across the north bridge!"), ["wave", 0, [["main", 2], ["base", 2]], { from: [60, 18] }]] },
           { done: "bluff", do: [say("reyes", "The bluff is ours. Artillery on that deck and push for the factory."), ["reinf", [["main", 3], ["anti", 2]], [8, 4], [36, 36]], ["credits", 2e3]] },
           { at: 420, do: [say("draganov", "You cross my river, Colonel? Then you will swim back.")] },
           { every: 180, from: 360, until: 1800, do: [["wave", 0, [["main", 1], ["base", 3], ["anti", 1]], { grow: 0.6, to: [54, 35] }]] }
@@ -20797,7 +20811,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           { id: "loss", t: "lossMax", n: 20, sec: 1, text: "Lose no more than 20 units" }
         ],
         ev: [
-          { at: 5, do: [say("bogdan", "Towns are east and west on the ring road. Conscripts can garrison them.")] },
+          { at: 5, do: [say("bogdan", "Towns are east and west on the ring road. Militia can garrison them.")] },
           { done: "towns", do: [say("bogdan", "Depots are ours. Freight credits coming through."), ["credits", 2500]] },
           { at: 240, do: [say("hale", "Legion in the basin. Hit their ring road."), ["wave", 0, [["main", 2], ["base", 2]]]] },
           { every: 200, from: 440, until: 1600, do: [["wave", 0, [["main", 1], ["base", 3]], { grow: 0.5 }]] }
@@ -20980,7 +20994,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           { done: "pow", do: [say("senna", "The current flows again. I can feel it humming.")] },
           { done: "ref", do: [say("senna", "Their old harvester answers to us now."), ["miner"]] },
           { done: "train", do: [say("voice", "Enough. The Vanguard camp lies across the lakes to the south-east. Quiet it."), ["show", "kill"], ["ping", 84, 64]] },
-          { at: 210, do: [say("hale", "Unknown infantry near the lakes. Weapons free."), ["wave", 0, [["base", 3]]]] },
+          { at: 210, do: [say("senna", "Their soldiers have seen us by the lakes. They are coming."), ["wave", 0, [["base", 3]]]] },
           { every: 240, from: 480, until: 1500, do: [["wave", 0, [["base", 2], ["anti", 1]], { grow: 0.5 }]] }
         ],
         win: [["voice", "Quiet at last. Listen, Adept. Can you hear how much more there is?"]],
@@ -21002,9 +21016,9 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           { id: "loss", t: "lossMax", n: 25, sec: 1, text: "Lose no more than 25 units" }
         ],
         ev: [
-          { at: 5, do: [say("senna", "Initiates can take the houses. The townsfolk will not resist us for long.")] },
+          { at: 5, do: [say("senna", "Acolytes can take the houses. The townsfolk will not resist us for long.")] },
           { done: "town", do: [say("voice", "Hear them? They sing for us now."), ["credits", 2500]] },
-          { at: 250, do: [say("draganov", "Who is out there on the river? Show yourselves!"), ["wave", 0, [["main", 2], ["base", 2]]]] },
+          { at: 250, do: [say("senna", "The Marshal's guards are shouting at shadows on the river. He is afraid."), ["wave", 0, [["main", 2], ["base", 2]]]] },
           { every: 190, from: 450, until: 1800, do: [["wave", 0, [["main", 1], ["base", 3]], { grow: 0.5 }]] },
           { at: 600, do: [say("voice", "Marshal Draganov. You are tired. Let me help you sleep.")] }
         ],
@@ -21030,7 +21044,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           { at: 5, do: [say("senna", "They will come over the ice and across the high bridge.")] },
           { every: 110, from: 80, until: 580, do: [["wave", 0, [["main", 2], ["base", 2]], { grow: 0.7 }]] },
           { every: 130, from: 140, until: 580, do: [["wave", 1, [["main", 1], ["base", 3]], { grow: 0.7 }]] },
-          { at: 300, do: [say("reyes", "All units, burn that Amplifier. Whatever it takes."), say("draganov", "For once, Colonel, we agree.")] },
+          { at: 300, do: [say("senna", "Their radios scream one order, Master: burn the Amplifier."), say("voice", "Even the Marshal agrees with them now. How touching.")] },
           { at: 480, do: [say("voice", "Two minutes. Listen \u2014 the song is almost finished.")] }
         ],
         win: [["voice", "The song is sung. Every radio on the Frontier carries it now."]],
@@ -21048,7 +21062,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         brief: [["voice", "The Legion is learning to burn us out. Their base behind the Firing Line must go dark."], ["phantom", "Then I will be the dark."], ["voice", "A seeded mind in their grid will pulse when you reach the north-east relay. Their Power Plant first, then their headquarters. Unseen, Phantom. Charges from inside with B."]],
         foes: [{ fac: "legion", diff: "normal", spawn: 1, base: ["power", "barracks", "lab", "def1", "def1", "def2"] }],
         start: {},
-        alarm: [["volkova", "Syndicate infiltrator! Lights on \u2014 find her!"]],
+        alarm: [["voice", "If they see you, every light in that base comes on. Stay in the dark."]],
         obj: [
           { id: "relay", t: "reach", x: 53, y: 26, r: 3, text: "Reach the relay on the north-east bluff" },
           { id: "pow", t: "destroy", tag: "pp", text: "Destroy the Power Plant" },
@@ -21109,7 +21123,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         ev: [
           { at: 4, do: [say("senna", "The swarm is awake. More broods will join us.")] },
           { every: 150, from: 150, until: 900, do: [["reinf", [["main", 1], ["base", 3]], [0, 64], [12, 58]], say("senna", "A new brood has hatched.")] },
-          { at: 330, do: [say("reyes", "Syndicate swarm on the Highlands! Hold the mesa!"), ["wave", 0, [["main", 2], ["anti", 2]], { to: "army" }]] }
+          { at: 330, do: [say("senna", "They have seen the swarm. They are running for the mesa."), ["wave", 0, [["main", 2], ["anti", 2]], { to: "army" }]] }
         ],
         win: [["voice", "Delicious."]],
         lose: [["senna", "The swarm is spent."]]
@@ -21120,7 +21134,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         unlock: ["voice", "And the Psychic Amplifier seed is yours. When it has grown, the city will kneel."],
         loc: "Port Merrow",
         spawn: 1,
-        brief: [["voice", "Three Masterminds wait on the west bank of Port Merrow. Together they can reach every mind in the city."], ["senna", "They must reach the east bluff. The high bridge is the only way."], ["voice", "Two will be enough. Move when they are ready."]],
+        brief: [["voice", "Three Overminds wait on the west bank of Port Merrow. Together they can reach every mind in the city."], ["senna", "They must reach the east bluff. The high bridge is the only way."], ["voice", "Two will be enough. Move when they are ready."]],
         foes: [{ fac: "legion", diff: "hard", spawn: 3, team: 2, base: ["power", "barracks", "def1"] }, { fac: "vanguard", diff: "normal", spawn: 2, team: 2 }],
         start: { credits: 6e3, base: ["power", "refinery", "barracks", "factory"], convoy: { key: "overmind", n: 3, tag: "convoy", at: [20, 35] } },
         obj: [
@@ -21130,14 +21144,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           { id: "sw", t: "build", key: "super", n: 1, sec: 1, text: "Grow the Psychic Amplifier" }
         ],
         ev: [
-          { at: 5, do: [["ping", 45, 35], say("senna", "The Masterminds gather by the west bluff.")] },
+          { at: 5, do: [["ping", 45, 35], say("senna", "The Overminds gather by the west bluff.")] },
           { at: 90, do: [["go", "convoy", 59, 35], say("voice", "Go now. Let the city hear us coming.")] },
-          { at: 140, do: [say("draganov", "Something is crossing the harbour. Shoot it!"), ["wave", 0, [["main", 2], ["anti", 2]], { to: [50, 35] }]] },
+          { at: 140, do: [say("senna", "Their gunners on the harbour have seen us. Hurry."), ["wave", 0, [["main", 2], ["anti", 2]], { to: [50, 35] }]] },
           { every: 150, from: 260, until: 1500, do: [["wave", 0, [["main", 1], ["base", 3]], { grow: 0.5, to: [55, 35] }]] },
           { done: "esc", do: [say("voice", "They are in place. Now hold."), ["show", "hold"], ["credits", 3e3], ["wave", 1, [["main", 2], ["base", 4]], { to: [59, 35] }]] }
         ],
         win: [["voice", "Port Merrow is listening. All of it."]],
-        lose: [["senna", "The Masterminds are lost."]]
+        lose: [["senna", "The Overminds are lost."]]
       },
       {
         name: "Ascendance",
@@ -21155,7 +21169,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         ],
         ev: [
           { at: 6, do: [say("senna", "The rim is high ground on every side. Ramps down into the crater.")] },
-          { at: 300, do: [say("reyes", "Draganov. Whatever happens today \u2014 thank you."), say("draganov", "Save it for after, Colonel.")] },
+          { at: 300, do: [say("senna", "The Colonel and the Marshal are thanking each other on an open channel."), say("voice", "Let them. It is the last thing they will ever share.")] },
           { done: "dom", do: [say("voice", "It is finished. Now \u2014 ascend."), ["credits", 3e3]] },
           { every: 200, from: 300, until: 2600, do: [["wave", 0, [["main", 2], ["base", 3]], { grow: 0.6 }]] }
         ],
@@ -21183,7 +21197,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function techAllowed(k, isBld, abil) {
     const m = S.mission, T = m && m.tier;
     if (!T || m.tutorial) return true;
-    if (abil) return "super" === k ? T >= 7 : "curtain" === k ? T >= 5 : T >= 3;
+    if (abil) return "super" === k ? T >= 7 : "curtain" === k ? T >= 5 : "spy" === k ? T >= 4 : true;
     return (isBld ? TIER_BLD[k] || 2 : unitTier(k)) <= T;
   }
   function tierNews(fac, t) {
@@ -21373,6 +21387,40 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var inZone = (u, x, y, r) => dist2(u.x, u.y, T2P(x), T2P(y)) < 32 * r * (32 * r);
   var ownedCount = (pred) => S.blds.filter((b) => 0 === b.owner && !b.dead && pred(b)).length;
+  var _omT = -1;
+  var _omCache = [];
+  function objMarkers() {
+    const m = S.mission;
+    if (!m || !m.objs) return [];
+    if (_omT === S.time) return _omCache;
+    _omT = S.time;
+    const out = [], T = (v) => 32 * v + 16, p0 = S.players[0], sx = p0 && p0.spawnX || 0, sy = p0 && p0.spawnY || 0, near = (list, n) => list.sort((a, b) => dist2(a.x, a.y, sx, sy) - dist2(b.x, b.y, sx, sy)).slice(0, n), cen = (l) => ({ x: l.reduce((s, b) => s + b.x, 0) / l.length, y: l.reduce((s, b) => s + b.y, 0) / l.length });
+    for (const o of m.objs) {
+      if (!o.shown || 0 !== o.state) continue;
+      const prim = !o.sec, add = (q) => q && out.push({ x: q.x, y: q.y, prim });
+      if (null != o.x && null != o.y) {
+        add({ x: T(o.x), y: T(o.y) });
+        continue;
+      }
+      if ("destroy" === o.t) {
+        const ow = null != o.slot ? [o.slot + 1] : enemyOwners(), l = S.blds.filter((b) => !b.dead && (o.tag ? b.mtag === o.tag : ow.includes(b.owner) && (o.keys || []).includes(b.key)));
+        near(l, 2).forEach(add);
+      } else if ("elim" === o.t) {
+        const ow = null != o.slot ? [o.slot + 1] : enemyOwners();
+        for (const id of ow) {
+          const l = S.blds.filter((b) => !b.dead && b.owner === id);
+          l.length && add(cen(l));
+        }
+      } else if ("own" === o.t) {
+        const l = S.blds.filter((b) => !b.dead && b.key === o.key && 0 !== b.owner);
+        near(l, 2).forEach(add);
+      } else if ("capture" === o.t) {
+        const l = S.blds.filter((b) => !b.dead && 0 !== b.owner && (b.d.civ || SPECIALS.includes(b.key)));
+        near(l, 2).forEach(add);
+      }
+    }
+    return _omCache = out;
+  }
   var SPECIALS = ["oilDerek", "paradropHangar", "empTower", "rogueDen"];
   function evalObj(o, m, dt) {
     switch (o.t) {
@@ -21831,17 +21879,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   function missionMapSVG(m) {
     const W = 920, H = 720, img = mapPreviewImg(m.map), X = (x) => (x / 92 * W).toFixed(1), Y = (y) => (y / 72 * H).toFixed(1), spots = mapSpots(m.map) || [], c = [];
-    const sp = spots[m.spawn || 0];
-    sp && c.push('<circle cx="' + X(sp[0]) + '" cy="' + Y(sp[1]) + '" r="26" fill="none" stroke="#7dff8a" stroke-width="5"/><text x="' + X(sp[0]) + '" y="' + (sp[1] > 60 ? +Y(sp[1]) - 40 : +Y(sp[1]) + 56) + '" class="mL" fill="#7dff8a">YOU</text>');
-    m.foes.forEach((f) => {
-      const q = spots[f.spawn];
-      q && c.push('<circle cx="' + X(q[0]) + '" cy="' + Y(q[1]) + '" r="24" fill="' + (f.ally ? "#6fb8e055" : "#e0473a55") + '" stroke="' + (f.ally ? "#6fb8e0" : "#e0473a") + '" stroke-width="4"/><text x="' + X(q[0]) + '" y="' + (q[1] > 60 ? +Y(q[1]) - 38 : +Y(q[1]) + 54) + '" class="mL" fill="' + (f.ally ? "#a8d8f0" : "#f3a397") + '">' + (f.ally ? "ALLY" : FAC_NAME[f.fac].toUpperCase()) + "</text>");
-    });
-    let k = 0;
-    for (const o of m.obj) if (null != o.x && !o.hide) {
-      k++;
-      c.push('<circle cx="' + X(o.x) + '" cy="' + Y(o.y) + '" r="' + Math.max(16, o.r / 92 * W) + '" fill="#ffd75e22" stroke="#ffd75e" stroke-width="4" stroke-dasharray="10 7"/><text x="' + X(o.x) + '" y="' + Y(o.y) + '" dy=".35em" class="mL big" fill="#ffd75e">' + k + "</text>");
+    const p0 = S.players[0], sp = p0 && p0.spawnX ? [p0.spawnX / 32, p0.spawnY / 32] : spots[m.spawn || 0];
+    sp && c.push('<circle cx="' + X(sp[0]) + '" cy="' + Y(sp[1]) + '" r="26" fill="#ffffff22" stroke="#ffffff" stroke-width="5"/><text x="' + X(sp[0]) + '" y="' + (sp[1] > 60 ? +Y(sp[1]) - 40 : +Y(sp[1]) + 56) + '" class="mL" fill="#ffffff">YOU</text>');
+    const mk = S.mission && S.mission.def === m ? objMarkers() : [];
+    for (const q of mk.slice().sort((a, b) => +a.prim - +b.prim)) {
+      const x = +X(q.x / 32), y = +Y(q.y / 32), col = q.prim ? "#46e06a" : "#ff9a2c", r = q.prim ? 30 : 24;
+      c.push('<g><circle cx="' + x + '" cy="' + y + '" r="' + (r + 10) + '" fill="none" stroke="' + col + '" stroke-width="3" opacity=".55"/><path d="M' + x + " " + (y - r) + "L" + (x + r) + " " + y + "L" + x + " " + (y + r) + "L" + (x - r) + " " + y + 'Z" fill="' + col + 'aa" stroke="' + col + '" stroke-width="4"/></g>');
     }
+    c.push('<g font-family="monospace" font-size="26" font-weight="700" transform="translate(' + (W - 270) + ' 0)"><rect x="14" y="' + (H - 86) + '" width="250" height="72" rx="8" fill="#000a"/><path d="M34 ' + (H - 66) + 'l12 12-12 12-12-12z" fill="#46e06a"/><text x="56" y="' + (H - 45) + '" fill="#bff5c8">PRIMARY</text><path d="M34 ' + (H - 36) + 'l10 10-10 10-10-10z" fill="#ff9a2c"/><text x="56" y="' + (H - 17) + '" fill="#ffd2a0">BONUS</text></g>');
     return '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMidYMid meet"><image href="' + img + '" width="' + W + '" height="' + H + '" preserveAspectRatio="none"/>' + c.join("") + "</svg>";
   }
   var LOAD_TIPS = ["Bonus objectives earn stars \u2014 replay missions to collect them all.", "High ground gives your units 30% more sight range.", "Units on an overpass can't be hit by units passing underneath.", "Garrison town buildings with infantry to hold them.", "Power down a base and its defences stop firing."];
@@ -21852,7 +21897,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     "function" == typeof probeMedia && probeMedia(m.brief[0][0]);
     const lsImg = "function" == typeof fmvSrc && fmvSrc(m.brief[0][0]), prim = m.obj.filter((o) => !o.sec && !o.hide), sec = m.obj.filter((o) => o.sec && !o.hide && !("stealth" === o.t && "hard" === cd)), speaker = m.brief[0][0], c = castOf(speaker);
     let k = 0;
-    el.innerHTML = '<div class="lsMap">' + missionMapSVG(m) + '</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-' + fac + '">' + CAMPAIGNS[fac].title.toUpperCase() + " \xB7 MISSION " + (idx2 + 1) + " \xB7 " + CDIFF[cd].n + "</div><h1>" + m.name.toUpperCase() + '</h1><div class="lsLoc">' + m.loc + " \xB7 " + mapName(m.map) + "</div>" + (m.hero || m.noBuild ? "" : '<div class="lsSec">NEW TECHNOLOGY</div><div class="bTech">' + tierNews(fac, m.tier) + "</div>") + '<div class="lsSec">PRIMARY OBJECTIVES</div>' + prim.map((o) => '<div class="bObj"><b>' + (null != o.x ? ++k : "\u25C6") + "</b>" + o.text + "</div>").join("") + (sec.length ? '<div class="lsSec">BONUS</div>' + sec.map((o) => '<div class="bObj sec"><b>\u2605</b>' + o.text + "</div>").join("") : "") + '<div class="lsVo"><span class="rbPort' + (lsImg ? " img" : "") + '" style="--rc:' + c.c + (lsImg ? ";background-image:url(" + lsImg + ")" : "") + '">' + (lsImg ? "" : c.n.split(" ").map((w) => w[0]).join("").slice(-2)) + '</span><span><b style="color:' + c.c + '">' + c.n.toUpperCase() + '</b><i class="lsWave"></i></span></div><div class="lsTip">TIP \u2014 ' + pick(LOAD_TIPS) + '</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING\u2026</button></div>';
+    el.innerHTML = '<div class="lsMap">' + missionMapSVG(m) + '</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-' + fac + '">' + CAMPAIGNS[fac].title.toUpperCase() + " \xB7 MISSION " + (idx2 + 1) + " \xB7 " + CDIFF[cd].n + "</div><h1>" + m.name.toUpperCase() + '</h1><div class="lsLoc">' + m.loc + " \xB7 " + mapName(m.map) + "</div>" + (m.hero || m.noBuild ? "" : '<div class="lsSec">NEW TECHNOLOGY</div><div class="bTech">' + tierNews(fac, m.tier) + "</div>") + '<div class="lsSec">PRIMARY OBJECTIVES</div>' + prim.map((o) => '<div class="bObj"><b style="color:#46e06a">\u25C6</b>' + o.text + "</div>").join("") + (sec.length ? '<div class="lsSec">BONUS</div>' + sec.map((o) => '<div class="bObj sec"><b style="color:#ff9a2c">\u25C6</b>' + o.text + "</div>").join("") : "") + '<div class="lsVo"><span class="rbPort' + (lsImg ? " img" : "") + '" style="--rc:' + c.c + (lsImg ? ";background-image:url(" + lsImg + ")" : "") + '">' + (lsImg ? "" : c.n.split(" ").map((w) => w[0]).join("").slice(-2)) + '</span><span><b style="color:' + c.c + '">' + c.n.toUpperCase() + '</b><i class="lsWave"></i></span></div><div class="lsTip">TIP \u2014 ' + pick(LOAD_TIPS) + '</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING\u2026</button></div>';
     el.classList.remove("hidden"), S.running = false;
     const bar = el.querySelector(".lsBar i"), go = el.querySelector(".lsGo");
     bar.style.width = "0%", requestAnimationFrame(() => {
@@ -21930,6 +21975,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     skipTutorial,
     techAllowed,
     tierNews,
+    objMarkers,
     castLineList,
     showCampaign,
     showMissionList,
@@ -22029,6 +22075,41 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       g.lineTo(x * W, base * H - amp * H * fbm2(x * (freq || 4), 0, seed));
     }
     g.lineTo(W, H), g.closePath(), g.fillStyle = col, g.fill();
+  }
+  var WORLD_POLYS = [
+    [-168, 66, -162, 70, -140, 70, -120, 72, -95, 72, -80, 74, -70, 67, -62, 60, -56, 52, -66, 45, -70, 42, -76, 38, -81, 31, -80, 25, -82, 27, -85, 30, -90, 29, -97, 26, -97, 21, -92, 18, -87, 21, -88, 15, -83, 9, -78, 8, -80, 7, -86, 11, -92, 14, -100, 17, -106, 23, -112, 29, -110, 23, -115, 30, -118, 34, -124, 40, -124, 48, -130, 55, -140, 60, -150, 60, -160, 58, -165, 62],
+    [-55, 60, -45, 60, -38, 66, -22, 70, -18, 77, -30, 83, -55, 82, -70, 78, -58, 72, -52, 66],
+    [-78, 8, -72, 12, -62, 10, -52, 5, -35, -5, -39, -15, -41, -22, -48, -26, -53, -33, -58, -38, -63, -42, -66, -48, -69, -52, -74, -52, -75, -45, -73, -37, -71, -28, -70, -18, -76, -14, -81, -5, -80, 1],
+    [-10, 36, -9, 43, -1, 46, -5, 48, 2, 51, 8, 54, 8, 57, 5, 60, 8, 63, 14, 67, 20, 70, 28, 71, 40, 67, 44, 68, 60, 69, 70, 73, 80, 73, 100, 77, 113, 74, 130, 71, 140, 72, 160, 70, 180, 69, 180, 65, 170, 60, 163, 58, 156, 51, 162, 57, 142, 59, 135, 55, 140, 48, 133, 43, 129, 40, 127, 35, 122, 40, 118, 38, 122, 31, 120, 25, 110, 21, 108, 17, 105, 9, 100, 13, 99, 8, 103, 1, 98, 8, 97, 16, 92, 21, 88, 22, 80, 15, 77, 8, 73, 17, 70, 22, 66, 25, 57, 25, 56, 27, 50, 30, 48, 29, 52, 24, 56, 26, 59, 22, 52, 16, 43, 13, 35, 28, 34, 31, 36, 36, 28, 37, 27, 40, 22, 40, 24, 36, 22, 37, 19, 40, 16, 38, 18, 40, 13, 44, 9, 44, 3, 43, -1, 37, -5, 36],
+    [-5, 50, 1, 51, 2, 53, -2, 56, -2, 58, -6, 58, -5, 55, -3, 54, -5, 52],
+    [-10, 52, -6, 52, -6, 55, -9, 55],
+    [-24, 64, -14, 64, -14, 66, -22, 66],
+    [-17, 21, -17, 15, -12, 8, -8, 4, -2, 5, 8, 4, 10, 2, 9, -2, 12, -6, 14, -12, 12, -18, 15, -26, 18, -33, 20, -35, 26, -34, 32, -29, 35, -24, 40, -15, 40, -10, 39, -5, 42, 0, 51, 11, 44, 11, 38, 18, 33, 28, 32, 31, 20, 31, 10, 33, 10, 37, 0, 36, -6, 35, -10, 30, -13, 27],
+    [44, -13, 50, -15, 47, -25, 44, -24],
+    [130, 31, 135, 34, 141, 36, 142, 41, 145, 44, 141, 45, 140, 40, 136, 37, 132, 35],
+    [114, -22, 122, -18, 130, -12, 137, -12, 142, -11, 146, -19, 153, -25, 151, -33, 147, -38, 140, -38, 135, -34, 129, -32, 115, -34, 113, -26],
+    [95, 5, 104, -5, 106, -6, 98, 2],
+    [109, 1, 117, 7, 119, 1, 116, -4, 110, -3],
+    [131, -1, 141, -3, 150, -10, 141, -9, 134, -4],
+    [172, -35, 178, -38, 174, -41, 170, -46, 167, -46, 172, -41]
+  ];
+  function worldLand(MW, MH) {
+    const cv = document.createElement("canvas");
+    cv.width = MW, cv.height = MH;
+    const x = cv.getContext("2d");
+    x.fillStyle = "#000", x.fillRect(0, 0, MW, MH), x.fillStyle = "#fff";
+    const px = (lon) => (lon + 170) / 360 * MW, py = (lat) => (80 - lat) / 140 * MH;
+    for (const P of WORLD_POLYS) {
+      x.beginPath();
+      for (let i = 0; i < P.length; i += 2) i ? x.lineTo(px(P[i]), py(P[i + 1])) : x.moveTo(px(P[i]), py(P[i + 1]));
+      x.closePath(), x.fill();
+    }
+    const d = x.getImageData(0, 0, MW, MH).data, L = new Float32Array(MW * MH);
+    for (let i = 0; i < MW * MH; i++) {
+      const u = i % MW / MW, v = (i / MW | 0) / MH;
+      L[i] = d[4 * i] > 127 ? 0.63 + 0.3 * fbm2(u * 6, v * 6, 17) : 0.2;
+    }
+    return L;
   }
   var SCENES = {
     space(g, W, H, t, T, p) {
@@ -22243,11 +22324,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       let c = SCENES._mapCv;
       if (!c) {
         c = SCENES._mapCv = document.createElement("canvas"), c.width = MW, c.height = MH;
-        SCENES._land = new Float32Array(MW * MH);
-        for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
-          const u = x / MW, v = y / MH, d = Math.hypot((u - 0.5) * 1.25, (v - 0.52) * 1.6);
-          SCENES._land[y * MW + x] = fbm2(u * 5, v * 5, 17) + 0.55 - d;
-        }
+        SCENES._land = worldLand(MW, MH);
       }
       const cg = c.getContext("2d"), img = cg.createImageData(MW, MH), L = SCENES._land, e = ease(t), lf = lerp(p.l0 != null ? p.l0 : 0.7, p.l1 != null ? p.l1 : 0.7, e), vf = p.v0 != null ? lerp(p.v0, p.v1, e) : -1, hr = lerp(p.h0 || 0, p.h1 || 0, e), hs = p.hs || [[0.5, 0.45]];
       for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
@@ -22283,13 +22360,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         const an = Math.atan2(ay - sy, ax - sx);
         g.fillStyle = col, g.beginPath(), g.moveTo(ax + Math.cos(an) * m * 0.03, ay + Math.sin(an) * m * 0.03), g.lineTo(ax + Math.cos(an + 2.5) * m * 0.03, ay + Math.sin(an + 2.5) * m * 0.03), g.lineTo(ax + Math.cos(an - 2.5) * m * 0.03, ay + Math.sin(an - 2.5) * m * 0.03), g.fill(), g.shadowBlur = 0;
       });
+      g.font = "700 " + Math.round(m * 0.018) + "px monospace", g.fillStyle = "rgba(230,235,240,.55)", g.textAlign = "center", g.fillText("THE FRONTIER", mx + mw * 0.5, my + mh * 0.36), g.textAlign = "left";
       if (p.site) {
         const sx = mx + mw * p.site[0], sy = my + mh * p.site[1], pr = T * 0.8 % 1;
         g.strokeStyle = "rgba(230,180,255," + (1 - pr) + ")", g.lineWidth = 2, g.beginPath(), g.arc(sx, sy, m * (0.01 + 0.06 * pr), 0, 7), g.stroke();
         g.fillStyle = "#f0d8ff", g.beginPath(), g.arc(sx, sy, m * 7e-3, 0, 7), g.fill();
         g.font = "600 " + Math.round(m * 0.024) + "px monospace", g.fillText("SITE NINE", sx + m * 0.015, sy - m * 0.012);
       }
-      g.font = "700 " + Math.round(m * 0.026) + "px monospace", g.fillStyle = "rgba(170,220,240,.85)", g.fillText(p.label || "THEATRE MAP \u2014 THE FRONTIER", mx, my - m * 0.025);
+      g.font = "700 " + Math.round(m * 0.026) + "px monospace", g.fillStyle = "rgba(170,220,240,.85)", g.fillText(p.label || "WORLD THEATRE MAP", mx, my - m * 0.025);
       g.textAlign = "right", g.fillText(p.date || "", mx + mw, my - m * 0.025), g.textAlign = "left";
       const leg = [["VANGUARD", "#3a7bd5"], ["LEGION", "#c0392b"], ["SYNDICATE", "#8e44ad"]];
       g.font = "600 " + Math.round(m * 0.022) + "px monospace";
@@ -22785,7 +22863,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   var FILMS = {
     prologue: { title: "The Iron Frontier", mood: "tense", shots: [
       { s: "title", p: { text: "2031", sub: "A DIFFERENT HISTORY" }, d: 4.5, fx: "sting" },
-      { s: "warmap", say: [N, "In this history the Cold War never ended. It ran out of oil \u2014 and the East answered the resource war with numbers."], p: { l0: 0.78, l1: 0.45, date: "2019 \u2014 2029", arrows: [[0.85, 0.4, 0.55, 0.42, "#e0473a"], [0.85, 0.65, 0.58, 0.62, "#e0473a"]] } },
+      { s: "warmap", say: [N, "In this history the Cold War never ended. It ran out of oil \u2014 and the East answered the resource war with numbers."], p: { l0: 0.78, l1: 0.45, date: "2019 \u2014 2029", arrows: [[0.82, 0.3, 0.53, 0.26, "#e0473a"], [0.8, 0.45, 0.57, 0.4, "#e0473a"]] } },
       { s: "march", say: [N, "The Legion. Millions of soldiers and endless armour, pouring west across the Frontier."], fx: "whoosh" },
       { s: "battle", say: [N, "The Western Vanguard could not match them. City by city, the West fell back."], p: { sky: "dusk", dir: -1, color: "#e0473a", n: 8 } },
       { s: "lab", say: ["marsh", "There is something out past Jupiter. Mass, metal \u2014 and structure. It is not natural. And we can bring it down."], p: {}, rec: "ARCHIVE \u2014 DR. ELIAS MARSH \u2014 PROJECT STARFALL" },
@@ -22796,14 +22874,14 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       { s: "site", say: [N, "Containment failed in eleven minutes. Nobody who was inside that night came out as themselves."], p: { alarm: 1 }, fx: "sting" },
       { s: "dna", say: [N, "It had found the one thing it lacked \u2014 a body that could live here. It cloned the Vanguard's own DNA, and folded it into the hive."], p: {}, mood: "hive" },
       { s: "vats", say: [N, "They call themselves the Syndicate. They wear our faces now. They think as one."], p: { wake: 1 }, fxAt: [[5, "pulse"]] },
-      { s: "warmap", say: [N, "Three powers now fight over what is left. The Legion. The Vanguard. And the hive the Vanguard made."], p: { l0: 0.45, l1: 0.5, h0: 0.02, h1: 0.2, hs: [[0.5, 0.42], [0.3, 0.7], [0.72, 0.3]], site: [0.5, 0.42], date: "2031" } },
+      { s: "warmap", say: [N, "Three powers now fight over what is left. The Legion. The Vanguard. And the hive the Vanguard made."], p: { l0: 0.45, l1: 0.5, h0: 0.02, h1: 0.2, hs: [[0.36, 0.12], [0.3, 0.4], [0.62, 0.2]], site: [0.36, 0.12], date: "2031" } },
       { s: "title", p: { text: "IRON FRONTIER", sub: "CHOOSE YOUR SIDE", big: 0.11 }, d: 5, fx: "boom" }
     ] },
     vanguard_intro: { title: "Operation Clean Slate", mood: "tense", shots: [
       { s: "title", p: { text: "VANGUARD", sub: "OPERATION CLEAN SLATE", c: "#6fb8e0" }, d: 4, fx: "sting" },
       { s: "portrait", say: ["reyes", "I was at Site Nine the night it broke out. I signed the order that brought that rock down."], p: { who: "reyes" } },
       { s: "site", say: ["reyes", "We wanted a weapon to stop the Legion. We opened a door instead."], p: { alarm: 1 }, rec: "ARCHIVE \u2014 SITE NINE" },
-      { s: "warmap", say: ["reyes", "Now the Legion holds half the Frontier, and the Syndicate grows in every gap between us."], p: { l0: 0.5, l1: 0.5, v0: 0.2, v1: 0.2, h0: 0.08, h1: 0.14, hs: [[0.5, 0.42]], site: [0.5, 0.42], date: "FRONT LINE \u2014 TODAY" } },
+      { s: "warmap", say: ["reyes", "Now the Legion holds half the Frontier, and the Syndicate grows in every gap between us."], p: { l0: 0.5, l1: 0.5, v0: 0.33, v1: 0.33, h0: 0.08, h1: 0.14, hs: [[0.36, 0.12]], site: [0.36, 0.12], date: "FRONT LINE \u2014 TODAY" } },
       { s: "portrait", say: ["hale", "Battlegroup's fuelled and ready, Colonel. Say the word."], p: { who: "hale", side: "r" } },
       { s: "battle", say: ["reyes", "First we take our land back from the Legion. Then we clean up our own mess."], p: { sky: "dusk", dir: 1, color: "#6fb8e0" }, mood: "war" },
       { s: "title", p: { text: "CLEAN SLATE", sub: "RECLAIM THE FRONTIER", c: "#6fb8e0" }, d: 4, fx: "boom" }
@@ -22817,7 +22895,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     ] },
     vanguard_end: { title: "Clean Slate", mood: "hope", shots: [
       { s: "city", say: [N, "The Grand Crossing fell silent at dawn. For the first time in twelve years, the Frontier's guns stopped."], p: { dawn: 1 } },
-      { s: "warmap", say: ["reyes", "The Syndicate's grip is broken. The Legion is going home."], p: { l0: 0.5, l1: 0.9, v0: 0.2, v1: 0.85, h0: 0.14, h1: 0, hs: [[0.5, 0.42]], date: "CEASEFIRE" } },
+      { s: "warmap", say: ["reyes", "The Syndicate's grip is broken. The Legion is going home."], p: { l0: 0.5, l1: 0.9, v0: 0.33, v1: 0.85, h0: 0.14, h1: 0, hs: [[0.36, 0.12]], date: "CEASEFIRE" } },
       { s: "portrait", say: ["reyes", "Starfall was our mistake. Clean Slate is how we answer for it."], p: { who: "reyes" } },
       { s: "portrait", say: ["hale", "And the thing in the ice, ma'am?"], p: { who: "hale", side: "r" } },
       { s: "eye", say: ["voice", "We are patient. We fell a very long way to get here."], d: 5, mood: "hive", fx: "sting" },
@@ -22841,7 +22919,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     ] },
     legion_end: { title: "Iron Reclamation", mood: "hope", shots: [
       { s: "march", say: [N, "The Legion held the Frontier from the eastern steppe to the Kessel River."] },
-      { s: "warmap", say: ["volkova", "The hive is broken. Its nests are burning."], p: { l0: 0.5, l1: 0.1, h0: 0.14, h1: 0, hs: [[0.5, 0.42]], date: "VICTORY" } },
+      { s: "warmap", say: ["volkova", "The hive is broken. Its nests are burning."], p: { l0: 0.5, l1: 0.1, h0: 0.14, h1: 0, hs: [[0.36, 0.12]], date: "VICTORY" } },
       { s: "portrait", say: ["draganov", "For the first time in a year, my head is quiet. I had forgotten what my own thoughts sound like."], p: { who: "draganov" } },
       { s: "eye", say: ["voice", "Quiet is only the space between words, Marshal."], d: 5, mood: "hive", fx: "sting" },
       { s: "title", p: { text: "IRON RECLAMATION", sub: "COMPLETE", c: "#e0674a" }, d: 5 }
@@ -22862,7 +22940,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     ] },
     syndicate_end: { title: "One Mind", mood: "hive", shots: [
       { s: "city", say: [N, "The Iron Ring fell in a single night. By morning, the Frontier had stopped fighting."], p: { hive: 1, h0: 0.2, h1: 0.9, air: 1 } },
-      { s: "warmap", say: ["senna", "Every city. Every radio. Every mind. One song."], p: { l0: 0.5, l1: 0.5, v0: 0.2, v1: 0.2, h0: 0.1, h1: 1.2, hs: [[0.5, 0.42]], site: [0.5, 0.42], date: "ASCENDANCE" } },
+      { s: "warmap", say: ["senna", "Every city. Every radio. Every mind. One song."], p: { l0: 0.5, l1: 0.5, v0: 0.33, v1: 0.33, h0: 0.1, h1: 1.2, hs: [[0.36, 0.12]], site: [0.36, 0.12], date: "ASCENDANCE" } },
       { s: "eye", say: ["voice", "We fell a very long way to find a home. Now we are home."], fx: "sting" },
       { s: "title", p: { text: "ONE MIND", sub: "THE HARVEST \u2014 COMPLETE", c: "#b27ae0" }, d: 5, fx: "boom" }
     ] }
@@ -23021,7 +23099,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   addEventListener("keydown", (e) => {
     F && ("Escape" === e.key ? endFilm() : " " === e.key && (F.st = 1e3));
   });
-  Object.assign(window, { playFilm, endFilm, FILMS, filmSeen, FMV_MEDIA, probeMedia, fmvSrc });
+  Object.assign(window, { playFilm, endFilm, FILMS, filmSeen, FMV_MEDIA, probeMedia, fmvSrc, SCENES });
 })();
 
 </script>
@@ -23245,6 +23323,12 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }) };
     (S.history = S.history || []).push(snap), S.history.length > 300 && S.history.shift();
   }
+  var _storeWarnT = -99;
+  function capCredits(p) {
+    if (p.neutral) return;
+    const cap = creditCap(p.id);
+    p.credits > cap && (p.credits = cap, 0 === p.id && S.time - _storeWarnT > 25 && (_storeWarnT = S.time, hint("Silos needed \u2014 storage full")));
+  }
   function step(e) {
     buildUnitGrid(), S.time += e, sampleHistory(e), updateFog(e), lightningT = Math.max(0, lightningT - e);
     tickWeather(e);
@@ -23253,7 +23337,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
     S.spyReveals && S.spyReveals.length && (S.spyReveals.forEach((r) => r.t -= e), S.spyReveals = S.spyReveals.filter((r) => r.t > 0));
     tickCrates(e), tickIronFx();
-    for (const t of S.players) t.neutral || (t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), t.curtainCD > 0 && (t.curtainCD -= e), tickProduction(t, e), t.isAI ? (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e), aiCurtain(t)) : 0 === t.id && S.autopilot && (tickAI(t, e), aiMicro(t, e)));
+    for (const t of S.players) t.neutral || (capCredits(t), t.spyCD > 0 && (t.spyCD -= e), t.paradropCD > 0 && (t.paradropCD -= e), t.empCD > 0 && (t.empCD -= e), t.curtainCD > 0 && (t.curtainCD -= e), tickProduction(t, e), t.isAI ? (t.credits += 8 * DIFFS[t.diff].inc * (t.ai.diffScale || 1) * e * S.speed, t.credits = Math.min(t.credits, 8 * DIFFS[t.diff].cash), tickAI(t, e), aiMicro(t, e), aiCurtain(t)) : 0 === t.id && S.autopilot && (tickAI(t, e), aiMicro(t, e)));
     for (const t of S.units) tickUnit(t, e);
     snowTrails();
     tickSeparation(e);
@@ -23439,6 +23523,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     wallTileOk,
     autoLinkWall,
     canPlaceRaw,
+    capCredits,
     frame,
     tickFpsEntry,
     beginFpsEntry,

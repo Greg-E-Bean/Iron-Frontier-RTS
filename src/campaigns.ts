@@ -55,7 +55,7 @@ vanguard:{title:"Operation Clean Slate",tag:"Take back the lands lost to the Leg
  obj:[{id:"bluff",t:"hold",x:54,y:35,r:4,time:45,text:"Secure the east bluff at the high bridge"},{id:"fac",t:"destroy",keys:["factory"],text:"Destroy the Legion Factory"},
       {id:"town",t:"capture",n:2,sec:1,text:"Hold 2 town buildings"},{id:"loss",t:"lossMax",n:25,sec:1,text:"Lose no more than 25 units"}],
  ev:[{at:5,do:[say("hale","The bridge deck is the fast way across. The road bridges north and south are slower, but they'll be watching the deck."),["ping",45,35]]},
-     {at:200,do:[say("hale","Rhinos rolling across the north bridge!"),["wave",0,[["main",2],["base",2]],{from:[60,18]}]]},
+     {at:200,do:[say("hale","Maulers rolling across the north bridge!"),["wave",0,[["main",2],["base",2]],{from:[60,18]}]]},
      {done:"bluff",do:[say("reyes","The bluff is ours. Artillery on that deck and push for the factory."),["reinf",[["main",3],["anti",2]],[8,4],[36,36]],["credits",2000]]},
      {at:420,do:[say("draganov","You cross my river, Colonel? Then you will swim back.")]},
      {every:180,from:360,until:1800,do:[["wave",0,[["main",1],["base",3],["anti",1]],{grow:.6,to:[54,35]}]]}],
@@ -170,7 +170,7 @@ legion:{title:"Iron Reclamation",tag:"Hold the Frontier for the Legion — and b
  foes:[{fac:"vanguard",diff:"easy",spawn:3,base:["power","barracks","def1"]}],start:{credits:7000},
  obj:[{id:"towns",t:"capture",n:2,text:"Hold 2 town buildings"},{id:"bar",t:"destroy",keys:["barracks"],text:"Destroy the Vanguard Barracks"},
       {id:"oil",t:"own",key:"oilDerek",sec:1,text:"Capture the oil derrick"},{id:"loss",t:"lossMax",n:20,sec:1,text:"Lose no more than 20 units"}],
- ev:[{at:5,do:[say("bogdan","Towns are east and west on the ring road. Conscripts can garrison them.")]},
+ ev:[{at:5,do:[say("bogdan","Towns are east and west on the ring road. Militia can garrison them.")]},
      {done:"towns",do:[say("bogdan","Depots are ours. Freight credits coming through."),["credits",2500]]},
      {at:240,do:[say("hale","Legion in the basin. Hit their ring road."),["wave",0,[["main",2],["base",2]]]]},
      {every:200,from:440,until:1600,do:[["wave",0,[["main",1],["base",3]],{grow:.5}]]}],
@@ -268,7 +268,7 @@ syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard bl
      {done:"pow",do:[say("senna","The current flows again. I can feel it humming.")]},
      {done:"ref",do:[say("senna","Their old harvester answers to us now."),["miner"]]},
      {done:"train",do:[say("voice","Enough. The Vanguard camp lies across the lakes to the south-east. Quiet it."),["show","kill"],["ping",84,64]]},
-     {at:210,do:[say("hale","Unknown infantry near the lakes. Weapons free."),["wave",0,[["base",3]]]]},
+     {at:210,do:[say("senna","Their soldiers have seen us by the lakes. They are coming."),["wave",0,[["base",3]]]]},
      {every:240,from:480,until:1500,do:[["wave",0,[["base",2],["anti",1]],{grow:.5}]]}],
  win:[["voice","Quiet at last. Listen, Adept. Can you hear how much more there is?"]],
  lose:[["voice","Sleep, then. We will wake you again."]]},
@@ -277,9 +277,9 @@ syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard bl
  foes:[{fac:"legion",diff:"easy",spawn:3,team:2,base:["power","barracks"]},{fac:"vanguard",diff:"easy",spawn:2,team:3}],start:{credits:7000},
  obj:[{id:"town",t:"capture",n:3,text:"Hold 3 town buildings"},{id:"leg",t:"destroy",keys:["conyard"],slot:0,text:"Destroy the Legion Fortress HQ"},
       {id:"oil",t:"own",key:"oilDerek",sec:1,text:"Capture the oil derrick"},{id:"loss",t:"lossMax",n:25,sec:1,text:"Lose no more than 25 units"}],
- ev:[{at:5,do:[say("senna","Initiates can take the houses. The townsfolk will not resist us for long.")]},
+ ev:[{at:5,do:[say("senna","Acolytes can take the houses. The townsfolk will not resist us for long.")]},
      {done:"town",do:[say("voice","Hear them? They sing for us now."),["credits",2500]]},
-     {at:250,do:[say("draganov","Who is out there on the river? Show yourselves!"),["wave",0,[["main",2],["base",2]]]]},
+     {at:250,do:[say("senna","The Marshal's guards are shouting at shadows on the river. He is afraid."),["wave",0,[["main",2],["base",2]]]]},
      {every:190,from:450,until:1800,do:[["wave",0,[["main",1],["base",3]],{grow:.5}]]},
      {at:600,do:[say("voice","Marshal Draganov. You are tired. Let me help you sleep.")]}],
  win:[["senna","The Marshal hears you now, Master."],["voice","He always did. He simply did not know it."]],
@@ -294,7 +294,7 @@ syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard bl
  ev:[{at:5,do:[say("senna","They will come over the ice and across the high bridge.")]},
      {every:110,from:80,until:580,do:[["wave",0,[["main",2],["base",2]],{grow:.7}]]},
      {every:130,from:140,until:580,do:[["wave",1,[["main",1],["base",3]],{grow:.7}]]},
-     {at:300,do:[say("reyes","All units, burn that Amplifier. Whatever it takes."),say("draganov","For once, Colonel, we agree.")]},
+     {at:300,do:[say("senna","Their radios scream one order, Master: burn the Amplifier."),say("voice","Even the Marshal agrees with them now. How touching.")]},
      {at:480,do:[say("voice","Two minutes. Listen — the song is almost finished.")]}],
  win:[["voice","The song is sung. Every radio on the Frontier carries it now."]],
  lose:[["senna","The Amplifier is silent. Forgive me, Master."]]},
@@ -302,7 +302,7 @@ syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard bl
 {name:"Silent Hand",map:"line",film:"syndicate_reveal",loc:"Firing Line",spawn:2,hero:1,fpsOnly:1,stealth:1,
  brief:[["voice","The Legion is learning to burn us out. Their base behind the Firing Line must go dark."],["phantom","Then I will be the dark."],["voice","A seeded mind in their grid will pulse when you reach the north-east relay. Their Power Plant first, then their headquarters. Unseen, Phantom. Charges from inside with B."]],
  foes:[{fac:"legion",diff:"normal",spawn:1,base:["power","barracks","lab","def1","def1","def2"]}],start:{},
- alarm:[["volkova","Syndicate infiltrator! Lights on — find her!"]],
+ alarm:[["voice","If they see you, every light in that base comes on. Stay in the dark."]],
  obj:[{id:"relay",t:"reach",x:53,y:26,r:3,text:"Reach the relay on the north-east bluff"},{id:"pow",t:"destroy",tag:"pp",text:"Destroy the Power Plant"},{id:"cy",t:"destroy",keys:["conyard"],hide:1,text:"Destroy the Headquarters"},
       {id:"quiet",t:"stealth",text:"Stay undetected"},{id:"lab",t:"destroy",keys:["lab"],sec:1,text:"Destroy the Tech Centre"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
  ev:[{at:3,do:[say("phantom","In the shadows. They never feel me."),["ping",53,26],["hint","Cross the east high bridge onto the bluff — keep your distance from patrols"]]},
@@ -332,23 +332,23 @@ syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard bl
       {id:"emp",t:"own",key:"empTower",sec:1,text:"Capture the EMP tower on the north mesa"},{id:"fast",t:"timeMax",time:900,sec:1,text:"Finish within 15 minutes"}],
  ev:[{at:4,do:[say("senna","The swarm is awake. More broods will join us.")]},
      {every:150,from:150,until:900,do:[["reinf",[["main",1],["base",3]],[0,64],[12,58]],say("senna","A new brood has hatched.")]},
-     {at:330,do:[say("reyes","Syndicate swarm on the Highlands! Hold the mesa!"),["wave",0,[["main",2],["anti",2]],{to:"army"}]]}],
+     {at:330,do:[say("senna","They have seen the swarm. They are running for the mesa."),["wave",0,[["main",2],["anti",2]],{to:"army"}]]}],
  win:[["voice","Delicious."]],
  lose:[["senna","The swarm is spent."]]},
 
 {name:"Convergence",map:"harbor",unlock:["voice","And the Psychic Amplifier seed is yours. When it has grown, the city will kneel."],loc:"Port Merrow",spawn:1,
- brief:[["voice","Three Masterminds wait on the west bank of Port Merrow. Together they can reach every mind in the city."],["senna","They must reach the east bluff. The high bridge is the only way."],["voice","Two will be enough. Move when they are ready."]],
+ brief:[["voice","Three Overminds wait on the west bank of Port Merrow. Together they can reach every mind in the city."],["senna","They must reach the east bluff. The high bridge is the only way."],["voice","Two will be enough. Move when they are ready."]],
  foes:[{fac:"legion",diff:"hard",spawn:3,team:2,base:["power","barracks","def1"]},{fac:"vanguard",diff:"normal",spawn:2,team:2}],
  start:{credits:6000,base:["power","refinery","barracks","factory"],convoy:{key:"overmind",n:3,tag:"convoy",at:[20,35]}},
  obj:[{id:"esc",t:"escort",tag:"convoy",x:59,y:35,r:4,need:2,text:"Bring at least 2 Overminds to the east bluff"},{id:"hold",t:"hold",x:59,y:35,r:5,time:90,hide:1,text:"Hold the east bluff while they reach out"},
       {id:"loss",t:"lossMax",n:20,sec:1,text:"Lose no more than 20 units"},{id:"sw",t:"build",key:"super",n:1,sec:1,text:"Grow the Psychic Amplifier"}],
- ev:[{at:5,do:[["ping",45,35],say("senna","The Masterminds gather by the west bluff.")]},
+ ev:[{at:5,do:[["ping",45,35],say("senna","The Overminds gather by the west bluff.")]},
      {at:90,do:[["go","convoy",59,35],say("voice","Go now. Let the city hear us coming.")]},
-     {at:140,do:[say("draganov","Something is crossing the harbour. Shoot it!"),["wave",0,[["main",2],["anti",2]],{to:[50,35]}]]},
+     {at:140,do:[say("senna","Their gunners on the harbour have seen us. Hurry."),["wave",0,[["main",2],["anti",2]],{to:[50,35]}]]},
      {every:150,from:260,until:1500,do:[["wave",0,[["main",1],["base",3]],{grow:.5,to:[55,35]}]]},
      {done:"esc",do:[say("voice","They are in place. Now hold."),["show","hold"],["credits",3000],["wave",1,[["main",2],["base",4]],{to:[59,35]}]]}],
  win:[["voice","Port Merrow is listening. All of it."]],
- lose:[["senna","The Masterminds are lost."]]},
+ lose:[["senna","The Overminds are lost."]]},
 
 {name:"Ascendance",map:"ring",loc:"Iron Ring Crater",spawn:0,
  brief:[["voice","This is the last of it, Adept. The Vanguard and Legion have gathered everything they have at the Iron Ring."],["senna","They mean to end us."],["voice","Build the Overmind. Then show them what the end looks like."]],
@@ -356,7 +356,7 @@ syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard bl
  obj:[{id:"dom",t:"build",key:"super",n:1,text:"Grow the Psychic Amplifier (superweapon)"},{id:"all",t:"elim",text:"Destroy every enemy base"},
       {id:"mid",t:"hold",x:45,y:35,r:5,time:60,sec:1,text:"Hold the crater floor for 60 seconds"},{id:"kills",t:"kills",n:120,sec:1,text:"Destroy 120 enemy units"}],
  ev:[{at:6,do:[say("senna","The rim is high ground on every side. Ramps down into the crater.")]},
-     {at:300,do:[say("reyes","Draganov. Whatever happens today — thank you."),say("draganov","Save it for after, Colonel.")]},
+     {at:300,do:[say("senna","The Colonel and the Marshal are thanking each other on an open channel."),say("voice","Let them. It is the last thing they will ever share.")]},
      {done:"dom",do:[say("voice","It is finished. Now — ascend."),["credits",3000]]},
      {every:200,from:300,until:2600,do:[["wave",0,[["main",2],["base",3]],{grow:.6}]]}],
  win:[["voice","Silence. Perfect silence. Every mind on the Frontier, one voice."],["senna","Yours, Master."],["voice","Ours, Adept. Ours."]],
@@ -371,7 +371,7 @@ syndicate:{title:"The Harvest",tag:"Born of a fallen star and stolen Vanguard bl
 for(const fac in CAMPAIGNS)CAMPAIGNS[fac].missions.forEach((m,i)=>{m.tier=m.tier||i+1;m.unlock&&!m._u&&(m.brief.push(m.unlock),m._u=1)});
 const TIER_BLD={power:2,refinery:2,hive:2,barracks:2,wall:2,gate:2,def1:2,orerig:3,factory:3,silo:3,repair:3,lab:4,airfield:4,aa:4,def2:4,triturret:4,bastion:5,support:5,navalyard:6,super:7};
 function unitTier(k){const u=UNITS[k];if(!u)return 9;if(/^titan_/.test(k)||"bastion"===k)return 5;if("sea"===u.tab||"navalyard"===u.from)return 6;if("airfield"===u.from||"skyjack"===k)return 4;if("lab"===u.req)return 4;if("inf"===u.tab)return 1;if("miner"===u.role||"hivetrans"===k||"drone"===k)return 2;return 3}
-function techAllowed(k,isBld,abil){const m=S.mission,T=m&&m.tier;if(!T||m.tutorial)return!0;if(abil)return"super"===k?T>=7:"curtain"===k?T>=5:T>=3;return(isBld?TIER_BLD[k]||2:unitTier(k))<=T}
+function techAllowed(k,isBld,abil){const m=S.mission,T=m&&m.tier;if(!T||m.tutorial)return!0;if(abil)return"super"===k?T>=7:"curtain"===k?T>=5:"spy"===k?T>=4:!0;return(isBld?TIER_BLD[k]||2:unitTier(k))<=T}
 function tierNews(fac,t){const b=k=>bname(k,fac),u=k=>uname(k,fac),F=FACTIONS[fac];return{1:"Infantry only. Capture buildings with Technicians; no construction.",2:b("conyard")+": "+b("power")+", "+b("refinery")+", "+b("barracks")+" and "+b("def1")+".",3:b("factory")+": "+u(F.main)+", support vehicles and the "+b("repair")+".",4:b("lab")+", "+b("airfield")+", aircraft, advanced defences and elite infantry.",5:"Titan walker: the "+u("titan_"+("vanguard"===fac?"vanguard":"legion"===fac?"legion":"syndicate"))+", and the "+b("support")+" support structure.",6:"Naval yard and the full conventional arsenal.",7:"Superweapon: the "+b("super")+".",8:"Everything is authorised."}[t]||""}
 // ---- difficulty ----------------------------------------------------------------
 const CDIFF={easy:{n:"RECRUIT",d:"Weaker enemies, smaller attacks, more credits. Stealth: short sight range, slow to spot you.",shift:-1,wave:.6,cash:1.4,det:80,detT:2.8,emp:100,alarmT:15},
@@ -440,6 +440,17 @@ setTimeout(()=>{S.mission===m&&S.running&&(hint("OBJECTIVES — "+m.objs.filter(
 
 const inZone=(u,x,y,r)=>dist2(u.x,u.y,T2P(x),T2P(y))<(32*r)*(32*r);
 const ownedCount=pred=>S.blds.filter(b=>0===b.owner&&!b.dead&&pred(b)).length;
+// Where each open objective is, for the minimap and the loading-screen map:
+// {x, y (world px), prim}. Primary objectives are green, bonus ones orange.
+let _omT=-1,_omCache=[];
+function objMarkers(){const m=S.mission;if(!m||!m.objs)return[];if(_omT===S.time)return _omCache;_omT=S.time;const out=[],T=v=>32*v+16,p0=S.players[0],sx=p0&&p0.spawnX||0,sy=p0&&p0.spawnY||0,near=(list,n)=>list.sort((a,b)=>dist2(a.x,a.y,sx,sy)-dist2(b.x,b.y,sx,sy)).slice(0,n),cen=l=>({x:l.reduce((s,b)=>s+b.x,0)/l.length,y:l.reduce((s,b)=>s+b.y,0)/l.length});
+for(const o of m.objs){if(!o.shown||0!==o.state)continue;const prim=!o.sec,add=q=>q&&out.push({x:q.x,y:q.y,prim});
+if(null!=o.x&&null!=o.y){add({x:T(o.x),y:T(o.y)});continue}
+if("destroy"===o.t){const ow=null!=o.slot?[o.slot+1]:enemyOwners(),l=S.blds.filter(b=>!b.dead&&(o.tag?b.mtag===o.tag:ow.includes(b.owner)&&(o.keys||[]).includes(b.key)));near(l,2).forEach(add)}
+else if("elim"===o.t){const ow=null!=o.slot?[o.slot+1]:enemyOwners();for(const id of ow){const l=S.blds.filter(b=>!b.dead&&b.owner===id);l.length&&add(cen(l))}}
+else if("own"===o.t){const l=S.blds.filter(b=>!b.dead&&b.key===o.key&&0!==b.owner);near(l,2).forEach(add)}
+else if("capture"===o.t){const l=S.blds.filter(b=>!b.dead&&0!==b.owner&&(b.d.civ||SPECIALS.includes(b.key)));near(l,2).forEach(add)}}
+return _omCache=out}
 const SPECIALS=["oilDerek","paradropHangar","empTower","rogueDen"];
 // 1 done, -1 failed, 0 pending
 function evalObj(o,m,dt){switch(o.t){
@@ -564,14 +575,14 @@ m.film&&($("#bFilm").onclick=()=>{briefPlay++,playFilm(m.film)},filmSeen(m.film)
 // ---- loading screen: the map with objective markers, and the commander
 // reading out the objectives while the world finishes loading.
 function missionMapSVG(m){const W=920,H=720,img=mapPreviewImg(m.map),X=x=>(x/92*W).toFixed(1),Y=y=>(y/72*H).toFixed(1),spots=mapSpots(m.map)||[],c=[];
-const sp=spots[m.spawn||0];sp&&c.push('<circle cx="'+X(sp[0])+'" cy="'+Y(sp[1])+'" r="26" fill="none" stroke="#7dff8a" stroke-width="5"/><text x="'+X(sp[0])+'" y="'+(sp[1]>60?+Y(sp[1])-40:+Y(sp[1])+56)+'" class="mL" fill="#7dff8a">YOU</text>');
-m.foes.forEach(f=>{const q=spots[f.spawn];q&&c.push('<circle cx="'+X(q[0])+'" cy="'+Y(q[1])+'" r="24" fill="'+(f.ally?"#6fb8e055":"#e0473a55")+'" stroke="'+(f.ally?"#6fb8e0":"#e0473a")+'" stroke-width="4"/><text x="'+X(q[0])+'" y="'+(q[1]>60?+Y(q[1])-38:+Y(q[1])+54)+'" class="mL" fill="'+(f.ally?"#a8d8f0":"#f3a397")+'">'+(f.ally?"ALLY":FAC_NAME[f.fac].toUpperCase())+"</text>")});
-let k=0;for(const o of m.obj)if(null!=o.x&&!o.hide){k++;c.push('<circle cx="'+X(o.x)+'" cy="'+Y(o.y)+'" r="'+Math.max(16,o.r/92*W)+'" fill="#ffd75e22" stroke="#ffd75e" stroke-width="4" stroke-dasharray="10 7"/><text x="'+X(o.x)+'" y="'+Y(o.y)+'" dy=".35em" class="mL big" fill="#ffd75e">'+k+"</text>")}
+const p0=S.players[0],sp=p0&&p0.spawnX?[p0.spawnX/32,p0.spawnY/32]:spots[m.spawn||0];sp&&c.push('<circle cx="'+X(sp[0])+'" cy="'+Y(sp[1])+'" r="26" fill="#ffffff22" stroke="#ffffff" stroke-width="5"/><text x="'+X(sp[0])+'" y="'+(sp[1]>60?+Y(sp[1])-40:+Y(sp[1])+56)+'" class="mL" fill="#ffffff">YOU</text>');
+const mk=S.mission&&S.mission.def===m?objMarkers():[];for(const q of mk.slice().sort((a,b)=>+a.prim-+b.prim)){const x=+X(q.x/32),y=+Y(q.y/32),col=q.prim?"#46e06a":"#ff9a2c",r=q.prim?30:24;c.push('<g><circle cx="'+x+'" cy="'+y+'" r="'+(r+10)+'" fill="none" stroke="'+col+'" stroke-width="3" opacity=".55"/><path d="M'+x+" "+(y-r)+"L"+(x+r)+" "+y+"L"+x+" "+(y+r)+"L"+(x-r)+" "+y+'Z" fill="'+col+'aa" stroke="'+col+'" stroke-width="4"/></g>')}
+c.push('<g font-family="monospace" font-size="26" font-weight="700" transform="translate('+(W-270)+' 0)"><rect x="14" y="'+(H-86)+'" width="250" height="72" rx="8" fill="#000a"/><path d="M34 '+(H-66)+'l12 12-12 12-12-12z" fill="#46e06a"/><text x="56" y="'+(H-45)+'" fill="#bff5c8">PRIMARY</text><path d="M34 '+(H-36)+'l10 10-10 10-10-10z" fill="#ff9a2c"/><text x="56" y="'+(H-17)+'" fill="#ffd2a0">BONUS</text></g>');
 return'<svg viewBox="0 0 '+W+" "+H+'" preserveAspectRatio="xMidYMid meet"><image href="'+img+'" width="'+W+'" height="'+H+'" preserveAspectRatio="none"/>'+c.join("")+"</svg>"}
 const LOAD_TIPS=["Bonus objectives earn stars — replay missions to collect them all.","High ground gives your units 30% more sight range.","Units on an overpass can't be hit by units passing underneath.","Garrison town buildings with infantry to hold them.","Power down a base and its defences stop firing."];
 function showLoading(fac,idx){const m=CAMPAIGNS[fac].missions[idx],cd=campDiff();let el=$("#loadScreen");el||(el=document.createElement("div"),el.id="loadScreen",document.body.appendChild(el));
 "function"==typeof probeMedia&&probeMedia(m.brief[0][0]);const lsImg="function"==typeof fmvSrc&&fmvSrc(m.brief[0][0]),prim=m.obj.filter(o=>!o.sec&&!o.hide),sec=m.obj.filter(o=>o.sec&&!o.hide&&!("stealth"===o.t&&"hard"===cd)),speaker=m.brief[0][0],c=castOf(speaker);let k=0;
-el.innerHTML='<div class="lsMap">'+missionMapSVG(m)+'</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-'+fac+'">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+" · "+CDIFF[cd].n+'</div><h1>'+m.name.toUpperCase()+'</h1><div class="lsLoc">'+m.loc+" · "+mapName(m.map)+'</div>'+(m.hero||m.noBuild?"":'<div class="lsSec">NEW TECHNOLOGY</div><div class="bTech">'+tierNews(fac,m.tier)+"</div>")+'<div class="lsSec">PRIMARY OBJECTIVES</div>'+prim.map(o=>'<div class="bObj"><b>'+(null!=o.x?++k:"◆")+"</b>"+o.text+"</div>").join("")+(sec.length?'<div class="lsSec">BONUS</div>'+sec.map(o=>'<div class="bObj sec"><b>★</b>'+o.text+"</div>").join(""):"")+'<div class="lsVo"><span class="rbPort'+(lsImg?" img":"")+'" style="--rc:'+c.c+(lsImg?";background-image:url("+lsImg+")":"")+'">'+(lsImg?"":c.n.split(" ").map(w=>w[0]).join("").slice(-2))+'</span><span><b style="color:'+c.c+'">'+c.n.toUpperCase()+'</b><i class="lsWave"></i></span></div><div class="lsTip">TIP — '+pick(LOAD_TIPS)+'</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING…</button></div>';
+el.innerHTML='<div class="lsMap">'+missionMapSVG(m)+'</div><div class="lsShade"></div><div class="lsInfo"><div class="lsOp f-'+fac+'">'+CAMPAIGNS[fac].title.toUpperCase()+" · MISSION "+(idx+1)+" · "+CDIFF[cd].n+'</div><h1>'+m.name.toUpperCase()+'</h1><div class="lsLoc">'+m.loc+" · "+mapName(m.map)+'</div>'+(m.hero||m.noBuild?"":'<div class="lsSec">NEW TECHNOLOGY</div><div class="bTech">'+tierNews(fac,m.tier)+"</div>")+'<div class="lsSec">PRIMARY OBJECTIVES</div>'+prim.map(o=>'<div class="bObj"><b style="color:#46e06a">◆</b>'+o.text+"</div>").join("")+(sec.length?'<div class="lsSec">BONUS</div>'+sec.map(o=>'<div class="bObj sec"><b style="color:#ff9a2c">◆</b>'+o.text+"</div>").join(""):"")+'<div class="lsVo"><span class="rbPort'+(lsImg?" img":"")+'" style="--rc:'+c.c+(lsImg?";background-image:url("+lsImg+")":"")+'">'+(lsImg?"":c.n.split(" ").map(w=>w[0]).join("").slice(-2))+'</span><span><b style="color:'+c.c+'">'+c.n.toUpperCase()+'</b><i class="lsWave"></i></span></div><div class="lsTip">TIP — '+pick(LOAD_TIPS)+'</div><div class="lsBar"><i></i></div><button class="lsGo" disabled>LOADING…</button></div>';
 el.classList.remove("hidden"),S.running=!1;const bar=el.querySelector(".lsBar i"),go=el.querySelector(".lsGo");bar.style.width="0%",requestAnimationFrame(()=>{bar.style.transition="width 1.6s ease-out",bar.style.width="100%"});
 try{cineMood("tense")}catch(e){}
 const vo=loadingVO(m);let vi=0;const tok=el._tok=(el._tok||0)+1;
@@ -589,7 +600,7 @@ return'<div class="dBrief">'+(last?'<button class="bPlay" id="dEnd">▶ WATCH TH
 Object.assign(window, {
   FAC_NAME, CAMPAIGNS, launchMission, checkMissionOutcome, campaignUnlocked, unlockNext, applyPendingMission,
   otherFacs, launchTutorial, updateTutorial, updateTutorialPanel, skipTutorial,
-  techAllowed, tierNews, castLineList, showCampaign, showMissionList, showBriefing, missionDebrief, stealthBlock, showLoading, campDiff, CDIFF, missionStars, radioStop, CAST, castOf,
+  techAllowed, tierNews, objMarkers, castLineList, showCampaign, showMissionList, showBriefing, missionDebrief, stealthBlock, showLoading, campDiff, CDIFF, missionStars, radioStop, CAST, castOf,
 });
 
 Object.defineProperties(window, {

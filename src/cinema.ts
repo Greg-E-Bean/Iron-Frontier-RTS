@@ -23,6 +23,21 @@ function sky(g,W,H,stops){const gr=g.createLinearGradient(0,0,0,H);stops.forEach
 function starfield(g,W,H,T,a,drift){for(const[x,y,s,tw]of STARS){const al=a*(.45+.55*Math.sin(T*1.3+tw)**2);g.fillStyle="rgba(220,230,255,"+al+")";g.fillRect(((x+drift*T*s*.01)%1+1)%1*W,y*H,s,s)}}
 function ridge(g,W,H,base,amp,seed,col,freq){g.beginPath(),g.moveTo(0,H);for(let i=0;i<=80;i++){const x=i/80;g.lineTo(x*W,base*H-amp*H*fbm2(x*(freq||4),0,seed))}g.lineTo(W,H),g.closePath(),g.fillStyle=col,g.fill()}
 
+// ---- world map for the war-room scenes ----------------------------------
+// Coarse continent outlines (lon, lat). The map is equirectangular from
+// 170W to 190E and 80N to 60S, so Europe (the Frontier) sits mid-map with the
+// Americas to the west and Asia to the east.
+const WORLD_POLYS=[
+[-168,66,-162,70,-140,70,-120,72,-95,72,-80,74,-70,67,-62,60,-56,52,-66,45,-70,42,-76,38,-81,31,-80,25,-82,27,-85,30,-90,29,-97,26,-97,21,-92,18,-87,21,-88,15,-83,9,-78,8,-80,7,-86,11,-92,14,-100,17,-106,23,-112,29,-110,23,-115,30,-118,34,-124,40,-124,48,-130,55,-140,60,-150,60,-160,58,-165,62],
+[-55,60,-45,60,-38,66,-22,70,-18,77,-30,83,-55,82,-70,78,-58,72,-52,66],
+[-78,8,-72,12,-62,10,-52,5,-35,-5,-39,-15,-41,-22,-48,-26,-53,-33,-58,-38,-63,-42,-66,-48,-69,-52,-74,-52,-75,-45,-73,-37,-71,-28,-70,-18,-76,-14,-81,-5,-80,1],
+[-10,36,-9,43,-1,46,-5,48,2,51,8,54,8,57,5,60,8,63,14,67,20,70,28,71,40,67,44,68,60,69,70,73,80,73,100,77,113,74,130,71,140,72,160,70,180,69,180,65,170,60,163,58,156,51,162,57,142,59,135,55,140,48,133,43,129,40,127,35,122,40,118,38,122,31,120,25,110,21,108,17,105,9,100,13,99,8,103,1,98,8,97,16,92,21,88,22,80,15,77,8,73,17,70,22,66,25,57,25,56,27,50,30,48,29,52,24,56,26,59,22,52,16,43,13,35,28,34,31,36,36,28,37,27,40,22,40,24,36,22,37,19,40,16,38,18,40,13,44,9,44,3,43,-1,37,-5,36],
+[-5,50,1,51,2,53,-2,56,-2,58,-6,58,-5,55,-3,54,-5,52],[-10,52,-6,52,-6,55,-9,55],[-24,64,-14,64,-14,66,-22,66],
+[-17,21,-17,15,-12,8,-8,4,-2,5,8,4,10,2,9,-2,12,-6,14,-12,12,-18,15,-26,18,-33,20,-35,26,-34,32,-29,35,-24,40,-15,40,-10,39,-5,42,0,51,11,44,11,38,18,33,28,32,31,20,31,10,33,10,37,0,36,-6,35,-10,30,-13,27],
+[44,-13,50,-15,47,-25,44,-24],[130,31,135,34,141,36,142,41,145,44,141,45,140,40,136,37,132,35],
+[114,-22,122,-18,130,-12,137,-12,142,-11,146,-19,153,-25,151,-33,147,-38,140,-38,135,-34,129,-32,115,-34,113,-26],
+[95,5,104,-5,106,-6,98,2],[109,1,117,7,119,1,116,-4,110,-3],[131,-1,141,-3,150,-10,141,-9,134,-4],[172,-35,178,-38,174,-41,170,-46,167,-46,172,-41]];
+function worldLand(MW,MH){const cv=document.createElement("canvas");cv.width=MW,cv.height=MH;const x=cv.getContext("2d");x.fillStyle="#000",x.fillRect(0,0,MW,MH),x.fillStyle="#fff";const px=lon=>((lon+170)/360)*MW,py=lat=>((80-lat)/140)*MH;for(const P of WORLD_POLYS){x.beginPath();for(let i=0;i<P.length;i+=2)i?x.lineTo(px(P[i]),py(P[i+1])):x.moveTo(px(P[i]),py(P[i+1]));x.closePath(),x.fill()}const d=x.getImageData(0,0,MW,MH).data,L=new Float32Array(MW*MH);for(let i=0;i<MW*MH;i++){const u=i%MW/MW,v=(i/MW|0)/MH;L[i]=d[4*i]>127?.63+.3*fbm2(u*6,v*6,17):.2}return L}
 const SCENES={
 space(g,W,H,t,T,p){sky(g,W,H,[[0,"#020308"],[1,"#070b18"]]);const m=Math.min(W,H);
 for(const[x,y,r,c]of[[.25,.3,.5,"#4b2a7a"],[.8,.2,.4,"#16406a"],[.6,.7,.45,"#3a1850"]])glow(g,x*W,y*H,r*W,c,.28);
@@ -86,14 +101,14 @@ p.wake&&t>.6&&z<3.2&&(glow(g,x-w*.05,y+h*.22+bob,w*.12,"#ff7af5",.9),glow(g,x+w*
 const R=mulb(k*7+s);g.fillStyle="rgba(240,210,255,.5)";for(let b=0;b<6;b++){const by=y+h-((R()*h+T*h*.2*(.5+R()))%h);g.fillRect(x-w/2+R()*w,by,2*sc+1,2*sc+1)}}
 glow(g,cx,hy,W*.3,"#7a2aa8",.25)},
 
-warmap(g,W,H,t,T,p){sky(g,W,H,[[0,"#03080c"],[1,"#061018"]]);const MW=320,MH=180;let c=SCENES._mapCv;if(!c){c=SCENES._mapCv=document.createElement("canvas"),c.width=MW,c.height=MH;SCENES._land=new Float32Array(MW*MH);for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const u=x/MW,v=y/MH,d=Math.hypot((u-.5)*1.25,(v-.52)*1.6);SCENES._land[y*MW+x]=fbm2(u*5,v*5,17)+.55-d}}
+warmap(g,W,H,t,T,p){sky(g,W,H,[[0,"#03080c"],[1,"#061018"]]);const MW=320,MH=180;let c=SCENES._mapCv;if(!c){c=SCENES._mapCv=document.createElement("canvas"),c.width=MW,c.height=MH;SCENES._land=worldLand(MW,MH)}
 const cg=c.getContext("2d"),img=cg.createImageData(MW,MH),L=SCENES._land,e=ease(t),lf=lerp(p.l0!=null?p.l0:.7,p.l1!=null?p.l1:.7,e),vf=p.v0!=null?lerp(p.v0,p.v1,e):-1,hr=lerp(p.h0||0,p.h1||0,e),hs=p.hs||[[.5,.45]];
 for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const i=y*MW+x,o=4*i,land=L[i]>.62,u=x/MW,v=y/MH,nz=fbm2(u*9,v*9,3)-.5;let r=4,gg=14,b=24;if(land){let col=[40,64,92];u+nz*.12>lf&&(col=[150,44,38]);vf>=0&&u+nz*.12<vf&&(col=[40,90,150]);for(const[hx,hy]of hs)Math.hypot((u-hx)*1.6,v-hy)+nz*.1<hr&&(col=[120,50,170]);const sh=.75+.5*(L[i]-.62);r=col[0]*sh,gg=col[1]*sh,b=col[2]*sh;L[i]<.66&&(r+=25,gg+=25,b+=25)}img.data[o]=r,img.data[o+1]=gg,img.data[o+2]=b,img.data[o+3]=255}
 cg.putImageData(img,0,0);const mx=W*.08,my=H*.12,mw=W*.84,mh=H*.76;g.imageSmoothingEnabled=!0,g.drawImage(c,mx,my,mw,mh);
 g.strokeStyle="rgba(120,200,230,.08)",g.lineWidth=1;for(let i=0;i<=16;i++){g.beginPath(),g.moveTo(mx+mw*i/16,my),g.lineTo(mx+mw*i/16,my+mh),g.stroke()}for(let i=0;i<=9;i++){g.beginPath(),g.moveTo(mx,my+mh*i/9),g.lineTo(mx+mw,my+mh*i/9),g.stroke()}
 const m=Math.min(W,H);(p.arrows||[]).forEach(([x0,y0,x1,y1,col],k)=>{const q=sat((t-.1-.1*k)/.6);if(q<=0)return;const ax=mx+mw*lerp(x0,x1,q),ay=my+mh*lerp(y0,y1,q),sx=mx+mw*x0,sy=my+mh*y0;g.strokeStyle=col,g.lineWidth=m*.012,g.lineCap="round",g.shadowColor=col,g.shadowBlur=m*.02,g.beginPath(),g.moveTo(sx,sy),g.lineTo(ax,ay),g.stroke();const an=Math.atan2(ay-sy,ax-sx);g.fillStyle=col,g.beginPath(),g.moveTo(ax+Math.cos(an)*m*.03,ay+Math.sin(an)*m*.03),g.lineTo(ax+Math.cos(an+2.5)*m*.03,ay+Math.sin(an+2.5)*m*.03),g.lineTo(ax+Math.cos(an-2.5)*m*.03,ay+Math.sin(an-2.5)*m*.03),g.fill(),g.shadowBlur=0});
-if(p.site){const sx=mx+mw*p.site[0],sy=my+mh*p.site[1],pr=(T*.8)%1;g.strokeStyle="rgba(230,180,255,"+(1-pr)+")",g.lineWidth=2,g.beginPath(),g.arc(sx,sy,m*(.01+.06*pr),0,7),g.stroke();g.fillStyle="#f0d8ff",g.beginPath(),g.arc(sx,sy,m*.007,0,7),g.fill();g.font="600 "+Math.round(m*.024)+"px monospace",g.fillText("SITE NINE",sx+m*.015,sy-m*.012)}
-g.font="700 "+Math.round(m*.026)+"px monospace",g.fillStyle="rgba(170,220,240,.85)",g.fillText(p.label||"THEATRE MAP — THE FRONTIER",mx,my-m*.025);g.textAlign="right",g.fillText(p.date||"",mx+mw,my-m*.025),g.textAlign="left";
+g.font="700 "+Math.round(m*.018)+"px monospace",g.fillStyle="rgba(230,235,240,.55)",g.textAlign="center",g.fillText("THE FRONTIER",mx+mw*.5,my+mh*.36),g.textAlign="left";if(p.site){const sx=mx+mw*p.site[0],sy=my+mh*p.site[1],pr=(T*.8)%1;g.strokeStyle="rgba(230,180,255,"+(1-pr)+")",g.lineWidth=2,g.beginPath(),g.arc(sx,sy,m*(.01+.06*pr),0,7),g.stroke();g.fillStyle="#f0d8ff",g.beginPath(),g.arc(sx,sy,m*.007,0,7),g.fill();g.font="600 "+Math.round(m*.024)+"px monospace",g.fillText("SITE NINE",sx+m*.015,sy-m*.012)}
+g.font="700 "+Math.round(m*.026)+"px monospace",g.fillStyle="rgba(170,220,240,.85)",g.fillText(p.label||"WORLD THEATRE MAP",mx,my-m*.025);g.textAlign="right",g.fillText(p.date||"",mx+mw,my-m*.025),g.textAlign="left";
 const leg=[["VANGUARD","#3a7bd5"],["LEGION","#c0392b"],["SYNDICATE","#8e44ad"]];g.font="600 "+Math.round(m*.022)+"px monospace";leg.forEach(([n,cc],i)=>{g.fillStyle=cc,g.fillRect(mx+i*m*.3,my+mh+m*.025,m*.02,m*.02),g.fillStyle="rgba(200,220,235,.8)",g.fillText(n,mx+i*m*.3+m*.03,my+mh+m*.043)})},
 
 battle(g,W,H,t,T,p){const S={dusk:[[0,"#1a1020"],[.5,"#6a3026"],[.8,"#c8643a"],[1,"#e8a060"]],night:[[0,"#05070e"],[.6,"#1c2436"],[1,"#40405a"]],day:[[0,"#4a5a6a"],[1,"#c0a888"]],hive:[[0,"#0a0414"],[.6,"#3a1450"],[1,"#8a4aa0"]]}[p.sky||"dusk"];sky(g,W,H,S);const m=Math.min(W,H),gy=H*.66;
@@ -265,7 +280,7 @@ const N="narr";
 const FILMS={
 prologue:{title:"The Iron Frontier",mood:"tense",shots:[
  {s:"title",p:{text:"2031",sub:"A DIFFERENT HISTORY"},d:4.5,fx:"sting"},
- {s:"warmap",say:[N,"In this history the Cold War never ended. It ran out of oil — and the East answered the resource war with numbers."],p:{l0:.78,l1:.45,date:"2019 — 2029",arrows:[[.85,.4,.55,.42,"#e0473a"],[.85,.65,.58,.62,"#e0473a"]]}},
+ {s:"warmap",say:[N,"In this history the Cold War never ended. It ran out of oil — and the East answered the resource war with numbers."],p:{l0:.78,l1:.45,date:"2019 — 2029",arrows:[[.82,.3,.53,.26,"#e0473a"],[.8,.45,.57,.4,"#e0473a"]]}},
  {s:"march",say:[N,"The Legion. Millions of soldiers and endless armour, pouring west across the Frontier."],fx:"whoosh"},
  {s:"battle",say:[N,"The Western Vanguard could not match them. City by city, the West fell back."],p:{sky:"dusk",dir:-1,color:"#e0473a",n:8}},
  {s:"lab",say:["marsh","There is something out past Jupiter. Mass, metal — and structure. It is not natural. And we can bring it down."],p:{},rec:"ARCHIVE — DR. ELIAS MARSH — PROJECT STARFALL"},
@@ -276,14 +291,14 @@ prologue:{title:"The Iron Frontier",mood:"tense",shots:[
  {s:"site",say:[N,"Containment failed in eleven minutes. Nobody who was inside that night came out as themselves."],p:{alarm:1},fx:"sting"},
  {s:"dna",say:[N,"It had found the one thing it lacked — a body that could live here. It cloned the Vanguard's own DNA, and folded it into the hive."],p:{},mood:"hive"},
  {s:"vats",say:[N,"They call themselves the Syndicate. They wear our faces now. They think as one."],p:{wake:1},fxAt:[[5,"pulse"]]},
- {s:"warmap",say:[N,"Three powers now fight over what is left. The Legion. The Vanguard. And the hive the Vanguard made."],p:{l0:.45,l1:.5,h0:.02,h1:.2,hs:[[.5,.42],[.3,.7],[.72,.3]],site:[.5,.42],date:"2031"}},
+ {s:"warmap",say:[N,"Three powers now fight over what is left. The Legion. The Vanguard. And the hive the Vanguard made."],p:{l0:.45,l1:.5,h0:.02,h1:.2,hs:[[.36,.12],[.3,.4],[.62,.2]],site:[.36,.12],date:"2031"}},
  {s:"title",p:{text:"IRON FRONTIER",sub:"CHOOSE YOUR SIDE",big:.11},d:5,fx:"boom"}]},
 
 vanguard_intro:{title:"Operation Clean Slate",mood:"tense",shots:[
  {s:"title",p:{text:"VANGUARD",sub:"OPERATION CLEAN SLATE",c:"#6fb8e0"},d:4,fx:"sting"},
  {s:"portrait",say:["reyes","I was at Site Nine the night it broke out. I signed the order that brought that rock down."],p:{who:"reyes"}},
  {s:"site",say:["reyes","We wanted a weapon to stop the Legion. We opened a door instead."],p:{alarm:1},rec:"ARCHIVE — SITE NINE"},
- {s:"warmap",say:["reyes","Now the Legion holds half the Frontier, and the Syndicate grows in every gap between us."],p:{l0:.5,l1:.5,v0:.2,v1:.2,h0:.08,h1:.14,hs:[[.5,.42]],site:[.5,.42],date:"FRONT LINE — TODAY"}},
+ {s:"warmap",say:["reyes","Now the Legion holds half the Frontier, and the Syndicate grows in every gap between us."],p:{l0:.5,l1:.5,v0:.33,v1:.33,h0:.08,h1:.14,hs:[[.36,.12]],site:[.36,.12],date:"FRONT LINE — TODAY"}},
  {s:"portrait",say:["hale","Battlegroup's fuelled and ready, Colonel. Say the word."],p:{who:"hale",side:"r"}},
  {s:"battle",say:["reyes","First we take our land back from the Legion. Then we clean up our own mess."],p:{sky:"dusk",dir:1,color:"#6fb8e0"},mood:"war"},
  {s:"title",p:{text:"CLEAN SLATE",sub:"RECLAIM THE FRONTIER",c:"#6fb8e0"},d:4,fx:"boom"}]},
@@ -295,7 +310,7 @@ vanguard_reveal:{title:"The Marsh Tapes",mood:"dread",shots:[
  {s:"title",p:{text:"THE HIVE BELOW",c:"#b27ae0"},d:3.5,fx:"boom"}]},
 vanguard_end:{title:"Clean Slate",mood:"hope",shots:[
  {s:"city",say:[N,"The Grand Crossing fell silent at dawn. For the first time in twelve years, the Frontier's guns stopped."],p:{dawn:1}},
- {s:"warmap",say:["reyes","The Syndicate's grip is broken. The Legion is going home."],p:{l0:.5,l1:.9,v0:.2,v1:.85,h0:.14,h1:0,hs:[[.5,.42]],date:"CEASEFIRE"}},
+ {s:"warmap",say:["reyes","The Syndicate's grip is broken. The Legion is going home."],p:{l0:.5,l1:.9,v0:.33,v1:.85,h0:.14,h1:0,hs:[[.36,.12]],date:"CEASEFIRE"}},
  {s:"portrait",say:["reyes","Starfall was our mistake. Clean Slate is how we answer for it."],p:{who:"reyes"}},
  {s:"portrait",say:["hale","And the thing in the ice, ma'am?"],p:{who:"hale",side:"r"}},
  {s:"eye",say:["voice","We are patient. We fell a very long way to get here."],d:5,mood:"hive",fx:"sting"},
@@ -317,7 +332,7 @@ legion_reveal:{title:"The Marshal's Voices",mood:"dread",shots:[
  {s:"title",p:{text:"RED TIDE",c:"#e0674a"},d:3.5,fx:"boom"}]},
 legion_end:{title:"Iron Reclamation",mood:"hope",shots:[
  {s:"march",say:[N,"The Legion held the Frontier from the eastern steppe to the Kessel River."]},
- {s:"warmap",say:["volkova","The hive is broken. Its nests are burning."],p:{l0:.5,l1:.1,h0:.14,h1:0,hs:[[.5,.42]],date:"VICTORY"}},
+ {s:"warmap",say:["volkova","The hive is broken. Its nests are burning."],p:{l0:.5,l1:.1,h0:.14,h1:0,hs:[[.36,.12]],date:"VICTORY"}},
  {s:"portrait",say:["draganov","For the first time in a year, my head is quiet. I had forgotten what my own thoughts sound like."],p:{who:"draganov"}},
  {s:"eye",say:["voice","Quiet is only the space between words, Marshal."],d:5,mood:"hive",fx:"sting"},
  {s:"title",p:{text:"IRON RECLAMATION",sub:"COMPLETE",c:"#e0674a"},d:5}]},
@@ -336,7 +351,7 @@ syndicate_reveal:{title:"The Copy",mood:"hive",shots:[
  {s:"title",p:{text:"SILENT HAND",c:"#b27ae0"},d:3.5,fx:"boom"}]},
 syndicate_end:{title:"One Mind",mood:"hive",shots:[
  {s:"city",say:[N,"The Iron Ring fell in a single night. By morning, the Frontier had stopped fighting."],p:{hive:1,h0:.2,h1:.9,air:1}},
- {s:"warmap",say:["senna","Every city. Every radio. Every mind. One song."],p:{l0:.5,l1:.5,v0:.2,v1:.2,h0:.1,h1:1.2,hs:[[.5,.42]],site:[.5,.42],date:"ASCENDANCE"}},
+ {s:"warmap",say:["senna","Every city. Every radio. Every mind. One song."],p:{l0:.5,l1:.5,v0:.33,v1:.33,h0:.1,h1:1.2,hs:[[.36,.12]],site:[.36,.12],date:"ASCENDANCE"}},
  {s:"eye",say:["voice","We fell a very long way to find a home. Now we are home."],fx:"sting"},
  {s:"title",p:{text:"ONE MIND",sub:"THE HARVEST — COMPLETE",c:"#b27ae0"},d:5,fx:"boom"}]}
 };
@@ -371,4 +386,4 @@ const vg=g.createRadialGradient(W/2,H/2,m*.35,W/2,H/2,Math.hypot(W,H)*.55);vg.ad
 const fi=sat(F.st/.45),fo=sat((D-F.st)/.35),a=1-Math.min(fi,fo);a>0&&(g.fillStyle="rgba(0,0,0,"+a+")",g.fillRect(0,0,W,H))}
 addEventListener("keydown",e=>{F&&("Escape"===e.key?endFilm():" "===e.key&&(F.st=1e3))});
 
-Object.assign(window,{playFilm,endFilm,FILMS,filmSeen,FMV_MEDIA,probeMedia,fmvSrc});
+Object.assign(window,{playFilm,endFilm,FILMS,filmSeen,FMV_MEDIA,probeMedia,fmvSrc,SCENES});
