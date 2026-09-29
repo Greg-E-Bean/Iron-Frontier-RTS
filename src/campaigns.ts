@@ -584,7 +584,7 @@ const cp=$("#cancelPlace");cp&&!cp.classList.contains("hidden")&&(el=null);
 if(!el){tip&&tip.classList.add("hidden");return}
 tip||(tip=document.createElement("div"),tip.id="coachTip",document.body.appendChild(tip));
 el.classList.add("coach");const r=el.getBoundingClientRect(),up=r.top>70,nm=el.querySelector(".nm"),lbl=el.dataset.l||(nm?nm.textContent:el.textContent||"").trim().split("\n")[0].slice(0,18)||"HERE";
-tip.textContent=up?"TAP "+lbl+" ▼":"▲ TAP "+lbl,tip.classList.remove("hidden"),tip.classList.toggle("dn",!up);
+const arw=d=>'<svg viewBox="0 0 24 24"'+(d?' style="transform:rotate(180deg)"':"")+'><path d="M12 1.5 22 12h-6v10.5H8V12H2z"/></svg>',txt=document.createElement("span");txt.textContent="TAP "+lbl;tip.innerHTML="",up?(tip.appendChild(txt),tip.insertAdjacentHTML("beforeend",arw(1))):(tip.insertAdjacentHTML("afterbegin",arw(0)),tip.appendChild(txt)),tip.classList.remove("hidden"),tip.classList.toggle("dn",!up);
 const w=tip.offsetWidth;tip.style.left=Math.max(4,Math.min(innerWidth-w-4,r.left+r.width/2-w/2))+"px",tip.style.top=(up?r.top-tip.offsetHeight-6:r.bottom+6)+"px"}
 // ---- stealth: enemies cannot target the cloaked hero until the alarm is raised;
 // staying near an enemy (or a live defence) fills the detection meter.
