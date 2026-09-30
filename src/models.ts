@@ -660,7 +660,7 @@ function radarSpin(n,x,y,z,sz,rate,mat?){n.push(P_(CYL(.35*sz/5+.3,.8*sz,8),x,y,
 function vawt(n,x,y,z,h,mat?){n.push(P_(CYL(.55,h,8),x,y,z,"steel"));n.push(P_(CYL(1.3,1,10),x,y,z+h,"darkmetal"));const A={orbit:2.4,pvx:x,pvy:y};for(let k=0;k<3;k++){const ang=2.094*k,bx=x+2.8*Math.cos(ang),by=y+2.8*Math.sin(ang);n.push(P_(BOXM(.45,1.5,.72*h,.1),bx,by,z+.24*h,mat||"white",{r:ang,a:A}));n.push(P_(BOXM(2.8,.3,.3,.05),x+1.4*Math.cos(ang),y+1.4*Math.sin(ang),z+.24*h,"steel",{r:ang,a:A}));n.push(P_(BOXM(2.8,.3,.3,.05),x+1.4*Math.cos(ang),y+1.4*Math.sin(ang),z+.95*h,"steel",{r:ang,a:A}))}}
 function flagPole(n,x,y,z,h,mat?){n.push(P_(CYL(.45,h,8),x,y,z,"steel"));n.push(P_(DOME(.8,.8,8),x,y,z+h,"gold"));n.push(P_(BOXM(4.4,.3,5,.05),x+2.4,y,z+h-5.6,mat||"body",{a:{orbit:2.6,amp:.22,pvx:x,pvy:y}}));n.push(P_(BOXM(4,.3,4.6,.05),x+6.4,y,z+h-5.4,mat||"body",{a:{orbit:3.1,amp:.36,pvx:x,pvy:y}}));n.push(P_(BOXM(8.2,.35,.7,.05),x+4.3,y,z+h-2.1,"trim",{a:{orbit:2.6,amp:.28,pvx:x,pvy:y}}))}
 function spinBeacon(n,x,y,z,col?){n.push(P_(CYL(1,1,8),x,y,z,"darkmetal"));n.push(P_(CYL(.8,1.4,8),x,y,z+1,"glassdark"));n.push(P_(BOXM(2.2,.5,.9,.1),x,y,z+1.2,col||"lightY",{e:1,a:{spin:5}}))}
-function factoryShell(n,bw,bd,bh,doorW,doorH,l,m){const hw=bw/2,hd=bd/2,th=1.6,pw=(bw-doorW)/2;n.push(P_(BOXM(bw,th,bh,.3),0,-hd+th/2,l,m.body));for(const sx of[-1,1])n.push(P_(BOXM(th,bd,bh,.3),sx*(hw-th/2),0,l,m.body)),n.push(P_(BOXM(pw,th,bh,.3),sx*(doorW/2+pw/2),hd-th/2,l,m.body));n.push(P_(BOXM(doorW,th,bh-doorH,.2),0,hd-th/2,l+doorH,m.body));n.push(P_(BOXM(bw-2*th,bd-2*th,.3,.1),0,0,l+.05,"concrete"));for(const sx of[-1,1])for(const sy of[-1,1])n.push(P_(BOXM(3,1,.3,.1),sx*.3*bw,sy*.28*bd,l+.4,"lightY",{e:1}));hazard(n,0,hd-6,l+.4,doorW-6,0);for(const sy of[-.25,.25])n.push(P_(BOXM(bw-4,1,1,.2),0,sy*bd,l+bh-2.5,"darkmetal"));const cr={patrol:.1,pw:.5*bw,ph:0};n.push(P_(BOXM(3,.52*bd,1.6,.2),.25*bw,0,l+bh-4,"lightY",{a:cr}));n.push(P_(CYL(.15,6,5),.25*bw,0,l+bh-10,"dark2",{a:cr}));n.push(P_(BOXM(1.4,1.4,1,.2),.25*bw,0,l+bh-11,"steel",{a:cr}));for(const sx of[-.3,0,.3])n.push(P_(BOXM(6,1.2,.4,.1),sx*bw,-hd+th+.8,l+bh-3,"lightY",{e:1}));for(const sx of[-1,1])n.push(P_(BOXM(1.2,1.2,6,.2),sx*(hw-th-1),-hd+th+3,l,"darkmetal")),n.push(P_(BOXM(3,2,2.4,.3),sx*(hw-th-3),-hd+th+3,l,"olive"))}
+function factoryShell(n,bw,bd,bh,doorW,doorH,l,m){const hw=bw/2,hd=bd/2,th=1.6,pw=(bw-doorW)/2;n.push(P_(BOXM(bw,th,bh,.3),0,-hd+th/2,l,m.body));for(const sx of[-1,1])n.push(P_(BOXM(th,bd,bh,.3),sx*(hw-th/2),0,l,m.body)),n.push(P_(BOXM(pw,th,bh,.3),sx*(doorW/2+pw/2),hd-th/2,l,m.body,{ng:1}));n.push(P_(BOXM(doorW,th,bh-doorH,.2),0,hd-th/2,l+doorH,m.body,{ng:1}));n.push(P_(BOXM(bw-2*th,bd-2*th,.3,.1),0,0,l+.05,"concrete"));for(const sx of[-1,1])for(const sy of[-1,1])n.push(P_(BOXM(3,1,.3,.1),sx*.3*bw,sy*.28*bd,l+.4,"lightY",{e:1}));hazard(n,0,hd-6,l+.4,doorW-6,0);for(const sy of[-.25,.25])n.push(P_(BOXM(bw-4,1,1,.2),0,sy*bd,l+bh-2.5,"darkmetal"));const cr={patrol:.1,pw:.5*bw,ph:0};n.push(P_(BOXM(3,.52*bd,1.6,.2),.25*bw,0,l+bh-4,"lightY",{a:cr}));n.push(P_(CYL(.15,6,5),.25*bw,0,l+bh-10,"dark2",{a:cr}));n.push(P_(BOXM(1.4,1.4,1,.2),.25*bw,0,l+bh-11,"steel",{a:cr}));for(const sx of[-.3,0,.3])n.push(P_(BOXM(6,1.2,.4,.1),sx*bw,-hd+th+.8,l+bh-3,"lightY",{e:1}));for(const sx of[-1,1])n.push(P_(BOXM(1.2,1.2,6,.2),sx*(hw-th-1),-hd+th+3,l,"darkmetal")),n.push(P_(BOXM(3,2,2.4,.3),sx*(hw-th-3),-hd+th+3,l,"olive"))}
 function bldExtras(n,e,t,r,l,s,rb,cn){const O="legion"===t,Y="syndicate"===t,A=!O&&!Y;
 if("wall"===e){const h=.68*r,thin=.08*r,full=r;if(10===cn||5===cn){const hz=10===cn,BX=(al,ac,hh)=>hz?BOXM(al,ac,hh,.1):BOXM(ac,al,hh,.1),AX=v=>hz?[v,0]:[0,v];n.push(P_(BX(full,1.3*thin,.9),0,0,l+h,A?"armor3":O?"darkmetal":"carapace2"));if(A)n.push(P_(BX(.96*full,.5,.35),0,0,l+h+.9,"arcbolt",{e:1}));else if(O){for(const v of[-.4,0,.4]){const[px,py]=AX(v*full);n.push(P_(CYL(.25,3,5),px,py,l+h+.9,"darkmetal"))}const[bx,by]=AX(-.5*full);n.push(P_(CYL(.85,full,6),bx,by,l+h+2.4,"dark2",{ty:hz?PI2:0,tx:hz?0:-PI2}))}else for(const v of[-.32,0,.32]){const[px,py]=AX(v*full);n.push(P_(CONE(1.3,.1,4.2,6),px,py,l+h+.9,"carapace2"))}}return}
 if(rb<4)return;
@@ -1112,17 +1112,24 @@ if(riseBucket>=2){
 // .. 1=open) grows, and the fixed-pitch corrugation ribs disappear from
 // the bottom up as the curtain retracts - it reads as rolling into the
 // housing rather than parting into floating slats.
-const dt2=riseBucket>=4?doorT:0,jamb=5,housingH=6;
-n.push(P_(BOXM(doorW+2*jamb,4.2,housingH,.35),0,doorY,l+doorH,facMat.frame));
-for(const sx of[-1,1])n.push(P_(BOXM(jamb,3.4,doorH+housingH,.2),sx*(doorW/2+jamb/2),doorY,l,facMat.frame));
-
-const curtH=doorH*(1-dt2);
-if(curtH>.4)n.push(P_(BOXM(doorW-2,3,curtH,.08),0,doorY-.1,l+doorH-curtH,facMat.frame));
-const ribGap=doorH/7;
-for(let i=0;i<7;i++){
-const ribBot=l+doorH-(i+1)*ribGap;
-if(ribBot>=l+doorH-curtH-.01)n.push(P_(BOXM(doorW-3,2.6,ribGap*.3,.08),0,doorY-.05,ribBot+ribGap*.35,i%2?facMat.frame:facMat.trim));
-}
+const dt2=riseBucket>=4?doorT:0,jamb=5,housingH=6,NG={ng:1},fr=facMat.frame,fac=a?"vanguard":o?"legion":"syndicate";
+// housing box with a projecting hood lip and end plates
+n.push(P_(BOXM(doorW+2*jamb,4.2,housingH,.35),0,doorY,l+doorH,fr,NG)),n.push(P_(BOXM(doorW+2*jamb+1,5.4,1,.2),0,doorY+.6,l+doorH+housingH-.2,facMat.dark,NG)),n.push(P_(BOXM(doorW+2*jamb-2,.6,.8,.1),0,doorY+2.3,l+doorH+.6,facMat.trim,NG));
+for(const sx of[-1,1]){const jx=sx*(doorW/2+jamb/2);
+ // jambs with a dark guide channel the curtain runs in, hazard banding and a lamp on top
+ n.push(P_(BOXM(jamb,3.4,doorH+housingH,.2),jx,doorY,l,fr,NG)),n.push(P_(BOXM(1.4,1.2,doorH,.1),sx*(doorW/2-.2),doorY+1.2,l,"dark",NG));
+ for(let k=0;k<4;k++)n.push(P_(BOXM(jamb+.2,.5,1.4,.05),jx,doorY+1.75,l+1+k*2.8,k%2?"dark":"lightY",NG));
+ n.push(P_(CYL(.8,.9,10),jx,doorY+.6,l+doorH+housingH,"lightY",{e:1,ng:1}))}
+// the curtain: many narrow interlocking slats with grooves between them; it
+// shrinks upward into the housing as doorT goes 0 (closed) -> 1 (open)
+const curtH=doorH*(1-dt2),N=14,g=doorH/N,top=l+doorH;
+if(curtH>.4)n.push(P_(BOXM(doorW-2,1,curtH,.05),0,doorY-1.2,top-curtH,facMat.dark,NG));
+for(let i=0;i<N;i++){const bot=top-(i+1)*g;if(bot<top-curtH-.01)break;
+ n.push(P_(BOXM(doorW-2.6,2.9,g*.72,.12),0,doorY,bot+g*.14,i%2?fr:facMat.trim,NG));
+ fac==="vanguard"&&i===3&&n.push(P_(BOXM(doorW*.6,.3,g*.4,.05),0,doorY+1.55,bot+g*.3,"glass",{e:1,ng:1}));
+ fac==="legion"&&i%3===1&&(()=>{for(let r=-doorW/2+3;r<doorW/2-2;r+=4)n.push(P_(BOXM(.5,.4,.5,.05),r,doorY+1.55,bot+g*.45,"steel",NG))})()}
+// weighted bottom bar with two pull handles (and a glow seam for the Syndicate)
+if(curtH>.4){const bz=top-curtH;n.push(P_(BOXM(doorW-2,3.6,1.3,.25),0,doorY+.2,bz,facMat.dark,NG));for(const hx of[-.28,.28])n.push(P_(BOXM(2.6,.6,.6,.1),hx*doorW,doorY+2.2,bz+.35,"steel",NG));fac==="syndicate"&&n.push(P_(BOXM(doorW-3,.3,.3,.05),0,doorY+2.05,bz+1,"psi",{e:1,ng:1}))}
 hazard(n,0,doorY-2.2,5.2,doorW+10,0);
 // windows()'s first loop spreads across `t` and plants windows on the
 // +-r faces, the second spreads across `r` and plants them on the +-t
@@ -1301,7 +1308,7 @@ const GROUND_DROP=3.8;// ---- greebling: surface detail on the walls and roofs o
 // structure always looks the same.
 function greebleParts(parts,key,fac,budget){if(!parts||!parts.length)return parts;let seed=7;for(const ch of key+fac)seed=seed*31+ch.charCodeAt(0)>>>0;const R=()=>(seed=1664525*seed+1013904223>>>0)/4294967296;
 const syn="syndicate"===fac,leg="legion"===fac,MA=syn?"carapace":leg?"darkmetal":"dark",MB=syn?"carapace2":leg?"rust":"trim",MP=syn?"flesh":"steel",MG=syn?"psi":leg?"glow":"glass",out=parts.slice(),add=(m,x,y,z,c,o?)=>{out.push(P_(m,x,y,z,c,o)),budget--};
-const boxes=parts.filter(q=>q&&q.m&&q.m.bdim&&!q.tx&&!q.ty&&!q.r&&!q.e&&"glass"!==q.c&&"glow"!==q.c&&q.m.bdim[2]>=6&&Math.max(q.m.bdim[0],q.m.bdim[1])>=14&&Math.min(q.m.bdim[0],q.m.bdim[1])>=.8).sort((a,b)=>Math.max(b.m.bdim[0],b.m.bdim[1])*b.m.bdim[2]-Math.max(a.m.bdim[0],a.m.bdim[1])*a.m.bdim[2]).slice(0,6);
+const boxes=parts.filter(q=>q&&q.m&&q.m.bdim&&!q.ng&&!q.tx&&!q.ty&&!q.r&&!q.e&&"glass"!==q.c&&"glow"!==q.c&&q.m.bdim[2]>=6&&Math.max(q.m.bdim[0],q.m.bdim[1])>=14&&Math.min(q.m.bdim[0],q.m.bdim[1])>=.8).sort((a,b)=>Math.max(b.m.bdim[0],b.m.bdim[1])*b.m.bdim[2]-Math.max(a.m.bdim[0],a.m.bdim[1])*a.m.bdim[2]).slice(0,6);
 for(const q of boxes){const[w,d,h]=q.m.bdim,z0=q.z||0,thin=Math.min(w,d)<4;
  // thin wall panels only get their outward face; solid blocks get all four
  for(const[fx,fy]of thin?w<d?[[Math.sign(q.x)||1,0]]:[[0,Math.sign(q.y)||1]]:[[1,0],[-1,0],[0,1],[0,-1]]){if(budget<=0)break;const L=fx?d:w,off=(fx?w:d)/2,px=q.x+fx*off,py=q.y+fy*off,T=(t,dep,wd,ht,z,c,o?)=>add(fx?BOXM(dep,wd,ht,.1):BOXM(wd,dep,ht,.1),px+fx*dep/2+(fx?0:t),py+fy*dep/2+(fx?t:0),z,c,o);
