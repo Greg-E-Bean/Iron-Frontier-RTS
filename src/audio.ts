@@ -175,6 +175,7 @@ const ACCENT_LINES: any = {
   za: { inf: { sel: ["Ja, Commander?", "Ready, boss.", "Shot, what's the plan?"], go: ["Ja, moving now.", "Lekker, on our way.", "Sharp sharp."] } },
 };
 const HERO_LINES: any = {
+  broodmother: { sel: ["The Mother hears you.", "My brood awaits your will.", "Speak, and the swarm answers.", "I see all that crawls below.", "Every egg a soldier. Every soldier mine."], go: ["The swarm moves.", "Where I pass, nothing remains.", "Carry me, my children.", "The brood follows.", "Spread the wings. Blot out the sun."] },
   operative: { sel: ["Ghost here. Do try to keep up.", "You rang?", "Let's make this quick, shall we?", "Right, who needs sorting out?"], go: ["Leave it with me.", "On my way, darling.", "Quietly does it.", "Consider it handled."] },
 };
 function hashKey(k: string) { let h = 7; for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0; return h; }
@@ -294,7 +295,7 @@ function unitLines(fac: string, category: string, role: string, key?: string | n
   return F.inf[category];
 }
 // Hero units are story characters: they always use that character's own voice.
-const HERO_CAST: Record<string, string> = { operative: "ghost", reaper: "reaper", phantom: "phantom" };
+const HERO_CAST: Record<string, string> = { operative: "ghost", reaper: "reaper", phantom: "phantom", broodmother: "broodmother" };
 const ackMem: any = {}, lastPick: any = {};
 function playVoiceLine(fac: string, category: string, role?: string | null, key?: string | null, uid?: number) {
   const now = performance.now();
