@@ -146,7 +146,7 @@ const PERSONA_VANGUARD: Record<string, Persona> = {
   rifleman: P_("us", "m"), engineer: P_("ie", "m", 1.02), lancer: P_("za", "m", .97), marksman: P_("us", "f"), vindicator: P_("rp", "m"),
   operative: P_("rp", "f", 1.04, 1.02), phaser: P_("rp", "f", .98), warden: P_("us", "m", .95), skirmisher: P_("au", "m"), hover: P_("us", "f", 1.02, 1.04),
   photon: P_("rp", "m", .96), bulwark: P_("north", "m", .93, .97), titan_vanguard: P_("scot", "m", .9, .95), longbow: P_("rp", "m", .94),
-  skyjack: P_("us", "f", 1.03, 1.05), hornet: P_("us", "m", .97, 1.05), kestrel: P_("us", "f", 1.02, 1.05), chinook: P_("au", "m"),
+  skyjack: P_("us", "f", 1.03, 1.05), hornet: P_("us", "m", .97, 1.05), kestrel: P_("us", "f", 1.02, 1.05), skycarrier: P_("rp", "m", .92, .96), chinook: P_("au", "m"),
   interceptor: P_("us", "m", 1, 1.06), frigate: P_("rp", "m", .95, .97), barracuda: P_("au", "m", .97), lst: P_("au", "f"),
   mhq: P_("north", "m", .92, .97), bastion: P_("scot", "m", .93, .96), miner_vanguard: P_("north", "m", .96),
 };
