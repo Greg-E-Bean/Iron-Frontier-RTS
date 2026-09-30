@@ -457,7 +457,7 @@ function fx3dActive() { return !!(FPS.on && FPS.u && FG.fx); }
 // Model coords for the part builders: x forward, y = right, z up (glMerge
 // maps them to three's X, Z, Y). Every limb part is built along +z from its
 // joint so it can be aimed bone-to-bone by the IK below.
-const BK = ["metal", "matte", "glass", "emis", "concrete", "organic", "rubber", "foliage"];
+const BK = ["metal", "matte", "glass", "emis", "concrete", "organic", "rubber", "foliage", "psi"];
 const HD_LOOK: Record<string, any> = {
   rifleman: { helmet: "body", pack: "armor3", visor: "glass" }, lancer: { helmet: "body", pack: "armor3" },
   militia: { hat: "bark", beret: "bark2", pack: "dark", visor: "glow" }, flak: { helmet: "armor3", pack: "steel", visor: "glow" },
@@ -685,7 +685,7 @@ function hdGeo(key: string, pal: any, build: (a: any[]) => void) {
 }
 // World figures collapse the material buckets into metal / matte / emissive
 // meshes (one draw call each) — a squad of them stays cheap.
-const HD_GROUP: Record<string, string> = { metal: "metal", glass: "metal", emis: "emis", matte: "matte", concrete: "matte", organic: "matte", rubber: "matte", foliage: "matte" };
+const HD_GROUP: Record<string, string> = { metal: "metal", glass: "metal", emis: "emis", matte: "matte", concrete: "matte", organic: "matte", rubber: "matte", foliage: "matte", psi: "psi" };
 function fgMergeGeos(list: any[]) {
   if (1 === list.length) return list[0];
   const out = new THREE.BufferGeometry();
@@ -700,7 +700,7 @@ function fgMergeGeos(list: any[]) {
 function hdObj(g: any, mats: any, shadow: boolean) {
   const o = new THREE.Group();
   if (!g._grp) { const by: any = {}; for (const k of BK) g[k] && (by[HD_GROUP[k]] = by[HD_GROUP[k]] || []).push(g[k]); g._grp = {}; for (const k in by) g._grp[k] = fgMergeGeos(by[k]); }
-  for (const k in g._grp) { const m = new THREE.Mesh(g._grp[k], mats[k] || mats.metal); m.userData.shared = 1, m.castShadow = shadow && "emis" !== k, m.receiveShadow = shadow && "emis" !== k, o.add(m); }
+  for (const k in g._grp) { const m = new THREE.Mesh(g._grp[k], mats[k] || mats.metal); m.userData.shared = 1, m.castShadow = shadow && "emis" !== k && "psi" !== k, m.receiveShadow = shadow && "emis" !== k && "psi" !== k, o.add(m); }
   return o;
 }
 
@@ -860,10 +860,10 @@ function hdBakeGeo(u: any, frame: number) {
   fake.target && (fake.target.alt = heightAt(0, 0) - heightAt(100, 0));
   const t0 = S.time; S.time = 0; try { hdPose(F, 10); } catch (e) { } S.time = t0;
   F.root.updateMatrixWorld(!0);
-  const by: any = { metal: [], matte: [], emis: [] };
+  const by: any = { metal: [], matte: [], emis: [], psi: [] };
   for (const n in F.parts) F.parts[n].traverse((o: any) => {
     if (!o.isMesh) return;
-    const bucket = o.material === GL.mats.emis ? "emis" : o.material === GL.mats.metal && "gun" === n ? "metal" : "matte";
+    const bucket = o.material === GL.mats.emis ? "emis" : o.material === GL.mats.psi ? "psi" : o.material === GL.mats.metal && "gun" === n ? "metal" : "matte";
     const cg = o.geometry.clone(); cg.applyMatrix4(_bakeM.copy(o.matrixWorld)), by[bucket].push(cg);
   });
   if (frame & 8 && F.parts.gun) {
@@ -911,7 +911,7 @@ function fgVM() {
   scene.add(hemi, sun, fill), cam.add(ml), ml.position.set(.1, -.05, -.9), fill.position.set(-1, .3, .6);
   const T = fgTextures(), mk = (b: any) => { const m = new THREE.MeshStandardMaterial({ vertexColors: !0, roughness: b.roughness, metalness: b.metalness, map: b.map, normalMap: b.normalMap, normalScale: b.normalScale, side: THREE.DoubleSide }); m.color = b.color.clone(); return m; };
   const mats: any = {};
-  for (const k of BK) mats[k] = "emis" === k ? new THREE.MeshBasicMaterial({ vertexColors: !0, side: THREE.DoubleSide }) : mk(GL.mats[k]);
+  for (const k of BK) mats[k] = "psi" === k ? GL.mats.psi : "emis" === k ? new THREE.MeshBasicMaterial({ vertexColors: !0, side: THREE.DoubleSide }) : mk(GL.mats[k]);
   mats.metal.metalness = .75, mats.metal.roughness = .38, mats.metal.envMapIntensity = 1;
   return FG.vm = { renderer: GL.renderer, scene, cam, hemi, sun, fill, ml, mats, T, st: { aim: 0, sprint: 0, rp: 0, rv: 0, rx: 0, rvx: 0, swX: 0, swY: 0, ly: null, lp: null, lastM: 0, draw: 0, boltT: 9, throwT: 0, lastT: 0, land: 0, lastJ: 0 } };
 }

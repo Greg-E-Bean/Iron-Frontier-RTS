@@ -11982,7 +11982,60 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     for (const e2 of ["metal", "matte", "glass", "concrete", "organic", "rubber", "foliage"]) GL.mats[e2].color = new THREE.Color(1.06, 1.06, 1.06);
     _mat = new THREE.Matrix4(), buildFogTex();
     for (const e2 in GL.mats) fogPatch(GL.mats[e2]);
+    GL.mats.psi = makePsiMat();
     return buildTerrainGL(), buildSkyGL(), true;
+  }
+  function psiNoiseTex() {
+    const N = 128, G2 = 8, c = document.createElement("canvas");
+    c.width = c.height = N;
+    const x = c.getContext("2d"), im = x.createImageData(N, N);
+    let sd = 1337;
+    const rnd2 = () => (sd = (1103515245 * sd + 12345) % 2147483648) / 2147483648, oct = [];
+    for (let o = 0; o < 4; o++) {
+      const g = G2 << o, t2 = new Float32Array(g * g);
+      for (let i = 0; i < g * g; i++) t2[i] = rnd2();
+      oct.push([g, t2]);
+    }
+    const sm = (t2) => t2 * t2 * (3 - 2 * t2);
+    for (let py = 0; py < N; py++) for (let px = 0; px < N; px++) {
+      let v = 0, w = 0.5, tw = 0;
+      for (const [g, t2] of oct) {
+        const fx = px / N * g, fy = py / N * g, ix = Math.floor(fx), iy = Math.floor(fy), ax = sm(fx - ix), ay = sm(fy - iy), q = (a, b2) => t2[b2 % g * g + a % g], v0 = q(ix, iy) + (q(ix + 1, iy) - q(ix, iy)) * ax, v1 = q(ix, iy + 1) + (q(ix + 1, iy + 1) - q(ix, iy + 1)) * ax;
+        v += w * (v0 + (v1 - v0) * ay), tw += w, w *= 0.5;
+      }
+      const b = Math.round(255 * v / tw), i = 4 * (py * N + px);
+      im.data[i] = im.data[i + 1] = im.data[i + 2] = b, im.data[i + 3] = 255;
+    }
+    x.putImageData(im, 0, 0);
+    const t = new THREE.CanvasTexture(c);
+    return t.wrapS = t.wrapT = THREE.RepeatWrapping, t;
+  }
+  function makePsiMat() {
+    const m = new THREE.MeshBasicMaterial({ vertexColors: true });
+    GL.psiU = { value: 0 };
+    const tex = psiNoiseTex();
+    fogPatch(m);
+    const prev = m.onBeforeCompile;
+    m.onBeforeCompile = (t, r) => {
+      t.uniforms.uPsiT = GL.psiU, t.uniforms.psiNoise = { value: tex }, t.vertexShader = "varying vec3 vPsiP;\nvarying vec3 vPsiN;\nvarying vec2 vPsiI;\n" + t.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n  vPsiP = position; vPsiN = normal; vPsiI = vec2(0.0);\n  #ifdef USE_INSTANCING\n  vPsiI = instanceMatrix[3].xz;\n  #endif"), t.fragmentShader = "uniform float uPsiT;\nuniform sampler2D psiNoise;\nvarying vec3 vPsiP;\nvarying vec3 vPsiN;\nvarying vec2 vPsiI;\n" + t.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+  {
+    vec3 an = abs(normalize(vPsiN));
+    vec2 p = (an.y > max(an.x, an.z) ? vPsiP.xz : (an.x > an.z ? vPsiP.zy : vPsiP.xy)) * 0.11;
+    float ph = vPsiI.x * 0.013 + vPsiI.y * 0.017;
+    float t = uPsiT;
+    float n1 = texture2D(psiNoise, p * 0.45 + vec2(t * 0.035, -t * 0.028)).r;
+    float n2 = texture2D(psiNoise, p * 1.1 + vec2(-t * 0.05, t * 0.042) + (n1 - 0.5) * 0.9).r;
+    float wave = sin((p.x * 1.4 + p.y * 1.1 + vPsiP.y * 0.06) * 3.2 + n1 * 10.0 - t * 1.9 + ph);
+    float band = smoothstep(0.35, 1.0, wave) * smoothstep(0.35, 0.8, n2);
+    float pulse = 0.8 + 0.2 * sin(t * 2.3 + ph * 3.0 + vPsiP.y * 0.08);
+    float ridge = 1.0 - abs(n2 * 2.0 - 1.0);
+    float vein = pow(ridge, 7.0) * (0.6 + 0.4 * wave);
+    float lum = (0.32 + 0.95 * n2 * n2 + 0.16 * wave) * pulse;
+    diffuseColor.rgb = diffuseColor.rgb * lum + vec3(0.55, 0.3, 0.7) * band * pulse * 0.8 + vec3(0.95, 0.65, 1.0) * vein * pulse * 0.75 + vec3(0.1, 0.0, 0.16) * (1.0 - n1);
+  }`), prev(t, r);
+    };
+    m.customProgramCacheKey = () => "psiflow";
+    return m;
   }
   function glPixelRatioCap() {
     if (MENU_CAM) return 0.7 * Math.min(1, window.devicePixelRatio || 1);
@@ -12002,7 +12055,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var GLBUCKET = { glass: "glass", glassdark: "glass", crystal: "glass", arcbolt: "glass", lightY: "glass", concrete: "concrete", concrete2: "concrete", asphalt: "concrete", sand: "matte", olive: "foliage", wood: "matte", skin: "matte", rubber: "rubber", tread: "rubber", rust: "matte", neutral: "matte", carapace: "organic", carapace2: "organic", pod: "organic", bark: "matte", roof: "concrete", rock2: "concrete", rock3: "concrete", tibG: "glass", tibB: "glass", green: "foliage", green2: "foliage", green3: "foliage", pine: "foliage", autumn: "foliage", bark2: "matte", scorch: "matte", wreck: "matte" };
   function glMerge(e, t) {
-    const r = { metal: { p: [], n: [], c: [], u: [] }, matte: { p: [], n: [], c: [], u: [] }, glass: { p: [], n: [], c: [], u: [] }, emis: { p: [], n: [], c: [], u: [] }, concrete: { p: [], n: [], c: [], u: [] }, organic: { p: [], n: [], c: [], u: [] }, rubber: { p: [], n: [], c: [], u: [] }, foliage: { p: [], n: [], c: [], u: [] } }, n = [];
+    const r = { metal: { p: [], n: [], c: [], u: [] }, matte: { p: [], n: [], c: [], u: [] }, glass: { p: [], n: [], c: [], u: [] }, emis: { p: [], n: [], c: [], u: [] }, concrete: { p: [], n: [], c: [], u: [] }, organic: { p: [], n: [], c: [], u: [] }, rubber: { p: [], n: [], c: [], u: [] }, foliage: { p: [], n: [], c: [], u: [] }, psi: { p: [], n: [], c: [], u: [] } }, n = [];
     for (const a2 of e) {
       if (!a2 || !a2.m) continue;
       if (a2.a) {
@@ -12010,7 +12063,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
         n.push({ geo: e3, px: a2.x || 0, py: a2.y || 0, pz: a2.z || 0, spin: a2.a.spin || 0, bob: a2.a.bob || 0, orbit: a2.a.orbit || 0, amp: a2.a.amp || 0, pvx: null != a2.a.pvx ? a2.a.pvx : a2.x || 0, pvy: null != a2.a.pvy ? a2.a.pvy : a2.y || 0, patrol: a2.a.patrol || 0, pw: a2.a.pw || 0, ph: a2.a.ph || 0, ba: a2.a.ba || 4.5, belt: a2.a.belt || 0, bdy: a2.a.bdy || 0, bdz: a2.a.bdz || 0, pp: a2.a.pp || 0, rock: a2.a.rock || 0, ra: a2.a.ra || 0, rph: a2.a.rph || 0, rpx: null != a2.a.rpx ? a2.a.rpx : a2.x || 0, rpz: null != a2.a.rpz ? a2.a.rpz : a2.z || 0 });
         continue;
       }
-      const e2 = a2.r || 0, o = Math.cos(e2), s = Math.sin(e2), i = a2.tx || 0, l = a2.ty || 0, c = Math.cos(i), d = Math.sin(i), f = Math.cos(l), h = Math.sin(l), u = a2.x || 0, p = a2.y || 0, m = a2.z || 0, g = a2.sx || 1, y = a2.sy || 1, x = a2.sz || 1, M = rgbOf(colOf(a2.c, t)), b = _s2l[M[0]], P = _s2l[M[1]], k = _s2l[M[2]], S2 = !!a2.e, v = S2 ? r.emis : r[GLBUCKET[a2.c] || "metal"], w = v.p, _ = v.n, L = v.c, T = v.u;
+      const e2 = a2.r || 0, o = Math.cos(e2), s = Math.sin(e2), i = a2.tx || 0, l = a2.ty || 0, c = Math.cos(i), d = Math.sin(i), f = Math.cos(l), h = Math.sin(l), u = a2.x || 0, p = a2.y || 0, m = a2.z || 0, g = a2.sx || 1, y = a2.sy || 1, x = a2.sz || 1, M = rgbOf(colOf(a2.c, t)), b = _s2l[M[0]], P = _s2l[M[1]], k = _s2l[M[2]], S2 = !!a2.e || "psi" === a2.c, v = "psi" === a2.c ? r.psi : S2 ? r.emis : r[GLBUCKET[a2.c] || "metal"], w = v.p, _ = v.n, L = v.c, T = v.u;
       for (const e3 of a2.m) {
         const t2 = [0, 0, 0], r2 = [0, 0, 0], n2 = [0, 0, 0], a3 = [0, 0, 0], M2 = [0, 0, 0], v2 = [0, 0, 0];
         for (let b2 = 0; b2 < 3; b2++) {
@@ -12044,7 +12097,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       const t2 = new THREE.BufferGeometry();
       return t2.setAttribute("position", new THREE.Float32BufferAttribute(e2.p, 3)), t2.setAttribute("normal", new THREE.Float32BufferAttribute(e2.n, 3)), t2.setAttribute("color", new THREE.Float32BufferAttribute(e2.c, 3)), t2.setAttribute("uv", new THREE.Float32BufferAttribute(e2.u, 2)), t2.computeBoundingSphere(), t2;
     };
-    return { metal: a(r.metal), matte: a(r.matte), glass: a(r.glass), emis: a(r.emis), concrete: a(r.concrete), organic: a(r.organic), rubber: a(r.rubber), foliage: a(r.foliage), anims: n };
+    return { metal: a(r.metal), matte: a(r.matte), glass: a(r.glass), emis: a(r.emis), concrete: a(r.concrete), organic: a(r.organic), rubber: a(r.rubber), foliage: a(r.foliage), psi: a(r.psi), anims: n };
   }
   var GLGEO = /* @__PURE__ */ new Map();
   function glGeom(e, t, r) {
@@ -12057,7 +12110,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var _uy = 0;
   var _uz = 0;
   var _scV = new THREE.Vector3();
-  var GLPASS = ["metal", "matte", "glass", "emis", "concrete", "organic", "rubber", "foliage"];
+  var GLPASS = ["metal", "matte", "glass", "emis", "concrete", "organic", "rubber", "foliage", "psi"];
   function glFlush(e, t) {
     const r = e.list.length / 6;
     for (const t2 of GLPASS) {
@@ -12067,7 +12120,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (!a || a.count0 < r) {
         a && (GL.scene.remove(a), a.dispose());
         const o2 = Math.max(8, 1 << Math.ceil(Math.log2(Math.max(1, r))));
-        a = new THREE.InstancedMesh(n, e.wind && "emis" !== t2 ? fgWindMat(t2) : GL.mats[t2], o2), a.count0 = o2, a.castShadow = "emis" !== t2 && !e.noShadow, a.receiveShadow = "emis" !== t2, a.frustumCulled = false, GL.scene.add(a), e[t2] = a;
+        a = new THREE.InstancedMesh(n, e.wind && "emis" !== t2 && "psi" !== t2 ? fgWindMat(t2) : GL.mats[t2], o2), a.count0 = o2, a.castShadow = "emis" !== t2 && !e.noShadow, a.receiveShadow = "emis" !== t2 && "psi" !== t2, a.frustumCulled = false, GL.scene.add(a), e[t2] = a;
       }
       a.count = r;
       const o = e.list, s = _mat, sc = e.sc || 1;
@@ -12239,7 +12292,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }, e.needsUpdate = true;
   }
   function setFogUniform(e) {
-    const t = [GL.mats.metal, GL.mats.matte, GL.mats.glass, GL.mats.emis, GL.terrain && GL.terrain.material, GL.water && GL.water.material];
+    const t = [GL.mats.metal, GL.mats.matte, GL.mats.glass, GL.mats.emis, GL.mats.psi, GL.terrain && GL.terrain.material, GL.water && GL.water.material];
     for (const r of t) r && r.userData && r.userData.shader && (r.userData.shader.uniforms.fogOn.value = e ? 1 : 0);
   }
   function glNoiseTex() {
@@ -12991,6 +13044,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     fpsGfxPre();
     glTrackUpdate();
     GL.waterU && (GL.waterU.value = S.time);
+    GL.psiU && (GL.psiU.value = performance.now() / 1e3 % 1e4);
     if (GL.water) {
       const wm = GL.water.material;
       wm.map && (wm.map.offset.x = 0.015 * S.time, wm.map.offset.y = 6e-3 * S.time), wm.bumpMap && (wm.bumpMap.offset.x = -0.03 * S.time, wm.bumpMap.offset.y = 0.012 * S.time);
@@ -14975,7 +15029,7 @@ varying vec3 vFgWN;
   function fx3dActive() {
     return !!(FPS.on && FPS.u && FG.fx);
   }
-  var BK = ["metal", "matte", "glass", "emis", "concrete", "organic", "rubber", "foliage"];
+  var BK = ["metal", "matte", "glass", "emis", "concrete", "organic", "rubber", "foliage", "psi"];
   var HD_LOOK = {
     rifleman: { helmet: "body", pack: "armor3", visor: "glass" },
     lancer: { helmet: "body", pack: "armor3" },
@@ -15218,7 +15272,7 @@ varying vec3 vFgWN;
     FG.figGeo.set(key, g);
     return g;
   }
-  var HD_GROUP = { metal: "metal", glass: "metal", emis: "emis", matte: "matte", concrete: "matte", organic: "matte", rubber: "matte", foliage: "matte" };
+  var HD_GROUP = { metal: "metal", glass: "metal", emis: "emis", matte: "matte", concrete: "matte", organic: "matte", rubber: "matte", foliage: "matte", psi: "psi" };
   function fgMergeGeos(list) {
     if (1 === list.length) return list[0];
     const out = new THREE.BufferGeometry();
@@ -15242,7 +15296,7 @@ varying vec3 vFgWN;
     }
     for (const k in g._grp) {
       const m = new THREE.Mesh(g._grp[k], mats[k] || mats.metal);
-      m.userData.shared = 1, m.castShadow = shadow && "emis" !== k, m.receiveShadow = shadow && "emis" !== k, o.add(m);
+      m.userData.shared = 1, m.castShadow = shadow && "emis" !== k && "psi" !== k, m.receiveShadow = shadow && "emis" !== k && "psi" !== k, o.add(m);
     }
     return o;
   }
@@ -15443,10 +15497,10 @@ varying vec3 vFgWN;
     }
     S.time = t0;
     F.root.updateMatrixWorld(true);
-    const by = { metal: [], matte: [], emis: [] };
+    const by = { metal: [], matte: [], emis: [], psi: [] };
     for (const n in F.parts) F.parts[n].traverse((o) => {
       if (!o.isMesh) return;
-      const bucket = o.material === GL.mats.emis ? "emis" : o.material === GL.mats.metal && "gun" === n ? "metal" : "matte";
+      const bucket = o.material === GL.mats.emis ? "emis" : o.material === GL.mats.psi ? "psi" : o.material === GL.mats.metal && "gun" === n ? "metal" : "matte";
       const cg = o.geometry.clone();
       cg.applyMatrix4(_bakeM.copy(o.matrixWorld)), by[bucket].push(cg);
     });
@@ -15517,7 +15571,7 @@ varying vec3 vFgWN;
       return m;
     };
     const mats = {};
-    for (const k of BK) mats[k] = "emis" === k ? new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }) : mk(GL.mats[k]);
+    for (const k of BK) mats[k] = "psi" === k ? GL.mats.psi : "emis" === k ? new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }) : mk(GL.mats[k]);
     mats.metal.metalness = 0.75, mats.metal.roughness = 0.38, mats.metal.envMapIntensity = 1;
     return FG.vm = { renderer: GL.renderer, scene, cam, hemi, sun, fill, ml, mats, T, st: { aim: 0, sprint: 0, rp: 0, rv: 0, rx: 0, rvx: 0, swX: 0, swY: 0, ly: null, lp: null, lastM: 0, draw: 0, boltT: 9, throwT: 0, lastT: 0, land: 0, lastJ: 0 } };
   }
