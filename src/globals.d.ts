@@ -579,6 +579,7 @@ declare global {
   function fpsUnitScale(u: any): number;
   function enterFPS(u: Unit): boolean;
   function exitFPS(): void;
+  function leaveFpsForMenu(): void;
   function fpsTick(dt: number): void;
   function leaveGarrison(u: Unit): void;
   function fpsInteract(): void;

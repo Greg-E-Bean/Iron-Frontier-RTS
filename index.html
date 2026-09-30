@@ -277,7 +277,7 @@ body.fps #tutorialPanel{top:calc(env(safe-area-inset-top,0px) + 100px)}
 .filmRow{display:flex;gap:8px}.filmRow .bPlay{flex:1}
 #filmPro{margin:0 0 4px}
 
-body.fpsOnly #fpsexit{display:none!important}
+body.fpsOnly #fpsexit{font-size:0}body.fpsOnly #fpsexit::after{content:"MENU";font-size:11px}
 #tutorialPanel .stl{position:relative;margin:2px 0 6px;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1.5px;color:#9fe8b0;background:rgba(125,255,138,.08);overflow:hidden}
 #tutorialPanel .stl i{position:absolute;left:0;bottom:0;height:2px;background:#ffcb62;transition:width .2s}
 #tutorialPanel .stl.warn{color:#ffcb62;background:rgba(255,203,98,.12)}
@@ -11544,9 +11544,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       d2 < 48 && u.cool <= 0 && (fire(u, tg, r), u.ammo--, u.cool = r.rof);
       return;
     }
-    const d = Math.hypot(c.x - u.x, c.y - u.y);
-    if (d < 26) return c.bay = Math.min(CARRIER_BAY, (c.bay || 0) + 1), c.launchT = Math.max(c.launchT || 0, 1.2), c.drones = (c.drones || []).filter((x) => x !== u), void killUnitSilent(u);
-    flyTo(u, c.x - Math.cos(c.ang) * 30, c.y - Math.sin(c.ang) * 30, t);
+    const hx = c.x - Math.cos(c.ang) * 30, hy = c.y - Math.sin(c.ang) * 30, d = Math.hypot(hx - u.x, hy - u.y);
+    if (d < 18 || Math.hypot(c.x - u.x, c.y - u.y) < 34) return c.bay = Math.min(CARRIER_BAY, (c.bay || 0) + 1), c.launchT = Math.max(c.launchT || 0, 1.2), c.drones = (c.drones || []).filter((x) => x !== u), void killUnitSilent(u);
+    flyTo(u, hx, hy, t);
   }
   function tickAir(e, t) {
     const a0 = e.ang, z0 = e.alt || 0;
@@ -11657,9 +11657,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
       t2 && (e.target = t2, "idle" === e.order && (e.order = "attack"));
     }
-    if ("attack" === e.order && e.target) {
+    if (("attack" === e.order || "amove" === e.order) && e.target && !e.target.dead) {
       const n2 = e.target;
-      if (!canTarget(e, n2)) return e.target = null, void (e.order = "idle");
+      if (!canTarget(e, n2)) return e.target = null, void ("amove" !== e.order && (e.order = "idle"));
       e.lastTarget = n2;
       const a = r.range;
       if (dist2(e.x, e.y, n2.x, n2.y) < a * a) {
@@ -18851,14 +18851,43 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       bd && bd.naval && !nearWater(r.tx, r.ty, bd.size, 2) ? hint("Cannot build there \u2014 must be near the coast") : hint("Cannot build there \u2014 must be near your base");
     }
   }
+  function leaveFpsForMenu() {
+    try {
+      FPS.on && exitFPS();
+    } catch (e) {
+    }
+    try {
+      document.pointerLockElement && document.exitPointerLock();
+    } catch (e) {
+    }
+    document.body.classList.remove("fpsOnly", "fps");
+  }
+  function bldAtScreen(sx, sy) {
+    let best = null, bd = -1e9;
+    const z = cam.z;
+    for (const b of S.blds) {
+      if (b.dead || !seen(b)) continue;
+      const r = 32 * b.size, px = w2sx(b.x, b.y), py = w2sy(b.x, b.y), hw = 0.92 * r * z, top = py - (0.55 * r + 22) * z, bot = py + 0.5 * r * z;
+      if (sx < px - hw || sx > px + hw || sy < top || sy > bot) continue;
+      const ey = Math.abs(sx - px) / hw;
+      if (sy > py && (sy - py) / (0.5 * r * z) + ey > 1.05) continue;
+      const dp = b.x + b.y;
+      dp > bd && (bd = dp, best = b);
+    }
+    return best;
+  }
   function entAt(e, t, sx, sy) {
     let r = null, n = 1e9;
     const hidden = (o2) => o2.d.sub && teamOf(o2.owner) !== teamOf(0) && !subRevealed(o2);
     if (void 0 !== sx) {
       for (const o2 of S.units) {
-        if (o2.dead || o2.inside || !(o2.d.fly || o2.alt > 2) || hidden(o2)) continue;
+        if (o2.dead || o2.inside || !(o2.d.fly || o2.alt > 2) || hidden(o2) || "cdrone" === o2.d.role) continue;
         const px = w2sx(o2.x, o2.y), py = w2sy(o2.x, o2.y, o2.alt || 0), rad = Math.max(34, (o2.d.radius + 18) * cam.z), dx = sx - px, dy = sy - py, d2 = dx * dx + dy * dy;
         d2 < rad * rad && d2 < n && (n = d2, r = o2);
+      }
+      if (r && 0 === r.owner && S.sel.length) {
+        const gb = bldAtScreen(sx, sy);
+        if (gb && teamOf(gb.owner) !== teamOf(0)) return gb;
       }
       if (r) return r;
       n = 1e9;
@@ -18878,7 +18907,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         if (t2) return t2;
       }
     }
-    return null;
+    return void 0 !== sx ? bldAtScreen(sx, sy) : null;
   }
   function tap(e, t) {
     if (S.placing) return void tryPlace(e, t);
@@ -19260,7 +19289,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return '<div class="sub" style="margin-top:10px">RESULTS</div><div class="small">' + rows + "</div>";
   }
   function gameOver(win) {
-    clearResume(), S.over = true, S.running = false, setRainAmbience(false), sfx(win ? "win" : "lose");
+    clearResume(), S.over = true, S.running = false, leaveFpsForMenu(), setRainAmbience(false), sfx(win ? "win" : "lose");
     $("#menu").classList.remove("hidden");
     const t = P(), mission = S.mission, tut = !!(mission && (mission.tutorial || mission.training)), trn = mission && mission.training;
     mission && !tut && win && unlockNext(mission.fac, mission.idx);
@@ -19564,7 +19593,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   function menuBgActive() {
     return MB.on && S.running && menuBgStop(), MB.on;
   }
-  Object.assign(window, { menuBgStart, menuBgStop, menuBgSetMap, menuBgFrame, menuBgActive });
+  Object.assign(window, { leaveFpsForMenu, tapCommand, entAt, bldAtScreen, menuBgStart, menuBgStop, menuBgSetMap, menuBgFrame, menuBgActive });
 })();
 
 </script>
@@ -21844,7 +21873,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
   };
   function showTraining() {
-    radioStop(), hideLoading(), $("#menu").classList.remove("hidden");
+    radioStop(), hideLoading(), leaveFpsForMenu(), $("#menu").classList.remove("hidden");
     const card = (k, ic, t, d) => '<button class="campCard" data-k="' + k + '"><div class="ccTop"><span class="ccIcon">' + ic + '</span><span class="ccFac">' + t + '</span></div><div class="ccTag">' + d + "</div></button>";
     $("#panelMain").innerHTML = '<h1>TRAINING</h1><div class="sub">Learn the controls \u2014 nothing here counts against you</div><div id="campList">' + card("rts", "\u2691", "BASE & ARMY", "Build a base, train a squad, repel a scripted raid, repair, attack-move and destroy an outpost.") + card("fps", "\u25CE", "FIRST PERSON & INFILTRATION", "Move and shoot as a commando, get inside an enemy building, plant C4 and get out.") + card("tut", "\u25B8", "QUICK SKIRMISH TUTORIAL", "The original short checklist against an easy opponent.") + '</div><button id="backSetup" ' + SECBTN + ">BACK</button>";
     $("#panelMain").querySelectorAll(".campCard").forEach((b) => b.onclick = () => "tut" === b.dataset.k ? launchTutorial() : launchTraining(b.dataset.k)), $("#backSetup").onclick = showSetup;
@@ -22517,7 +22546,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     l && (l._tok = (l._tok || 0) + 1, l.classList.add("hidden"));
   }
   function showCampaign() {
-    radioStop(), hideLoading(), $("#menu").classList.remove("hidden");
+    radioStop(), hideLoading(), leaveFpsForMenu(), $("#menu").classList.remove("hidden");
     const rows = ["vanguard", "legion", "syndicate"].map((fac) => {
       const camp = CAMPAIGNS[fac], unlocked = campaignUnlocked(fac), total = camp.missions.length, done = Math.min(total, Math.max(0, unlocked - 1));
       return '<button class="campCard f-' + fac + '" data-fac="' + fac + '"><div class="ccTop"><span class="ccIcon">' + FAC_ICON[fac] + '</span><span class="ccFac">' + FAC_NAME[fac].toUpperCase() + '</span><span class="ccProg">' + done + "/" + total + '</span></div><div class="ccTitle">' + camp.title + '</div><div class="ccTag">' + camp.tag + '</div><div class="ccBar"><i style="width:' + Math.round(100 * done / total) + '%"></i></div><div class="ccStars">\u2605 ' + campStars(fac) + " / " + 3 * total + "</div></button>";
@@ -23865,6 +23894,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }
   var SETUP_HTML = null;
   function showSetup() {
+    leaveFpsForMenu();
     null === SETUP_HTML && (SETUP_HTML = $("#panelMain").innerHTML), $("#menu").classList.remove("hidden"), $("#panelMain").innerHTML = SETUP_HTML, refreshMenu(), wireSetup();
   }
   function wireSetup() {
@@ -24107,7 +24137,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   }, 6e4), $("#fpsPrompt").addEventListener("click", (ev) => {
     ev.stopPropagation(), fpsPromptTarget && !FPS.on && !FPS.entering && (GL ? beginFpsEntry(fpsPromptTarget) : hint("First person needs 3D graphics support"));
   }), $("#fpsexit").addEventListener("click", (e) => {
-    e.stopPropagation(), S.mission && S.mission.fpsOnly && !S.over || exitFPS();
+    e.stopPropagation(), S.mission && S.mission.fpsOnly && !S.over ? (S.running = false, openMenu("pause")) : exitFPS();
   }), (function() {
     const e = $("#fpsstick"), t = e.firstElementChild, r = $("#fpsfire"), zone = $("#fpszone"), lock = $("#fpslock");
     let n = null, cx = 0, cy = 0;
