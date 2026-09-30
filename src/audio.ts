@@ -93,9 +93,9 @@ const VOICE_LINES: any = {
     harv: { sel: ["Prospector ready.", "Hopper's empty. Where's the ore?", "Collector standing by."], go: ["Heading out.", "Going for the ore.", "On the move."] },
     sub: { sel: ["Periscope up.", "Sub's ready."], go: ["Diving.", "Running silent."] },
     hero: { sel: ["You called?", "Let's make this quick.", "Ready for anything."], go: ["I'm on it.", "Leave it to me.", "Watch this."] },
-    unit: ["Unit ready.", "Reinforcements have arrived.", "New unit reporting in."],
+    unit: ["Unit ready.", "New unit reporting in."],
     ready: ["Construction complete.", "Structure ready.", "Building ready for placement."],
-    ann: { underAttack: "Warning. Our base is under attack.", storage: "Silos needed.", unitAttack: "Unit under attack.", harvAttack: "Our harvester is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." },
+    ann: { reinforce: "Reinforcements have arrived.", underAttack: "Warning. Our base is under attack.", storage: "Silos needed.", unitAttack: "Unit under attack.", harvAttack: "Our harvester is under attack.", unitLost: "Unit lost.", funds: "Insufficient funds.", radarOn: "Radar online.", radarOff: "Radar offline.", strike: "Strike inbound.", deployed: "Headquarters deployed.", captured: "Building captured." },
   },
   legion: {
     inf: { sel: [["Da, komandir?", "Да, командир?"], ["Ready for orders.", "Рэди фор ордерс."], ["Comrade, I listen.", "Камрад, ай лисэн."], ["Legion stands ready.", "Лиджэн стэндс рэди."], ["Speak, commander.", "Спик, коммандэр."]], go: [["Moving out.", "Мувинг аут."], ["For the Motherland!", "Фор зэ мазэрлэнд!"], ["As ordered.", "Эз ордэрд."], ["Davai, davai!", "Давай, давай!"], ["We march.", "Ви марч."]] },
@@ -109,7 +109,7 @@ const VOICE_LINES: any = {
     hero: { sel: [["You need me, comrade?", "Ю нид ми, камрад?"], ["I am here.", "Ай эм хиа."]], go: [["They will not stop me.", "Зэй вил нот стоп ми."], ["Leave it to me.", "Лив ит ту ми."]] },
     unit: [["Unit ready, comrade.", "Юнит рэди, камрад."], ["New recruit reporting.", "Нью рэкрут рипортинг."]],
     ready: [["Construction complete, comrade.", "Констракшн комплит, камрад."], ["Structure is ready.", "Стракчер из рэди."]],
-    ann: { underAttack: ["Our base is under attack!", "Ауэр бэйс из андэр эттак!"], storage: ["Silos needed, comrade.", "Сайлоуз нидид, камрад."], unitAttack: ["Our units are under attack!", "Ауэр юнитс ар андэр эттак!"], harvAttack: ["Ore hauler under attack!", "Ор хоулер андэр эттак!"], unitLost: ["Unit lost.", "Юнит лост."], funds: ["Not enough funds, comrade.", "Нот инаф фандз, камрад."], radarOn: ["Radar online.", "Рэйдар онлайн."], radarOff: ["Radar offline.", "Рэйдар офлайн."], strike: ["Strike incoming.", "Страйк инкаминг."], deployed: ["Headquarters deployed.", "Констракшн ярд диплойд."], captured: ["Building captured.", "Билдинг кэпчерд."] },
+    ann: { reinforce: ["Reinforcements have arrived, comrade.", "Рейнфорсментс хэв эррайвд, камрад."], underAttack: ["Our base is under attack!", "Ауэр бэйс из андэр эттак!"], storage: ["Silos needed, comrade.", "Сайлоуз нидид, камрад."], unitAttack: ["Our units are under attack!", "Ауэр юнитс ар андэр эттак!"], harvAttack: ["Ore hauler under attack!", "Ор хоулер андэр эттак!"], unitLost: ["Unit lost.", "Юнит лост."], funds: ["Not enough funds, comrade.", "Нот инаф фандз, камрад."], radarOn: ["Radar online.", "Рэйдар онлайн."], radarOff: ["Radar offline.", "Рэйдар офлайн."], strike: ["Strike incoming.", "Страйк инкаминг."], deployed: ["Headquarters deployed.", "Констракшн ярд диплойд."], captured: ["Building captured.", "Билдинг кэпчерд."] },
   },
   syndicate: {
     inf: { sel: ["We are listening.", "Speak, and we obey.", "Our minds are yours.", "The Syndicate hears you."], go: ["It will be done.", "Moving, unseen.", "As the Syndicate wills.", "Silently."] },
@@ -122,7 +122,7 @@ const VOICE_LINES: any = {
     hero: { sel: ["You summoned me.", "Minds bend before me."], go: ["They will not see me coming.", "Their thoughts are mine."] },
     unit: ["A new servant awakens.", "Another mind joins us."],
     ready: ["The structure has grown.", "It is complete."],
-    ann: { underAttack: "Our domain is under attack.", storage: "We need more storage.", unitAttack: "Our servants are under attack.", harvAttack: "Our gatherers are under attack.", unitLost: "A servant has fallen.", funds: "We lack resources.", radarOn: "The eye opens.", radarOff: "The eye is blind.", strike: "Strike inbound.", deployed: "The nest takes root.", captured: "A structure bends to our will." },
+    ann: { reinforce: "More of us arrive.", underAttack: "Our domain is under attack.", storage: "We need more storage.", unitAttack: "Our servants are under attack.", harvAttack: "Our gatherers are under attack.", unitLost: "A servant has fallen.", funds: "We lack resources.", radarOn: "The eye opens.", radarOff: "The eye is blind.", strike: "Strike inbound.", deployed: "The nest takes root.", captured: "A structure bends to our will." },
   },
 };
 function voiceRoleFor(u: any) {
@@ -294,6 +294,10 @@ function unitLines(fac: string, category: string, role: string, key?: string | n
   for (let r: string | undefined = role; r; r = ROLE_FALLBACK[r]) if (F[r] && F[r][category]) return F[r][category];
   return F.inf[category];
 }
+// Each unit introduces itself by name now and then when selected.
+const UNIT_TAGS: Record<string, Record<string, string>> = {"vanguard": {"miner_vanguard": "Prospector, prospecting for profit.", "rifleman": "Rifleman, holding the line.", "engineer": "Technician, tools at the ready.", "lancer": "Lancer, armour is my business.", "marksman": "Sky Guard, eyes on the skies.", "vindicator": "Vindicator, beam charged.", "operative": "Ghost. You never saw me.", "phaser": "Phase Trooper, reality bends to me.", "warden": "Warden Tank, rolling steel.", "skirmisher": "Skirmisher, quick and loaded.", "hover": "Skimmer, skating over land and sea.", "photon": "Photon Tank, lens focused.", "bulwark": "Bulwark, an immovable wall.", "titan_vanguard": "Paladin Walker, striding into battle.", "longbow": "Longbow, reaching out to touch them.", "skyjack": "Skyjack, jets hot.", "hornet": "Hornet, stinger armed.", "kestrel": "Kestrel, owning the sky.", "skycarrier": "Aegis Skycarrier, soaring through.", "chinook": "Chinook, rotors turning.", "interceptor": "Interceptor Boat, cutting through the waves.", "frigate": "Frigate, guns run out.", "barracuda": "Barracuda, silent and deep.", "lst": "Landing Craft, ramp ready.", "mhq": "Mobile HQ, a base on wheels.", "bastion": "Sentinel Rig, ready to dig in."}, "legion": {"miner_legion": "Ore Hauler, for the people's treasury.", "militia": "Militia, for the motherland!", "engineer": "Technician, I fix anything, comrade.", "flak": "Flak Gunner, the sky will burn.", "bombard": "Bombardier, rockets loaded.", "caustic": "Caustic Trooper, the air turns foul.", "arctrooper": "Arc Trooper, full of lightning.", "hound": "Warhound, off the leash.", "mauler": "Mauler Tank, the iron fist.", "tickdrone": "Tick Drone, ready to burrow.", "ravager": "Ravager, the long arm of the Legion.", "sledge": "Sledge, heavy hammer ready.", "colossus": "Colossus, crushing all before me.", "titan_legion": "Juggernaut, unstoppable.", "eagle": "Vulture, circling for prey.", "jackal": "Jackal, hunting in the clouds.", "leviathan": "Leviathan, darkening the sky.", "skyhauler": "Skyhauler, cargo secured.", "riverine": "Riverine Gunboat, patrolling the waters.", "destroyer": "Destroyer, broadsides ready.", "nautilus": "Nautilus, beneath the surface.", "barge": "Troop Barge, all aboard, comrades.", "mhq": "Mobile HQ, the Legion marches.", "bastion": "Rampart Rig, iron foundations.", "reaper": "Reaper. Death comes quietly.", "salvager": "Salvager, nothing goes to waste."}, "syndicate": {"acolyte": "Acolyte, burning with devotion.", "engineer": "Technician, the hive shapes the world.", "leech": "Leech, hungry for life.", "brood": "Brood, teeth and hunger.", "vector_inf": "Vector, carrying the contagion.", "blighter": "Blight Sniper, one shot, one plague.", "fangtank": "Fang Tank, the hive bites back.", "stinger": "Stinger, venom ready.", "spore": "Spore Lobber, seeding the field.", "shard": "Shard Walker, crystal and claw.", "rift": "Rift, tearing the world open.", "overmind": "Overmind. Your thoughts are mine.", "titan_syndicate": "Devourer Walker, all will be consumed.", "wisp": "Wisp, drifting on the psychic wind.", "locust": "Locust, the swarm ascends.", "broodmother": "Brood Mother. Blot out the sun.", "hivetrans": "Reclaimer, the hive is on the move.", "gullet": "Gullet, swallowing our warriors whole.", "polyp": "Polyp, stirring in the shallows.", "kraken": "Kraken, rising from the deep.", "lamprey": "Lamprey, latching on.", "maw": "Maw, open wide.", "mhq": "Mobile HQ, the hive takes root.", "bastion": "Carapace Rig, the shell hardens.", "phantom": "Phantom. I walk unseen.", "piercer": "Piercer, armour means nothing.", "cultivator": "Cultivator, the flesh regrows."}};
+function unitTag(fac: string, key?: string | null) { return key && UNIT_TAGS[fac] && UNIT_TAGS[fac][key] || null; }
+const tagSeen: any = {};
 // Hero units are story characters: they always use that character's own voice.
 const HERO_CAST: Record<string, string> = { operative: "ghost", reaper: "reaper", phantom: "phantom", broodmother: "broodmother" };
 const ackMem: any = {}, lastPick: any = {};
@@ -308,7 +312,10 @@ function playVoiceLine(fac: string, category: string, role?: string | null, key?
   if (!set || !set.length) return;
   let i = Math.floor(Math.random() * set.length);
   set.length > 1 && lastPick[category] === set[i] && (i = (i + 1) % set.length), lastPick[category] = set[i];
-  lastVoiceT = now, speakLine(fac, set[i], !1, per, hashKey(key || role || ""), !1, key && HERO_CAST[key] ? "c_" + HERO_CAST[key] : null);
+  let line: any = set[i];
+  const tag = "sel" === category ? unitTag(fac, key) : null;
+  tag && (uid && !tagSeen[uid] || Math.random() < .33) && lastPick.tag !== tag && (line = tag, uid && (tagSeen[uid] = 1)), lastPick.tag = line === tag ? tag : null;
+  lastVoiceT = now, speakLine(fac, line, !1, per, hashKey(key || role || ""), !1, key && HERO_CAST[key] ? "c_" + HERO_CAST[key] : null);
 }
 // Faction announcer for important events.
 function announce(ev: string) {
@@ -321,12 +328,12 @@ function announce(ev: string) {
 function announceHint(msg: string) {
   if (!msg || "string" != typeof msg) return;
   const m = msg.toLowerCase();
-  m.includes("under attack") ? announce(m.includes("harvester") ? "harvAttack" : m.includes("unit") ? "unitAttack" : "underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("silos needed") ? announce("storage") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
+  m.startsWith("reinforcements") || m.startsWith("paradrop") ? announce("reinforce") : m.includes("under attack") ? announce(m.includes("harvester") ? "harvAttack" : m.includes("unit") ? "unitAttack" : "underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("silos needed") ? announce("storage") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
 }
 
 // ------------------------------------------------------------------ effects
 function sfx(e: string, u?: any) {
-  ("sel" === e || "go" === e || "unit" === e || "ready" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
+  ("sel" === e || "go" === e || "unit" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
   if (sfxBudget > 7 || !sOK()) return;
   sfxBudget++;
   const t = AC.currentTime + .004, pn = (Math.random() - .5) * .5;
@@ -1014,7 +1021,7 @@ function voiceBankList() {
   const out: any[] = [], seen: any = {}, add = (vx: string, t: any) => { const s = Array.isArray(t) ? t[0] : t; if (!s) return; const k = vx + "|" + s; seen[k] || (seen[k] = 1, out.push({ vox: vx, text: s })); };
   for (const fac of ["vanguard", "legion", "syndicate"]) {
     const F = VOICE_LINES[fac], units = (FACTIONS[fac] && FACTIONS[fac].units) || [];
-    for (const key of units) { const u: any = { key, d: UNITS[key] }; if (!u.d) continue; const role = voiceRoleFor(u), per = personaFor(fac, key, role), vx = HERO_CAST[key] ? "c_" + HERO_CAST[key] : voxFor(fac, per); for (const cat of ["sel", "go"]) (unitLines(fac, cat, role, key, per) || []).forEach((t: any) => add(vx, t)); }
+    for (const key of units) { const u: any = { key, d: UNITS[key] }; if (!u.d) continue; const role = voiceRoleFor(u), per = personaFor(fac, key, role), vx = HERO_CAST[key] ? "c_" + HERO_CAST[key] : voxFor(fac, per); const tg = unitTag(fac, key); tg && add(vx, tg); for (const cat of ["sel", "go"]) (unitLines(fac, cat, role, key, per) || []).forEach((t: any) => add(vx, t)); }
     const vxA = voxFor(fac, ANNOUNCER[fac]);
     (F.unit || []).forEach((t: any) => add(vxA, t)), (F.ready || []).forEach((t: any) => add(vxA, t));
     for (const k in F.ann || {}) add(vxA, F.ann[k]);

@@ -857,3 +857,5 @@ declare global {
 }
 
 export {};
+
+declare global { function announce(ev: string): void; }
