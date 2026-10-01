@@ -2554,9 +2554,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (S.blds.push(i), S.bldById.set(i.id, i), recalcPower(e), evict(i), "refinery" === t) {
       const t2 = addUnit(e, s.f.miner, i.x, i.y + 70.4);
       t2 && (t2.order = "harvest");
-    } else if ("hive" === t) for (let n2 = 0; n2 < 3; n2++) {
-      const a2 = addUnit(e, "drone", i.x + rnd(-20, 20), i.y + 70.4 + rnd(-10, 10));
-      a2 && (a2.order = "harvest", a2.hiveId = i.id);
+    } else if ("hive" === t) {
+      i.deployed = true;
+      for (let n2 = 0; n2 < 3; n2++) {
+        const a2 = addUnit(e, "drone", i.x + rnd(-20, 20), i.y + 70.4 + rnd(-10, 10));
+        a2 && (a2.order = "harvest", a2.hiveId = i.id);
+      }
     }
     return i;
   }
@@ -2839,7 +2842,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     i && (o = 32 * i[0] + 16, s = 32 * i[1] + 16);
     const l = addUnit(e.id, t, o, s);
     l && "factory" === a.key && !r.fly && !r.naval && (l.x = a.x, l.y = a.y + 0.25 * 32 * a.size + 2, l.ang = l.tang = Math.PI / 2, l.rollout = { x: o, y: s }, a.rollT = 2.2);
-    l && (r.fly && (l.alt = 0, l.ammo = r.ammo || 0, l.home = "airfield" === a.key ? a : null, "airfield" === a.key && !r.airship && dockNew(l, a)), "miner" === r.role ? l.order = "harvest" : a.rally && cmdMove([l], a.rally.x, a.rally.y), e.isAI || sfx("unit"), "inf" === r.kind && "barracks" === a.key && "syndicate" === e.f.key && !r.limit && t !== e.f.hero && "engineer" !== t && !(e.drain > e.power) && hasActiveBld(e.id, "support") && ((c) => {
+    l && (r.fly && (l.alt = 0, l.ammo = r.ammo || 0, l.home = "airfield" === a.key ? a : null, "airfield" === a.key && !r.airship && dockNew(l, a)), "miner" === r.role ? l.order = "harvest" : a.rally && cmdMove([l], a.rally.x, a.rally.y), e.isAI || sfx("unit", l), "inf" === r.kind && "barracks" === a.key && "syndicate" === e.f.key && !r.limit && t !== e.f.hero && "engineer" !== t && !(e.drain > e.power) && hasActiveBld(e.id, "support") && ((c) => {
       c && (c.order = "idle", a.rally && cmdMove([c], a.rally.x + rnd(-14, 14), a.rally.y + rnd(-14, 14)), S.fx.push({ kind: "ring", x: c.x, y: c.y, z: 4, s: 0.45, c: "#d98cff", t: 0, life: 0.5 }));
     })(addUnit(e.id, t, l.x + rnd(-12, 12), l.y + rnd(4, 14))));
   }
@@ -4172,7 +4175,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   function aiNextBld(e) {
     const t = (t2) => countBld(e.id, t2), y = "syndicate" === e.f.key, rk = "refinery", pz = aiPersonality(e);
-    return e.drain + 25 > e.power ? "power" : !y && t(rk) < 1 ? rk : y && t("hive") < 1 && !S.units.some((u) => u.owner === e.id && !u.dead && "hivetrans" === u.key) ? "hive" : t("barracks") < 1 ? "barracks" : t("factory") < 1 ? "factory" : !y && t(rk) < 2 ? rk : t("def1") < Math.round(2 * pz.defMul) && t("barracks") > 0 ? "def1" : t("aa") < 1 && enemyAir(e) ? "aa" : t("lab") < 1 ? "lab" : (t("silo") < 1 || t("silo") < 3 && "function" == typeof creditCap && e.credits > 0.85 * creditCap(e.id)) && (y ? t(rk) >= 1 : t(rk) > 1) ? "silo" : aiFreeDrill(e) && t("orerig") < Math.min(4, 1 + Math.floor(S.time / 200)) && e.credits > 1500 && (t(rk) > 0 || t("hive") > 0) ? "orerig" : t("repair") < 1 && e.credits > 2200 ? "repair" : t("super") < 1 && t("lab") > 0 && e.credits > 5200 && aiWantsSuper(e) ? "super" : t("support") < 1 && t("lab") > 0 && e.credits > 3200 && S.time > 600 ? "support" : t("airfield") < 1 && e.credits > 2500 ? "airfield" : t("navalyard") < 1 && e.credits > 2200 && aiHasCoast(e) ? "navalyard" : t("aa") < 3 && enemyAir(e) ? "aa" : !y && t(rk) < Math.round(5 * pz.refMul) && e.credits > 4e3 ? rk : y && t("hive") < Math.round(3 * pz.refMul) && e.credits > 4e3 ? "hive" : t("def2") < Math.round(4 * pz.defMul) && t("lab") > 0 ? "def2" : t("factory") < 4 && e.credits > 5e3 ? "factory" : t("barracks") < 4 && e.credits > 4e3 ? "barracks" : t("airfield") < 3 && e.credits > 4500 ? "airfield" : t("navalyard") < 3 && e.credits > 4500 && aiHasCoast(e) ? "navalyard" : t("def1") < Math.round(10 * pz.defMul) && e.credits > 3e3 ? "def1" : null;
+    return e.drain + 25 > e.power ? "power" : !y && t(rk) < 1 ? rk : y && t("hive") < 1 && !S.units.some((u) => u.owner === e.id && !u.dead && "hivetrans" === u.key) ? "hive" : t("barracks") < 1 ? "barracks" : t("factory") < 1 ? "factory" : !y && t(rk) < 2 ? rk : y && t("hive") < 2 && t("factory") > 0 ? "hive" : t("def1") < Math.round(2 * pz.defMul) && t("barracks") > 0 ? "def1" : t("aa") < 1 && enemyAir(e) ? "aa" : t("lab") < 1 ? "lab" : (t("silo") < 1 || t("silo") < 3 && "function" == typeof creditCap && e.credits > 0.85 * creditCap(e.id)) && (y ? t(rk) >= 1 : t(rk) > 1) ? "silo" : aiFreeDrill(e) && t("orerig") < Math.min(4, 1 + Math.floor(S.time / 200)) && e.credits > 1500 && (t(rk) > 0 || t("hive") > 0) ? "orerig" : t("repair") < 1 && e.credits > 2200 ? "repair" : t("super") < 1 && t("lab") > 0 && e.credits > 5200 && aiWantsSuper(e) ? "super" : t("support") < 1 && t("lab") > 0 && e.credits > 3200 && S.time > 600 ? "support" : t("airfield") < 1 && e.credits > 2500 ? "airfield" : t("navalyard") < 1 && e.credits > 2200 && aiHasCoast(e) ? "navalyard" : t("aa") < 3 && enemyAir(e) ? "aa" : !y && t(rk) < Math.round(5 * pz.refMul) && e.credits > 4e3 ? rk : y && t("hive") < Math.round(3 * pz.refMul) && e.credits > 4e3 ? "hive" : t("def2") < Math.round(4 * pz.defMul) && t("lab") > 0 ? "def2" : t("factory") < 4 && e.credits > 5e3 ? "factory" : t("barracks") < 4 && e.credits > 4e3 ? "barracks" : t("airfield") < 3 && e.credits > 4500 ? "airfield" : t("navalyard") < 3 && e.credits > 4500 && aiHasCoast(e) ? "navalyard" : t("def1") < Math.round(10 * pz.defMul) && e.credits > 3e3 ? "def1" : null;
   }
   function enemyAir(e) {
     return S.units.some((t) => !t.dead && t.owner !== e.id && t.owner !== NEUTRAL && t.d.fly);
@@ -4243,9 +4246,9 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }
     }
     const yu = "syndicate" === e.f.key;
+    const nbK = aiNextBld(e), rsv = as < 4 || !nbK || e.queues[bldKind(nbK)] && e.queues[bldKind(nbK)].list.length || e.ready[bldKind(nbK)] || !canBuildBld(e, nbK) ? 0 : 0.5 * BLD[nbK].cost;
     if (yu) {
       for (const u of S.units) u.owner === e.id && !u.dead && "hivetrans" === u.key && deployHive(u);
-      !hasBld(e.id, "hive") && !e.queues.veh && !S.units.some((u) => u.owner === e.id && !u.dead && "hivetrans" === u.key) && e.credits > 1200 && startBuild(e, "veh", "hivetrans");
     }
     aiSuper(e);
     for (const t2 of S.blds) t2.owner === e.id && !t2.dead && !t2.d.civ && t2.hp < 0.6 * t2.maxhp && (t2.repair = true);
@@ -4253,23 +4256,23 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (!e.queues.veh && hasBld(e.id, "factory")) {
       if (!yu && n < 2) e.credits > 700 && startBuild(e, "veh", o.miner);
       else if (!yu && n < a && e.credits > 1400) startBuild(e, "veh", o.miner);
-      else if (as < aiCap(e) && e.credits > 2400 && canBuildUnit(e, o.elite) && Math.random() < pz.eliteChance) startBuild(e, "veh", o.elite);
-      else if (as < aiCap(e) && e.credits > 900) {
+      else if (as < aiCap(e) && e.credits > 2400 + rsv && canBuildUnit(e, o.elite) && Math.random() < pz.eliteChance) startBuild(e, "veh", o.elite);
+      else if (as < aiCap(e) && e.credits > 900 + rsv) {
         const t2 = (Math.random() < 0.55 ? aiPickUnit(e, "veh") : null) || o.main;
         startBuild(e, "veh", t2);
       }
     }
     for (const u of S.units) u.owner === e.id && !u.dead && "bastion" === u.key && deployBastion(u);
     !e.queues.veh && !S.units.some((u) => u.owner === e.id && !u.dead && "bastion" === u.key) && countBld(e.id, "triturret") < 1 && hasBld(e.id, "aa") && hasBld(e.id, "lab") && e.credits > 3200 && startBuild(e, "veh", "bastion");
-    if (as < aiCap(e) && !e.queues.inf && hasBld(e.id, "barracks") && e.credits > 500) {
+    if (as < aiCap(e) && !e.queues.inf && hasBld(e.id, "barracks") && e.credits > 500 + rsv) {
       let t2 = o.base;
       const r2 = Math.random();
       r2 < 0.34 && canBuildUnit(e, o.anti) ? t2 = o.anti : r2 < 0.48 && o.hero && canBuildUnit(e, o.hero) ? t2 = o.hero : r2 < 0.7 && (t2 = aiPickUnit(e, "inf") || o.base), startBuild(e, "inf", t2, t2 === o.base ? 2 : 1);
     }
-    if (as < aiCap(e) && !e.queues.air && hasBld(e.id, "airfield") && e.credits > 1600 && o.air && canBuildUnit(e, o.air)) {
+    if (as < aiCap(e) && !e.queues.air && hasBld(e.id, "airfield") && e.credits > 1600 + rsv && o.air && canBuildUnit(e, o.air)) {
       S.units.filter((t2) => t2.owner === e.id && !t2.dead && t2.d.fly).length < 2 + Math.floor(e.ai.wave / 2) && startBuild(e, "air", o.air);
     }
-    if (as < aiCap(e) && !e.queues.sea && hasBld(e.id, "navalyard") && e.credits > 900) {
+    if (as < aiCap(e) && !e.queues.sea && hasBld(e.id, "navalyard") && e.credits > 900 + rsv) {
       const t2 = aiPickUnit(e, "sea");
       t2 && startBuild(e, "sea", t2);
     }
@@ -11322,6 +11325,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     killUnitSilent(u);
     const b = addBuilding(u.owner, "hive", bx, by, true);
     b.deployed = true, b.hiveGroupId = gid;
+    b.id !== gid && S.units.forEach((x) => !x.dead && x.hiveId === b.id && (x.hiveId = gid));
+    S.units.filter((x) => !x.dead && x.hiveId === gid).slice(3).forEach((x) => killUnitSilent(x));
     const alive = S.units.filter((x) => !x.dead && x.hiveId === gid).length;
     for (let n = alive; n < 3; n++) {
       const a = addUnit(u.owner, "drone", b.x + rnd(-20, 20), b.y + 70.4 + rnd(-10, 10));
@@ -11356,6 +11361,8 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       killUnitSilent(u);
       const b = addBuilding(u.owner, "hive", tx, ty, true);
       b.deployed = true, b.hiveGroupId = gid;
+      b.id !== gid && S.units.forEach((x) => !x.dead && x.hiveId === b.id && (x.hiveId = gid));
+      S.units.filter((x) => !x.dead && x.hiveId === gid).slice(3).forEach((x) => killUnitSilent(x));
       const alive = S.units.filter((x) => !x.dead && x.hiveId === gid).length;
       for (let n = alive; n < 3; n++) {
         const a = addUnit(u.owner, "drone", b.x + rnd(-20, 20), b.y + 70.4 + rnd(-10, 10));
@@ -17040,8 +17047,9 @@ varying vec3 vFgWN;
   var voxSrc = null;
   var voxEnd = 0;
   var _radioCurve = null;
+  var ANN_VOX = { vanguard: "ann_v", legion: "ann_l", syndicate: "ann_s" };
   function voxFor(fac, per) {
-    if (!per) return "legion" === fac ? "ru_f" : "syndicate" === fac ? "hive_m" : "gb_f";
+    if (!per) return ANN_VOX[fac] || ANN_VOX.vanguard;
     if ("legion" === fac) return "f" === per.g ? "ru_f" : "ru_m";
     if ("syndicate" === fac) return "f" === per.g ? "hive_f" : "hive_m";
     return ("us" === per.acc ? "us_" : "rp" === per.acc || "en" === per.acc ? "gb_" : "gb2_") + per.g;
@@ -17164,7 +17172,7 @@ varying vec3 vFgWN;
     set.length > 1 && lastPick[category] === set[i] && (i = (i + 1) % set.length), lastPick[category] = set[i];
     let line = set[i];
     const tag = "sel" === category ? unitTag(fac, key) : null;
-    tag && (uid && !tagSeen[uid] || Math.random() < 0.33) && lastPick.tag !== tag && (line = tag, uid && (tagSeen[uid] = 1)), lastPick.tag = line === tag ? tag : null;
+    tag && (uid && !tagSeen[uid] || Math.random() < 0.5) && lastPick.tag !== tag && (line = tag, uid && (tagSeen[uid] = 1)), lastPick.tag = line === tag ? tag : null;
     lastVoiceT = now, speakLine(fac, line, false, per, hashKey(key || role || ""), false, key && HERO_CAST[key] ? "c_" + HERO_CAST[key] : null);
   }
   function announce(ev) {
@@ -17180,7 +17188,7 @@ varying vec3 vFgWN;
     m.startsWith("reinforcements") || m.startsWith("paradrop") ? announce("reinforce") : m.includes("under attack") ? announce(m.includes("harvester") ? "harvAttack" : m.includes("unit") ? "unitAttack" : "underAttack") : "unit lost" === m ? announce("unitLost") : m.startsWith("silos needed") ? announce("storage") : m.startsWith("need $") ? announce("funds") : "radar online" === m ? announce("radarOn") : m.startsWith("radar offline") ? announce("radarOff") : m.includes("inbound") ? announce("strike") : m.startsWith("headquarters deployed") || "hive deployed" === m ? announce("deployed") : "captured" === m && announce("captured");
   }
   function sfx(e, u) {
-    ("sel" === e || "go" === e || "unit" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
+    ("sel" === e || "go" === e || "unit" === e) && u && "u" === u.e && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
     if (sfxBudget > 7 || !sOK()) return;
     sfxBudget++;
     const t = AC.currentTime + 4e-3, pn = (Math.random() - 0.5) * 0.5;
@@ -18124,7 +18132,7 @@ varying vec3 vFgWN;
         tg && add(vx, tg);
         for (const cat of ["sel", "go"]) (unitLines(fac, cat, role, key, per) || []).forEach((t) => add(vx, t));
       }
-      const vxA = voxFor(fac, ANNOUNCER[fac]);
+      const vxA = voxFor(fac);
       (F.unit || []).forEach((t) => add(vxA, t)), (F.ready || []).forEach((t) => add(vxA, t));
       for (const k in F.ann || {}) add(vxA, F.ann[k]);
     }
@@ -18788,7 +18796,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
   $("#bSel").addEventListener("click", () => {
     S.selMode = !S.selMode, $("#bSel").classList.toggle("on", S.selMode), S.selMode && hint("Drag on the map to box-select");
   }), $("#bAll").addEventListener("click", () => {
-    S.sel = S.units.filter((e) => 0 === e.owner && !e.dead && "miner" !== e.d.role), sfx("sel"), S.sel.length || hint("No combat units");
+    S.sel = S.units.filter((e) => 0 === e.owner && !e.dead && "miner" !== e.d.role), sfx("sel", S.sel[0]), S.sel.length || hint("No combat units");
   }), $("#bStop").addEventListener("click", () => {
     S.sel.forEach((e) => {
       "u" === e.e && (e.order = "miner" === e.d.role ? "harvest" : "idle", e.path = null, e.target = null);
@@ -18934,7 +18942,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         }), S.marker = { x: o.x, y: o.y, t: 0, c: "#7dff8a" }, sfx("go", engs[0]);
         else {
           const e2 = performance.now();
-          "u" === o.e ? (e2 - lastTap < 330 && S.sel.includes(o) ? (S.sel = S.units.filter((e3) => 0 === e3.owner && !e3.dead && e3.key === o.key), hint("Selected all " + o.d.name)) : S.sel.includes(o) && S.sel.length > 1 ? (S.sel = S.sel.filter((e3) => e3 !== o), hint("Dropped " + o.d.name)) : S.sel.includes(o) && 1 === S.sel.length ? (S.sel = [], hint("Deselected")) : S.sel = [o], lastTap = e2) : S.sel = S.sel.includes(o) ? [] : [o], sfx("sel");
+          "u" === o.e ? (e2 - lastTap < 330 && S.sel.includes(o) ? (S.sel = S.units.filter((e3) => 0 === e3.owner && !e3.dead && e3.key === o.key), hint("Selected all " + o.d.name)) : S.sel.includes(o) && S.sel.length > 1 ? (S.sel = S.sel.filter((e3) => e3 !== o), hint("Dropped " + o.d.name)) : S.sel.includes(o) && 1 === S.sel.length ? (S.sel = [], hint("Deselected")) : S.sel = [o], lastTap = e2) : S.sel = S.sel.includes(o) ? [] : [o], sfx("sel", S.sel[0]);
         }
       } else if (teamOf(o.owner) === teamOf(0)) {
         hint((o.d.name || "Ally") + " \u2014 allied, cannot attack");
@@ -18978,7 +18986,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     if (repairMode) return void (o && "b" === o.e && 0 === o.owner && (o.d.civ ? hint("Civilian structures can't be repaired \u2014 use an engineer") : (o.repair = !o.repair, o.repair && S.flags && (S.flags.repair = 1), hint(o.repair ? "Repairing" : "Repair off"))));
     if (o && 0 === o.owner) {
       const e2 = performance.now();
-      "u" === o.e ? (e2 - lastTap < 330 && S.sel.includes(o) ? (S.sel = S.units.filter((e3) => 0 === e3.owner && !e3.dead && e3.key === o.key), hint("Selected all " + o.d.name)) : S.sel.includes(o) && S.sel.length > 1 ? (S.sel = S.sel.filter((e3) => e3 !== o), hint("Dropped " + o.d.name)) : S.sel.includes(o) && 1 === S.sel.length ? (S.sel = [], hint("Deselected")) : S.sel = [o], lastTap = e2) : S.sel = S.sel.includes(o) ? [] : [o], sfx("sel");
+      "u" === o.e ? (e2 - lastTap < 330 && S.sel.includes(o) ? (S.sel = S.units.filter((e3) => 0 === e3.owner && !e3.dead && e3.key === o.key), hint("Selected all " + o.d.name)) : S.sel.includes(o) && S.sel.length > 1 ? (S.sel = S.sel.filter((e3) => e3 !== o), hint("Dropped " + o.d.name)) : S.sel.includes(o) && 1 === S.sel.length ? (S.sel = [], hint("Deselected")) : S.sel = [o], lastTap = e2) : S.sel = S.sel.includes(o) ? [] : [o], sfx("sel", S.sel[0]);
       return;
     }
     S.sel = [];
@@ -19026,7 +19034,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     }
     const s = o.filter((e2) => "miner" !== e2.d.role), i = s.length ? s : o;
     if (!i.length) return S.sel = [], void hint("Selection cleared");
-    S.sel = i, sfx("sel");
+    S.sel = i, sfx("sel", i[0]);
     const l = [...new Set(i.map((e2) => e2.d.name))];
     hint(i.length + " selected \u2014 " + l.slice(0, 2).join(", ") + (l.length > 2 ? "\u2026" : ""));
   }
@@ -19083,7 +19091,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       if (e.ctrlKey || e.metaKey) e.preventDefault(), S.sel.length && (ctrlGroups[g] = S.sel.slice());
       else {
         const grp = ctrlGroups[g].filter((u) => !u.dead);
-        grp.length && (S.sel = grp, sfx("sel"));
+        grp.length && (S.sel = grp, sfx("sel", grp[0]));
       }
     }
   });

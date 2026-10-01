@@ -25,10 +25,12 @@ const VOX = {
   c_voice: [9, -4.5, .86, "hive"], c_senna: [4, .5, .95, "hivelight"], c_phantom: [1, -1.5, .95, "hivelight"], c_broodmother: [1, -4, .86, "hive"],
   us_m: [6, -.5, 1.05], us_f: [3, 0, 1.05], gb_m: [9, 0, 1.03], gb_f: [7, .5, 1.02], gb2_m: [10, 0, 1.05], gb2_f: [8, .5, 1.03],
   ru_m: [5, -1.5, .95], ru_f: [8, -1.5, .98], hive_m: [9, -3.5, .9, "hivelight"], hive_f: [1, -1, .95, "hivelight"],
+  ann_v: [4, -.5, 1.0, "ann"], ann_l: [3, -2.5, .95, "ann"], ann_s: [6, -4.5, .88, "hive"],
 };
 const FX = {
   hive: "chorus=0.6:0.9:50|60:0.4|0.32:0.25|0.4:2|2.3,aecho=0.8:0.6:45:0.22,",
   hivelight: "chorus=0.7:0.9:40:0.3:0.3:2,",
+  ann: "aphaser=in_gain=0.8:out_gain=0.9:delay=2:decay=0.3:speed=0.5,bandpass=f=1900:width_type=o:w=3.2,",
 };
 const fnv = s => { let h = 2166136261; for (const c of Buffer.from(s)) h = Math.imul(h ^ c, 16777619) >>> 0; return h.toString(36); };
 const src = JSON.parse(fs.readFileSync(process.argv[2]));

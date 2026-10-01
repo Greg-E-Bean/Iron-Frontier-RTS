@@ -226,8 +226,11 @@ let VOX: any = null;
 try { fetch("voice/manifest.json").then(r => r.ok ? r.json() : null).then(m => { VOX = m; }).catch(() => { }); } catch (e) { }
 const voxBufs: any = {};
 let voxSrc: any = null, voxEnd = 0, _radioCurve: any = null;
+// The faction announcer has its own recorded voice, distinct from every unit
+// voice, so unit acknowledgements never sound like the announcer.
+const ANN_VOX: Record<string, string> = { vanguard: "ann_v", legion: "ann_l", syndicate: "ann_s" };
 function voxFor(fac: string, per?: Persona) {
-  if (!per) return "legion" === fac ? "ru_f" : "syndicate" === fac ? "hive_m" : "gb_f";
+  if (!per) return ANN_VOX[fac] || ANN_VOX.vanguard;
   if ("legion" === fac) return "f" === per.g ? "ru_f" : "ru_m";
   if ("syndicate" === fac) return "f" === per.g ? "hive_f" : "hive_m";
   return ("us" === per.acc ? "us_" : "rp" === per.acc || "en" === per.acc ? "gb_" : "gb2_") + per.g;
@@ -314,7 +317,7 @@ function playVoiceLine(fac: string, category: string, role?: string | null, key?
   set.length > 1 && lastPick[category] === set[i] && (i = (i + 1) % set.length), lastPick[category] = set[i];
   let line: any = set[i];
   const tag = "sel" === category ? unitTag(fac, key) : null;
-  tag && (uid && !tagSeen[uid] || Math.random() < .33) && lastPick.tag !== tag && (line = tag, uid && (tagSeen[uid] = 1)), lastPick.tag = line === tag ? tag : null;
+  tag && (uid && !tagSeen[uid] || Math.random() < .5) && lastPick.tag !== tag && (line = tag, uid && (tagSeen[uid] = 1)), lastPick.tag = line === tag ? tag : null;
   lastVoiceT = now, speakLine(fac, line, !1, per, hashKey(key || role || ""), !1, key && HERO_CAST[key] ? "c_" + HERO_CAST[key] : null);
 }
 // Faction announcer for important events.
@@ -333,7 +336,8 @@ function announceHint(msg: string) {
 
 // ------------------------------------------------------------------ effects
 function sfx(e: string, u?: any) {
-  ("sel" === e || "go" === e || "unit" === e) && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
+  // Voices only answer for an actual unit; bare UI clicks just click.
+  ("sel" === e || "go" === e || "unit" === e) && u && "u" === u.e && playVoiceLine(P().fac, e, voiceRoleFor(u), u && u.key, u && u.id);
   if (sfxBudget > 7 || !sOK()) return;
   sfxBudget++;
   const t = AC.currentTime + .004, pn = (Math.random() - .5) * .5;
@@ -1022,7 +1026,7 @@ function voiceBankList() {
   for (const fac of ["vanguard", "legion", "syndicate"]) {
     const F = VOICE_LINES[fac], units = (FACTIONS[fac] && FACTIONS[fac].units) || [];
     for (const key of units) { const u: any = { key, d: UNITS[key] }; if (!u.d) continue; const role = voiceRoleFor(u), per = personaFor(fac, key, role), vx = HERO_CAST[key] ? "c_" + HERO_CAST[key] : voxFor(fac, per); const tg = unitTag(fac, key); tg && add(vx, tg); for (const cat of ["sel", "go"]) (unitLines(fac, cat, role, key, per) || []).forEach((t: any) => add(vx, t)); }
-    const vxA = voxFor(fac, ANNOUNCER[fac]);
+    const vxA = voxFor(fac);
     (F.unit || []).forEach((t: any) => add(vxA, t)), (F.ready || []).forEach((t: any) => add(vxA, t));
     for (const k in F.ann || {}) add(vxA, F.ann[k]);
   }
