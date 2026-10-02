@@ -12084,6 +12084,56 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   }
   var FLOWB = ["psi", "nrg", "heat"];
   var FLOW_OF = { crystal: "nrg", arcbolt: "nrg", glow: "heat", red: "heat" };
+  var _gvT = -1;
+  var _gv = [];
+  function ghostVeils() {
+    if (_gvT !== S.time) {
+      _gvT = S.time, _gv = S.blds.filter((b) => {
+        if (b.dead || "support" !== b.key || b.blackoutT > 0 || b.rise < 1) return false;
+        const p = S.players[b.owner];
+        return !!p && "vanguard" === (b.capturedFac || p.fac) && !(p.drain > p.power);
+      });
+    }
+    return _gv;
+  }
+  function ghostCol(e) {
+    if (!e || e.dead || e.owner === NEUTRAL) return null;
+    const p = S.players[e.owner];
+    if (!p || p.neutral) return null;
+    let hid = false;
+    if ("u" === e.e) {
+      if (e.d.sub && !subRevealed(e)) hid = true;
+      else if (e.cloakM && S.mission && S.mission.st && !(S.mission.st.alarm > 0)) hid = true;
+    }
+    if (!hid) {
+      const tm = teamOf(e.owner);
+      for (const b of ghostVeils()) if (teamOf(b.owner) === tm && dist2(b.x, b.y, e.x, e.y) < 67600) {
+        hid = true;
+        break;
+      }
+    }
+    return hid ? palette(e.owner).body : null;
+  }
+  var GHOST_MATS = /* @__PURE__ */ new Map();
+  function ghostMat(col) {
+    let m = GHOST_MATS.get(col);
+    if (m) return m;
+    m = new THREE.MeshPhongMaterial({ color: 0, transparent: true, depthWrite: false, shininess: 0 });
+    GL.psiU || (GL.psiU = { value: 0 });
+    const gc = new THREE.Color(col), hsl = { h: 0, s: 0, l: 0 };
+    gc.getHSL(hsl), gc.setHSL(hsl.h, Math.max(hsl.s, 0.7), Math.min(0.62, Math.max(0.5, hsl.l)));
+    const cu = { value: gc.multiplyScalar(1.25) };
+    m.onBeforeCompile = (t) => {
+      t.uniforms.gCol = cu, t.uniforms.uPsiT = GL.psiU, t.fragmentShader = "uniform vec3 gCol;\nuniform float uPsiT;\n" + t.fragmentShader.replace("#include <tonemapping_fragment>", `{
+    vec3 vd = isOrthographic ? vec3(0.0, 0.0, 1.0) : normalize(vViewPosition);
+    float fr = pow(1.0 - abs(dot(normalize(normal), vd)), 1.6);
+    float sh = 0.5 + 0.5 * sin(uPsiT * 2.6 + (vViewPosition.x + vViewPosition.y) * 0.05);
+    gl_FragColor = vec4(gCol * (0.45 + 1.1 * fr) * (0.85 + 0.25 * sh), 0.16 + 0.5 * fr + 0.06 * sh);
+  }
+  #include <tonemapping_fragment>`);
+    }, m.customProgramCacheKey = () => "ghost";
+    return GHOST_MATS.set(col, m), m;
+  }
   function glPixelRatioCap() {
     if (MENU_CAM) return 0.7 * Math.min(1, window.devicePixelRatio || 1);
     return QUALITY >= 2 ? Math.min(3, window.devicePixelRatio || 1) : QUALITY >= 1 ? Math.min(1.5, window.devicePixelRatio || 1) : 1;
@@ -12151,6 +12201,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     let n = GLGEO.get(e);
     return n || (n = glMerge(t(), r), GLGEO.set(e, n)), n;
   }
+  var _ghost = null;
   var _mat = null;
   var _usc = 1;
   var _ux = 0;
@@ -12167,7 +12218,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       if (!a || a.count0 < r) {
         a && (GL.scene.remove(a), a.dispose());
         const o2 = Math.max(8, 1 << Math.ceil(Math.log2(Math.max(1, r))));
-        a = new THREE.InstancedMesh(n, e.wind && "emis" !== t2 && !FLOWB.includes(t2) ? fgWindMat(t2) : GL.mats[t2], o2), a.count0 = o2, a.castShadow = "emis" !== t2 && !e.noShadow, a.receiveShadow = "emis" !== t2 && !FLOWB.includes(t2), a.frustumCulled = false, GL.scene.add(a), e[t2] = a;
+        a = new THREE.InstancedMesh(n, e.ghost ? ghostMat(e.ghost) : e.wind && "emis" !== t2 && !FLOWB.includes(t2) ? fgWindMat(t2) : GL.mats[t2], o2), a.count0 = o2, a.castShadow = "emis" !== t2 && !e.noShadow, a.receiveShadow = "emis" !== t2 && !FLOWB.includes(t2) && !e.ghost, a.frustumCulled = false, GL.scene.add(a), e[t2] = a;
       }
       a.count = r;
       const o = e.list, s = _mat, sc = e.sc || 1;
@@ -13141,8 +13192,11 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     i.left = -s, i.right = s, i.top = s, i.bottom = -s, i.near = 1, i.far = 2600, i.updateProjectionMatrix(), fpsGfxShadow();
     updateLitPool(n, a, dayF);
     const l = [], c = (e2, t2, r2, n2, a2, o2, s2, i2, c2, rl, pt) => {
+      if (_ghost) {
+        c2 = c2 || glGeom(e2, t2, r2), e2 = e2 + "|G" + _ghost;
+      }
       let d2 = GL.groups.get(e2);
-      d2 && d2.touched || (d2 = d2 || { geo: c2 || glGeom(e2, t2, r2), solid: null, emis: null, list: [] }, d2.geo || (d2.geo = c2 || glGeom(e2, t2, r2)), d2.list.length = 0, d2.touched = 1, d2.noShadow = !!i2, d2.wind = WIND_KEYS.test(e2), GL.groups.set(e2, d2), l.push(e2)), _usc !== 1 && (n2 = _ux + (n2 - _ux) * _usc, a2 = _uy + (a2 - _uy) * _usc, o2 = _uz + (o2 - _uz) * _usc), d2.sc = _usc, d2.list.push(n2, a2, o2, s2, rl || 0, pt || 0);
+      d2 && d2.touched || (d2 = d2 || { geo: c2 || glGeom(e2, t2, r2), solid: null, emis: null, list: [] }, d2.geo || (d2.geo = c2 || glGeom(e2, t2, r2)), d2.list.length = 0, d2.touched = 1, d2.noShadow = !!i2 || !!_ghost, d2.ghost = _ghost, d2.wind = WIND_KEYS.test(e2), GL.groups.set(e2, d2), l.push(e2)), _usc !== 1 && (n2 = _ux + (n2 - _ux) * _usc, a2 = _uy + (a2 - _uy) * _usc, o2 = _uz + (o2 - _uz) * _usc), d2.sc = _usc, d2.list.push(n2, a2, o2, s2, rl || 0, pt || 0);
     };
     for (const e2 of GL.groups.values()) e2.touched = 0;
     const d = S.time, f = FPS.on ? 1700 : (CW + CH) / cam.z * 0.62 + 320;
@@ -13151,6 +13205,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
       if (FPS.on && FPS.u && FPS.u.inside === e2) continue;
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f + 220) continue;
       if (!seen(e2)) continue;
+      _ghost = ghostCol(e2);
       const live = 2 === visAt(e2.x, e2.y);
       const t2 = e2.owner < 0 ? "neutral" : S.players[e2.owner].fac, r2 = e2.owner < 0 ? { body: MAT.neutral, dark: "#6a6252", trim: "#aaa" } : palette(e2.owner), gy = e2.d.naval ? 3.8 : heightAt(e2.x, e2.y), n2 = (hasStagedBuild(e2.key) ? 0 : e2.rise >= 1 ? 0 : -(1 - e2.rise) * (32 * e2.size * 0.62 + 30)) + gy, conn = "wall" === e2.key || "gate" === e2.key ? wallNeighborMask(e2.tx, e2.ty, e2.owner) | ("gate" === e2.key ? gateNeighborBits(e2.tx, e2.ty, e2.owner) << 4 : 0) : 0, gateBucket = "gate" === e2.key ? Math.round(8 * (e2.gateT || 0)) : 0, riseBucket = hasStagedBuild(e2.key) ? Math.round(4 * Math.min(1, e2.rise)) : 4, mf = e2.capturedFac || t2, prod = "factory" === e2.key && S.players[e2.owner] && S.players[e2.owner].queues.veh && S.players[e2.owner].queues.veh.list.length ? S.players[e2.owner].queues.veh.list[0] + "@" + Math.min(4, Math.floor(5 * (S.players[e2.owner].queues.veh.prog || 0))) : null, doorBucket = "factory" === e2.key ? Math.round(10 * (e2.doorT || 0)) : 0, a2 = "B" + e2.key + ("hive" === e2.key || "super" === e2.key ? e2.deployed ? "D" : "U" : "gate" === e2.key ? "G" + gateBucket : hasStagedBuild(e2.key) ? "R" + riseBucket : "") + (conn ? "_c" + conn : "") + ("factory" === e2.key ? "|PU" + (prod || "-") + "|DR" + doorBucket : "") + "|" + mf + "|" + e2.owner;
       c(a2, () => BMODEL(e2.key, mf, "gate" === e2.key ? gateBucket / 8 : hasStagedBuild(e2.key) ? Math.min(1, e2.rise) : e2.deployed, conn, e2.rot || 0, prod, doorBucket / 10), r2, e2.x, e2.y, n2, e2.rot || 0);
@@ -13187,6 +13242,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
         c("BTt1" + ownKey, () => triGunHead(mf), r2, e2.x - off, e2.y, n2, live ? e2.tang || 0 : e2.frTang || 0), c("BTt2" + ownKey, () => triGunHead(mf), r2, e2.x + off, e2.y, n2, live ? e2.tang || 0 : e2.frTang || 0), c("BTt3" + ownKey, () => triAAHead(mf), r2, e2.x, e2.y, n2, live ? e2.tang2 || 0 : e2.frTang2 || 0);
       }
     }
+    _ghost = null;
     const hdS = fpsHDSet();
     for (const e2 of S.units) {
       if (e2.dead || e2.inside) continue;
@@ -13194,7 +13250,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
       if (hdS && hdS.has(e2)) continue;
       if (Math.abs(e2.x - cam.x) + Math.abs(e2.y - cam.y) > f) continue;
       if (!seen(e2)) continue;
-      _usc = FPS.on ? fpsUnitScale(e2) : 1, _ux = e2.x, _uy = e2.y, _uz = (e2.d.naval ? 0.8 : e2.d.swim ? unitGroundH(e2) : heightAt(e2.x, e2.y)) + (e2.d.fly ? e2.alt || 0 : 0);
+      _ghost = ghostCol(e2), _usc = FPS.on ? fpsUnitScale(e2) : 1, _ux = e2.x, _uy = e2.y, _uz = (e2.d.naval ? 0.8 : e2.d.swim ? unitGroundH(e2) : heightAt(e2.x, e2.y)) + (e2.d.fly ? e2.alt || 0 : 0);
       const hitFlash = e2.hitT > 0 && "inf" === e2.d.kind, t2 = hitFlash ? { body: "#ffffff", dark: "#ddb8b0", trim: "#ffffff" } : palette(e2.owner), r2 = unitFrame(e2), gy = (e2.d.naval ? 0.8 : unitGroundH(e2)) + (FPS.on && e2 === FPS.u ? 0 : unitBob(e2)), v3l = "ravager" === e2.key ? e2.cool <= 0 : void 0, dep = e2.deployed ? 1 : 0, turRise = dep && TURRET_RISE[e2.key] || 0;
       let gt, tt;
       const hb = hdBakeOk(e2) ? hdBakeGeo(e2, r2 & 15) : null;
@@ -13204,7 +13260,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
         hb2 && c("UB" + tk, () => UTURRET(e2.key, 0, { gunKey: e2.gunKey }).filter((q) => q.b), t2, e2.x - cx * 4.2 * rc, e2.y - sx * 4.2 * rc, tz, e2.tang, void 0, void 0, tr, tp);
       })(e2.key + (e2.gunKey ? "_" + e2.gunKey : "") + "|" + e2.owner + (dep ? "|D" : ""), e2.recoil || 0)), "miner" === e2.d.role && ((mo) => c("UA" + e2.key + "|" + e2.owner, mo[0], t2, e2.x + mo[1] * Math.cos(e2.ang), e2.y + mo[1] * Math.sin(e2.ang), gy + (e2.alt || 0), e2.augerSpin || 0))(MINE_TOOL[e2.key] || MINE_DEFAULT), ("chinook" === e2.key || "skyhauler" === e2.key) && (c("UR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x + 2 * Math.cos(e2.ang), e2.y + 2 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, e2.rotorSpin || 0), "chinook" === e2.key ? c("UTR" + e2.key + "|" + e2.owner, heliRotor, t2, e2.x - 28 * Math.cos(e2.ang), e2.y - 28 * Math.sin(e2.ang), gy + (e2.alt || 0) + 22, -(e2.rotorSpin || 0)) : c("UTRV" + e2.key + "|" + e2.owner, heliTailRotorV, t2, e2.x - 28 * Math.cos(e2.ang) - 2.2 * Math.sin(e2.ang), e2.y - 28 * Math.sin(e2.ang) + 2.2 * Math.cos(e2.ang), gy + (e2.alt || 0) + 16, e2.ang, void 0, void 0, 0, 1.4 * (+e2.rotorSpin || 0))), e2.d.vehSlots && e2.cargo && e2.cargo.length && ((cv) => cv && c("UV" + cv.key + "|" + cv.owner, () => UMODEL(cv.key, unitFrame(cv), {}), palette(cv.owner), e2.x, e2.y, gy + Math.max(2, (e2.alt || 0) - 22), e2.ang))(e2.cargo.find((cc) => "inf" !== cc.d.kind));
     }
-    _usc = 1;
+    _usc = 1, _ghost = null;
     const h = FPS.on ? 1500 : (CW + CH) / cam.z * 0.55 + 260;
     if (S.crates) for (const e2 of S.crates) (!FOG_ON || G.vis[idx(e2.x / 32 | 0, e2.y / 32 | 0)] > 0) && c("XCRATE", crateModel, TIBPAL, e2.x, e2.y, heightAt(e2.x, e2.y) + 1.2 + 1.2 * Math.sin(3 * S.time + e2.x), e2.r + 0.6 * S.time);
     const _fu = FPS.on && FPS.u && !FPS.thirdPerson ? FPS.u : null;
@@ -13260,7 +13316,7 @@ float wSD(vec2 wp){ vec2 fuv = vec2((wp.x / 32.0 + 0.5) / 93.0, (wp.y / 32.0 + 0
     }
     fpsGfxPost();
   }
-  Object.assign(window, { FLOWB, setMenuCam, trackMark, cornerBumpBase });
+  Object.assign(window, { FLOWB, ghostCol, setMenuCam, trackMark, cornerBumpBase });
   Object.assign(window, {
     glMerge,
     fogPatch,
