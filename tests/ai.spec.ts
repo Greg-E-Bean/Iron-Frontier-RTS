@@ -8,12 +8,12 @@ test("skirmish AI expands, builds an army, and its exposed functions run cleanly
 
   const start = await page.evaluate(() => {
     const w = window as any;
-    w.cfg.fac = "allied";
+    w.cfg.fac = "vanguard";
     w.cfg.map = "grand";
     w.cfg.fog = "on";
     w.cfg.slots = [
-      { fac: "soviet", team: 2, color: "def", spawn: 1, diff: "hard" },
-      { fac: "yuri", team: 3, color: "def", spawn: 2, diff: "normal" },
+      { fac: "legion", team: 2, color: "def", spawn: 1, diff: "hard" },
+      { fac: "syndicate", team: 3, color: "def", spawn: 2, diff: "normal" },
     ];
     w.S.running = false;
     w.startGame();

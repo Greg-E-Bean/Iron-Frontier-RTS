@@ -12,10 +12,10 @@ test("every non-random map generates a valid, playable start state", async ({ pa
     for (const m of w.MAPS) {
       if (m.k === "random") continue;
       try {
-        w.cfg.fac = "allied";
+        w.cfg.fac = "vanguard";
         w.cfg.map = m.k;
         w.cfg.fog = "off";
-        w.cfg.slots = [{ fac: "soviet", team: 2, color: "def", spawn: 1, diff: "normal" }];
+        w.cfg.slots = [{ fac: "legion", team: 2, color: "def", spawn: 1, diff: "normal" }];
         w.startGame();
         w.S.running = false;
         out[m.k] = {

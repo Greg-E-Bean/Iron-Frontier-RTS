@@ -8,13 +8,13 @@ test("a 4-player fogged skirmish survives 15 sim-minutes without crashing", asyn
 
   await page.evaluate(() => {
     const w = window as any;
-    w.cfg.fac = "allied";
+    w.cfg.fac = "vanguard";
     w.cfg.map = "grand";
     w.cfg.fog = "on";
     w.cfg.slots = [
-      { fac: "soviet", team: 2, color: "def", spawn: 1, diff: "normal" },
-      { fac: "yuri", team: 3, color: "def", spawn: 2, diff: "normal" },
-      { fac: "allied", team: 4, color: "def", spawn: 3, diff: "normal" },
+      { fac: "legion", team: 2, color: "def", spawn: 1, diff: "normal" },
+      { fac: "syndicate", team: 3, color: "def", spawn: 2, diff: "normal" },
+      { fac: "vanguard", team: 4, color: "def", spawn: 3, diff: "normal" },
     ];
     w.startGame();
   });

@@ -16,9 +16,9 @@ test("external GLTF/GLB asset loading falls back gracefully and converts correct
   //    PROPMODEL still return a valid, non-empty procedural parts array.
   const r1 = await page.evaluate(() => {
     const w = window as any;
-    w.registerModelAsset("gi", "https://example.invalid/does-not-exist.glb");
-    const before = typeof w.MODEL_ASSETS.gi;
-    const u = w.UMODEL("gi", 0);
+    w.registerModelAsset("rifleman", "https://example.invalid/does-not-exist.glb");
+    const before = typeof w.MODEL_ASSETS.rifleman;
+    const u = w.UMODEL("rifleman", 0);
     const b = w.BMODEL("conyard", 0, 0, "def");
     const p = w.PROPMODEL("tree");
     const isParts = (x: any) => Array.isArray(x) && x.length > 0 && x[0] && Array.isArray(x[0].m);
@@ -33,9 +33,9 @@ test("external GLTF/GLB asset loading falls back gracefully and converts correct
   const r1b = await page.evaluate(() => {
     const w = window as any;
     const isParts = (x: any) => Array.isArray(x) && x.length > 0 && x[0] && Array.isArray(x[0].m);
-    const u2 = w.UMODEL("gi", 0); // should still fall back to procedural
-    w.unregisterModelAsset("gi");
-    return { stillFallsBack: isParts(u2), unregistered: !w.MODEL_ASSETS.gi };
+    const u2 = w.UMODEL("rifleman", 0); // should still fall back to procedural
+    w.unregisterModelAsset("rifleman");
+    return { stillFallsBack: isParts(u2), unregistered: !w.MODEL_ASSETS.rifleman };
   });
   expect(r1b.stillFallsBack).toBe(true);
   expect(r1b.unregistered).toBe(true);

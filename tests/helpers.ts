@@ -23,10 +23,10 @@ export interface SkirmishOptions {
  */
 export async function startSkirmish(page: Page, opts: SkirmishOptions = {}) {
   const {
-    fac = "allied",
+    fac = "vanguard",
     map = "basin",
     fog = "off",
-    slots = [{ fac: "soviet", team: 2, color: "def", spawn: 1, diff: "normal" }],
+    slots = [{ fac: "legion", team: 2, color: "def", spawn: 1, diff: "normal" }],
   } = opts;
   await page.evaluate(
     ({ fac, map, fog, slots }) => {
