@@ -1056,7 +1056,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     } catch (e) {
     }
   })();
-  var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { vanguard: "Command Spire", legion: "Fortress HQ", syndicate: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { vanguard: "Solar Array", legion: "Thermal Plant", syndicate: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { vanguard: "Ore Processor", legion: "Smelting Works", syndicate: "Digester", neutral: "Ore Processor" } }, orerig: { key: "orerig", size: 3, hp: 900, cost: 1200, power: -20, build: 12, tab: "bld", prereq: ["power"], noAnchor: true, drillRig: true, names: { vanguard: "Ore Pump Station", legion: "Deep Bore Rig", syndicate: "Feeder Maw", neutral: "Ore Rig" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { vanguard: "Spawning Hive", legion: "Spawning Hive", syndicate: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { vanguard: "Training Hall", legion: "Muster Bunker", syndicate: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { vanguard: "Assembly Bay", legion: "Foundry", syndicate: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { vanguard: "Research Spire", legion: "War Institute", syndicate: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { vanguard: "Auto Turret", legion: "Gun Bunker", syndicate: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { vanguard: "Airstrip", legion: "Landing Pad", syndicate: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { vanguard: "Shipwright", legion: "Drydock", syndicate: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { vanguard: "Interceptor Battery", legion: "Flak Cannon", syndicate: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 1500, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { vanguard: "Sentinel Line", legion: "Iron Rampart", syndicate: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 280, dmg: 65, rof: 0.85, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true, aaBonus: 2.4 } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Outpost", legion: "Outpost", syndicate: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Storehouse", legion: "Storehouse", syndicate: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { vanguard: "High-Rise", legion: "High-Rise", syndicate: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Chapel", legion: "Chapel", syndicate: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { vanguard: "Tenement", legion: "Tenement", syndicate: "Tenement", neutral: "Tenement" } }, civ6: { key: "civ6", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Market Row", legion: "Market Row", syndicate: "Market Row", neutral: "Market Row" } }, civ7: { key: "civ7", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Workshop", legion: "Workshop", syndicate: "Workshop", neutral: "Workshop" } }, civ8: { key: "civ8", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Tavern", legion: "Tavern", syndicate: "Tavern", neutral: "Tavern" } }, civ9: { key: "civ9", size: 3, hp: 1100, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { vanguard: "Terrace Flats", legion: "Terrace Flats", syndicate: "Terrace Flats", neutral: "Terrace Flats" } }, bridgehut: { key: "bridgehut", size: 1, hp: 220, cost: 0, power: 0, build: 1, tab: null, prereq: [], noAnchor: true, indestructible: true, names: { vanguard: "Bridge Watch", legion: "Bridge Watch", syndicate: "Bridge Watch", neutral: "Bridge Watch" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Garrison Cannon", legion: "Garrison Cannon", syndicate: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { vanguard: "Ore Vault", legion: "Stockpile", syndicate: "Nutrient Sac", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { vanguard: "Service Bay", legion: "Field Works", syndicate: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { vanguard: "Photon Lance", legion: "Missile Silo", syndicate: "Psychic Amplifier", neutral: "Photon Lance" } }, support: { key: "support", size: 2, hp: 1e3, cost: 2200, power: -100, build: 20, tab: "bld", prereq: ["lab"], limit: 1, names: { vanguard: "Veil Generator", legion: "Aegis Field", syndicate: "Gene Crucible", neutral: "Veil Generator" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { vanguard: "Photon Tower", legion: "Arc Tower", syndicate: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { vanguard: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "photon" }, legion: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "arcbolt" }, syndicate: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { vanguard: "Barrier Wall", legion: "Iron Wall", syndicate: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { vanguard: "Checkpoint Gate", legion: "Blast Gate", syndicate: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Oil Derrick", legion: "Oil Derrick", syndicate: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Paradrop Hangar", legion: "Paradrop Hangar", syndicate: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "EMP Spire", legion: "EMP Spire", syndicate: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Rogue Den", legion: "Rogue Den", syndicate: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 } };
+  var BLD = { conyard: { key: "conyard", size: 3, hp: 1500, cost: 2500, power: 0, build: 22, tab: "bld", prereq: [], names: { vanguard: "Command Spire", legion: "Fortress HQ", syndicate: "Hive Core", neutral: "Command Spire" } }, power: { key: "power", size: 2, hp: 750, cost: 600, power: 150, build: 7, tab: "bld", prereq: ["conyard"], names: { vanguard: "Solar Array", legion: "Thermal Plant", syndicate: "Bio Reactor", neutral: "Solar Array" } }, refinery: { key: "refinery", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 14, tab: "bld", prereq: ["power"], names: { vanguard: "Ore Processor", legion: "Smelting Works", syndicate: "Digester", neutral: "Ore Processor" } }, orerig: { key: "orerig", size: 3, hp: 900, cost: 1200, power: -20, build: 12, tab: "bld", prereq: ["power"], noAnchor: true, drillRig: true, names: { vanguard: "Ore Pump Station", legion: "Deep Bore Rig", syndicate: "Feeder Maw", neutral: "Ore Rig" } }, hive: { key: "hive", size: 3, hp: 1100, cost: 2200, power: -30, build: 16, tab: "bld", prereq: ["power"], names: { vanguard: "Spawning Hive", legion: "Spawning Hive", syndicate: "Spawning Hive", neutral: "Spawning Hive" } }, barracks: { key: "barracks", size: 2, hp: 800, cost: 500, power: -20, build: 6, tab: "bld", prereq: ["power"], names: { vanguard: "Training Hall", legion: "Muster Bunker", syndicate: "Spawning Pit", neutral: "Training Hall" } }, factory: { key: "factory", size: 3, hp: 1e3, cost: 2e3, power: -25, build: 15, tab: "bld", prereq: ["refinery"], names: { vanguard: "Assembly Bay", legion: "Foundry", syndicate: "Fabricator", neutral: "Assembly Bay" } }, lab: { key: "lab", size: 3, hp: 750, cost: 2e3, power: -50, build: 16, tab: "bld", prereq: ["factory"], names: { vanguard: "Research Spire", legion: "War Institute", syndicate: "Gene Vault", neutral: "Research Spire" } }, def1: { key: "def1", size: 1, hp: 400, cost: 500, power: -20, build: 5, tab: "bld", prereq: ["barracks"], names: { vanguard: "Auto Turret", legion: "Gun Bunker", syndicate: "Spitter Nest", neutral: "Auto Turret" }, weapon: { range: 170, dmg: 18, rof: 0.45, vsInf: 1.5, vsVeh: 0.5, vsBldg: 0.3, proj: "bullet" } }, airfield: { key: "airfield", size: 3, hp: 1e3, cost: 1e3, power: -30, build: 10, tab: "bld", prereq: ["factory"], names: { vanguard: "Airstrip", legion: "Landing Pad", syndicate: "Launch Pod", neutral: "Airstrip" } }, navalyard: { key: "navalyard", size: 3, hp: 900, cost: 1800, power: -20, build: 14, tab: "bld", prereq: ["refinery"], naval: true, names: { vanguard: "Shipwright", legion: "Drydock", syndicate: "Larval Wharf", neutral: "Shipwright" } }, aa: { key: "aa", size: 1, hp: 500, cost: 1e3, power: -30, build: 7, tab: "bld", prereq: ["factory"], names: { vanguard: "Interceptor Battery", legion: "Flak Cannon", syndicate: "Needle Spire", neutral: "Interceptor Battery" }, weapon: { range: 250, dmg: 60, rof: 1.1, vsInf: 0.4, vsVeh: 0.8, vsBldg: 0.2, proj: "aamissile", aa: true, airOnly: false, aaBonus: 2.2 } }, triturret: { key: "triturret", size: 2, hp: 1500, cost: 2600, power: -90, build: 12, tab: null, prereq: ["lab", "aa"], names: { vanguard: "Sentinel Line", legion: "Iron Rampart", syndicate: "Spine Ward", neutral: "Bastion Line" }, weapon: { range: 220, dmg: 70, rof: 0.9, vsInf: 1.3, vsVeh: 1, vsBldg: 0.5, proj: "shell" }, weapon2: { range: 280, dmg: 65, rof: 0.85, vsInf: 0.3, vsVeh: 0.6, vsBldg: 0.15, proj: "aamissile", aa: true, airOnly: true, aaBonus: 2.4 } }, civ1: { key: "civ1", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Outpost", legion: "Outpost", syndicate: "Outpost", neutral: "Outpost" } }, civ2: { key: "civ2", size: 2, hp: 750, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Storehouse", legion: "Storehouse", syndicate: "Storehouse", neutral: "Storehouse" } }, civ3: { key: "civ3", size: 3, hp: 1e3, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { vanguard: "High-Rise", legion: "High-Rise", syndicate: "High-Rise", neutral: "High-Rise" } }, civ4: { key: "civ4", size: 2, hp: 650, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Chapel", legion: "Chapel", syndicate: "Chapel", neutral: "Chapel" } }, civ5: { key: "civ5", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { vanguard: "Tenement", legion: "Tenement", syndicate: "Tenement", neutral: "Tenement" } }, civ6: { key: "civ6", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Market Row", legion: "Market Row", syndicate: "Market Row", neutral: "Market Row" } }, civ7: { key: "civ7", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Workshop", legion: "Workshop", syndicate: "Workshop", neutral: "Workshop" } }, civ8: { key: "civ8", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, names: { vanguard: "Tavern", legion: "Tavern", syndicate: "Tavern", neutral: "Tavern" } }, civ9: { key: "civ9", size: 3, hp: 1100, cost: 0, power: 0, build: 1, tab: "none", prereq: [], civ: true, roof: true, names: { vanguard: "Terrace Flats", legion: "Terrace Flats", syndicate: "Terrace Flats", neutral: "Terrace Flats" } }, bridgehut: { key: "bridgehut", size: 1, hp: 220, cost: 0, power: 0, build: 1, tab: null, prereq: [], noAnchor: true, indestructible: true, names: { vanguard: "Bridge Watch", legion: "Bridge Watch", syndicate: "Bridge Watch", neutral: "Bridge Watch" } }, cannon: { key: "cannon", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Garrison Cannon", legion: "Garrison Cannon", syndicate: "Garrison Cannon", neutral: "Garrison Cannon" }, noAnchor: true, weapon: { range: 200, dmg: 24, rof: 0.55, vsInf: 1, vsVeh: 1.1, vsBldg: 0.3, proj: "shell" } }, silo: { key: "silo", size: 2, hp: 700, cost: 800, power: -10, build: 6, tab: "bld", prereq: ["refinery"], names: { vanguard: "Ore Vault", legion: "Stockpile", syndicate: "Nutrient Sac", neutral: "Ore Vault" } }, repair: { key: "repair", size: 2, hp: 900, cost: 1200, power: -30, build: 9, tab: "bld", prereq: ["factory"], names: { vanguard: "Service Bay", legion: "Field Works", syndicate: "Regrowth Pool", neutral: "Service Bay" } }, super: { key: "super", size: 3, hp: 1200, cost: 5e3, power: -200, build: 40, tab: "bld", prereq: ["lab"], charge: 270, limit: 1, names: { vanguard: "Photon Lance", legion: "Missile Silo", syndicate: "Psychic Amplifier", neutral: "Photon Lance" } }, support: { key: "support", size: 2, hp: 1e3, cost: 2200, power: -100, build: 20, tab: "bld", prereq: ["lab"], limit: 1, names: { vanguard: "Veil Generator", legion: "Aegis Field", syndicate: "Gene Crucible", neutral: "Veil Generator" } }, def2: { key: "def2", size: 1, hp: 600, cost: 1500, power: -75, build: 9, tab: "bld", prereq: ["lab"], names: { vanguard: "Photon Tower", legion: "Arc Tower", syndicate: "Psionic Pylon", neutral: "Photon Tower" }, weapon: { range: 240, dmg: 110, rof: 2.2, vsInf: 1.2, vsVeh: 1.2, vsBldg: 0.8, proj: "beam" }, weapons: { vanguard: { range: 250, dmg: 120, rof: 2.4, vsInf: 1.2, vsVeh: 1.1, vsBldg: 0.9, proj: "photon" }, legion: { range: 210, dmg: 130, rof: 2, vsInf: 1.6, vsVeh: 1.2, vsBldg: 0.5, proj: "arcbolt" }, syndicate: { range: 215, dmg: 110, rof: 2.2, vsInf: 1.8, vsVeh: 0.6, vsBldg: 0.2, proj: "psi" } } }, wall: { key: "wall", size: 1, hp: 300, cost: 50, power: 0, build: 2, tab: "def", prereq: ["barracks"], names: { vanguard: "Barrier Wall", legion: "Iron Wall", syndicate: "Bone Palisade", neutral: "Barrier Wall" }, noAnchor: true }, gate: { key: "gate", size: 1, hp: 350, cost: 150, power: -5, build: 3, tab: "def", prereq: ["barracks"], names: { vanguard: "Checkpoint Gate", legion: "Blast Gate", syndicate: "Maw Gate", neutral: "Checkpoint Gate" }, noAnchor: true }, oilDerek: { key: "oilDerek", size: 2, hp: 500, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Oil Derrick", legion: "Oil Derrick", syndicate: "Oil Derrick", neutral: "Oil Derrick" }, noAnchor: true, econIncome: 14 }, paradropHangar: { key: "paradropHangar", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Paradrop Hangar", legion: "Paradrop Hangar", syndicate: "Paradrop Hangar", neutral: "Paradrop Hangar" }, noAnchor: true }, empTower: { key: "empTower", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "EMP Spire", legion: "EMP Spire", syndicate: "EMP Spire", neutral: "EMP Spire" }, noAnchor: true }, rogueDen: { key: "rogueDen", size: 2, hp: 700, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Rogue Den", legion: "Rogue Den", syndicate: "Rogue Den", neutral: "Rogue Den" }, noAnchor: true, spawnRate: 22 }, hospital: { key: "hospital", size: 2, hp: 800, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Field Hospital", legion: "Field Hospital", syndicate: "Field Hospital", neutral: "Field Hospital" }, noAnchor: true, tech: true }, machineShop: { key: "machineShop", size: 2, hp: 900, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Machine Shop", legion: "Machine Shop", syndicate: "Machine Shop", neutral: "Machine Shop" }, noAnchor: true, tech: true }, techPower: { key: "techPower", size: 2, hp: 900, cost: 0, power: 200, build: 1, tab: null, prereq: [], names: { vanguard: "Power Station", legion: "Power Station", syndicate: "Power Station", neutral: "Power Station" }, noAnchor: true, tech: true }, commsRelay: { key: "commsRelay", size: 2, hp: 600, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Comms Relay", legion: "Comms Relay", syndicate: "Comms Relay", neutral: "Comms Relay" }, noAnchor: true, tech: true, sight: 700 }, secretLab: { key: "secretLab", size: 2, hp: 1e3, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Secret Lab", legion: "Secret Lab", syndicate: "Secret Lab", neutral: "Secret Lab" }, noAnchor: true, tech: true }, fuelDepot: { key: "fuelDepot", size: 2, hp: 350, cost: 0, power: 0, build: 1, tab: null, prereq: [], names: { vanguard: "Fuel Depot", legion: "Fuel Depot", syndicate: "Fuel Depot", neutral: "Fuel Depot" }, noAnchor: true, tech: true, noCapture: true } };
   function U(e) {
     return Object.assign({ kind: "veh", armor: "veh", radius: 11, speed: 44, sight: 260, vsInf: 1, vsVeh: 1, vsBldg: 1, proj: "shell", rof: 1, dmg: 10, range: 130, from: "factory", tab: "veh" }, e);
   }
@@ -1208,6 +1208,12 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     paradropHangar: "Neutral airstrip hangar. Capture it with a Technician to unlock the Paradrop power.",
     empTower: "Neutral EMP spire. Capture it with a Technician to unlock the EMP Burst power, which shuts down vehicles and defences.",
     rogueDen: "Neutral mercenary den. Capture it with a Technician and it sends you free Rogue fighters over time.",
+    hospital: "Neutral field hospital. Capture it with a Technician and your infantry nearby heal quickly.",
+    machineShop: "Neutral machine shop. Capture it with a Technician and all your vehicles and aircraft slowly repair themselves, anywhere on the map.",
+    techPower: "Neutral power station. Capture it with a Technician for 200 free power.",
+    commsRelay: "Neutral comms relay. Capture it with a Technician to reveal a wide area around it and bring your radar online even without your own radar building.",
+    secretLab: "Neutral research lab. Capture it with a Technician to unlock a prototype from another faction's arsenal, trained at your own barracks or factory.",
+    fuelDepot: "Neutral fuel depot. Can't be captured, but shoot it and it explodes, wrecking everything nearby. Great for ambushes.",
     bridgehut: "Bridge control hut. Capture it with a Technician and it rebuilds destroyed bridges nearby.",
     cannon: "Heavy gun emplacement. Capture it with a Technician to turn it on your enemies.",
     super: "Your faction's superweapon \u2014 charges over time, then unleashes a devastating strike anywhere on the map.",
@@ -2667,8 +2673,57 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       }), S.sel = S.sel.filter((t2) => t2 !== e);
     }
   }
+  var LAB_POOL = ["phaser", "arctrooper", "blighter", "photon", "colossus", "shard", "longbow", "sledge", "rift"];
+  function labUnitFor(b, fac) {
+    const F = FACTIONS[fac];
+    if (!F) return null;
+    for (let i = 0; i < LAB_POOL.length; i++) {
+      const k = LAB_POOL[((b.labIdx || 0) + i) % LAB_POOL.length];
+      if (!F.units.includes(k)) return k;
+    }
+    return null;
+  }
+  function labGrants(pid, k) {
+    const p = S.players[pid];
+    return !!p && S.blds.some((b) => b.owner === pid && !b.dead && "secretLab" === b.key && labUnitFor(b, p.fac) === k);
+  }
+  function tickTechBld(e, t) {
+    if (e.owner === NEUTRAL || !S.players[e.owner]) return;
+    const st = t * S.speed;
+    if ("hospital" === e.key) {
+      e.healFx = (e.healFx || 0) - t;
+      for (const u of S.units) if (!u.dead && !u.inside && u.owner === e.owner && "inf" === u.d.kind && u.hp < u.maxhp && dist2(u.x, u.y, e.x, e.y) < 44100) {
+        u.hp = Math.min(u.maxhp, u.hp + 0.08 * u.maxhp * st);
+        e.healFx <= 0 && 2 === visAt(u.x, u.y) && S.fx.push({ kind: "spark", x: u.x, y: u.y, z: 12, s: 0.5, c: "#7dff8a", t: 0, life: 0.5 });
+      }
+      e.healFx <= 0 && (e.healFx = 0.6);
+    } else if ("machineShop" === e.key) {
+      for (const u of S.units) !u.dead && u.owner === e.owner && "inf" !== u.d.kind && u.hp < u.maxhp && (u.hp = Math.min(u.maxhp, u.hp + 6e-3 * u.maxhp * st));
+    }
+  }
+  function fuelBlast(e) {
+    const R = 150;
+    boom(e.x, e.y, 3.2, "#ffb347"), boom(e.x + 18, e.y - 10, 2.2, "#ff7a2a", 0.12), boom(e.x - 16, e.y + 12, 2.4, "#ffd27a", 0.24);
+    for (let i = 0; i < 10; i++) S.fx.push({ kind: "smoke", x: e.x + rnd(-40, 40), y: e.y + rnd(-40, 40), z: 10 + rnd(0, 30), s: 1.4 + Math.random(), c: "#3a342e", t: 0, life: 2.4 + Math.random() });
+    for (const u of S.units) {
+      if (u.dead || u.inside) continue;
+      const d = dist(u.x, u.y, e.x, e.y);
+      d < R && damage(u, (1 - d / R * 0.6) * 420, NEUTRAL, null);
+    }
+    for (const b of S.blds) {
+      if (b === e || b.dead) continue;
+      const d = dist(b.x, b.y, e.x, e.y);
+      d < R + 16 * b.size && damage(b, (1 - Math.min(1, d / (R + 16 * b.size)) * 0.6) * 380, NEUTRAL, null);
+    }
+    try {
+      sfx("cannon");
+    } catch (x) {
+    }
+  }
   function killBld(e) {
     if (!e.dead) {
+      "fuelDepot" === e.key && !e.blasted && (e.blasted = 1, fuelBlast(e));
+      if (e.dead) return;
       if (S.bldById.delete(e.id), e.dead = true, e.crumbleDur = 0.55 + 0.22 * e.size, e.crumbleT = e.crumbleDur, e.garrison) {
         for (const t of e.garrison) t.dead || (t.inside = null, killUnit(t, null));
         e.garrison = [];
@@ -2750,11 +2805,13 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (0 === e.id && "function" == typeof techAllowed && !techAllowed(t, false)) return false;
     if (FACTIONS[e.f.key].units.includes(t) || t === e.f.miner) {
       if (!hasBld(e.id, r.from)) return false;
+    } else if (labGrants(e.id, t)) {
+      if (!hasBld(e.id, r.from)) return false;
     } else {
       const ff = unitFacOwner(t);
       if (!ff || !hasBld(e.id, r.from, ff)) return false;
     }
-    if (r.req && !hasBld(e.id, r.req)) return false;
+    if (r.req && !hasBld(e.id, r.req) && !labGrants(e.id, t)) return false;
     if (r.limit) {
       if (S.units.filter((r2) => r2.owner === e.id && !r2.dead && r2.key === t).length + qCount(e, r.tab, t) - (inProgress ? 1 : 0) >= r.limit) return false;
     }
@@ -2792,6 +2849,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if ("bld" === n || "def" === n) return hasActiveBld(e.id, "conyard");
     const r = UNITS[o];
     if (FACTIONS[e.f.key].units.includes(o) || o === e.f.miner) return hasActiveBld(e.id, r.from);
+    if (labGrants(e.id, o)) return hasActiveBld(e.id, r.from);
     const ff = unitFacOwner(o);
     return !!ff && hasActiveBld(e.id, r.from, ff);
   }
@@ -2834,7 +2892,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   function spawnUnit(e, t) {
-    const r = UNITS[t], own = FACTIONS[e.f.key].units.includes(t), ff = own ? null : unitFacOwner(t), n = S.blds.filter((b) => b.owner === e.id && !b.dead && b.key === r.from && (own || b.capturedFac === ff));
+    const r = UNITS[t], own = FACTIONS[e.f.key].units.includes(t), ff = own ? null : unitFacOwner(t), lab = !own && labGrants(e.id, t), n = S.blds.filter((b) => b.owner === e.id && !b.dead && b.key === r.from && (own || b.capturedFac === ff || lab && !b.capturedFac));
     if (!n.length) return;
     const pid = e.primary && e.primary[r.from], a = n.find((b) => b.id === pid) || n[Math.floor(Math.random() * n.length)];
     let o = a.x, s = a.y + 32 * a.size / 2 + 16;
@@ -3757,7 +3815,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   var fogT = 0;
   var FOG_HZ = 1 / 7;
   function sightOf(e) {
-    return "b" === e.e ? 150 + 34 * e.size : (e.d.sight || 260) * (e.d.fly ? 1.25 : 1) * (!e.d.fly && (e.lvl || G.elevOverride[tileOfU(e)] >= PLAT_MIN) ? 1.3 : 1);
+    return "b" === e.e ? e.d.sight && e.owner !== NEUTRAL ? e.d.sight : 150 + 34 * e.size : (e.d.sight || 260) * (e.d.fly ? 1.25 : 1) * (!e.d.fly && (e.lvl || G.elevOverride[tileOfU(e)] >= PLAT_MIN) ? 1.3 : 1);
   }
   function updateFog(e, t) {
     if (!FOG_ON) return;
@@ -3868,6 +3926,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     if ("bridgehut" === e.key) return void tickBridgeHut(e, t);
     if (e.d.civ) return void tickGarrison(e, t);
+    if (e.d.tech) return void tickTechBld(e, t);
     if ("oilDerek" === e.key) return void (e.owner !== NEUTRAL && (S.players[e.owner].credits += (e.d.econIncome || 14) * t * S.speed));
     if ("rogueDen" === e.key) return void tickRogueDen(e, t);
     if ("repair" === e.key) return void tickRepairBay(e, t);
@@ -3937,6 +3996,11 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
   }
   Object.assign(window, {
+    labUnitFor,
+    labGrants,
+    LAB_POOL,
+    tickTechBld,
+    fuelBlast,
     dressRoad,
     buildPendingBridges,
     buildTowns,
@@ -4271,7 +4335,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     if (as < aiCap(e) && !e.queues.inf && hasBld(e.id, "barracks") && e.credits > 500 + rsv) {
       let t2 = o.base;
       const r2 = Math.random();
-      r2 < 0.34 && canBuildUnit(e, o.anti) ? t2 = o.anti : r2 < 0.48 && o.hero && canBuildUnit(e, o.hero) ? t2 = o.hero : r2 < 0.7 && (t2 = aiPickUnit(e, "inf") || o.base), startBuild(e, "inf", t2, t2 === o.base ? 2 : 1);
+      r2 < 0.34 && canBuildUnit(e, o.anti) ? t2 = o.anti : r2 < 0.48 && o.hero && canBuildUnit(e, o.hero) ? t2 = o.hero : r2 < 0.7 && (t2 = aiPickUnit(e, "inf") || o.base), Math.random() < 0.3 && canBuildUnit(e, "engineer") && !S.units.some((u) => u.owner === e.id && !u.dead && "engineer" === u.key) && S.blds.some((b) => !b.dead && b.owner === NEUTRAL && !b.d.civ && !b.d.noCapture && "bridgehut" !== b.key) && (t2 = "engineer"), startBuild(e, "inf", t2, t2 === o.base ? 2 : 1);
     }
     if (as < aiCap(e) && !e.queues.air && hasBld(e.id, "airfield") && e.credits > 1600 + rsv && o.air && canBuildUnit(e, o.air)) {
       S.units.filter((t2) => t2.owner === e.id && !t2.dead && t2.d.fly).length < 2 + Math.floor(e.ai.wave / 2) && startBuild(e, "air", o.air);
@@ -4282,6 +4346,19 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     }
     if (e.ai.gt = (e.ai.gt || 0) - r.tick, e.ai.gt <= 0) {
       e.ai.gt = 14;
+      {
+        const bc = aiBaseCenter(e), engs = S.units.filter((u) => u.owner === e.id && !u.dead && "engineer" === u.key && "idle" === u.order);
+        for (const u of engs) {
+          let best = null, bd = 1e12;
+          for (const b of S.blds) {
+            if (b.dead || b.owner !== NEUTRAL || b.d.civ || b.d.noCapture || "bridgehut" === b.key) continue;
+            if (S.units.some((x) => x !== u && !x.dead && x.owner === e.id && "capture" === x.order && x.target === b)) continue;
+            const d2 = dist2(b.x, b.y, bc.x, bc.y) + 0.5 * dist2(b.x, b.y, u.x, u.y);
+            d2 < bd && d2 < 4e6 && (bd = d2, best = b);
+          }
+          best && (u.order = "capture", u.target = best, u.path = null);
+        }
+      }
       const t2 = aiBaseCenter(e), r2 = S.blds.find((e2) => !e2.dead && e2.d.civ && e2.owner === NEUTRAL && dist2(e2.x, e2.y, t2.x, t2.y) < 495616);
       if (r2) {
         S.units.filter((t3) => t3.owner === e.id && !t3.dead && t3.d.garrison && "idle" === t3.order).slice(0, 2).forEach((e2) => {
@@ -8540,7 +8617,100 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     n.push(P_(CYL(0.2, 9, 5), -17, -12, l + 10, "darkmetal")), n.push(P_(BOXM(0.2, 4, 2.4, 0.05), -17, -10, l + 16, "black", { a: { orbit: 2, amp: 0.3, pvx: -17, pvy: -12 } }));
     return n;
   }
-  var CIVX = { civ7: workshopModel, civ9: terraceModel, bridgehut: bridgeHutModel, oilDerek: oilDerrickModel, paradropHangar: paraHangarModel, empTower: empSpireModel, rogueDen: rogueDenModel };
+  function hospitalModel(r, l) {
+    const n = [];
+    n.push(P_(BOXM(30, 20, 14, 0.4), -4, -4, l, "white"));
+    for (const z of [3.5, 9]) n.push(P_(BOXM(30.4, 20.4, 2.2, 0.1), -4, -4, l + z, "glassdark"));
+    n.push(P_(BOXM(30.6, 20.6, 1.2, 0.1), -4, -4, l + 12.4, "#b0302a"));
+    n.push(P_(BOXM(20, 14, 8, 0.4), -6, -6, l + 14, "white")), n.push(P_(BOXM(20.4, 14.4, 2, 0.1), -6, -6, l + 17, "glassdark"));
+    n.push(P_(BOXM(11, 3, 0.7, 0.1), -6, -6, l + 22, "#d03a32")), n.push(P_(BOXM(3, 11, 0.7, 0.1), -6, -6, l + 22, "#d03a32"));
+    n.push(P_(BOXM(12, 5, 0.8, 0.2), -4, 8.5, l + 7, "white"));
+    for (const x of [-9, 1]) n.push(P_(CYL(0.4, 7, 6), x, 10.5, l, "steel"));
+    n.push(P_(BOXM(6, 0.4, 5.5, 0.1), -4, 6.2, l, "glass", { e: 1 }));
+    n.push(P_(CYL(8, 0.6, 20), 18, 12, l, "concrete2")), n.push(P_(CYL(7.2, 0.2, 20), 18, 12, l + 0.6, "#c8cdd2"));
+    n.push(P_(BOXM(1, 6, 0.2, 0.05), 16, 12, l + 0.8, "#2a6ad8")), n.push(P_(BOXM(1, 6, 0.2, 0.05), 20, 12, l + 0.8, "#2a6ad8")), n.push(P_(BOXM(4, 1, 0.2, 0.05), 18, 12, l + 0.8, "#2a6ad8"));
+    n.push(P_(CYL(0.7, 1.2, 8), 5, -11, l + 22, "red", { e: 1, a: { bob: 4, ba: 0.15 } }));
+    n.push(P_(BOXM(9, 4.4, 4, 0.6), -20, 13, l, "white")), n.push(P_(BOXM(9.2, 4.6, 0.8, 0.1), -20, 13, l + 2, "#b0302a")), n.push(P_(BOXM(3, 4.2, 2, 0.3), -15, 13, l + 4, "glassdark"));
+    for (const x of [-23, -17]) for (const y of [11, 15]) n.push(P_(CYL(1, 0.8, 8), x, y, l + 0.2, "rubber", { tx: PI2 }));
+    crate(n, 18, -16, l, 5, "white", 0.3);
+    return n;
+  }
+  function machineShopModel(r, l) {
+    const n = [];
+    n.push(P_(BOXM(34, 22, 13, 0.4), -4, -6, l, "#6b6f74"));
+    for (let k = 0; k < 7; k++) n.push(P_(BOXM(0.3, 22.2, 13, 0.05), -20 + 5.4 * k, -6, l, "darkmetal"));
+    n.push(P_(BOXM(35, 23, 1.2, 0.2), -4, -6, l + 13, "rust")), n.push(P_(BOXM(35, 12, 3.2, 0.3), -4, -6, l + 14, "rust", { tx: 0 }));
+    n.push(P_(BOXM(16, 0.4, 10, 0.1), -4, 5.3, l, "black"));
+    hazard(n, -4, 5.8, l + 0.2, 18, 0);
+    n.push(P_(BOXM(10, 6, 3, 0.4), -4, 0, l + 1.2, "olive"));
+    for (const x of [-8, 0]) n.push(P_(CYL(1.6, 1, 10), x, 3.2, l + 1.6, "rubber", { tx: PI2 }));
+    for (const y of [-14, 10]) n.push(P_(CYL(0.7, 19, 8), 18, y, l, "gold"));
+    n.push(P_(BOXM(1.4, 26, 1.4, 0.1), 18, -2, l + 18.5, "gold"));
+    n.push(P_(BOXM(3, 3, 2, 0.2), 18, -4, l + 16.5, "darkmetal", { a: { patrol: 0.12, pw: 0, ph: 0 } })), n.push(P_(CYL(0.15, 8, 4), 18, -4, l + 8.5, "steel"));
+    n.push(P_(BOXM(6, 5, 4, 0.4), 18, -4, l + 0.1, "darkmetal"));
+    for (let k = 0; k < 3; k++) n.push(P_(CYL(2.4, 1.2, 12), -22, 13, l + 1.2 * k, "rubber"));
+    for (let k = 0; k < 3; k++) barrel(n, -14 + 3 * k, 12, l);
+    n.push(P_(CONE(1, 0.1, 1.6, 6), -1, 1, l + 5, "lightY", { e: 1, a: { bob: 9, ba: 0.4 } }));
+    return n;
+  }
+  function techPowerModel(r, l) {
+    const n = [];
+    n.push(P_(BOXM(28, 13, 11, 0.4), -2, 10, l, "concrete")), n.push(P_(BOXM(28.4, 13.4, 1.6, 0.1), -2, 10, l + 8, "glassdark")), n.push(P_(BOXM(29, 14, 1, 0.2), -2, 10, l + 11, "steel"));
+    for (const x of [-14, 8]) {
+      n.push(P_(CONE(9, 6.6, 11, 20), x, -12, l, "concrete2")), n.push(P_(CONE(6.6, 7.6, 8, 20), x, -12, l + 11, "concrete2")), n.push(P_(CYL(7.7, 0.8, 20), x, -12, l + 19, "concrete")), n.push(P_(CYL(6.8, 0.3, 18), x, -12, l + 19.6, "black"));
+    }
+    n.push(P_(CYL(1.6, 30, 10), 12, 8, l + 11, "#a5a9ad"));
+    for (const z of [33, 37]) n.push(P_(CYL(1.7, 1.6, 10), 12, 8, l + z, "red"));
+    n.push(P_(CYL(0.5, 1, 6), 12, 8, l + 41, "red", { e: 1, a: { bob: 3, ba: 0.1 } }));
+    for (let k = 0; k < 3; k++) {
+      const x = -14 + 6 * k;
+      n.push(P_(BOXM(4, 4, 4, 0.3), x, 22, l, "steel"));
+      for (const dx of [-1, 1]) n.push(P_(CYL(0.5, 3, 6), x + dx, 22, l + 4, "white"));
+      n.push(P_(CYL(0.9, 0.8, 8), x, 22, l + 4, "lightY", { e: 1, a: { bob: 2 + k, ba: 0.2 } }));
+    }
+    return n;
+  }
+  function commsRelayModel(r, l) {
+    const n = [];
+    const H = 54;
+    for (const [x, y] of [[-5, -5], [5, -5], [5, 5], [-5, 5]]) strut3(n, x, y, l, x * 0.12, y * 0.12, l + H, 0.45, "red");
+    for (let k = 1; k < 7; k++) {
+      const z = l + k * H / 7.5, w = 10 * (1 - k / 8.5);
+      n.push(P_(BOXM(w, 0.4, 0.4, 0.05), 0, -w / 2, z, "white")), n.push(P_(BOXM(w, 0.4, 0.4, 0.05), 0, w / 2, z, "white")), n.push(P_(BOXM(0.4, w, 0.4, 0.05), -w / 2, 0, z, "white")), n.push(P_(BOXM(0.4, w, 0.4, 0.05), w / 2, 0, z, "white"));
+    }
+    n.push(P_(CYL(0.3, 9, 5), 0, 0, l + H, "steel")), n.push(P_(CYL(1, 1.2, 8), 0, 0, l + H + 9, "red", { e: 1, a: { bob: 5, ba: 0.2 } }));
+    n.push(P_(BOXM(6, 0.6, 0.6, 0.1), 0, 0, l + H - 6, "darkmetal", { a: { spin: 1.4 } }));
+    dish(n, 15, 11, l, 7), dish(n, -16, 13, l, 6);
+    n.push(P_(CYL(6, 4, 16), -15, -13, l, "concrete2")), n.push(P_(DOME(6.6, 6.6, 16), -15, -13, l + 4, "white"));
+    n.push(P_(BOXM(10, 8, 6, 0.4), 15, -14, l, "#7d8a96")), n.push(P_(BOXM(10.4, 8.4, 1, 0.1), 15, -14, l + 6, "steel")), n.push(P_(BOXM(4, 0.3, 2, 0.05), 15, -9.8, l + 2, "glass", { e: 1 }));
+    return n;
+  }
+  function secretLabModel(r, l) {
+    const n = [];
+    n.push(P_(BOXM(34, 28, 6, 1.2), 0, -2, l, "concrete2")), n.push(P_(BOXM(24, 18, 4, 0.8), -2, -4, l + 6, "concrete"));
+    n.push(P_(CYL(7, 1.2, 20), -2, -4, l + 10, "steel")), n.push(P_(DOME(6.6, 6, 20), -2, -4, l + 11.2, "glass")), n.push(P_(DOME(3.2, 3.2, 14), -2, -4, l + 11.6, "crystal", { e: 1, a: { bob: 1.6, ba: 0.5 } }));
+    n.push(P_(BOXM(9, 0.8, 5, 0.2), 0, 12.3, l, "steel")), hazard(n, 0, 12.9, l + 5.2, 12, 0), hazard(n, 0, 13.2, l + 0.2, 14, 0);
+    for (const x of [-16, -11, -6]) n.push(P_(CYL(2.2, 8, 12), x, 15, l, "glass")), n.push(P_(CYL(1.5, 6.6, 10), x, 15, l + 0.6, "green", { e: 1, a: { bob: 2.2 + x * 0.05, ba: 0.3 } })), n.push(P_(CYL(2.4, 0.8, 12), x, 15, l + 8, "darkmetal"));
+    for (const [x, y] of [[13, -12], [13, 4]]) n.push(P_(CYL(2, 3, 10), x, y, l + 6, "steel")), n.push(P_(CYL(2.3, 0.6, 10), x, y, l + 9, "darkmetal"));
+    n.push(P_(CYL(0.3, 14, 5), 10, -14, l + 6, "steel")), n.push(P_(CYL(0.8, 0.8, 6), 10, -14, l + 20, "green", { e: 1, a: { bob: 6, ba: 0.1 } }));
+    n.push(P_(BOXM(6, 1, 6, 0.2), 16, 12, l, "#3a3f46"));
+    return n;
+  }
+  function fuelDepotModel(r, l) {
+    const n = [];
+    for (const [x, y, R, h] of [[-12, -9, 7.5, 11], [6, -12, 6.5, 10], [-6, 9, 6.5, 9]]) {
+      n.push(P_(CYL(R, h, 20), x, y, l, "white")), n.push(P_(CYL(R + 0.15, 1.6, 20), x, y, l + h * 0.55, "#c8382b")), n.push(P_(DOME(R, 2.6, 20), x, y, l + h, "white"));
+      for (let k = 0; k < 5; k++) n.push(P_(BOXM(0.3, 0.6, 0.3, 0.05), x + R + 0.3, y, l + 1 + k * h / 5, "darkmetal"));
+    }
+    n.push(P_(CYL(3, 15, 12), 15, 8, l + 3.6, "#c9b25a", { ty: PI2 })), n.push(P_(DOME(3, 1.4, 12), 22.5, 8, l + 3.6, "#c9b25a", { ty: PI2 })), n.push(P_(DOME(3, 1.4, 12), 7.5, 8, l + 3.6, "#c9b25a", { ty: -PI2 }));
+    for (const x of [9, 21]) n.push(P_(BOXM(2, 6, 2, 0.2), x, 8, l, "darkmetal"));
+    n.push(P_(BOXM(26, 0.8, 0.8, 0.1), -3, -1, l + 2, "steel")), n.push(P_(BOXM(0.8, 20, 0.8, 0.1), -3, 0, l + 2, "steel"));
+    for (const [x, y] of [[2, -3], [12, 1]]) n.push(P_(BOXM(3, 0.3, 3, 0.05), x, y, l + 3, "gold"));
+    for (let k = 0; k < 8; k++) n.push(P_(CYL(0.25, 4, 4), -28 + 8 * k, 24, l, "steel"));
+    n.push(P_(BOXM(56, 0.15, 2.8, 0.02), 0, 24, l + 1, "#8a8f96"));
+    return n;
+  }
+  var CIVX = { hospital: hospitalModel, machineShop: machineShopModel, techPower: techPowerModel, commsRelay: commsRelayModel, secretLab: secretLabModel, fuelDepot: fuelDepotModel, civ7: workshopModel, civ9: terraceModel, bridgehut: bridgeHutModel, oilDerek: oilDerrickModel, paradropHangar: paraHangarModel, empTower: empSpireModel, rogueDen: rogueDenModel };
   function refineryModel(n, t, r, l, rb) {
     refineryCore(n, t, r, l, rb);
     rb >= 4 && refineryLife(n, t, l);
@@ -10739,7 +10909,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
   function radarOnline() {
     if (S.mission && S.mission.hero) return true;
     const p = S.players[0];
-    return !!p && hasActiveBld(0, "lab") && !(p.drain > p.power);
+    return !!p && (hasActiveBld(0, "lab") || hasActiveBld(0, "commsRelay")) && !(p.drain > p.power);
   }
   var _radarWas = null;
   var _radarT = -9;
@@ -11193,6 +11363,46 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       n && addBuilding(NEUTRAL, r, e, t, true);
     }
   }
+  function placeTechSites() {
+    const spawns = S.players.filter((p) => p && !p.neutral && null != p.spawnX).map((p) => [p.spawnX / 32, p.spawnY / 32]);
+    if (spawns.length < 2) return;
+    const have = (k) => S.blds.some((b) => !b.dead && b.key === k), want = ["secretLab", "commsRelay", "hospital", "machineShop", "techPower", "fuelDepot", "fuelDepot"];
+    have("rogueDen") || want.push("rogueDen");
+    have("oilDerek") || want.push("oilDerek");
+    have("cannon") || want.push("cannon");
+    const placed = S.blds.filter((b) => !b.dead && (b.owner === NEUTRAL || b.d.civ)).map((b) => [b.tx + b.size / 2, b.ty + b.size / 2]);
+    const ok = (x, y, sz) => {
+      for (let yy = y - 1; yy <= y + sz; yy++) for (let xx = x - 1; xx <= x + sz; xx++) {
+        if (!inMap(xx, yy)) return false;
+        const i = idx(xx, yy);
+        if (G.terr[i] >= 2 || G.occ[i] || G.blk && G.blk[i] || G.bridge && G.bridge[i] > 0) return false;
+        if (yy >= y && yy < y + sz && xx >= x && xx < x + sz && (G.ore[i] > 0 || G.mtn && G.mtn[i] > 0.12 || G.shore && G.shore[i] > 0.08)) return false;
+      }
+      return true;
+    };
+    let n = 0;
+    for (const key of want) {
+      const sz = BLD[key].size;
+      let best = null, bs = -1e9;
+      for (let pass = 0; pass < 2 && !best; pass++) {
+        const minGap = ("fuelDepot" === key ? 6 : 8) - 3 * pass, minSp = 15 - 3 * pass, step = 2 - pass;
+        for (let y = 3; y < 69 - sz; y += step) for (let x = 3; x < 89 - sz; x += step) {
+          const cx = x + sz / 2, cy = y + sz / 2, ds = spawns.map((s) => Math.hypot(cx - s[0], cy - s[1])).sort((a, b) => a - b);
+          if (ds[0] < minSp) continue;
+          let gap = 99;
+          for (const q of placed) gap = Math.min(gap, Math.hypot(cx - q[0], cy - q[1]));
+          if (gap < minGap || !ok(x, y, sz)) continue;
+          const sc = Math.min(gap, 22) - 1.3 * Math.abs(ds[0] - ds[1]) - 0.08 * ds[0] + 0.4 * Math.sin(17 * x + 31 * y + n);
+          sc > bs && (bs = sc, best = [x, y]);
+        }
+      }
+      if (best) {
+        const b = addBuilding(NEUTRAL, key, best[0], best[1], true);
+        b && (b.rise = 1, "secretLab" === key && (b.labIdx = (best[0] * 7 + best[1] * 3 + (G.seed | 0)) % LAB_POOL.length), placed.push([best[0] + sz / 2, best[1] + sz / 2]));
+      }
+      n++;
+    }
+  }
   function garrisonCap(e) {
     return e.d.roof || e.size >= 3 ? 8 : 3;
   }
@@ -11311,6 +11521,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
       e.tx = r.x, e.ty = r.y, e.repath -= t, (!e.path || e.repath <= 0) && (repath(e), e.repath = 1.2), e.engStuckT = void 0 !== e.engD2 && d2 > e.engD2 - 4 && d2 < cap ? (e.engStuckT || 0) + t : 0, e.engD2 = d2, moveAlong(e, t);
       if (e.engStuckT < 1.5) return;
     }
+    if (r.d.noCapture && r.owner !== e.owner) return 0 === e.owner && hint("Can't capture that \u2014 shoot it instead"), e.order = "idle", void (e.target = null);
     r.owner === e.owner ? (r.hp = r.maxhp, textFx(r.x, r.y - 20, "REPAIRED", "#7dff8a")) : captureBld(r, e.owner), void killUnitSilent(e);
   }
   function killUnitSilent(e) {
@@ -11877,6 +12088,7 @@ const TILE=32,MAPW=92,MAPH=72,WORLDW=2944,WORLDH=2304,clamp=(e,t,r)=>e<t?t:e>r?r
     canTarget,
     spawnCivs,
     spawnSpecials,
+    placeTechSites,
     garrisonCap,
     garrisonable,
     fpsEnterable,
@@ -18529,11 +18741,19 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const pb = selProducer(e);
     if (pb) {
       const pf = pb.capturedFac && pb.capturedFac !== t.key ? pb.capturedFac : null;
-      return (pf ? FACTIONS[pf].units : t.units).filter((u) => UNITS[u].tab === e && (!pf || !t.units.includes(u))).map((u) => ({ kind: e, key: u, foreign: !!pf }));
+      return (pf ? FACTIONS[pf].units : t.units).filter((u) => UNITS[u].tab === e && (!pf || !t.units.includes(u))).map((u) => ({ kind: e, key: u, foreign: !!pf })).concat(pf ? [] : labTab(e));
     }
     const own = t.units.filter((t2) => UNITS[t2].tab === e), foreign = [];
     for (const fac of capFacs) for (const u of FACTIONS[fac].units) UNITS[u].tab === e && !own.includes(u) && !foreign.includes(u) && foreign.push(u);
-    return own.concat(foreign).map((t2) => ({ kind: e, key: t2, foreign: !own.includes(t2) }));
+    return own.concat(foreign).map((t2) => ({ kind: e, key: t2, foreign: !own.includes(t2) })).concat(labTab(e).filter((x) => !foreign.includes(x.key)));
+  }
+  function labTab(e) {
+    const p = P(), out = [];
+    for (const b of S.blds) if (b.owner === p.id && !b.dead && "secretLab" === b.key) {
+      const k = labUnitFor(b, p.fac);
+      k && UNITS[k].tab === e && !out.some((o) => o.key === k) && out.push({ kind: e, key: k, proto: true });
+    }
+    return out;
   }
   function iconCanvas(e, t) {
     const r = document.createElement("canvas");
@@ -18551,7 +18771,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
       const r = document.createElement("div");
       r.className = "card";
       r.dataset.key = t.key;
-      const n = ("bld" === t.kind || "def" === t.kind ? bname(t.key, e.fac) : "ability" === t.kind ? ABILITIES[t.key].name : uname(t.key, e.fac)) + (t.foreign ? " (Captured)" : ""), a = "bld" === t.kind || "def" === t.kind ? BLD[t.key].cost : "ability" === t.kind ? ABILITIES[t.key].cost || 0 : UNITS[t.key].cost;
+      const n = ("bld" === t.kind || "def" === t.kind ? bname(t.key, e.fac) : "ability" === t.kind ? ABILITIES[t.key].name : uname(t.key, e.fac)) + (t.foreign ? " (Captured)" : t.proto ? " (Prototype)" : ""), a = "bld" === t.kind || "def" === t.kind ? BLD[t.key].cost : "ability" === t.kind ? ABILITIES[t.key].cost || 0 : UNITS[t.key].cost;
       r.appendChild(iconCanvas(t.kind, t.key));
       const o = document.createElement("div");
       o.className = "prog", o.style.transform = "scaleY(0)", r.appendChild(o);
@@ -19463,7 +19683,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
         addUnit(t, "mhq", S.players[t].spawnX, S.players[t].spawnY);
         for (let e = 0; e < 3; e++) addUnit(t, o.base, 32 * (r + 3.5) + rnd(-40, 40), 32 * (n + 5) + rnd(-20, 30));
       }
-    }), spawnCivs(), spawnSpecials(), applyPendingMission(), S.players[0].credits = 1e4, S.running = true, $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), openMenu(null), S.mission && (S.mission.hero || S.mission.noBuild || S.mission.ruins) || hint("COMMAND: select your Mobile HQ and tap DEPLOY"), setTimeout(() => {
+    }), spawnCivs(), spawnSpecials(), applyPendingMission(), S.mission || placeTechSites(), S.players[0].credits = 1e4, S.running = true, $("#top").classList.remove("hidden"), $("#side").classList.remove("hidden"), $("#mmWrap").classList.remove("hidden"), buildCards(), openMenu(null), S.mission && (S.mission.hero || S.mission.noBuild || S.mission.ruins) || hint("COMMAND: select your Mobile HQ and tap DEPLOY"), setTimeout(() => {
       S.running && !S.mission && S.players.some((p) => p.isAI) && hint("Intel: " + rivalNames(S.players[0]));
     }, 5e3), setTimeout(() => {
       S.running && !S.mission && hint("COMMAND: tap a card again to queue more");
@@ -19693,7 +19913,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     return { patrol: u.patrol, hold: u.hold, ironUntil: u.ironUntil, mtag: u.mtag, cloakM: u.cloakM, arrived: u.arrived, id: u.id, key: u.key, owner: u.owner, x: u.x, y: u.y, hp: u.hp, maxhp: u.maxhp, ang: u.ang, tang: u.tang, order: u.order, tx: u.tx, ty: u.ty, cool: u.cool, cargo: u.cargo, ore: u.ore, unload: u.unload, deployed: u.deployed, xp: u.xp, vet: u.vet, alt: u.alt, ammo: u.ammo, inside: entRef(u.inside), host: entRef(u.host), drone: entRef(u.drone), erase: u.erase, frozen: u.frozen, state: u.state, home: entRef(u.home), padHome: entRef(u.padHome), padIdx: null != u.padIdx ? u.padIdx : null, origOwner: u.origOwner, slaves: (u.slaves || []).map(entRef), ctrlBy: entRef(u.ctrlBy), target: entRef(u.target), ref: entRef(u.ref), guard: u.guard, ctrl: u.ctrl, rangeMul: u.rangeMul, slowT: u.slowT, retreatT: u.retreatT, revealT: u.revealT, gunner: u.gunner || null, heroMode: u.heroMode };
   }
   function bldToObj(b) {
-    return { mtag: b.mtag, blackoutT: b.blackoutT, id: b.id, key: b.key, owner: b.owner, tx: b.tx, ty: b.ty, size: b.size, hp: b.hp, maxhp: b.maxhp, cool: b.cool, target: entRef(b.target), rally: b.rally, sellT: b.sellT, repair: b.repair, chargeT: b.chargeT, charge: b.charge, rise: b.rise, spin: b.spin, capturedFac: b.capturedFac, garrison: (b.garrison || []).map(entRef), deployed: b.deployed, rot: b.rot, open: b.open, pairId: entRef(b.pairId ? { id: b.pairId, e: "b" } : null), pads: b.pads ? b.pads.map(entRef) : null };
+    return { mtag: b.mtag, blackoutT: b.blackoutT, id: b.id, key: b.key, owner: b.owner, tx: b.tx, ty: b.ty, size: b.size, hp: b.hp, maxhp: b.maxhp, cool: b.cool, target: entRef(b.target), rally: b.rally, sellT: b.sellT, repair: b.repair, chargeT: b.chargeT, charge: b.charge, rise: b.rise, spin: b.spin, capturedFac: b.capturedFac, labIdx: b.labIdx, garrison: (b.garrison || []).map(entRef), deployed: b.deployed, rot: b.rot, open: b.open, pairId: entRef(b.pairId ? { id: b.pairId, e: "b" } : null), pads: b.pads ? b.pads.map(entRef) : null };
   }
   function restoreUnit(rec) {
     const base = UNITS[rec.key];
@@ -19705,7 +19925,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
     const bd = BLD[rec.key];
     if (!bd) return null;
     const owner = S.players[rec.owner], fac = owner ? owner.fac : "vanguard", sz = rec.size || bd.size;
-    return { id: rec.id, e: "b", key: rec.key, d: bd, owner: rec.owner, tx: rec.tx, ty: rec.ty, size: sz, x: 32 * (rec.tx + sz / 2), y: 32 * (rec.ty + sz / 2), hp: rec.hp, maxhp: rec.maxhp, name: bname(rec.key, fac), cool: rec.cool || 0, target: null, dead: false, rally: rec.rally || null, sellT: rec.sellT || 0, repair: !!rec.repair, chargeT: rec.chargeT || 0, charge: rec.charge || 0, rise: null != rec.rise ? rec.rise : 1, w: bweapon(rec.key, fac), w2: bd.weapon2 || null, spin: rec.spin || 0, capturedFac: rec.capturedFac || null, deployed: rec.deployed, rot: rec.rot || 0, open: !!rec.open, gateT: rec.open ? 1 : 0, garrison: [], pads: null, _refTarget: rec.target, _refGarrison: rec.garrison || [], _refPairId: rec.pairId, _refPads: rec.pads || null };
+    return { id: rec.id, e: "b", key: rec.key, d: bd, owner: rec.owner, tx: rec.tx, ty: rec.ty, size: sz, x: 32 * (rec.tx + sz / 2), y: 32 * (rec.ty + sz / 2), hp: rec.hp, maxhp: rec.maxhp, name: bname(rec.key, fac), cool: rec.cool || 0, target: null, dead: false, rally: rec.rally || null, sellT: rec.sellT || 0, repair: !!rec.repair, chargeT: rec.chargeT || 0, charge: rec.charge || 0, rise: null != rec.rise ? rec.rise : 1, w: bweapon(rec.key, fac), w2: bd.weapon2 || null, spin: rec.spin || 0, capturedFac: rec.capturedFac || null, labIdx: rec.labIdx || 0, deployed: rec.deployed, rot: rec.rot || 0, open: !!rec.open, gateT: rec.open ? 1 : 0, garrison: [], pads: null, _refTarget: rec.target, _refGarrison: rec.garrison || [], _refPairId: rec.pairId, _refPads: rec.pads || null };
   }
   function resolveRefs() {
     const findE = (r) => {

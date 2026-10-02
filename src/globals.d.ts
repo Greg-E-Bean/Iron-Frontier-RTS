@@ -494,6 +494,12 @@ declare global {
   function canTarget(shooter: GameEntity, target: GameEntity): boolean;
   function spawnCivs(): void;
   function spawnSpecials(): void;
+  function labUnitFor(b: any, fac: string): string | null;
+  function labGrants(pid: number, k: string): boolean;
+  function tickTechBld(e: any, t: number): void;
+  function fuelBlast(e: any): void;
+  function placeTechSites(): void;
+  const LAB_POOL: string[];
   const garrisonCap: AnyFn;
   function garrisonable(b: Building): boolean;
   function fpsEnterable(b: Building): boolean;
