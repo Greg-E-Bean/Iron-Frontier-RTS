@@ -14,7 +14,7 @@
 // extraction needs — no list to maintain here.
 
 import * as esbuild from "esbuild";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -58,6 +58,11 @@ async function buildOnce() {
     html = html.replace(mod.marker, () => `<script>\n${js}\n</script>`);
   }
   await writeFile(outPath, html);
+  // List the cutscene media in fmv/ so the game only requests files that exist
+  // (probing every extension for every character produced a stream of 404s).
+  const fmvDir = path.join(root, "fmv");
+  const media = (await readdir(fmvDir).catch(() => [])).filter((f) => /\.(mp4|webm|webp|jpe?g|png)$/i.test(f)).sort();
+  await writeFile(path.join(fmvDir, "index.json"), JSON.stringify(media) + "\n").catch(() => {});
   console.log(`Built ${path.relative(root, outPath)} (${html.length} bytes, ${modules.length} module(s): ${modules.map((m) => m.name).join(", ")})`);
 }
 

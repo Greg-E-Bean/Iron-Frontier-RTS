@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 import { collectPageErrors, startSkirmish } from "./helpers";
 
 const FPS_UNIT_KEYS = [
-  "gi", "guardian", "conscript", "flak", "initiate", "virus", "engineer", "tanya",
-  "reaper", "phantom", "chrono", "desolator", "brute", "marksman", "bombard",
-  "leech", "grizzly", "ifv", "chinook", "riverine",
+  "rifleman", "lancer", "militia", "flak", "acolyte", "vector_inf", "engineer", "operative",
+  "reaper", "phantom", "phaser", "caustic", "brood", "marksman", "bombard",
+  "leech", "warden", "skirmisher", "chinook", "riverine",
 ];
 
 test("every FPS-capable unit can enter/tick/render/exit FPS mode without throwing", async ({ page }) => {

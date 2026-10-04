@@ -23,13 +23,13 @@ const CATEGORY_OPTIONS = [
   { k: "def", n: "Defense" },
   { k: "none", n: "Hidden" },
 ];
-const MINIBTN = 'style="padding:6px 10px;border-radius:6px;border:1px solid #5b74a0;background:#22334a;color:#cfe0f5;font-size:11px;margin:2px 4px 2px 0"';
-const MINIBTN_DANGER = 'style="padding:6px 10px;border-radius:6px;border:1px solid #a04040;background:#2a1c1c;color:#f0a0a0;font-size:11px;margin:2px 4px 2px 0"';
+const MINIBTN = 'class="gBtn"';
+const MINIBTN_DANGER = 'class="gBtn danger"';
 const FACTION_LIST = [
   { k: "", n: "All factions" },
-  { k: "allied", n: "Vanguard" },
-  { k: "soviet", n: "Legion" },
-  { k: "yuri", n: "Syndicate" },
+  { k: "vanguard", n: "Vanguard" },
+  { k: "legion", n: "Legion" },
+  { k: "syndicate", n: "Syndicate" },
 ];
 
 function loadAdminAssets() {
@@ -208,6 +208,11 @@ function targetTags(target) {
   }
   return { strong, weak };
 }
+// Manual tag overrides (set in the admin panel) let a designer correct a
+// unit's displayed threat tags directly - e.g. force "AA" on regardless of
+// the computed thresholds, or hide a technically-true but misleading one -
+// without having to fudge the underlying combat stats just to make the
+// auto-derived tag come out right.
 function entityTags(key, kind) {
   const strongMap = new Map(), weakMap = new Map();
   for (const entry of assetStatTargets(key, kind)) {
@@ -216,6 +221,12 @@ function entityTags(key, kind) {
     weak.forEach(m => weakMap.set(m.short, m));
   }
   for (const k of strongMap.keys()) weakMap.delete(k);
+  const override = (loadAdminStats()[key] || {}).tagOverride || {};
+  for (const cat of Object.keys(THREAT_META)) {
+    const m = THREAT_META[cat], state = override[cat];
+    if (state === "strong") { weakMap.delete(m.short); strongMap.set(m.short, m); }
+    else if (state === "hide") { strongMap.delete(m.short); weakMap.delete(m.short); }
+  }
   return { strong: [...strongMap.values()], weak: [...weakMap.values()] };
 }
 function syncCustomMaps() {
@@ -242,6 +253,10 @@ function blankMapData() {
     blk: packArr(new Uint8Array(n)),
     pave: packArr(new Uint8Array(n)),
     elevOverride: packArr(new Float32Array(n)),
+    bridge: packArr(new Uint8Array(n)),
+    bridgeHp: packArr(new Float32Array(n)),
+    bridgeSite: packArr(new Uint8Array(n)),
+    bridgeHoriz: packArr(new Uint8Array(n)),
     spots: [[13, 13], [76, 56]],
     civ: [], special: [], props: [], oreSpots: [],
   };
@@ -301,7 +316,7 @@ let assetSearchFilter = "";
 
 function assetDisplayName(key, kind) {
   if (kind === "unit") return (UNITS[key] && UNITS[key].name) || key;
-  return (BLD[key] && BLD[key].names && (BLD[key].names.neutral || BLD[key].names.allied)) || key;
+  return (BLD[key] && BLD[key].names && (BLD[key].names.neutral || BLD[key].names.vanguard)) || key;
 }
 function assetCategory(key, kind) {
   const d = kind === "unit" ? UNITS[key] : BLD[key];
@@ -318,7 +333,7 @@ function assetCategory(key, kind) {
 }
 function assetFactionMembership(key, kind) {
   if (kind === "unit") {
-    const facs = ["allied", "soviet", "yuri"].filter(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
+    const facs = ["vanguard", "legion", "syndicate"].filter(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
     if (!facs.length) return "None";
     return facs.map(f => FACTIONS[f].name).join(", ");
   }
@@ -326,10 +341,10 @@ function assetFactionMembership(key, kind) {
 }
 function assetPrimaryFaction(key, kind) {
   if (kind === "unit") {
-    const f = ["allied", "soviet", "yuri"].find(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
-    return f || "allied";
+    const f = ["vanguard", "legion", "syndicate"].find(f => FACTIONS[f] && FACTIONS[f].units && FACTIONS[f].units.includes(key));
+    return f || "vanguard";
   }
-  return (BLD[key] && BLD[key].civ) ? "neutral" : "allied";
+  return (BLD[key] && BLD[key].civ) ? "neutral" : "vanguard";
 }
 function statTargetBlock(entry, stat) {
   const s = (stat.t && stat.t[entry.id]) || {};
@@ -345,6 +360,21 @@ function statTargetBlock(entry, stat) {
       '<label class="small" style="white-space:nowrap"><input type="checkbox" class="aaOv"' + (s.aa != null ? s.aa ? " checked" : "" : w.aa ? " checked" : "") + '> Anti-Air</label>' +
     '</div>'
   );
+}
+function tagOverrideHtml(stat) {
+  const ov = stat.tagOverride || {};
+  return '<div class="small" style="opacity:.75;margin-top:2px">Tags</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">' +
+    Object.keys(THREAT_META).map(cat => {
+      const m = THREAT_META[cat], v = ov[cat] || "auto";
+      return '<label class="small" style="white-space:nowrap">' + m.short +
+        ' <select class="tagOv" data-cat="' + cat + '" style="width:90px">' +
+          '<option value="auto"' + (v === "auto" ? " selected" : "") + '>Auto</option>' +
+          '<option value="strong"' + (v === "strong" ? " selected" : "") + '>Force show</option>' +
+          '<option value="hide"' + (v === "hide" ? " selected" : "") + '>Force hide</option>' +
+        '</select></label>';
+    }).join("") +
+    '</div>';
 }
 function threatBadgeHtml(m, strong) {
   return '<span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle;' +
@@ -381,6 +411,7 @@ function assetRow(key, kind) {
         '<input type="number" class="hpOv" value="' + (stat.hp ?? "") + '" placeholder="HP ' + (d.hp || 0) + '" style="width:70px" title="Hit points override">' +
         '<select class="tabOv" title="Category override">' + CATEGORY_OPTIONS.map(c => '<option value="' + c.k + '"' + (stat.tab === c.k ? " selected" : "") + '>' + c.n + '</option>').join("") + '</select>' +
         (combatInputs ? '<div style="flex-basis:100%;display:flex;flex-direction:column;gap:4px;margin-top:2px">' + combatInputs + '</div>' : "") +
+        '<div style="flex-basis:100%">' + tagOverrideHtml(stat) + '</div>' +
       '</div>' +
     '</div>'
   );
@@ -523,6 +554,11 @@ function renderAssetsTab() {
         if (Object.keys(sub).length) { t[targetId] = sub; hasAny = true; }
       });
       ov.t = t;
+      const tagOverride: any = {};
+      row.querySelectorAll(".tagOv").forEach((sel: HTMLSelectElement) => {
+        if (sel.value !== "auto") { tagOverride[sel.dataset.cat] = sel.value; hasAny = true; }
+      });
+      ov.tagOverride = tagOverride;
       if (!hasAny) delete stats[key]; else stats[key] = ov;
       saveAdminStats(stats);
       applyAdminStat(key, stats[key] || { kind });
@@ -714,6 +750,7 @@ const EDITOR_TOOLS = [
   { k: "terrain", n: "Terrain" },
   { k: "elev", n: "Elevation" },
   { k: "ore", n: "Ore" },
+  { k: "bridge", n: "Bridge" },
   { k: "bld", n: "Building" },
   { k: "spawn", n: "Spawn" },
   { k: "erase", n: "Erase" },
@@ -731,6 +768,7 @@ let editorTerrainType = 0;
 let editorElevSign = 1;
 let editorOreType = 1;
 let editorOreAmount = 1200;
+let editorBridgeMode = 1;
 let editorBuildingKey = "civ1";
 let editorBuildingCategory = "";
 let editorBuildingSearch = "";
@@ -738,8 +776,56 @@ let editorBrush = 1;
 let editorDrag = null;
 let editorHover = null;
 let editorRAF = null;
+let editorUndoStack = [];
+let editorRedoStack = [];
+const EDITOR_HISTORY_MAX = 40;
+
+// A full snapshot of every editable field, taken before each discrete edit
+// (a whole paint stroke, or a single click action like placing a building).
+// Small enough (a few typed arrays over a 92x72 grid, plus short lists) that
+// snapshotting the whole thing beats diffing individual tile writes.
+function snapshotEditorState() {
+  return {
+    terr: G.terr.slice(), ore: G.ore.slice(), tib: G.tib.slice(), blk: G.blk.slice(), pave: G.pave.slice(),
+    elevOverride: G.elevOverride.slice(),
+    bridge: G.bridge.slice(), bridgeHp: G.bridgeHp.slice(), bridgeSite: G.bridgeSite.slice(), bridgeHoriz: G.bridgeHoriz.slice(),
+    spots: (G.spots || []).map(s => s.slice()),
+    civ: (G.civ || []).map(c => c.slice()),
+    special: (G.special || []).map(c => c.slice()),
+    props: (G.props || []).map(p => Object.assign({}, p)),
+    oreSpots: (G.oreSpots || []).map(o => Object.assign({}, o)),
+  };
+}
+function restoreEditorState(snap) {
+  G.terr.set(snap.terr); G.ore.set(snap.ore); G.tib.set(snap.tib); G.blk.set(snap.blk); G.pave.set(snap.pave);
+  G.elevOverride.set(snap.elevOverride);
+  G.bridge.set(snap.bridge); G.bridgeHp.set(snap.bridgeHp); G.bridgeSite.set(snap.bridgeSite); G.bridgeHoriz.set(snap.bridgeHoriz);
+  G.spots = snap.spots.map(s => s.slice());
+  G.civ = snap.civ.map(c => c.slice());
+  G.special = snap.special.map(c => c.slice());
+  G.props = snap.props.map(p => Object.assign({}, p));
+  G.oreSpots = snap.oreSpots.map(o => Object.assign({}, o));
+  computeMtnShore();
+  for (let y = 0; y < 72; y++) for (let x = 0; x < 92; x++) G.elev[idx(x, y)] = heightAt(32 * x + 16, 32 * y + 16);
+}
+function editorPushUndo() {
+  editorUndoStack.push(snapshotEditorState());
+  if (editorUndoStack.length > EDITOR_HISTORY_MAX) editorUndoStack.shift();
+  editorRedoStack = [];
+}
+function editorUndo() {
+  if (!editorUndoStack.length) return;
+  editorRedoStack.push(snapshotEditorState());
+  restoreEditorState(editorUndoStack.pop());
+}
+function editorRedo() {
+  if (!editorRedoStack.length) return;
+  editorUndoStack.push(snapshotEditorState());
+  restoreEditorState(editorRedoStack.pop());
+}
 
 function openMapEditor(key) {
+  menuBgStop();
   const store = loadAdminMapStore();
   const entry = store[key];
   if (!entry) return;
@@ -748,6 +834,8 @@ function openMapEditor(key) {
   editorTool = "terrain";
   editorDrag = null;
   editorHover = null;
+  editorUndoStack = [];
+  editorRedoStack = [];
   adminTab = "maps";
   cam.x = 1472; cam.y = 1152; cam.z = camZTarget = 0.62;
   clampCam();
@@ -764,6 +852,14 @@ function openMapEditor(key) {
   startEditorRender();
 }
 
+window.addEventListener("keydown", (e: KeyboardEvent) => {
+  if (editorMapKey === null || !e.ctrlKey && !e.metaKey) return;
+  const tag = document.activeElement && document.activeElement.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return; // let native text-field undo win
+  const k = e.key.toLowerCase();
+  if (k === "z" && !e.shiftKey) { e.preventDefault(); editorUndo(); renderEditorToolbar(); }
+  else if (k === "y" || k === "z" && e.shiftKey) { e.preventDefault(); editorRedo(); renderEditorToolbar(); }
+});
 function closeMapEditor() {
   stopEditorRender();
   editorMapKey = null;
@@ -801,8 +897,13 @@ function renderEditorToolbar() {
     extra =
       '<select id="oreType"><option value="1">Ore (amber)</option><option value="2">Gems (pale)</option></select>' +
       '<select id="oreAmount"><option value="600">Light</option><option value="1200" selected>Medium</option><option value="2000">Rich</option></select>';
+  } else if (editorTool === "bridge") {
+    extra =
+      '<button id="bridgePlace" class="catBtn' + (editorBridgeMode > 0 ? " on" : "") + '">Place</button>' +
+      '<button id="bridgeRemove" class="catBtn' + (editorBridgeMode < 0 ? " on" : "") + '">Remove</button>' +
+      '<span class="small">Only paints over water tiles</span>';
   }
-  const brushExtra = (editorTool === "terrain" || editorTool === "elev" || editorTool === "ore" || editorTool === "erase")
+  const brushExtra = (editorTool === "terrain" || editorTool === "elev" || editorTool === "ore" || editorTool === "erase" || editorTool === "bridge")
     ? '<span class="small">Brush <input type="number" id="brushSize" min="1" max="6" value="' + editorBrush + '" style="width:40px"></span>'
     : "";
   const toolbar = $("#editorTopBar");
@@ -811,6 +912,8 @@ function renderEditorToolbar() {
     EDITOR_TOOLS.map(t => '<button data-tool="' + t.k + '" class="catBtn' + (editorTool === t.k ? " on" : "") + '">' + t.n + '</button>').join("") +
     brushExtra + extra +
     '<span style="flex:1"></span>' +
+    '<button id="editorUndo" ' + MINIBTN + (editorUndoStack.length ? "" : " disabled") + ' title="Undo (Ctrl+Z)">↶ UNDO</button>' +
+    '<button id="editorRedo" ' + MINIBTN + (editorRedoStack.length ? "" : " disabled") + ' title="Redo (Ctrl+Y)">↷ REDO</button>' +
     '<button id="editorSave" ' + MINIBTN + '>SAVE</button>' +
     '<button id="editorTestPlay" ' + MINIBTN + '>SAVE &amp; TEST PLAY</button>' +
     '<button id="editorBack" ' + MINIBTN_DANGER + '>BACK</button>';
@@ -824,8 +927,12 @@ function renderEditorToolbar() {
   const tt = $("#terrainType") as HTMLSelectElement; if (tt) { tt.value = String(editorTerrainType); tt.onchange = () => editorTerrainType = parseInt(tt.value); }
   const eu = $("#elevUp"); if (eu) eu.onclick = () => { editorElevSign = 1; renderEditorToolbar(); };
   const ed = $("#elevDown"); if (ed) ed.onclick = () => { editorElevSign = -1; renderEditorToolbar(); };
+  const bp = $("#bridgePlace"); if (bp) bp.onclick = () => { editorBridgeMode = 1; renderEditorToolbar(); };
+  const br = $("#bridgeRemove"); if (br) br.onclick = () => { editorBridgeMode = -1; renderEditorToolbar(); };
   const ot = $("#oreType") as HTMLSelectElement; if (ot) { ot.value = String(editorOreType); ot.onchange = () => editorOreType = parseInt(ot.value); }
   const oa = $("#oreAmount") as HTMLSelectElement; if (oa) oa.onchange = () => editorOreAmount = parseInt(oa.value);
+  $("#editorUndo").onclick = () => { editorUndo(); renderEditorToolbar(); };
+  $("#editorRedo").onclick = () => { editorRedo(); renderEditorToolbar(); };
   $("#editorSave").onclick = () => { if (saveEditorMap()) hint("Map saved"); };
   $("#editorTestPlay").onclick = () => {
     // Bail out on a failed save (e.g. browser storage full - saveEditorMap
@@ -871,7 +978,7 @@ function renderEditorPaletteGrid() {
   ).join("") || '<div class="small">No buildings match.</div>';
   grid.querySelectorAll(".assetThumb").forEach((img: HTMLImageElement) => {
     const key = img.dataset.thumbKey;
-    renderThumbInto(img, key, "b", (BLD[key] && BLD[key].civ) ? "neutral" : "allied", 36);
+    renderThumbInto(img, key, "b", (BLD[key] && BLD[key].civ) ? "neutral" : "vanguard", 36);
   });
   grid.querySelectorAll("[data-bkey]").forEach(card => card.addEventListener("click", () => {
     editorBuildingKey = (card as HTMLElement).dataset.bkey;
@@ -934,13 +1041,33 @@ function applyEditorTool(x, y) {
   if (editorTool === "terrain") G.terr[i] = editorTerrainType;
   else if (editorTool === "elev") G.elevOverride[i] = clamp((G.elevOverride[i] || 0) + editorElevSign, -8, 8);
   else if (editorTool === "ore") { G.ore[i] = editorOreAmount; G.tib[i] = editorOreType; }
+  else if (editorTool === "bridge") {
+    if (editorBridgeMode > 0) {
+      if (G.terr[i] !== 2) return; // bridges only span actual water tiles
+      if (!G.bridge[i]) {
+        G.bridge[i] = 1; G.bridgeHp[i] = BRIDGE_MAX_HP; G.bridgeSite[i] = 1;
+        // orientation only matters for the plank prop's visual rotation; infer
+        // it from whichever neighbor is already bridged, default horizontal
+        const horiz = G.bridge[idx(Math.max(0, x - 1), y)] || G.bridge[idx(Math.min(91, x + 1), y)] ? 1 : (G.bridge[idx(x, Math.max(0, y - 1))] || G.bridge[idx(x, Math.min(71, y + 1))] ? 0 : 1);
+        G.bridgeHoriz[i] = horiz;
+        G.props.push({ tx: x, ty: y, kind: "bridge", x: 32 * x + 16, y: 32 * y + 16, r: horiz ? 0 : Math.PI / 2, v: 0, s: 1 });
+      }
+    } else removeBridgeTile(x, y);
+  }
   else if (editorTool === "erase") {
     G.ore[i] = 0; G.tib[i] = 0;
+    removeBridgeTile(x, y);
     G.civ = (G.civ || []).filter(c => {
       const sz = (BLD[c[2]] && BLD[c[2]].size) || 1;
       return !(x >= c[0] && x < c[0] + sz && y >= c[1] && y < c[1] + sz);
     });
   }
+}
+function removeBridgeTile(x, y) {
+  const i = idx(x, y);
+  if (!G.bridge[i]) return;
+  G.bridge[i] = 0; G.bridgeHp[i] = 0; G.bridgeSite[i] = 0; G.bridgeHoriz[i] = 0;
+  G.props = (G.props || []).filter(p => !(p.kind === "bridge" && p.tx === x && p.ty === y));
 }
 function toggleSpawn(tx, ty) {
   G.spots = G.spots || [];
@@ -976,6 +1103,7 @@ function wireEditorCanvas() {
       return;
     }
     if (!inMap(tx, ty)) return;
+    editorPushUndo();
     if (editorTool === "spawn") { toggleSpawn(tx, ty); return; }
     if (editorTool === "bld") { placeBuilding(tx, ty); return; }
     editorDrag = { mode: "paint" };
@@ -1015,6 +1143,10 @@ function saveEditorMap() {
     blk: packArr(G.blk),
     pave: packArr(G.pave),
     elevOverride: packArr(G.elevOverride),
+    bridge: packArr(G.bridge),
+    bridgeHp: packArr(G.bridgeHp),
+    bridgeSite: packArr(G.bridgeSite),
+    bridgeHoriz: packArr(G.bridgeHoriz),
     spots: (G.spots || []).map(s => s.slice()),
     civ: (G.civ || []).map(c => c.slice()),
     special: (G.special || []).map(c => c.slice()),
