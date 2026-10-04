@@ -586,6 +586,10 @@ declare global {
   function enterFPS(u: Unit): boolean;
   function exitFPS(): void;
   function leaveFpsForMenu(): void;
+  function quitToMenu(): void;
+  function armBackButton(): void;
+  function togglePauseMenu(): void;
+  function restartSkirmish(): void;
   function fpsTick(dt: number): void;
   function leaveGarrison(u: Unit): void;
   function fpsInteract(): void;
