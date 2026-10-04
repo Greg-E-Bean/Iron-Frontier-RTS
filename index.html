@@ -19556,7 +19556,7 @@ const $=e=>document.querySelector(e),elCards=$("#cards"),elCred=$("#credits"),el
           const b = e3.currentTarget;
           if (!b._arm) return b._arm = 1, b.textContent = "TAP AGAIN TO QUIT", b.style.background = "#5a2626", void setTimeout(() => {
             b._arm = 0, b.textContent = "QUIT TO MENU", b.style.background = "";
-          }, 3e3);
+          }, 4e3);
           quitToMenu();
         }), $("#restart").addEventListener("click", () => (clearResume(), S.mission) ? S.mission.training ? launchTraining(S.mission.training) : S.mission.tutorial ? launchTutorial() : launchMission(S.mission.fac, S.mission.idx) : restartSkirmish());
       } else if ("settings" === e) {
